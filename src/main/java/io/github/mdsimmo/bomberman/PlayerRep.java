@@ -39,6 +39,14 @@ public class PlayerRep implements Listener {
 	}
 		
 	public void joinGame() {
+		this.spawn = player.getLocation();
+		Vector spawn = game.findSpareSpawn();
+		if (spawn == null) {
+			player.sendMessage("game full");
+			return;
+		} else
+			player.teleport(game.loc.clone().add(spawn));
+		
 		spawnHealth = player.getHealth();
 		player.setHealth(game.lives);
 		player.setMaxHealth(game.lives);
@@ -50,16 +58,9 @@ public class PlayerRep implements Listener {
 				new ItemStack(Material.TNT, game.bombs),
 				new ItemStack(Material.BLAZE_POWDER, game.power)
 			});
-		spawn = player.getLocation();
 		
 		isPlaying = true;
 		game.players.add(this);
-		
-		Vector spawn = game.findSpareSpawn();
-		if (spawn == null) {
-			player.sendMessage("game full");
-		} else
-			player.teleport(game.loc.clone().add(spawn));
 	}
 	
 	
