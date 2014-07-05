@@ -1,0 +1,50 @@
+name: Bomberman
+main: io.github.mdsimmo.bomberman.Bomberman
+version: 0.0.1
+
+commands:
+  create-game:
+    description: generates the game
+    usage: \create-game <game>
+    permission: bomberman.op 
+  destroy-game:
+    description: destroys the game and reverts the land to how it was
+    usage: \desctroy-game <game>
+    permission: bomberman.op
+  reset-game:
+    description: resets the game to the starting point
+    usage: \reset-game <game> 
+    permission: bomberman.op
+  join-game:
+    description: Places the player into the game
+    usage: \join-game <game>
+    permission: bomberman.player
+  start-game:
+    description: Starts the game
+    usage: \start-game <game>
+    permission: bomberman.op
+  set-style:
+    description: Sets the game's board style
+    usage: \set-board <game> <style>
+    permission: bomberman.op
+  create-style:
+    description: Makes the thing you're looking at a standard board style
+    usage: \create-board <style>
+    permission: bomberman.op
+  list-games:
+    description: List all games currently existing
+    usage: \list-games
+    permission: bomberman.player
+
+permissions:
+  bomberman.*:
+    description: Gives access to all Bomberman commands
+    children:
+      bomberman.op: true
+      bomberman.player: true
+  bomberman.player:
+    description: Allows you to partake in the Bommerman fun
+    default: true
+  bomberman.op:
+    description: Allows you to create and modify games
+    default: op
