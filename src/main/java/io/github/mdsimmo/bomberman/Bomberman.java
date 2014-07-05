@@ -16,6 +16,8 @@ public class Bomberman extends JavaPlugin {
 	 * Multi game runs
 	 * kill count
 	 * bombs start other bombs
+	 * 
+	 * THIS IS A TEST
 	*/
 	
 	/* TODO BUGS (in order id importance)
