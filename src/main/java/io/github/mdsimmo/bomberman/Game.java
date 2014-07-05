@@ -119,6 +119,7 @@ public class Game implements Listener {
 	protected Board oldBoard;
 	protected boolean isPlaying;
 	private GameProtection protector;
+	public ItemStack stake = Config.stake;
 	private ItemStack[] drops = {
 			new ItemStack(Material.TNT),
 			new ItemStack(Material.BLAZE_POWDER),
@@ -130,6 +131,9 @@ public class Game implements Listener {
 	protected ArrayList<PlayerRep> players = new ArrayList<>();
 	public Stack<Player> winners = new Stack<>();
 	public Board board;
+	public int bombs = Config.bombs;
+	public int power = Config.power;
+	public int lives = Config.lives;
 	
 	public Game(String name, Location loc) {
 		this.name = name;

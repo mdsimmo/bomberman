@@ -1,18 +1,12 @@
 package io.github.mdsimmo.bomberman;
 
-import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.plugin.java.JavaPlugin;
 
 public class Bomberman extends JavaPlugin {
 	
-	private final String ITEM_PATH = "stake-item";
-	private final String STAKE_PATH = "stake-amount";
-	private final String LIVES_PATH = "lives";
-	private final String BOMBS_PATH = "bombs";
 	public static Bomberman instance;
 	
 	/* TODO FEATURES
-	 * configuability
 	 * Multi game runs
 	 * kill count
 	 * bombs start other bombs
@@ -31,7 +25,7 @@ public class Bomberman extends JavaPlugin {
 	@Override
 	public void onEnable() {
 		instance = this;
-		setupConfig();
+		new Config();
 		new GameCommander();
 		Game.loadGames();
 	}
@@ -41,15 +35,5 @@ public class Bomberman extends JavaPlugin {
 		for (Game game : Game.allGames()) {
 			game.saveGame();
 		}
-	}
-	
-	private void setupConfig() {
-		FileConfiguration c = getConfig();
-		c.addDefault(ITEM_PATH, "DIAMOND");
-		c.addDefault(STAKE_PATH, 3);
-		c.addDefault(LIVES_PATH, 3);
-		c.addDefault(BOMBS_PATH, 3);
-		c.options().copyDefaults(true);
-		saveConfig();
 	}
 }

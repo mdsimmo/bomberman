@@ -31,11 +31,6 @@ public class PlayerRep implements Listener {
 	public boolean isPlaying = false;
 	public int immunity = 0;
 	
-	public static ItemStack[] initialItems = {
-		new ItemStack(Material.TNT, 3),
-		new ItemStack(Material.BLAZE_POWDER, 3)
-	};
-	
 	public PlayerRep(Player player, Game game) {
 		this.player = player;
 		this.game = game;
@@ -45,13 +40,19 @@ public class PlayerRep implements Listener {
 		
 	public void joinGame() {
 		spawnHealth = player.getHealth();
-		player.setHealth(3);
-		player.setMaxHealth(3);
+		plugin.getLogger().info("" + game);
+		plugin.getLogger().info("" + game.lives);
+		plugin.getLogger().info("" + player);
+		player.setHealth(game.lives);
+		player.setMaxHealth(game.lives);
 		spawnHealthScale = player.getHealthScale();
 		spawnMaxHealth = player.getMaxHealth();
-		player.setHealthScale(6);
+		player.setHealthScale(game.lives*2);
 		spawnInventory = player.getInventory().getContents();
-		player.getInventory().setContents(initialItems);
+		player.getInventory().setContents(new ItemStack[] {
+				new ItemStack(Material.TNT, game.bombs),
+				new ItemStack(Material.BLAZE_POWDER, game.power)
+			});
 		spawn = player.getLocation();
 		
 		isPlaying = true;

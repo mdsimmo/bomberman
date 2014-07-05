@@ -26,8 +26,9 @@ public class BoardGenerator {
 	 * Loads the default board. If the needed save file is not made, it will create it.
 	 */
 	public static Board loadDefault() {
-		if (loadBoard("default") == null) {
+		if (loadBoard(Config.defaultBoard) == null) {
 			try {
+				plugin.getLogger().info("Couldn't find \"" + Config.defaultBoard + ".board\". Using \"default.board\"");
 				InputStream inputStream = plugin.getResource("default.board");
 				File f = new File(plugin.getDataFolder() + "/default.board");
 	 			// write the inputStream to a FileOutputStream
@@ -115,6 +116,8 @@ public class BoardGenerator {
 		Material.SAND,
 		Material.LONG_GRASS,
 		Material.SANDSTONE,
+		Material.WATER,
+		Material.LAVA,
 	};
 	private static List<Material> banned = Arrays.asList(bannedArray);
 	private static ArrayList<Block> checked = new ArrayList<>();
