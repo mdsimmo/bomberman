@@ -136,7 +136,10 @@ public class GameCommander implements CommandExecutor, TabCompleter {
 			else if (game.isPlaying)
 				sender.sendMessage("Game already started");
 			else {
-				game.startGame();
+				if (game.startGame())
+					sender.sendMessage("Game starting");
+				else
+					sender.sendMessage("There must be at least one player");
 			}
 			return true;
 		

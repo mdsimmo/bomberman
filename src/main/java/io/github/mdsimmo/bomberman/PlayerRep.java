@@ -40,9 +40,6 @@ public class PlayerRep implements Listener {
 		
 	public void joinGame() {
 		spawnHealth = player.getHealth();
-		plugin.getLogger().info("" + game);
-		plugin.getLogger().info("" + game.lives);
-		plugin.getLogger().info("" + player);
 		player.setHealth(game.lives);
 		player.setMaxHealth(game.lives);
 		spawnHealthScale = player.getHealthScale();
