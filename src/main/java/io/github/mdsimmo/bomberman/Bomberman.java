@@ -10,16 +10,16 @@ public class Bomberman extends JavaPlugin {
 	 * Multi game runs
 	 * kill count
 	 * bombs start other bombs
+	 * let players create styles that go underground
 	*/
 	
 	/* TODO BUGS (in order id importance)
-	 * game reloading is dodgy
 	 * games build one block to long
-	 * scoring at the end is dodgy (the winneres storage is bad)
 	 * players can spawn inside wall slightly
 	 * players continue to burn after leaving
 	 * chests (and other like things) don't spawn with contents
-	 * flames from one bomb put out the flames of another 
+	 * flames from one bomb put out the flames of another
+	 * convert-to-game builds another board where the player is standing 
 	 */
 	
 	@Override

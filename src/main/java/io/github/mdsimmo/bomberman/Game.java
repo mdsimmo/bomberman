@@ -51,12 +51,13 @@ public class Game implements Listener {
 		gameRegestry.put(game.name, game);
 	}
 
+	@SuppressWarnings("unchecked")
 	public static void deregister(Game game) {
 		gameRegestry.remove(game.name);
 		EntityDamageEvent.getHandlerList();
-		for (PlayerRep rep : game.observers) {
-			rep.reset();
-			game.updateGame();
+		for (PlayerRep rep : (List<PlayerRep>)game.players.clone()) {
+			rep.kill();
+			game.checkFinish();
 			HandlerList.unregisterAll(rep);
 		}
 		HandlerList.unregisterAll(game.protector);
@@ -109,7 +110,7 @@ public class Game implements Listener {
 			sw.close();
 			BoardGenerator.saveBoard(oldBoard);
 			for (PlayerRep rep : (List<PlayerRep>) players.clone())
-				rep.reset();
+				rep.kill();
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -128,7 +129,6 @@ public class Game implements Listener {
 			new Potion(PotionType.SPEED, 2).toItemStack(1), };
 	protected ArrayList<PlayerRep> observers = new ArrayList<>();
 	protected ArrayList<PlayerRep> players = new ArrayList<>();
-	public List<Player> winners = new ArrayList<>();
 	public Board board;
 	public int bombs = Config.bombs;
 	public int power = Config.power;
@@ -215,35 +215,48 @@ public class Game implements Listener {
 	/**
 	 * updates the status of the game.
 	 */
-	public void updateGame() {
+	@SuppressWarnings("unchecked")
+	public void checkFinish() {
 		if (players.size() <= 1 && isPlaying) {
 			isPlaying = false;
-			// add the surviver to winners
-			for (PlayerRep rep : players) {
-				winners.add(rep.player);
-				rep.reset();
+			// kill the remaining survivors
+			for (PlayerRep rep : (List<PlayerRep>)players.clone()) {
+				rep.kill();
 			}
-			players.clear();
-			Player topPlayer = winners.get(winners.size() - 1);
+			
+			ArrayList<PlayerRep> winners = new ArrayList<>();
+			for (PlayerRep rep : observers) {
+				addWinner(winners, rep);
+			}
+			Player topPlayer = winners.get(0).player;
 			topPlayer.getInventory()
-					.addItem(new ItemStack(Material.DIAMOND, 3));
+					.addItem(stake);
 			
 			players.clear();
 			for (PlayerRep rep : observers) {
 				rep.player.sendMessage(ChatColor.YELLOW + "The game is over!");
-				rep.player.sendMessage(scoreDisplay());
+				rep.player.sendMessage(scoreDisplay(winners));
 			}
-			winners.clear();
 			BoardGenerator.switchBoard(this.board, this.board, loc);
 		}
 	}
+	
+	private void addWinner(ArrayList<PlayerRep> winners, PlayerRep rep) {
+		for (int i = 0; i < winners.size(); i++) {
+			if (rep.deathTime > winners.get(i).deathTime) {
+				winners.add(i, rep);
+				return;
+			}
+		}
+		winners.add(rep);
+	}
 
-	public String scoreDisplay() {
-		String display = "The winners are:\n";
-		int place = 1;
-		for (int i = winners.size() - 1; i >= 0; i++) {
-			Player player = winners.get(i);
-			display += " " + place++ + ": " + player.getName();
+	public String scoreDisplay(ArrayList<PlayerRep> winners) {
+		String display = "The leaders are:\n";
+		for (int place = 0; place < winners.size(); place++) {
+			Player player = winners.get(place).player;
+			if (place == 0)
+				display += " " + ++place + ": " + player.getName() + "\n";
 		}
 		return display;
 	}
@@ -252,11 +265,10 @@ public class Game implements Listener {
 	 * call when a player dies
 	 */
 	public void alertRemoval(PlayerRep player) {
-		winners.add(player.player);
 		for (PlayerRep rep : observers) {
 			rep.player.sendMessage(ChatColor.YELLOW + player.player.getName()
 					+ " is out");
 		}
-		updateGame();
+		checkFinish();
 	}
 }

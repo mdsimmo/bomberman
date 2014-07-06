@@ -1,5 +1,7 @@
 package io.github.mdsimmo.bomberman;
 
+import java.util.Calendar;
+
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -30,6 +32,7 @@ public class PlayerRep implements Listener {
 	public double spawnHealth, spawnHealthScale, spawnMaxHealth;
 	public boolean isPlaying = false;
 	public int immunity = 0;
+	public long deathTime = -1;
 	
 	public PlayerRep(Player player, Game game) {
 		this.player = player;
@@ -64,17 +67,13 @@ public class PlayerRep implements Listener {
 	}
 	
 	
-	
 	/**
-	 * restores the player to how they were before joining
+	 * Removes the player from the game and restores the player to how they were before joining
 	 */
 	public void kill() {
-		player.sendMessage(ChatColor.RED + "Game Over!");
-		reset();
-	}
-	
-	public void reset() {
 		if (isPlaying) {
+			deathTime = Calendar.getInstance().getTimeInMillis();
+			player.sendMessage(ChatColor.RED + "Game Over!");
 			isPlaying = false;
 			game.players.remove(this);
 			player.getInventory().setContents(spawnInventory);
@@ -163,7 +162,7 @@ public class PlayerRep implements Listener {
 	@EventHandler
 	public void onPlayerLeave(PlayerQuitEvent e) {
 		if (e.getPlayer() == player) {
-			reset();
+			kill();
 		}
 	}
 }
