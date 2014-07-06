@@ -23,8 +23,13 @@ public class BlockRep {
 
 	@SuppressWarnings("deprecation")
 	public void setBlock(Block b) {
-		b.setType(material);
-		b.setData(data);
+		//if (material == Material.DIRT && Math.random() < 0.5) {
+		//	b.setType(Material.AIR);
+		//	b.setData((byte)0);
+		//} else {
+			b.setType(material);
+			b.setData(data);
+		//}
 	}
 	
 	public void save(SaveWriter sw) throws IOException {

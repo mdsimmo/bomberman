@@ -11,6 +11,7 @@ public class Bomberman extends JavaPlugin {
 	 * kill count
 	 * bombs start other bombs
 	 * let players create styles that go underground
+	 * randomly remove dirt (bomb explosions should be fixed first)
 	*/
 	
 	/* TODO BUGS
@@ -19,7 +20,8 @@ public class Bomberman extends JavaPlugin {
 	 * chests (and other like things) don't spawn with contents
 	 * flames from one bomb put out the flames of another
 	 * convert-to-game builds another board where the player is standing
-	 * players can spawn inside wall slightly (maybe fixed itself?) 
+	 * players can spawn inside wall slightly
+	 * players don't get thier health back
 	 */
 	
 	@Override
