@@ -14,7 +14,6 @@ import org.bukkit.plugin.java.JavaPlugin;
 public class GameCommander implements CommandExecutor, TabCompleter {
 	
 	private JavaPlugin plugin = Bomberman.instance;
-		
 	public GameCommander() {
 		String[] commands = {
 				"create-game", 
@@ -43,7 +42,7 @@ public class GameCommander implements CommandExecutor, TabCompleter {
 	}
 	
 	private void destroyGame(Game game) {
-		Game.deregister(game);
+		game.deregister();
 		BoardGenerator.switchBoard(game.board, game.oldBoard, game.loc);
 	}
 	
@@ -85,9 +84,13 @@ public class GameCommander implements CommandExecutor, TabCompleter {
 				if (Game.findGame(args[0]) != null) {
 					sender.sendMessage("Game already exists");
 				} else {
-					Board board = BoardGenerator.createStyle((Player)sender, args[0]);
+					Location[] locations = BoardGenerator.getBoundingStructure((Player)sender, args[0]);
+					Board board = BoardGenerator.createStyle(null, locations[0], locations[1]);
 					BoardGenerator.saveBoard(board);
-					createGame(args[0], ((Player)sender).getLocation(), board);
+					game = new Game(args[0], locations[0]);
+					game.board = board;
+					game.oldBoard = board;
+					Game.register(game);
 					sender.sendMessage("Game created");
 				}
 			} else {
@@ -194,7 +197,8 @@ public class GameCommander implements CommandExecutor, TabCompleter {
 			if (args.length != 1)
 				return false;
 			if (sender instanceof Player) {
-				Board board2 = BoardGenerator.createStyle((Player)sender, args[0]);
+				Location[] locations = BoardGenerator.getBoundingStructure((Player)sender, args[0]);
+				Board board2 = BoardGenerator.createStyle(null, locations[0], locations[1]);
 				BoardGenerator.saveBoard(board2);
 				sender.sendMessage("Style created");
 			}

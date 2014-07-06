@@ -141,10 +141,11 @@ public class BoardGenerator {
 	}
 	
 	/**
-	 * creates a board style from what the player is looking at
+	 * Gets the bounds of the structure.
+	 * @return an array with the minimum and maximm points. 
 	 */
 	@SuppressWarnings("unchecked")
-	public static Board createStyle(Player p, String style) {
+	public static Location[] getBoundingStructure(Player p, String style) {
 		@SuppressWarnings("deprecation")
 		Block target = p.getTargetBlock(null, 100);
 		
@@ -172,14 +173,26 @@ public class BoardGenerator {
 			minz = (int)Math.min(l.getZ(), minz);
 			maxz = (int)Math.max(l.getZ(), maxz);
 		}
-		Location loc = target.getWorld().getBlockAt(minx, miny, minz).getLocation();
 		
 		checked.clear();
 		toCheck.clear();
 		
-		return createStyle(style, loc, maxx-minx+1, maxy-miny+1, maxz-minz+1);
+		return new Location[] {
+				new Location(target.getWorld(), minx, miny, minz),
+				new Location(target.getWorld(), maxx, maxy, maxz)
+		};
 	}
 	
+	/**
+	 * Creates a board style 
+	 */
+	public static Board createStyle(String style, Location min, Location max) {
+		int xSize = max.getBlockX() - min.getBlockX();
+		int ySize = max.getBlockY() - min.getBlockY();
+		int zSize = max.getBlockZ() - min.getBlockZ();
+		return createStyle(style, min, xSize, ySize, zSize);
+	}
+
 	/**
 	 * Creates a board style 
 	 */

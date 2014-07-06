@@ -12,14 +12,14 @@ public class Bomberman extends JavaPlugin {
 	 * bombs start other bombs
 	 * let players create styles that go underground
 	 * randomly remove dirt (bomb explosions should be fixed first)
+	 * make chests (and other like things) spawn with contents
+	 * make flames from one bomb put out the flames of another
 	*/
 	
 	/* TODO BUGS
 	 * games build one block to long
-	 * chests (and other like things) don't spawn with contents
-	 * flames from one bomb put out the flames of another
-	 * convert-to-game builds another board where the player is standing
 	 * players can spawn inside wall slightly
+	 * reloading twice with a loaded game causes a crash
 	 */
 	
 	@Override

@@ -51,18 +51,17 @@ public class Game implements Listener {
 		gameRegestry.put(game.name, game);
 	}
 
-	public static void deregister(Game game) {
-		gameRegestry.remove(game.name);
+	public void deregister() {
+		gameRegestry.remove(name);
 		EntityDamageEvent.getHandlerList();
-		for (PlayerRep rep : new ArrayList<PlayerRep>(game.players)) {
-			rep.kill();
-			game.checkFinish();
+		terminate();
+		for (PlayerRep rep : new ArrayList<PlayerRep>(observers)) {
 			HandlerList.unregisterAll(rep);
 		}
-		HandlerList.unregisterAll(game.protector);
-		File f = new File(plugin.getDataFolder() + "/" + game.name + ".game");
+		HandlerList.unregisterAll(protector);
+		File f = new File(plugin.getDataFolder() + "/" + name + ".game");
 		f.delete();
-		f = new File(plugin.getDataFolder() + "/" + game.name + ".old.board");
+		f = new File(plugin.getDataFolder() + "/" + name + ".old.board");
 		f.delete();
 	}
 
