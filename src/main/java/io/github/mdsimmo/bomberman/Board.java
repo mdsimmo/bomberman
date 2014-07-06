@@ -76,6 +76,9 @@ public class Board {
 			} catch (NullPointerException e) {
 				// caused when BlockRep tries to read past the end of the file
 				break;
+			} catch (IllegalArgumentException e) {
+				System.out.println("Possible currupt save file \"" + board.name + ".board\" (or maybe it's just my bad programming)");
+				break;
 			}
 		}
 		return board;

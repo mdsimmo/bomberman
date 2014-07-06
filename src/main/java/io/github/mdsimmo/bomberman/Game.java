@@ -105,7 +105,8 @@ public class Game implements Listener {
 			sw.writePart(board.name);
 			sw.writePart(oldBoard.name);
 			sw.close();
-			BoardGenerator.saveBoard(oldBoard);
+			if (BoardGenerator.loadBoard(oldBoard.name) == null)
+				BoardGenerator.saveBoard(oldBoard);
 			for (PlayerRep rep : new ArrayList<PlayerRep>(players))
 				rep.kill();
 		} catch (IOException e) {

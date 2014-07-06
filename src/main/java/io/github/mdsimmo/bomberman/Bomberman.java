@@ -18,8 +18,7 @@ public class Bomberman extends JavaPlugin {
 	
 	/* TODO BUGS
 	 * games build one block to long
-	 * players can spawn inside wall slightly
-	 * reloading twice with a loaded game causes a crash
+	 * players can spawn inside wall
 	 */
 	
 	@Override

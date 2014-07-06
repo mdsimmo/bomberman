@@ -85,7 +85,7 @@ public class GameCommander implements CommandExecutor, TabCompleter {
 					sender.sendMessage("Game already exists");
 				} else {
 					Location[] locations = BoardGenerator.getBoundingStructure((Player)sender, args[0]);
-					Board board = BoardGenerator.createStyle(null, locations[0], locations[1]);
+					Board board = BoardGenerator.createStyle(args[0], locations[0], locations[1]);
 					BoardGenerator.saveBoard(board);
 					game = new Game(args[0], locations[0]);
 					game.board = board;
