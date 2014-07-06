@@ -29,7 +29,6 @@ public class PlayerRep implements Listener {
 	public ItemStack[] spawnInventory;
 	public Location spawn;
 	public Game game;
-	public double spawnHealth, spawnHealthScale, spawnMaxHealth;
 	public boolean isPlaying = false;
 	public int immunity = 0;
 	public long deathTime = -1;
@@ -50,11 +49,8 @@ public class PlayerRep implements Listener {
 		} else
 			player.teleport(game.loc.clone().add(spawn));
 		
-		spawnHealth = player.getHealth();
 		player.setHealth(game.lives);
 		player.setMaxHealth(game.lives);
-		spawnHealthScale = player.getHealthScale();
-		spawnMaxHealth = player.getMaxHealth();
 		player.setHealthScale(game.lives*2);
 		spawnInventory = player.getInventory().getContents();
 		player.getInventory().setContents(new ItemStack[] {
@@ -77,11 +73,19 @@ public class PlayerRep implements Listener {
 			isPlaying = false;
 			game.players.remove(this);
 			player.getInventory().setContents(spawnInventory);
-			player.setMaxHealth(spawnMaxHealth);
-			player.setHealth(spawnHealth);
-			player.setHealthScale(spawnHealthScale);
+			player.setMaxHealth(20);
+			player.setHealth(20);
+			player.setHealthScale(20);
 			player.teleport(spawn);
-			player.setFireTicks(0);
+			// needed to prevent crash when reloading
+			if (plugin.isEnabled())
+				plugin.getServer().getScheduler().scheduleSyncDelayedTask(plugin, new Runnable() {
+					
+					@Override
+					public void run() {
+						player.setFireTicks(0);
+					}
+				});
 			game.alertRemoval(this);
 		}
 	}

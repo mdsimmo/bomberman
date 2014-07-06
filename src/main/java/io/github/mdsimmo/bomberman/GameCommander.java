@@ -257,7 +257,7 @@ public class GameCommander implements CommandExecutor, TabCompleter {
 			} // else do next
 		case "start-game":
 		case "join-game":
-		case "restart-game":
+		case "reset-game":
 		case "destroy-game":
 			if (args.length == 1) {
 				for (String name : Game.allGames()) {

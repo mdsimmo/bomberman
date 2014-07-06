@@ -16,12 +16,10 @@ public class Bomberman extends JavaPlugin {
 	
 	/* TODO BUGS
 	 * games build one block to long
-	 * players continue to burn after leaving
 	 * chests (and other like things) don't spawn with contents
 	 * flames from one bomb put out the flames of another
 	 * convert-to-game builds another board where the player is standing
 	 * players can spawn inside wall slightly
-	 * players don't get thier health back
 	 */
 	
 	@Override
