@@ -24,7 +24,9 @@ public class GameCommander implements CommandExecutor, TabCompleter {
 				"reset-game", 
 				"join-game",
 				"start-game",
-				"list-games",};
+				"list-games",
+				"list-styles",
+				"convert-to-game"};
 		for (String cmd : commands) {
 			plugin.getCommand(cmd).setExecutor(this);
 			plugin.getCommand(cmd).setTabCompleter(this);
@@ -69,6 +71,23 @@ public class GameCommander implements CommandExecutor, TabCompleter {
 						return true;
 					}
 					createGame(args[0], ((Player)sender).getLocation(), style);
+					sender.sendMessage("Game created");
+				}
+			} else {
+				sender.sendMessage("You must be a player");
+			}
+			return true;
+			
+		case "convert-to-game":
+			if (args.length != 1)
+				return false;
+			if (sender instanceof Player) {
+				if (Game.findGame(args[0]) != null) {
+					sender.sendMessage("Game already exists");
+				} else {
+					Board board = BoardGenerator.createStyle((Player)sender, args[0]);
+					BoardGenerator.saveBoard(board);
+					createGame(args[0], ((Player)sender).getLocation(), board);
 					sender.sendMessage("Game created");
 				}
 			} else {
@@ -178,13 +197,25 @@ public class GameCommander implements CommandExecutor, TabCompleter {
 			return true;
 		
 		case "list-games":
-			List<Game> games = Game.allGames();
+			List<String> games = Game.allGames();
 			if (games.size() == 0) {
 				sender.sendMessage("No games");
 			} else {
 				sender.sendMessage("Current games:");
-				for (Game game2 : Game.allGames()) {
-					sender.sendMessage("* " + game2.name);
+				for (String name : games) {
+					sender.sendMessage("* " + name);
+				}
+			}
+			return true;
+		
+		case "list-styles":
+			List<String> styles = BoardGenerator.allBoards();
+			if (styles.size() == 0) {
+				sender.sendMessage("No styles");
+			} else {
+				sender.sendMessage("Current games:");
+				for (String name : styles) {
+					sender.sendMessage("* " + name);
 				}
 			}
 			return true;
@@ -201,16 +232,23 @@ public class GameCommander implements CommandExecutor, TabCompleter {
 		switch (cmd) {
 		case "create-style":
 			if (args.length == 1) {
-				for (Board board : BoardGenerator.allBoards())
-					if (board.name.startsWith(args[1]))
-						options.add(board.name);
+				String start = args[0];
+				for (String name : BoardGenerator.allBoards()) {
+					System.out.println("board: " + name);
+					
+					if (name.startsWith(start))
+						options.add(name);
+				}
 			}
 			break;
+		case "create-game":
 		case "set-style":
 			if (args.length == 2) {
-				for (Board board : BoardGenerator.allBoards())
-					if (board.name.startsWith(args[1]))
-						options.add(board.name);
+				for (String name : BoardGenerator.allBoards()) {
+					System.out.println("board: " + name);
+					if (name.startsWith(args[1]))
+						options.add(name);
+				}
 				break;
 			} // else do next
 		case "start-game":
@@ -218,13 +256,14 @@ public class GameCommander implements CommandExecutor, TabCompleter {
 		case "restart-game":
 		case "destroy-game":
 			if (args.length == 1) {
-				for (Game game : Game.allGames()) {
-					if (game.name.startsWith(args[0])) 
-						options.add(game.name);
+				for (String name : Game.allGames()) {
+					if (name.startsWith(args[0])) 
+						options.add(name);
 				}
 			}
 			break;
 		}
+		System.out.println("options: " + options);
 		return options;
 	}
 }

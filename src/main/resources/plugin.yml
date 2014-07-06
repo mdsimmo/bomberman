@@ -4,8 +4,8 @@ version: 0.0.1
 
 commands:
   create-game:
-    description: generates the game
-    usage: \create-game <game>
+    description: generates a bomberman game
+    usage: \create-game <game> [style]
     permission: bomberman.op 
   destroy-game:
     description: destroys the game and reverts the land to how it was
@@ -25,16 +25,24 @@ commands:
     permission: bomberman.op
   set-style:
     description: Sets the game's board style
-    usage: \set-board <game> <style>
+    usage: \set-style <game> <style>
     permission: bomberman.op
   create-style:
     description: Makes the thing you're looking at a standard board style
-    usage: \create-board <style>
+    usage: \create-style <style>
+    permission: bomberman.op
+  convert-to-game:
+    description: converts the stucture being looked at into an arena
+    usage: \convert-to-game <game>
     permission: bomberman.op
   list-games:
     description: List all games currently existing
     usage: \list-games
     permission: bomberman.player
+  list-styles:
+    description: Lists all the style currently available
+    usage: \list-styles
+    permission: bomberman.op 
 
 permissions:
   bomberman.*:

@@ -33,10 +33,10 @@ public class Game implements Listener {
 		return gameRegestry.get(name);
 	}
 
-	public static List<Game> allGames() {
-		List<Game> games = new ArrayList<>();
+	public static List<String> allGames() {
+		List<String> games = new ArrayList<>();
 		for (String name : gameRegestry.keySet()) {
-			games.add(findGame(name));
+			games.add(name);
 		}
 		return games;
 	}

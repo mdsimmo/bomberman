@@ -82,8 +82,8 @@ public class BoardGenerator {
 		}
 	}
 	
-	public static List<Board> allBoards() {
-		List<Board> boards = new ArrayList<>();
+	public static List<String> allBoards() {
+		List<String> boards = new ArrayList<>();
 		File[] files = plugin.getDataFolder().listFiles(new FilenameFilter() {
 
 			@Override
@@ -92,7 +92,7 @@ public class BoardGenerator {
 			}
 		});
 		for (File f : files) {
-			boards.add(loadBoard(f.getName().split(".game")[0]));
+			boards.add(f.getName().split(".board")[0]);
 		}
 		return boards;
 	}

@@ -32,8 +32,8 @@ public class Bomberman extends JavaPlugin {
 	
 	@Override
 	public void onDisable() {
-		for (Game game : Game.allGames()) {
-			game.saveGame();
+		for (String game : Game.allGames()) {
+			Game.findGame(game).saveGame();
 		}
 	}
 }
