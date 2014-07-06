@@ -51,11 +51,10 @@ public class Game implements Listener {
 		gameRegestry.put(game.name, game);
 	}
 
-	@SuppressWarnings("unchecked")
 	public static void deregister(Game game) {
 		gameRegestry.remove(game.name);
 		EntityDamageEvent.getHandlerList();
-		for (PlayerRep rep : (List<PlayerRep>)game.players.clone()) {
+		for (PlayerRep rep : new ArrayList<PlayerRep>(game.players)) {
 			rep.kill();
 			game.checkFinish();
 			HandlerList.unregisterAll(rep);
@@ -97,7 +96,6 @@ public class Game implements Listener {
 		}
 	}
 
-	@SuppressWarnings("unchecked")
 	public void saveGame() {
 		try {
 			SaveWriter sw = new SaveWriter(name + ".game");
@@ -109,7 +107,7 @@ public class Game implements Listener {
 			sw.writePart(oldBoard.name);
 			sw.close();
 			BoardGenerator.saveBoard(oldBoard);
-			for (PlayerRep rep : (List<PlayerRep>) players.clone())
+			for (PlayerRep rep : new ArrayList<PlayerRep>(players))
 				rep.kill();
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -128,7 +126,7 @@ public class Game implements Listener {
 			new Potion(PotionType.INVISIBILITY, 1).toItemStack(1),
 			new Potion(PotionType.SPEED, 2).toItemStack(1), };
 	protected ArrayList<PlayerRep> observers = new ArrayList<>();
-	protected ArrayList<PlayerRep> players = new ArrayList<>();
+	public ArrayList<PlayerRep> players = new ArrayList<>();
 	public Board board;
 	public int bombs = Config.bombs;
 	public int power = Config.power;
@@ -212,15 +210,25 @@ public class Game implements Listener {
 		return null;
 	}
 
+	/** 
+	 * Terminates the game. <br>
+	 * Kicks all playes out. Doesn't give awards 
+	 */
+	public void terminate() {
+		isPlaying = false;
+		for (PlayerRep rep : new ArrayList<PlayerRep>(players)) {
+			rep.kill();
+		}
+	}
+	
 	/**
 	 * updates the status of the game.
 	 */
-	@SuppressWarnings("unchecked")
 	public void checkFinish() {
 		if (players.size() <= 1 && isPlaying) {
 			isPlaying = false;
 			// kill the remaining survivors
-			for (PlayerRep rep : (List<PlayerRep>)players.clone()) {
+			for (PlayerRep rep : new ArrayList<PlayerRep>(players)) {
 				rep.kill();
 			}
 			

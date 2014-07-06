@@ -13,13 +13,13 @@ public class Bomberman extends JavaPlugin {
 	 * let players create styles that go underground
 	*/
 	
-	/* TODO BUGS (in order id importance)
+	/* TODO BUGS
 	 * games build one block to long
-	 * players can spawn inside wall slightly
 	 * players continue to burn after leaving
 	 * chests (and other like things) don't spawn with contents
 	 * flames from one bomb put out the flames of another
-	 * convert-to-game builds another board where the player is standing 
+	 * convert-to-game builds another board where the player is standing
+	 * players can spawn inside wall slightly (maybe fixed itself?) 
 	 */
 	
 	@Override

@@ -114,8 +114,8 @@ public class GameCommander implements CommandExecutor, TabCompleter {
 				sender.sendMessage("Game not found");
 				return true;
 			}
-			destroyGame(game);
-			createGame(game.name, game.loc, game.board);
+			game.terminate();
+			BoardGenerator.switchBoard(game.board, game.board, game.loc);
 			return true;
 			
 			
@@ -129,12 +129,16 @@ public class GameCommander implements CommandExecutor, TabCompleter {
 				} else {
 					if (game.isPlaying == false) {
 						PlayerRep rep = game.getPlayerRep((Player)sender); 
-						if (rep == null) {
+						if (rep == null)
 							rep = new PlayerRep((Player)sender, game);
-							rep.joinGame();
-						} else {
-							rep.joinGame();
+						for (String name : Game.allGames()) {
+							for (PlayerRep test : Game.findGame(name).players)
+								if (test.player == rep.player) {
+									sender.sendMessage("You can't join twice!");
+									return true;
+								}
 						}
+						rep.joinGame();
 						
 					} else {
 						sender.sendMessage("Game has already started");
