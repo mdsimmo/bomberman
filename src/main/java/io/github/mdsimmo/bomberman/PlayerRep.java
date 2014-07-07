@@ -32,39 +32,40 @@ public class PlayerRep implements Listener {
 	public boolean isPlaying = false;
 	public int immunity = 0;
 	public long deathTime = -1;
-	
+
 	public PlayerRep(Player player, Game game) {
 		this.player = player;
 		this.game = game;
 		plugin.getServer().getPluginManager().registerEvents(this, plugin);
 		game.observers.add(this);
 	}
-		
+
 	public void joinGame() {
 		this.spawn = player.getLocation();
-		Vector spawn = game.findSpareSpawn();
-		if (spawn == null) {
+		Vector gameSpawn = game.findSpareSpawn();
+		if (gameSpawn == null) {
 			player.sendMessage("game full");
 			return;
-		} else
-			player.teleport(game.loc.clone().add(spawn));
-		
+		} else {
+			// player.teleport() might seem better, but the players are teleported ~+-0.5 blocks out (and end up in the walls) 
+			plugin.getServer().dispatchCommand(player, "tp " + (gameSpawn.getBlockX()+game.loc.getBlockX()) + " " + (double)(gameSpawn.getBlockY()+game.loc.getBlockY()) + " " + (gameSpawn.getBlockZ()+game.loc.getBlockZ()));
+		}
+
 		player.setHealth(game.lives);
 		player.setMaxHealth(game.lives);
-		player.setHealthScale(game.lives*2);
+		player.setHealthScale(game.lives * 2);
 		spawnInventory = player.getInventory().getContents();
-		player.getInventory().setContents(new ItemStack[] {
-				new ItemStack(Material.TNT, game.bombs),
-				new ItemStack(Material.BLAZE_POWDER, game.power)
-			});
-		
+		player.getInventory().setContents(
+				new ItemStack[] { new ItemStack(Material.TNT, game.bombs),
+						new ItemStack(Material.BLAZE_POWDER, game.power) });
+
 		isPlaying = true;
 		game.players.add(this);
 	}
-	
-	
+
 	/**
-	 * Removes the player from the game and restores the player to how they were before joining
+	 * Removes the player from the game and restores the player to how they were
+	 * before joining
 	 */
 	public void kill() {
 		if (isPlaying) {
@@ -79,20 +80,22 @@ public class PlayerRep implements Listener {
 			player.teleport(spawn);
 			// needed to prevent crash when reloading
 			if (plugin.isEnabled())
-				plugin.getServer().getScheduler().scheduleSyncDelayedTask(plugin, new Runnable() {
-					
-					@Override
-					public void run() {
-						player.setFireTicks(0);
-					}
-				});
+				plugin.getServer().getScheduler()
+						.scheduleSyncDelayedTask(plugin, new Runnable() {
+
+							@Override
+							public void run() {
+								player.setFireTicks(0);
+							}
+						});
 			game.alertRemoval(this);
 		}
 	}
-	
+
 	@EventHandler
 	public void onPlayerPlaceTNT(BlockPlaceEvent e) {
-		if (e.isCancelled()) return;
+		if (e.isCancelled())
+			return;
 		Block b = e.getBlock();
 		if (e.getPlayer() == player && isPlaying) {
 			if (b.getType() == Material.TNT && game.isPlaying) {
@@ -102,24 +105,24 @@ public class PlayerRep implements Listener {
 			}
 		}
 	}
-	
+
 	@EventHandler
-    public void playerMove(PlayerMoveEvent e) {
-        Player p = e.getPlayer();
-        if (p == this.player && !game.isPlaying && isPlaying) {
-        	Location from = e.getFrom();
-            double xfrom = e.getFrom().getX();
-            double yfrom = e.getFrom().getY();
-            double zfrom = e.getFrom().getZ();
-            double xto = e.getTo().getX();
-            double yto = e.getTo().getY();
-            double zto = e.getTo().getZ();
-            if (!(xfrom == xto && yfrom == yto && zfrom == zto)) {
-                p.teleport(from);
-            }
-        }
-    }
-	
+	public void playerMove(PlayerMoveEvent e) {
+		Player p = e.getPlayer();
+		if (p == this.player && !game.isPlaying && isPlaying) {
+			Location from = e.getFrom();
+			double xfrom = e.getFrom().getX();
+			double yfrom = e.getFrom().getY();
+			double zfrom = e.getFrom().getZ();
+			double xto = e.getTo().getX();
+			double yto = e.getTo().getY();
+			double zto = e.getTo().getZ();
+			if (!(xfrom == xto && yfrom == yto && zfrom == zto)) {
+				p.teleport(from);
+			}
+		}
+	}
+
 	public int bombStrength() {
 		int strength = 0;
 		for (ItemStack stack : player.getInventory().getContents()) {
@@ -129,40 +132,42 @@ public class PlayerRep implements Listener {
 		}
 		return strength;
 	}
-	
+
 	public void damage() {
 		if (immunity <= 0) {
 			if (player.getHealth() > 1) {
 				player.damage(1);
 				new Immunity();
-			} else { 
+			} else {
 				kill();
 			}
 		}
 	}
-	
+
 	private class Immunity implements Runnable {
-		
+
 		public Immunity() {
 			immunity++;
-			plugin.getServer().getScheduler().scheduleSyncDelayedTask(plugin, this, 20);
+			plugin.getServer().getScheduler()
+					.scheduleSyncDelayedTask(plugin, this, 20);
 		}
-		
+
 		@Override
 		public void run() {
 			immunity--;
 		}
 	}
-	
+
 	@EventHandler
 	public void onPlayerRegen(EntityRegainHealthEvent e) {
 		if (e.getEntity() == player && isPlaying) {
 			if (e.getRegainReason() == RegainReason.MAGIC)
-				player.setHealth(Math.min(player.getHealth()+1, player.getMaxHealth()));
+				player.setHealth(Math.min(player.getHealth() + 1,
+						player.getMaxHealth()));
 			e.setCancelled(true);
 		}
 	}
-	
+
 	@EventHandler
 	public void onPlayerLeave(PlayerQuitEvent e) {
 		if (e.getPlayer() == player) {

@@ -11,9 +11,10 @@ import org.bukkit.command.TabCompleter;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
 
-public class GameCommander implements CommandExecutor, TabCompleter {
+public class GameCommander implements CommandExecutor, TabCompleter, Runnable {
 	
 	private JavaPlugin plugin = Bomberman.instance;
+	private Player player;
 	public GameCommander() {
 		String[] commands = {
 				"create-game", 
@@ -29,8 +30,8 @@ public class GameCommander implements CommandExecutor, TabCompleter {
 		for (String cmd : commands) {
 			plugin.getCommand(cmd).setExecutor(this);
 			plugin.getCommand(cmd).setTabCompleter(this);
-			
 		}
+		plugin.getServer().getScheduler().scheduleSyncRepeatingTask(plugin, this, 0, 20);
 	}
 	
 	private void createGame(String name, Location l, Board style) {
@@ -53,6 +54,7 @@ public class GameCommander implements CommandExecutor, TabCompleter {
 		Game game;
 		switch (cmd) {
 		case "create-game":
+			player = (Player)sender;
 			if (!(args.length == 1 || args.length == 2))
 				return false;
 			if (sender instanceof Player) {
@@ -119,6 +121,7 @@ public class GameCommander implements CommandExecutor, TabCompleter {
 			}
 			game.terminate();
 			BoardGenerator.switchBoard(game.board, game.board, game.loc);
+			sender.sendMessage("Game reset");
 			return true;
 			
 			
@@ -273,5 +276,13 @@ public class GameCommander implements CommandExecutor, TabCompleter {
 		}
 		System.out.println("options: " + options);
 		return options;
+	}
+	
+	@Override
+	public void run() {
+		if (player != null) {
+			Location l = player.getLocation();
+			plugin.getLogger().info(l.getX()+":"+l.getY()+":"+l.getZ());
+		}
 	}
 }
