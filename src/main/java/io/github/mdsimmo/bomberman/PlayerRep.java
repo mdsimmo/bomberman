@@ -176,4 +176,31 @@ public class PlayerRep implements Listener {
 			kill();
 		}
 	}
+	
+	
+	// an attempt at making potion effects shorter
+	/*@EventHandler
+	public void onPlayerDrinkPotion(PlayerItemConsumeEvent e) {
+		if (e.getPlayer() == player && isPlaying) {
+			if (e.getItem().getType() == Material.POTION) {
+				//PotionMeta meta = (PotionMeta)e.getItem().getItemMeta();
+				Potion potion = Potion.fromItemStack(e.getItem());
+				Collection<PotionEffect> effects = potion.getEffects();
+				plugin.getLogger().info("" + effects);
+				effects.clear();
+				//effects.add(new PotionEffect(potion.getType().getEffectType(), 60, 1));
+				//plugin.getLogger().info("" + effects);
+				
+				
+				
+				// remove the empty bottle
+				plugin.getServer().getScheduler().scheduleSyncDelayedTask(plugin, new Runnable() {
+					@Override
+					public void run() {
+						player.setItemInHand(null);
+					}
+				});
+			}
+		}
+	}*/
 }

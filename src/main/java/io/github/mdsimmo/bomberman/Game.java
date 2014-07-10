@@ -9,7 +9,6 @@ import java.util.List;
 
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
-import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
@@ -106,13 +105,16 @@ public class Game implements Listener {
 			sw.writePart(board.name);
 			sw.writePart(oldBoard.name);
 			sw.close();
-			if (BoardGenerator.loadBoard(oldBoard.name) == null)
-				BoardGenerator.saveBoard(oldBoard);
-			for (PlayerRep rep : new ArrayList<PlayerRep>(players))
-				rep.kill();
 		} catch (IOException e) {
 			e.printStackTrace();
+		} catch (NoClassDefFoundError e) {
+			plugin.getLogger().info("error while saving " + name);
 		}
+		
+		if (BoardGenerator.loadBoard(oldBoard.name) == null)
+			BoardGenerator.saveBoard(oldBoard);
+		for (PlayerRep rep : new ArrayList<PlayerRep>(players))
+			rep.kill();
 	}
 
 	protected String name;
@@ -121,11 +123,17 @@ public class Game implements Listener {
 	protected boolean isPlaying;
 	private GameProtection protector;
 	public ItemStack stake = Config.stake;
-	private ItemStack[] drops = { new ItemStack(Material.TNT),
+	private ItemStack[] drops = { 
+			/*new ItemStack(Material.TNT),
+			new ItemStack(Material.TNT),
+			new ItemStack(Material.TNT),
+			new ItemStack(Material.TNT),
+			new ItemStack(Material.BLAZE_POWDER),
+			new ItemStack(Material.BLAZE_POWDER),
 			new ItemStack(Material.BLAZE_POWDER),
 			new Potion(PotionType.INSTANT_HEAL, 1).toItemStack(1),
-			new Potion(PotionType.INVISIBILITY, 1).toItemStack(1),
-			new Potion(PotionType.SPEED, 2).toItemStack(1), };
+			new Potion(PotionType.INSTANT_HEAL, 1).toItemStack(1),*/
+			new Potion(PotionType.SPEED, 2).toItemStack(1)};
 	protected ArrayList<PlayerRep> observers = new ArrayList<>();
 	public ArrayList<PlayerRep> players = new ArrayList<>();
 	public Board board;
@@ -210,10 +218,10 @@ public class Game implements Listener {
 	}
 
 	public void drop(Location l) {
-		if (Math.random() < 0.1) {
+		//if (Math.random() < 0.1) {
 			int rand = (int) (Math.random() * drops.length);
 			l.getWorld().dropItem(l, drops[rand]);
-		}
+		//}
 	}
 
 	public PlayerRep getPlayerRep(Player player) {

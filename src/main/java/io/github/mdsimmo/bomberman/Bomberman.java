@@ -19,8 +19,10 @@ public class Bomberman extends JavaPlugin {
 	
 	/* TODO BUGS
 	 * games build one block to long (but only default board????)
+	 * potion effects are way too long (harder than it looks)
 	 * flames from one bomb put out the flames of another
 	 * players can only be hurt when on burnable tile
+	 * tnt can ocationly go off when other bombs get to it
 	 */
 	
 	@Override
