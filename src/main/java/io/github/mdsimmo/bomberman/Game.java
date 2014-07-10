@@ -11,6 +11,7 @@ import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.World;
+import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 import org.bukkit.event.HandlerList;
 import org.bukkit.event.Listener;
@@ -149,12 +150,28 @@ public class Game implements Listener {
 	}
 
 	public Vector findSpareSpawn() {
-		if (board.spawnPoints.size() > 0)
-			return board.spawnPoints.remove(0);
-		else
-			return null;
+		for (Vector v : board.spawnPoints) {
+			plugin.getLogger().info("spawn: " + v);
+			if (blockEmpty(v))
+				return v;
+		}
+		return null;
 	}
 
+	/**
+	 * gets if there are any players <b>in</b> the block given by the vector (from game corner)
+	 * @return true if no player is in the block
+	 */
+	private boolean blockEmpty(Vector v) {
+		for (PlayerRep rep : players) {
+			Block under = rep.player.getLocation().getBlock();
+			Block block = loc.clone().add(v).getBlock();
+			if (block.equals(under))
+				return false;
+		}
+		return true;
+	}
+	
 	/**
 	 * Starts the game
 	 * @return true if the game was started succesfully
@@ -178,11 +195,9 @@ public class Game implements Listener {
 
 		public void run() {
 			if (count > 0) {
-				for (PlayerRep rep : players) {
+				for (PlayerRep rep : players)
 					rep.player.sendMessage("" + count);
-					plugin.getServer().getScheduler()
-							.scheduleSyncDelayedTask(plugin, this, 20);
-				}
+				plugin.getServer().getScheduler().scheduleSyncDelayedTask(plugin, this, 20);
 			} else {
 				for (PlayerRep rep : observers) {
 					rep.player.sendMessage(ChatColor.YELLOW + "Game started!");
@@ -227,18 +242,22 @@ public class Game implements Listener {
 	public void checkFinish() {
 		if (players.size() <= 1 && isPlaying) {
 			isPlaying = false;
-			// kill the remaining survivors
-			for (PlayerRep rep : new ArrayList<PlayerRep>(players)) {
-				rep.kill();
-			}
 			
 			ArrayList<PlayerRep> winners = new ArrayList<>();
 			for (PlayerRep rep : observers) {
-				addWinner(winners, rep);
+				if (rep.deathTime != -1)
+					addWinner(winners, rep);
+			}
+			
+			// kill the remaining survivors and add them to the winners
+			for (PlayerRep rep : new ArrayList<PlayerRep>(players)) {
+				rep.kill();
+				winners.add(0, rep);
 			}
 			Player topPlayer = winners.get(0).player;
 			topPlayer.getInventory()
 					.addItem(stake);
+			System.out.println(winners);
 			
 			players.clear();
 			for (PlayerRep rep : observers) {
@@ -252,19 +271,36 @@ public class Game implements Listener {
 	private void addWinner(ArrayList<PlayerRep> winners, PlayerRep rep) {
 		for (int i = 0; i < winners.size(); i++) {
 			if (rep.deathTime > winners.get(i).deathTime) {
+				System.out.println(rep.player.getName() + "is better than" + winners.get(i).player.getName());
 				winners.add(i, rep);
 				return;
 			}
 		}
+		System.out.println(rep.player.getName() + "is the worst");
 		winners.add(rep);
 	}
 
 	public String scoreDisplay(ArrayList<PlayerRep> winners) {
 		String display = "The leaders are:\n";
-		for (int place = 0; place < winners.size(); place++) {
-			Player player = winners.get(place).player;
-			if (place == 0)
-				display += " " + ++place + ": " + player.getName() + "\n";
+		int i = 0;
+		while (i < winners.size() && i < 8) {
+			Player player = winners.get(i).player;
+			i++;
+			String place;
+			switch (i) {
+			case 1:
+				place = "1st";
+				break;
+			case 2:
+				place = "2nd";
+				break;
+			case 3:
+				place = "3rd";
+				break;
+			default:
+				place = i+"th";
+			}			
+			display += " " + place + ": " + player.getName() + "\n";
 		}
 		return display;
 	}

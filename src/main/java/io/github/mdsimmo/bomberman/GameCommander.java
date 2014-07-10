@@ -11,10 +11,9 @@ import org.bukkit.command.TabCompleter;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
 
-public class GameCommander implements CommandExecutor, TabCompleter, Runnable {
+public class GameCommander implements CommandExecutor, TabCompleter {
 	
 	private JavaPlugin plugin = Bomberman.instance;
-	private Player player;
 	public GameCommander() {
 		String[] commands = {
 				"create-game", 
@@ -31,7 +30,6 @@ public class GameCommander implements CommandExecutor, TabCompleter, Runnable {
 			plugin.getCommand(cmd).setExecutor(this);
 			plugin.getCommand(cmd).setTabCompleter(this);
 		}
-		plugin.getServer().getScheduler().scheduleSyncRepeatingTask(plugin, this, 0, 20);
 	}
 	
 	private void createGame(String name, Location l, Board style) {
@@ -54,7 +52,6 @@ public class GameCommander implements CommandExecutor, TabCompleter, Runnable {
 		Game game;
 		switch (cmd) {
 		case "create-game":
-			player = (Player)sender;
 			if (!(args.length == 1 || args.length == 2))
 				return false;
 			if (sender instanceof Player) {
@@ -245,8 +242,6 @@ public class GameCommander implements CommandExecutor, TabCompleter, Runnable {
 			if (args.length == 1) {
 				String start = args[0];
 				for (String name : BoardGenerator.allBoards()) {
-					System.out.println("board: " + name);
-					
 					if (name.startsWith(start))
 						options.add(name);
 				}
@@ -256,7 +251,6 @@ public class GameCommander implements CommandExecutor, TabCompleter, Runnable {
 		case "set-style":
 			if (args.length == 2) {
 				for (String name : BoardGenerator.allBoards()) {
-					System.out.println("board: " + name);
 					if (name.startsWith(args[1]))
 						options.add(name);
 				}
@@ -274,15 +268,6 @@ public class GameCommander implements CommandExecutor, TabCompleter, Runnable {
 			}
 			break;
 		}
-		System.out.println("options: " + options);
 		return options;
-	}
-	
-	@Override
-	public void run() {
-		if (player != null) {
-			Location l = player.getLocation();
-			plugin.getLogger().info(l.getX()+":"+l.getY()+":"+l.getZ());
-		}
 	}
 }
