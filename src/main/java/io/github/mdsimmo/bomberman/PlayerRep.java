@@ -41,6 +41,7 @@ public class PlayerRep implements Listener {
 	public boolean isPlaying = false;
 	public int immunity = 0;
 	public long deathTime = -1;
+	public int kills = 0;
 	
 	public PlayerRep(Player player, Game game) {
 		this.player = player;
@@ -163,6 +164,7 @@ public class PlayerRep implements Listener {
 				else {
 					player.sendMessage("Hit by " + db.cause.player.getName());
 					cause.sendMessage("You hit " + player.getName());
+					db.cause.kills++;
 				}
 				new Immunity();
 			} else {
@@ -172,6 +174,7 @@ public class PlayerRep implements Listener {
 				else {
 					player.sendMessage(ChatColor.RED + "Killed by " + cause.getName());
 					cause.sendMessage(ChatColor.GREEN + "You killed " + player.getName());
+					db.cause.kills++;
 				}
 				kill(true);
 			}
@@ -216,7 +219,6 @@ public class PlayerRep implements Listener {
 		if (e.getPlayer() == player && isPlaying) {
 			if (e.getItem().getType() == Material.POTION) {
 				Potion potion = Potion.fromItemStack(e.getItem());
-				plugin.getLogger().info("Potion type " + potion.getType());
 				if (potion.getType() == PotionType.INSTANT_HEAL
 						|| potion.getType() == PotionType.INSTANT_DAMAGE) {
 					// instant potions don't need the duration changed

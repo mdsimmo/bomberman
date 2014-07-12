@@ -160,7 +160,6 @@ public class Game implements Listener {
 
 	public Vector findSpareSpawn() {
 		for (Vector v : board.spawnPoints) {
-			plugin.getLogger().info("spawn: " + v);
 			if (blockEmpty(v))
 				return v;
 		}
@@ -296,7 +295,7 @@ public class Game implements Listener {
 		String display = "The scores are:\n";
 		int i = 0;
 		while (i < winners.size() && i < 8) {
-			Player player = winners.get(i).player;
+			PlayerRep rep = winners.get(i);
 			i++;
 			String place;
 			switch (i) {
@@ -312,7 +311,7 @@ public class Game implements Listener {
 			default:
 				place = i+"th";
 			}			
-			display += " " + place + ": " + player.getName() + "\n";
+			display += " " + place + ": " + rep.player.getName() + "\n";
 		}
 		return display;
 	}

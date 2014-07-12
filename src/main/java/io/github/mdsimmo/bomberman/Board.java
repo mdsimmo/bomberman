@@ -5,10 +5,12 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 import org.bukkit.Material;
+import org.bukkit.plugin.Plugin;
 import org.bukkit.util.Vector;
 
 public class Board {
 
+	private static Plugin plugin = Bomberman.instance;
 	public String name;
 	public int xSize;
 	public int ySize;
@@ -77,7 +79,7 @@ public class Board {
 				// caused when BlockRep tries to read past the end of the file
 				break;
 			} catch (IllegalArgumentException e) {
-				System.out.println("Possible currupt save file \"" + board.name + ".board\" (or maybe it's just my bad programming)");
+				plugin.getLogger().info("Possible currupt save file \"" + board.name + ".board\" (or maybe it's just my bad programming)");
 				break;
 			}
 		}

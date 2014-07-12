@@ -11,6 +11,7 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockBurnEvent;
+import org.bukkit.event.block.BlockIgniteEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityExplodeEvent;
@@ -62,9 +63,15 @@ public class GameProtection implements Listener {
 	
 	@EventHandler
 	public void onBlockCobust(BlockBurnEvent e) {
-		if (game.isPlaying)
-			if (game.containsLocation(e.getBlock().getLocation()))
-				e.setCancelled(true);
+		if (game.containsLocation(e.getBlock().getLocation()))
+			e.setCancelled(true);
+	}
+	
+	@EventHandler
+	public void onBlockIgnite(BlockIgniteEvent e) {
+		if (game.containsLocation(e.getBlock().getLocation())) {
+			e.setCancelled(true);
+		}
 	}
 	
 	@EventHandler
