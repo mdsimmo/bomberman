@@ -7,7 +7,6 @@ public class Bomberman extends JavaPlugin {
 	public static Bomberman instance;
 	
 	/* TODO FEATURES
-	 * Multi game runs
 	 * kill count
 	 * let players create styles that go underground
 	 * randomly remove dirt (bomb explosions should be fixed first)

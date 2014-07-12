@@ -59,7 +59,7 @@ public class Game implements Listener {
 		EntityDamageEvent.getHandlerList();
 		terminate();
 		for (PlayerRep rep : new ArrayList<PlayerRep>(observers)) {
-			HandlerList.unregisterAll(rep);
+			rep.destroy();
 		}
 		HandlerList.unregisterAll(protector);
 		File f = new File(plugin.getDataFolder() + "/" + name + ".game");
@@ -117,7 +117,7 @@ public class Game implements Listener {
 		if (BoardGenerator.loadBoard(oldBoard.name) == null)
 			BoardGenerator.saveBoard(oldBoard);
 		for (PlayerRep rep : new ArrayList<PlayerRep>(players))
-			rep.kill();
+			rep.kill(false);
 	}
 
 	protected String name;
@@ -240,19 +240,20 @@ public class Game implements Listener {
 
 	/** 
 	 * Terminates the game. <br>
-	 * Kicks all playes out. Doesn't give awards 
+	 * Kicks all playes out. Doesn't give awards. Does not deregister the game
 	 */
 	public void terminate() {
 		isPlaying = false;
-		for (PlayerRep rep : new ArrayList<PlayerRep>(players)) {
-			rep.kill();
+		for (PlayerRep rep : new ArrayList<PlayerRep>(observers)) {
+			rep.destroy();
 		}
 	}
 	
 	/**
 	 * updates the status of the game.
+	 * @return true if the game has finished;
 	 */
-	public void checkFinish() {
+	public boolean checkFinish() {
 		if (players.size() <= 1 && isPlaying) {
 			isPlaying = false;
 			
@@ -263,22 +264,26 @@ public class Game implements Listener {
 			}
 			
 			// kill the remaining survivors and add them to the winners
-			for (PlayerRep rep : new ArrayList<PlayerRep>(players)) {
-				rep.kill();
+			for (PlayerRep rep : new ArrayList<>(players)) {
+				rep.kill(false);
 				winners.add(0, rep);
 			}
+			
 			Player topPlayer = winners.get(0).player;
 			topPlayer.getInventory()
 					.addItem(stake);
-			System.out.println(winners);
 			
-			players.clear();
 			for (PlayerRep rep : observers) {
 				rep.player.sendMessage(ChatColor.YELLOW + "The game is over!");
 				rep.player.sendMessage(scoreDisplay(winners));
 			}
 			BoardGenerator.switchBoard(this.board, this.board, loc);
+			
+			terminate();
+			
+			return true;
 		}
+		return !isPlaying;
 	}
 	
 	private void addWinner(ArrayList<PlayerRep> winners, PlayerRep rep) {
@@ -292,7 +297,7 @@ public class Game implements Listener {
 	}
 
 	public String scoreDisplay(ArrayList<PlayerRep> winners) {
-		String display = "The leaders are:\n";
+		String display = "The scores are:\n";
 		int i = 0;
 		while (i < winners.size() && i < 8) {
 			Player player = winners.get(i).player;
@@ -320,10 +325,12 @@ public class Game implements Listener {
 	 * call when a player dies
 	 */
 	public void alertRemoval(PlayerRep player) {
-		for (PlayerRep rep : observers) {
-			rep.player.sendMessage(ChatColor.YELLOW + player.player.getName()
-					+ " is out");
+		if (!checkFinish()) {
+			for (PlayerRep rep : observers) {
+				if (rep.player != player)
+					rep.player.sendMessage(ChatColor.YELLOW + player.player.getName()
+							+ " is out");
+			}
 		}
-		checkFinish();
 	}
 }

@@ -150,7 +150,8 @@ public class Bomb implements Runnable {
 						 
 				}
 				if (--duration <= 0) {
-					block.setType(Material.AIR);
+					if (block.getType() == Material.FIRE)
+						block.setType(Material.AIR);
 					if (drop)
 						game.drop(block.getLocation());
 					plugin.getServer().getScheduler().cancelTask(dbTaskId);

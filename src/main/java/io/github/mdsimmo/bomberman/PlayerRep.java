@@ -10,6 +10,7 @@ import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
+import org.bukkit.event.HandlerList;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.entity.EntityRegainHealthEvent;
@@ -17,7 +18,7 @@ import org.bukkit.event.entity.EntityRegainHealthEvent.RegainReason;
 import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.plugin.Plugin;
+import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.util.Vector;
 
 /**
@@ -26,7 +27,7 @@ import org.bukkit.util.Vector;
  */
 public class PlayerRep implements Listener {
 
-	private static Plugin plugin = Bomberman.instance;
+	private static JavaPlugin plugin = Bomberman.instance;
 	public Player player;
 	public ItemStack[] spawnInventory;
 	public Location spawn;
@@ -71,10 +72,9 @@ public class PlayerRep implements Listener {
 	 * Removes the player from the game and restores the player to how they were
 	 * before joining
 	 */
-	public void kill() {
+	public void kill(boolean alert) {
 		if (isPlaying) {
 			deathTime = Calendar.getInstance().getTimeInMillis();
-			player.sendMessage(ChatColor.RED + "Game Over!");
 			isPlaying = false;
 			game.players.remove(this);
 			player.getInventory().setContents(spawnInventory);
@@ -92,8 +92,19 @@ public class PlayerRep implements Listener {
 								player.setFireTicks(0);
 							}
 						});
-			game.alertRemoval(this);
+			if (alert)
+				game.alertRemoval(this);
 		}
+	}
+	
+	/**
+	 * compleatly destroys this object.
+	 */
+	public void destroy() {
+		kill(false);
+		game.players.remove(this);
+		game.observers.remove(this);
+		HandlerList.unregisterAll(this);
 	}
 
 	@EventHandler
@@ -104,8 +115,6 @@ public class PlayerRep implements Listener {
 		if (e.getPlayer() == player && isPlaying) {
 			if (b.getType() == Material.TNT && game.isPlaying) {
 				new Bomb(game, this, e.getBlock());
-			} else {
-				e.setCancelled(true);
 			}
 		}
 	}
@@ -142,11 +151,23 @@ public class PlayerRep implements Listener {
 		if (immunity <= 0) {
 			if (player.getHealth() > 1) {
 				player.damage(1);
-				player.sendMessage("Hurt by " + db.cause.player.getName());
+				Player cause = db.cause.player;
+				if (cause == player)
+					player.sendMessage("You hit yourself!");
+				else {
+					player.sendMessage("Hit by " + db.cause.player.getName());
+					cause.sendMessage("You hit " + player.getName());
+				}
 				new Immunity();
 			} else {
-				kill();
-				player.sendMessage("Killed by " + db.cause.player.getName());
+				Player cause = db.cause.player;
+				if (cause == player)
+					player.sendMessage(ChatColor.RED + "You killed yourself!");
+				else {
+					player.sendMessage(ChatColor.RED + "Killed by " + cause.getName());
+					cause.sendMessage(ChatColor.GREEN + "You killed " + player.getName());
+				}
+				kill(true);
 			}
 		}
 	}
@@ -178,7 +199,7 @@ public class PlayerRep implements Listener {
 	@EventHandler
 	public void onPlayerLeave(PlayerQuitEvent e) {
 		if (e.getPlayer() == player) {
-			kill();
+			kill(true);
 		}
 	}
 	
