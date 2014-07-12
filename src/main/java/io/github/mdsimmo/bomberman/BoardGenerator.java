@@ -47,7 +47,24 @@ public class BoardGenerator {
 			}
 		}
 		return loadBoard("default");
-	}	
+	}
+	
+	/**
+	 * deletes the given board
+	 * @return false if the board never existed
+	 */
+	public static boolean deleteStyle(String name) {
+		Board board = loadBoard(name);
+		plugin.getLogger().info("1");
+		if (board == null)
+			return false;
+		plugin.getLogger().info("2");
+		loadedBoards.remove(board);
+		File f = new File(plugin.getDataFolder() + "/" + name + ".board");
+		plugin.getLogger().info(f.toString());
+		plugin.getLogger().info("+ " + f.delete());
+		return true;
+	}
 	
 	/**
 	 * destroys the current board and replaces it with the next board. <br>

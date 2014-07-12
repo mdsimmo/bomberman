@@ -19,6 +19,10 @@ commands:
     description: Places the player into the game
     usage: \join-game <game>
     permission: bomberman.player
+  leave-game:
+    description: Leave the currently joined game
+    useage: \leave-game
+    permission: bomberman.player
   start-game:
     description: Starts the game
     usage: \start-game <game>

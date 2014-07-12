@@ -22,6 +22,7 @@ public class GameCommander implements CommandExecutor, TabCompleter {
 				"create-style",
 				"reset-game", 
 				"join-game",
+				"leave-game",
 				"start-game",
 				"list-games",
 				"list-styles",
@@ -151,6 +152,21 @@ public class GameCommander implements CommandExecutor, TabCompleter {
 				sender.sendMessage("You must be a player to join");
 			}
 			return true;
+		
+		case "leave-game":
+			if (sender instanceof Player) {
+				for (String name : Game.allGames()) {
+					game = Game.findGame(name);
+					PlayerRep rep = game.getPlayerRep((Player)sender);
+					if (rep != null) {
+						rep.kill(true);
+						return true;
+					}
+					
+				}
+			}
+			sender.sendMessage("You're not part of a game");
+			return true;
 			
 		case "start-game":
 			if (args.length != 1) {
@@ -203,7 +219,7 @@ public class GameCommander implements CommandExecutor, TabCompleter {
 				sender.sendMessage("Style created");
 			}
 			return true;
-		
+			
 		case "list-games":
 			List<String> games = Game.allGames();
 			if (games.size() == 0) {
