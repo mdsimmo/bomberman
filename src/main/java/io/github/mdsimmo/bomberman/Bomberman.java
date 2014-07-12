@@ -13,6 +13,7 @@ public class Bomberman extends JavaPlugin {
 	*/
 	
 	/* TODO BUGS
+	 * players only get hurt when mostly inside block instead of touching block
 	 * games build one block to long (but only default board????)
 	 */
 	

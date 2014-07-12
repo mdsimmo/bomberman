@@ -24,6 +24,7 @@ public class GameCommander implements CommandExecutor, TabCompleter {
 				"join-game",
 				"leave-game",
 				"start-game",
+				"stop-game",
 				"list-games",
 				"list-styles",
 				"convert-to-game"};
@@ -184,6 +185,21 @@ public class GameCommander implements CommandExecutor, TabCompleter {
 					sender.sendMessage("There must be at least one player");
 			}
 			return true;
+			
+		case "stop-game":
+			if (args.length != 1) {
+				return false;
+			}
+			game = Game.findGame(args[0]);
+			if (game == null)
+				sender.sendMessage("Game not found");
+			else if (!game.isPlaying)
+				sender.sendMessage("Game hasn't started");
+			else {
+				game.terminate();
+				sender.sendMessage("Game stopped");
+			}
+			return true;
 		
 		case "set-style":
 			if (args.length != 2)
@@ -273,6 +289,7 @@ public class GameCommander implements CommandExecutor, TabCompleter {
 				break;
 			} // else do next
 		case "start-game":
+		case "stop-game":
 		case "join-game":
 		case "reset-game":
 		case "destroy-game":
