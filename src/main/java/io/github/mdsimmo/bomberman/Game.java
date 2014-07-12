@@ -1,11 +1,14 @@
 package io.github.mdsimmo.bomberman;
 
+import io.github.mdsimmo.bomberman.Bomb.DeathBlock;
+
 import java.io.File;
 import java.io.FilenameFilter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
@@ -140,7 +143,9 @@ public class Game implements Listener {
 	public int bombs = Config.bombs;
 	public int power = Config.power;
 	public int lives = Config.lives;
-
+	public List<DeathBlock> deathBlocks = new ArrayList<>();
+	public Map<Block, Bomb> explosions = new HashMap<>();
+	
 	public Game(String name, Location loc) {
 		this.name = name;
 		this.loc = loc;
@@ -279,12 +284,10 @@ public class Game implements Listener {
 	private void addWinner(ArrayList<PlayerRep> winners, PlayerRep rep) {
 		for (int i = 0; i < winners.size(); i++) {
 			if (rep.deathTime > winners.get(i).deathTime) {
-				System.out.println(rep.player.getName() + "is better than" + winners.get(i).player.getName());
 				winners.add(i, rep);
 				return;
 			}
 		}
-		System.out.println(rep.player.getName() + "is the worst");
 		winners.add(rep);
 	}
 

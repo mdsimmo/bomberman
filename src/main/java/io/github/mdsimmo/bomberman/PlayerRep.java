@@ -1,5 +1,7 @@
 package io.github.mdsimmo.bomberman;
 
+import io.github.mdsimmo.bomberman.Bomb.DeathBlock;
+
 import java.util.Calendar;
 
 import org.bukkit.ChatColor;
@@ -111,7 +113,8 @@ public class PlayerRep implements Listener {
 	@EventHandler
 	public void playerMove(PlayerMoveEvent e) {
 		Player p = e.getPlayer();
-		if (p == this.player && !game.isPlaying && isPlaying) {
+		if (p == this.player && isPlaying && !game.isPlaying) {
+			// stop the player from moving
 			Location from = e.getFrom();
 			double xfrom = e.getFrom().getX();
 			double yfrom = e.getFrom().getY();
@@ -135,13 +138,15 @@ public class PlayerRep implements Listener {
 		return strength;
 	}
 
-	public void damage() {
+	public void damage(DeathBlock db) {
 		if (immunity <= 0) {
 			if (player.getHealth() > 1) {
 				player.damage(1);
+				player.sendMessage("Hurt by " + db.cause.player.getName());
 				new Immunity();
 			} else {
 				kill();
+				player.sendMessage("Killed by " + db.cause.player.getName());
 			}
 		}
 	}

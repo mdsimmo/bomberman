@@ -9,9 +9,8 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockBreakEvent;
-import org.bukkit.event.block.BlockIgniteEvent;
+import org.bukkit.event.block.BlockBurnEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
-import org.bukkit.event.entity.EntityDamageEvent.DamageCause;
 import org.bukkit.event.entity.EntityExplodeEvent;
 import org.bukkit.plugin.Plugin;
 
@@ -31,14 +30,14 @@ public class GameProtection implements Listener {
 	@EventHandler
 	public void onExplosion(EntityExplodeEvent e) {
 		// protect the blocks
-		if (!game.isPlaying)
-			return;
-		List<Block> blockListCopy = new ArrayList<Block>();
-        blockListCopy.addAll(e.blockList());
-        for (Block block : blockListCopy) {
-            if (game.containsLocation(block.getLocation())) 
-            	e.blockList().remove(block);
-        }	
+		if (game.isPlaying) {
+			List<Block> blockListCopy = new ArrayList<Block>();
+	        blockListCopy.addAll(e.blockList());
+	        for (Block block : blockListCopy) {
+	            if (game.containsLocation(block.getLocation())) 
+	            	e.blockList().remove(block);
+	        }	
+		}
 	}
 	
 	@EventHandler
@@ -52,8 +51,10 @@ public class GameProtection implements Listener {
 	}
 	
 	@EventHandler
-	public void onBlockCobust(BlockIgniteEvent e) {
-		e.setCancelled(true);
+	public void onBlockCobust(BlockBurnEvent e) {
+		if (game.isPlaying)
+			if (game.containsLocation(e.getBlock().getLocation()))
+				e.setCancelled(true);
 	}
 	
 	@EventHandler
@@ -64,8 +65,6 @@ public class GameProtection implements Listener {
 			if (rep != null && rep.isPlaying) {
 				e.getEntity().setFireTicks(0);
 				e.setCancelled(true);
-				if (e.getCause() == DamageCause.FIRE)
-					rep.damage();
 			}
 		}
 	}
