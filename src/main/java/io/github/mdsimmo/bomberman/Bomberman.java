@@ -9,7 +9,7 @@ public class Bomberman extends JavaPlugin {
 	/* TODO FEATURES
 	 * kill count
 	 * let players create styles that go underground
-	 * randomly remove dirt (bomb explosions should be fixed first)
+	 * randomly remove dirt
 	 * make chests (and other like things) spawn with contents
 	*/
 	

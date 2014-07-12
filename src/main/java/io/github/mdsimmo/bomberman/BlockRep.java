@@ -23,10 +23,15 @@ public class BlockRep {
 
 	@SuppressWarnings("deprecation")
 	public void setBlock(Block b) {
-		//if (material == Material.DIRT && Math.random() < 0.5) {
-		//	b.setType(Material.AIR);
-		//	b.setData((byte)0);
-		//} else {
+		/*if (material == Material.DIRT && Math.random() < 0.25) {
+			for (int i = -1; i <= 1; i++) {
+				Block relative = b.getRelative(0, i, 0);
+				if (relative.getType() == Material.DIRT) {
+					relative.setType(Material.AIR);
+					b.getRelative(0, i, 0).setData((byte)0);
+				}
+			}
+		} else {*/
 			b.setType(material);
 			b.setData(data);
 		//}
