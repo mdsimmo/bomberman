@@ -15,7 +15,6 @@ public class Bomberman extends JavaPlugin {
 	
 	/* TODO BUGS
 	 * games build one block to long (but only default board????)
-	 * potion effects are way too long (harder than it looks)
 	 */
 	
 	@Override

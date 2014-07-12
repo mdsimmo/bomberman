@@ -3,6 +3,7 @@ package io.github.mdsimmo.bomberman;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
@@ -10,6 +11,7 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockBurnEvent;
+import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityExplodeEvent;
 import org.bukkit.plugin.Plugin;
@@ -48,6 +50,14 @@ public class GameProtection implements Listener {
 				e.setCancelled(true);
 			}
 		}
+	}
+	
+	@EventHandler
+	public void onPlaceBlock(BlockPlaceEvent e) {
+		PlayerRep rep = game.getPlayerRep(e.getPlayer());
+		if (e.getBlock().getType() == Material.TNT)
+			if (rep != null && rep.isPlaying && !rep.game.isPlaying)
+				e.setCancelled(true);
 	}
 	
 	@EventHandler

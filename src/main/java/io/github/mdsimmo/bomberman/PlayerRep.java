@@ -5,20 +5,26 @@ import io.github.mdsimmo.bomberman.Bomb.DeathBlock;
 import java.util.Calendar;
 
 import org.bukkit.ChatColor;
+import org.bukkit.GameMode;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
 import org.bukkit.event.HandlerList;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.entity.EntityRegainHealthEvent;
 import org.bukkit.event.entity.EntityRegainHealthEvent.RegainReason;
+import org.bukkit.event.player.PlayerItemConsumeEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.bukkit.potion.Potion;
+import org.bukkit.potion.PotionEffect;
+import org.bukkit.potion.PotionType;
 import org.bukkit.util.Vector;
 
 /**
@@ -55,7 +61,7 @@ public class PlayerRep implements Listener {
 			// player.teleport() might seem better, but the players are teleported ~+-0.5 blocks out (and end up in the walls)
 			plugin.getServer().dispatchCommand(player, "tp " + (gameSpawn.getBlockX()+game.loc.getBlockX()) + " " + (double)(gameSpawn.getBlockY()+game.loc.getBlockY()) + " " + (gameSpawn.getBlockZ()+game.loc.getBlockZ()));
 		}
-
+		player.setGameMode(GameMode.SURVIVAL);
 		player.setHealth(game.lives);
 		player.setMaxHealth(game.lives);
 		player.setHealthScale(game.lives * 2);
@@ -205,21 +211,30 @@ public class PlayerRep implements Listener {
 	
 	
 	// an attempt at making potion effects shorter
-	/*@EventHandler
+	@EventHandler(priority = EventPriority.HIGHEST)
 	public void onPlayerDrinkPotion(PlayerItemConsumeEvent e) {
 		if (e.getPlayer() == player && isPlaying) {
 			if (e.getItem().getType() == Material.POTION) {
-				//PotionMeta meta = (PotionMeta)e.getItem().getItemMeta();
 				Potion potion = Potion.fromItemStack(e.getItem());
-				Collection<PotionEffect> effects = potion.getEffects();
-				plugin.getLogger().info("" + effects);
-				effects.clear();
-				//effects.add(new PotionEffect(potion.getType().getEffectType(), 60, 1));
-				//plugin.getLogger().info("" + effects);
+				plugin.getLogger().info("Potion type " + potion.getType());
+				if (potion.getType() == PotionType.INSTANT_HEAL
+						|| potion.getType() == PotionType.INSTANT_DAMAGE) {
+					// instant potions don't need the duration changed
+				} else {
+					e.setCancelled(true);
+					// hack to fix bug that creates a ghost bottle
+					plugin.getServer().getScheduler().scheduleSyncDelayedTask(plugin, new Runnable() {
+						@SuppressWarnings("deprecation")
+						@Override
+						public void run() {
+							player.updateInventory();
+						}
+					});
+					
+					player.addPotionEffect(new PotionEffect(potion.getType().getEffectType(), 200, 1), true);
+				}
 				
-				
-				
-				// remove the empty bottle
+				// remove the bottle
 				plugin.getServer().getScheduler().scheduleSyncDelayedTask(plugin, new Runnable() {
 					@Override
 					public void run() {
@@ -228,5 +243,5 @@ public class PlayerRep implements Listener {
 				});
 			}
 		}
-	}*/
+	}
 }
