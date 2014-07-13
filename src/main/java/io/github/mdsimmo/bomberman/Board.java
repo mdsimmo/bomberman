@@ -33,18 +33,27 @@ public class Board {
 			sw.writePart(v.getBlockX());
 			sw.writePart(v.getBlockY());
 			sw.writePart(v.getBlockZ());
+			
 		}
 		
 		sw.close();
 	}
 	
-	
-	
+	/**
+	 * adds the block to the style
+	 * @param block the block to add
+	 * @param place the position to add it at
+	 */
 	public void addBlock(BlockRep block, Vector place) {
+		addBlock(block, place, true);
+	}
+	// account = add block to normal block list in place of delayed blocks
+	private void addBlock(BlockRep block, Vector place, boolean account) {
 		if (block.material.isSolid() || block.material == Material.AIR)
 			blocks.add(block);
 		else {
-			blocks.add(new BlockRep());
+			if (account)
+				blocks.add(new BlockRep());
 			delayed.put(place, block);
 		}
 		if (block.material == Material.WOOL) {
@@ -74,12 +83,12 @@ public class Board {
 				int x = sr.readInt();
 				int y = sr.readInt();
 				int z = sr.readInt();
-				board.addBlock(block, new Vector(x, y, z));
+				board.addBlock(block, new Vector(x, y, z), false);
 			} catch (NullPointerException e) {
 				// caused when BlockRep tries to read past the end of the file
 				break;
 			} catch (IllegalArgumentException e) {
-				plugin.getLogger().info("Possible currupt save file \"" + board.name + ".board\" (or maybe it's just my bad programming)");
+				plugin.getLogger().info("Possible currupt save file \"" + board.name + ".board\" (or maybe it's just my bad programming :P). A reload may help");
 				break;
 			}
 		}

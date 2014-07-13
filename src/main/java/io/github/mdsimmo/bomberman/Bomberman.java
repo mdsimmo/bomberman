@@ -10,10 +10,10 @@ public class Bomberman extends JavaPlugin {
 	 * kill count (real scores needed first)
 	 * let players create styles that go underground
 	 * make chests (and other like things) spawn with contents
+	 * more styles
 	*/
 	
 	/* TODO BUGS
-	 * games build one block to long (but only default board????)
 	 */
 	
 	@Override

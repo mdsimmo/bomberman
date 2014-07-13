@@ -204,9 +204,9 @@ public class BoardGenerator {
 	 * Creates a board style 
 	 */
 	public static Board createStyle(String style, Location min, Location max) {
-		int xSize = max.getBlockX() - min.getBlockX();
-		int ySize = max.getBlockY() - min.getBlockY();
-		int zSize = max.getBlockZ() - min.getBlockZ();
+		int xSize = max.getBlockX() - min.getBlockX()+1;
+		int ySize = max.getBlockY() - min.getBlockY()+1;
+		int zSize = max.getBlockZ() - min.getBlockZ()+1;
 		return createStyle(style, min, xSize, ySize, zSize);
 	}
 
