@@ -7,6 +7,7 @@ import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.Sound;
 import org.bukkit.block.Block;
+import org.bukkit.entity.Player;
 import org.bukkit.event.Listener;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.Plugin;
@@ -143,11 +144,9 @@ public class Bomb implements Runnable {
 			@Override
 			public void run() {
 				for (PlayerRep rep : new ArrayList<PlayerRep>(game.players)) {
-					if (rep.player.getEyeLocation().getBlock().equals(block)
-							|| rep.player.getLocation().getBlock().equals(block)) {
+					if (touching(rep.player)) {
 						rep.damage(this);
 					}
-						 
 				}
 				if (--duration <= 0) {
 					if (block.getType() == Material.FIRE)
@@ -157,6 +156,23 @@ public class Bomb implements Runnable {
 					plugin.getServer().getScheduler().cancelTask(dbTaskId);
 					game.deathBlocks.remove(this);
 				}
+			}
+			
+			public boolean touching(Player player) {
+				double margin = 0.295; // magical value that seems to be how far fire burns 
+				Location l = player.getLocation();
+				Location min = block.getLocation().add(0, -1, 0);
+				Location max = block.getLocation().add(1, 2, 1);
+				if (l.getX() >= min.getX()-margin
+						&& l.getX() <= max.getX()+margin
+						&& l.getY() >= min.getY()-margin
+						&& l.getY() <= max.getY()+margin
+						&& l.getZ() >= min.getZ()-margin
+						&& l.getZ() <= max.getZ()+margin)
+					return true;
+				else 
+					return false;
+				
 			}
 		}
 		

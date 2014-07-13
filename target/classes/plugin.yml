@@ -27,6 +27,10 @@ commands:
     description: Starts the game
     usage: \start-game <game>
     permission: bomberman.op
+  stop-game:
+    description: Stops the game
+    usage: \stop-game <game>
+    permission: bomberman.op
   set-style:
     description: Sets the game's board style
     usage: \set-style <game> <style>
