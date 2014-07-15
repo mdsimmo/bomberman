@@ -15,6 +15,7 @@ import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.block.Block;
+import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.event.HandlerList;
 import org.bukkit.event.Listener;
@@ -46,7 +47,7 @@ public class Game implements Listener {
 	}
 
 	/**
-	 * Regsters the game
+	 * Registers the game
 	 * 
 	 * @param game
 	 *            The game to register
@@ -83,42 +84,47 @@ public class Game implements Listener {
 	}
 
 	public static void loadGame(String name) {
-		try {
-			SaveReader sr = new SaveReader(name + ".game");
-			int x = sr.readInt();
-			int y = sr.readInt();
-			int z = sr.readInt();
-			World w = plugin.getServer().getWorld(sr.readPart());
-			Game game = new Game(name, new Location(w, x, y, z));
-			game.board = BoardGenerator.loadBoard(sr.readPart());
-			game.oldBoard = BoardGenerator.loadBoard(sr.readPart());
-			register(game);
-			sr.close();
-		} catch (IOException e) {
-			e.printStackTrace();
+		File f = new File(plugin.getDataFolder(), name+".game");
+		YamlConfiguration save = YamlConfiguration.loadConfiguration(f);
+		int x = save.getInt("location.x");
+		int y = save.getInt("location.y");
+		int z = save.getInt("location.z");
+		World w = plugin.getServer().getWorld(save.getString("location.world"));
+		Game game = new Game(name, new Location(w, x, y, z));
+		game.board = BoardGenerator.loadBoard(save.getString("style.current"));
+		game.oldBoard = BoardGenerator.loadBoard(save.getString("style.old"));
+		if (save.getString(Config.PRIZE_PATH).equals("pot")) {
+			game.prize = null;
+			game.pot = true;
+		} else {
+			game.prize = save.getItemStack(Config.PRIZE_PATH);
+			game.pot = false;
 		}
+		game.fare = save.getItemStack(Config.FARE_PATH);
+		register(game);
 	}
 
 	public void saveGame() {
 		try {
-			SaveWriter sw = new SaveWriter(name + ".game");
-			sw.writePart(loc.getBlockX());
-			sw.writePart(loc.getBlockY());
-			sw.writePart(loc.getBlockZ());
-			sw.writePart(loc.getWorld().getName());
-			sw.writePart(board.name);
-			sw.writePart(oldBoard.name);
-			sw.close();
+			YamlConfiguration save = new YamlConfiguration();
+			save.set(Config.FARE_PATH, fare);
+			if (pot)
+				save.set(Config.PRIZE_PATH, "pot");
+			else
+				save.set(Config.PRIZE_PATH, prize);
+			save.set("location.world", loc.getWorld().getName());
+			save.set("location.x", loc.getBlockX());
+			save.set("location.y", loc.getBlockY());
+			save.set("location.z", loc.getBlockZ());
+			save.set("style.current", board.name);
+			save.set("style.old", oldBoard.name);
+			save.save(new File(plugin.getDataFolder(), name+".game"));
 		} catch (IOException e) {
 			e.printStackTrace();
-		} catch (NoClassDefFoundError e) {
-			plugin.getLogger().info("error while saving " + name);
 		}
 		
 		if (BoardGenerator.loadBoard(oldBoard.name) == null)
 			BoardGenerator.saveBoard(oldBoard);
-		for (PlayerRep rep : new ArrayList<PlayerRep>(players))
-			rep.kill(false);
 	}
 
 	protected String name;
@@ -126,7 +132,6 @@ public class Game implements Listener {
 	protected Board oldBoard;
 	protected boolean isPlaying;
 	private GameProtection protector;
-	public ItemStack stake = Config.stake;
 	private ItemStack[] drops = { 
 			new ItemStack(Material.TNT),
 			new ItemStack(Material.TNT),
@@ -139,6 +144,9 @@ public class Game implements Listener {
 	public int bombs = Config.bombs;
 	public int power = Config.power;
 	public int lives = Config.lives;
+	public ItemStack fare = Config.fare;
+	public ItemStack prize = Config.prize;
+	public boolean pot = Config.pot;
 	public List<DeathBlock> deathBlocks = new ArrayList<>();
 	public Map<Block, Bomb> explosions = new HashMap<>();
 	
@@ -264,16 +272,23 @@ public class Game implements Listener {
 				winners.add(0, rep);
 			}
 			
+			// get the total winnings
+			if (pot == true)
+				prize = new ItemStack(fare.getType(), fare.getAmount()*winners.size());
+			
+			// give the winner the prize
 			Player topPlayer = winners.get(0).player;
 			topPlayer.getInventory()
-					.addItem(stake);
+					.addItem(prize);
 			
+			// display the scores
 			for (PlayerRep rep : observers) {
 				rep.player.sendMessage(ChatColor.YELLOW + "The game is over!");
 				rep.player.sendMessage(scoreDisplay(winners));
 			}
-			BoardGenerator.switchBoard(this.board, this.board, loc);
 			
+			// reset the game
+			BoardGenerator.switchBoard(this.board, this.board, loc);
 			terminate();
 			
 			return true;

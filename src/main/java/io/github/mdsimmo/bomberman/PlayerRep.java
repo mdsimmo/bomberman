@@ -57,6 +57,15 @@ public class PlayerRep implements Listener {
 			player.sendMessage("game full");
 			return;
 		} else {
+			if (game.fare != null) {
+				if (player.getInventory().contains(game.fare.getType(), game.fare.getAmount())
+						|| player.getGameMode() == GameMode.CREATIVE)
+					player.getInventory().removeItem(game.fare);
+				else {
+					player.sendMessage("You need at least " + game.fare.getAmount() + " " + game.fare.getType().toString().toLowerCase());
+					return;
+				}
+			}
 			for (PlayerRep rep : game.observers)
 				rep.player.sendMessage(player.getName() + " joined");
 			// player.teleport() might seem better, but the players are teleported ~+-0.5 blocks out (and end up in the walls)

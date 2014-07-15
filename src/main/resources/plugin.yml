@@ -50,8 +50,22 @@ commands:
   list-styles:
     description: Lists all the style currently available
     usage: \list-styles
+    permission: bomberman.op
+  set-fare:
+    description: Forces all participants to pay the given amount when joining
+    usage: 
+      \set-fare <game> <material> <amount>
+      \set-fare <game> none
+    permission: bomberman.op
+  set-prize:
+    description: Sets the amount that the winner will receive. 
+    usage: 
+      \set-prize <game> <pot> - winner gets what the players paid
+      \set-prize <none> - winner only gets the glory
+      \set-prize <material> <amount> - winner gets a fixed amount
     permission: bomberman.op 
 
+  
 permissions:
   bomberman.*:
     description: Gives access to all Bomberman commands

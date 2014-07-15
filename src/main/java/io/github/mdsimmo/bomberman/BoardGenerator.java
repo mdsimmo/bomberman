@@ -132,9 +132,12 @@ public class BoardGenerator {
 		Material.GRAVEL,
 		Material.SAND,
 		Material.LONG_GRASS,
+		Material.LEAVES,
+		Material.LEAVES_2,
 		Material.SANDSTONE,
 		Material.WATER,
 		Material.LAVA,
+		Material.NETHERRACK,
 	};
 	private static List<Material> banned = Arrays.asList(bannedArray);
 	private static ArrayList<Block> checked = new ArrayList<>();

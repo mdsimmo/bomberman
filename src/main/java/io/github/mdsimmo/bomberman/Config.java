@@ -10,14 +10,16 @@ public class Config {
 	private static Plugin plugin = Bomberman.instance;
 	private FileConfiguration c = plugin.getConfig();
 	
-	private final String ITEM_PATH = "stake.item";
-	private final String STAKE_PATH = "stake.amount";
-	private final String LIVES_PATH = "lives";
-	private final String BOMBS_PATH = "bombs";
-	private final String POWER_PATH = "power";
-	private final String DEFAULT_STYLE = "defaultstyle";
+	public static final String FARE_PATH = "stake.fare";
+	public static String PRIZE_PATH = "stake.prize";
+	public static String LIVES_PATH = "lives";
+	public static String BOMBS_PATH = "bombs";
+	public static String POWER_PATH = "power";
+	public static String DEFAULT_STYLE = "defaultstyle";
 	
-	protected static ItemStack stake;
+	protected static ItemStack fare;
+	protected static ItemStack prize;
+	protected static boolean pot;
 	protected static int bombs;
 	protected static int lives;
 	protected static int power;
@@ -25,23 +27,29 @@ public class Config {
 	
 	public Config() {
 		setupConfig();
-		Material item = Material.getMaterial(c.getString(ITEM_PATH));
-		int amount = c.getInt(STAKE_PATH);
-		stake = new ItemStack(item, amount);
 		bombs = c.getInt(BOMBS_PATH);
 		power = c.getInt(POWER_PATH);
 		lives = c.getInt(LIVES_PATH);
-		defaultBoard = c.getString(DEFAULT_STYLE);		
+		defaultBoard = c.getString(DEFAULT_STYLE);
+		
+		fare = c.getItemStack(FARE_PATH);
+		if (c.getString(PRIZE_PATH).equals("pot")) {
+			prize = null;
+			pot = true;
+		} else {
+			prize = c.getItemStack(PRIZE_PATH);
+			pot = false;
+		}
 		
 	}
 	
 	private void setupConfig() {
-		c.addDefault(ITEM_PATH, Material.DIAMOND.toString());
-		c.addDefault(STAKE_PATH, 3);
 		c.addDefault(LIVES_PATH, 3);
 		c.addDefault(BOMBS_PATH, 3);
 		c.addDefault(POWER_PATH, 3);
 		c.addDefault(DEFAULT_STYLE, "default");
+		c.addDefault(FARE_PATH, new ItemStack(Material.DIAMOND, 1));
+		c.addDefault(PRIZE_PATH, "pot");
 		c.options().copyDefaults(true);
 		plugin.saveConfig();
 	}

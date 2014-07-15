@@ -4,11 +4,13 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.bukkit.Location;
+import org.bukkit.Material;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabCompleter;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.java.JavaPlugin;
 
 public class GameCommander implements CommandExecutor, TabCompleter {
@@ -27,8 +29,10 @@ public class GameCommander implements CommandExecutor, TabCompleter {
 				"stop-game",
 				"list-games",
 				"list-styles",
-				"convert-to-game"};
-		for (String cmd : commands) {
+				"convert-to-game",
+				"set-fare",
+				"set-prize",};
+			for (String cmd : commands) {
 			plugin.getCommand(cmd).setExecutor(this);
 			plugin.getCommand(cmd).setTabCompleter(this);
 		}
@@ -259,6 +263,68 @@ public class GameCommander implements CommandExecutor, TabCompleter {
 				}
 			}
 			return true;
+		
+		case "set-fare":
+			if (!(args.length == 2 || args.length == 3))
+				return false;
+			game = Game.findGame(args[0]);
+			if (game == null) {
+				sender.sendMessage("Game not found");
+				return true;
+			}
+			if (args[1] == "none") {
+				game.fare = null;
+				return true;
+			} else if (args[1] == "pot") {
+				game.prize = null;
+				game.pot = true;
+				return true;
+			} else {
+				try {
+					Material m = Material.getMaterial(args[1]);
+					if (m == null)
+						sender.sendMessage("Unknown material");
+					int amount = Integer.parseInt(args[2]);
+					game.fare = new ItemStack(m, amount);
+					sender.sendMessage("Fare set");
+					return true;
+				} catch (Exception e) {
+					return false;
+				}
+			}
+			
+		case "set-prize":
+			if (!(args.length == 2 || args.length == 3))
+				return false;
+			game = Game.findGame(args[0]);
+			if (game == null) {
+				sender.sendMessage("Game not found");
+				return true;
+			}
+			if (args[1] == "none") {
+				game.prize = null;
+				game.pot = false;
+				return true;
+			} else if (args[1] == "pot") {
+				game.prize = null;
+				game.pot = true;
+				sender.sendMessage("Prize set");
+				return true;
+			} else {
+				try {
+					Material m = Material.getMaterial(args[1]);
+					if (m == null)
+						sender.sendMessage("Unknown material");
+					int amount = Integer.parseInt(args[2]);
+					game.prize = new ItemStack(m, amount);
+					game.pot = false;
+					sender.sendMessage("Prize set");
+					return true;
+				} catch (Exception e) {
+					return false;
+				}
+			}
+			
 		}
 			
 		return false;
@@ -271,36 +337,57 @@ public class GameCommander implements CommandExecutor, TabCompleter {
 		List<String> options = new ArrayList<>();
 		switch (cmd) {
 		case "create-style":
-			if (args.length == 1) {
-				String start = args[0];
-				for (String name : BoardGenerator.allBoards()) {
-					if (name.startsWith(start))
-						options.add(name);
-				}
-			}
+			if (args.length == 1)
+				addStyles(options, args[0]);
 			break;
+			
 		case "create-game":
 		case "set-style":
-			if (args.length == 2) {
-				for (String name : BoardGenerator.allBoards()) {
-					if (name.startsWith(args[1]))
-						options.add(name);
-				}
-				break;
-			} // else do next
+			if (args.length == 1)
+				addGames(options, args[0]);
+			else if (args.length == 2)
+				addStyles(options, args[1]);
+			break;
+			
 		case "start-game":
 		case "stop-game":
 		case "join-game":
 		case "reset-game":
 		case "destroy-game":
-			if (args.length == 1) {
-				for (String name : Game.allGames()) {
-					if (name.startsWith(args[0])) 
-						options.add(name);
+			if (args.length == 1)
+				addGames(options, args[0]);
+			break;
+		
+		case "set-fare":
+		case "set-prize":
+			if (args.length == 1)
+				addGames(options, args[0]);
+			else if (args.length == 2) {
+				for (Material m : Material.values()) {
+					if (m.toString().startsWith(args[1]))
+						options.add(m.toString());
 				}
+				if ("none".startsWith(args[1]))
+					options.add("none");
+				if ("pot".startsWith(args[1]))
+					options.add("pot");
 			}
 			break;
 		}
 		return options;
+	}
+	
+	private void addGames(List<String> options, String start) {
+		for (String name : Game.allGames()) {
+			if (name.startsWith(start))
+				options.add(name);
+		}
+	}
+	
+	private void addStyles(List<String> options, String start) {
+		for (String name : BoardGenerator.allBoards()) {
+			if (name.startsWith(start))
+				options.add(name);
+		}
 	}
 }
