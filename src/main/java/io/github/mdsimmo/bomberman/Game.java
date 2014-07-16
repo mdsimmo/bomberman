@@ -35,7 +35,7 @@ public class Game implements Listener {
 	 * finds the game associated with the given name
 	 */
 	public static Game findGame(String name) {
-		return gameRegestry.get(name);
+		return gameRegestry.get(name.toLowerCase());
 	}
 
 	public static List<String> allGames() {
@@ -53,11 +53,11 @@ public class Game implements Listener {
 	 *            The game to register
 	 */
 	public static void register(Game game) {
-		gameRegestry.put(game.name, game);
+		gameRegestry.put(game.name.toLowerCase(), game);
 	}
 
 	public void deregister() {
-		gameRegestry.remove(name);
+		gameRegestry.remove(name.toLowerCase());
 		EntityDamageEvent.getHandlerList();
 		terminate();
 		for (PlayerRep rep : new ArrayList<PlayerRep>(observers)) {
@@ -84,8 +84,9 @@ public class Game implements Listener {
 	}
 
 	public static void loadGame(String name) {
-		File f = new File(plugin.getDataFolder(), name+".game");
+		File f = new File(plugin.getDataFolder(), name.toLowerCase()+".game");
 		YamlConfiguration save = YamlConfiguration.loadConfiguration(f);
+		name = save.getString("name");
 		int x = save.getInt("location.x");
 		int y = save.getInt("location.y");
 		int z = save.getInt("location.z");
@@ -93,7 +94,11 @@ public class Game implements Listener {
 		Game game = new Game(name, new Location(w, x, y, z));
 		game.board = BoardGenerator.loadBoard(save.getString("style.current"));
 		game.oldBoard = BoardGenerator.loadBoard(save.getString("style.old"));
-		if (save.getString(Config.PRIZE_PATH).equals("pot")) {
+		String prize = save.getString(Config.PRIZE_PATH);
+		if (prize == null) {
+			game.prize = null;
+			game.pot = false;
+		} else if (prize.equals("pot")) {
 			game.prize = null;
 			game.pot = true;
 		} else {
@@ -112,13 +117,14 @@ public class Game implements Listener {
 				save.set(Config.PRIZE_PATH, "pot");
 			else
 				save.set(Config.PRIZE_PATH, prize);
+			save.set("name", name);
 			save.set("location.world", loc.getWorld().getName());
 			save.set("location.x", loc.getBlockX());
 			save.set("location.y", loc.getBlockY());
 			save.set("location.z", loc.getBlockZ());
 			save.set("style.current", board.name);
 			save.set("style.old", oldBoard.name);
-			save.save(new File(plugin.getDataFolder(), name+".game"));
+			save.save(new File(plugin.getDataFolder(), name.toLowerCase()+".game"));
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -274,12 +280,17 @@ public class Game implements Listener {
 			
 			// get the total winnings
 			if (pot == true)
-				prize = new ItemStack(fare.getType(), fare.getAmount()*winners.size());
+				if (fare == null)
+					prize = null;
+				else
+					prize = new ItemStack(fare.getType(), fare.getAmount()*winners.size());
 			
 			// give the winner the prize
-			Player topPlayer = winners.get(0).player;
-			topPlayer.getInventory()
-					.addItem(prize);
+			if (prize != null) {
+				Player topPlayer = winners.get(0).player;
+				topPlayer.getInventory()
+						.addItem(prize);
+			}
 			
 			// display the scores
 			for (PlayerRep rep : observers) {

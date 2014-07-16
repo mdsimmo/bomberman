@@ -48,8 +48,8 @@ public class Config {
 		c.addDefault(BOMBS_PATH, 3);
 		c.addDefault(POWER_PATH, 3);
 		c.addDefault(DEFAULT_STYLE, "default");
-		c.addDefault(FARE_PATH, new ItemStack(Material.DIAMOND, 1));
-		c.addDefault(PRIZE_PATH, "pot");
+		c.addDefault(FARE_PATH, null);
+		c.addDefault(PRIZE_PATH, new ItemStack(Material.DIAMOND, 3));
 		c.options().copyDefaults(true);
 		plugin.saveConfig();
 	}

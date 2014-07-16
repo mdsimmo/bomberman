@@ -28,7 +28,8 @@ public class BoardGenerator {
 	public static Board loadDefault() {
 		if (loadBoard(Config.defaultBoard) == null) {
 			try {
-				plugin.getLogger().info("Couldn't find \"" + Config.defaultBoard + ".board\". Using \"default.board\"");
+				if (!Config.defaultBoard.equals("default"))
+					plugin.getLogger().info("Couldn't find \"" + Config.defaultBoard + ".board\". Using \"default.board\"");
 				InputStream inputStream = plugin.getResource("default.board");
 				File f = new File(plugin.getDataFolder() + "/default.board");
 	 			// write the inputStream to a FileOutputStream
@@ -42,11 +43,12 @@ public class BoardGenerator {
 				fos.flush();
 				fos.close();
 				inputStream.close();
+				return loadBoard("default");
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
 		}
-		return loadBoard("default");
+		return loadBoard(Config.defaultBoard);
 	}
 	
 	/**

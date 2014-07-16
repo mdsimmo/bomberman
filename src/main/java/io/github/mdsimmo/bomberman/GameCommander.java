@@ -30,8 +30,8 @@ public class GameCommander implements CommandExecutor, TabCompleter {
 				"list-games",
 				"list-styles",
 				"convert-to-game",
-				"set-fare",
-				"set-prize",};
+				"fare",
+				"prize",};
 			for (String cmd : commands) {
 			plugin.getCommand(cmd).setExecutor(this);
 			plugin.getCommand(cmd).setTabCompleter(this);
@@ -264,64 +264,114 @@ public class GameCommander implements CommandExecutor, TabCompleter {
 			}
 			return true;
 		
-		case "set-fare":
-			if (!(args.length == 2 || args.length == 3))
+		case "fare":
+			if (args.length < 1)
 				return false;
-			game = Game.findGame(args[0]);
-			if (game == null) {
-				sender.sendMessage("Game not found");
-				return true;
-			}
-			if (args[1] == "none") {
-				game.fare = null;
-				return true;
-			} else if (args[1] == "pot") {
-				game.prize = null;
-				game.pot = true;
-				return true;
-			} else {
-				try {
-					Material m = Material.getMaterial(args[1]);
-					if (m == null)
-						sender.sendMessage("Unknown material");
-					int amount = Integer.parseInt(args[2]);
-					game.fare = new ItemStack(m, amount);
-					sender.sendMessage("Fare set");
+			if (!args[0].equalsIgnoreCase("set")) {
+				// just wants information about the fare
+				game = Game.findGame(args[0]);
+				if (game == null) {
+					sender.sendMessage("Game not found");
 					return true;
-				} catch (Exception e) {
-					return false;
+				} else {
+					if (game.fare != null)
+						sender.sendMessage("Fare: " + game.fare.getAmount() + " " + game.fare.getType());
+					else
+						sender.sendMessage("No fare");
+					return true;
 				}
-			}
-			
-		case "set-prize":
-			if (!(args.length == 2 || args.length == 3))
-				return false;
-			game = Game.findGame(args[0]);
-			if (game == null) {
-				sender.sendMessage("Game not found");
-				return true;
-			}
-			if (args[1] == "none") {
-				game.prize = null;
-				game.pot = false;
-				return true;
-			} else if (args[1] == "pot") {
-				game.prize = null;
-				game.pot = true;
-				sender.sendMessage("Prize set");
-				return true;
 			} else {
-				try {
-					Material m = Material.getMaterial(args[1]);
-					if (m == null)
-						sender.sendMessage("Unknown material");
-					int amount = Integer.parseInt(args[2]);
-					game.prize = new ItemStack(m, amount);
-					game.pot = false;
+				// set the fare amount
+				if (!sender.hasPermission("bomberman.op")) {
+					sender.sendMessage("You may only view what the current entry fee is");
+					return true;
+				}
+				if (!(args.length == 3 || args.length == 4))
+					return false;
+				game = Game.findGame(args[1]);
+				if (game == null) {
+					sender.sendMessage("Game not found");
+					return true;
+				}
+				if (args[2].equals("none")) {
+					game.fare = null;
+					sender.sendMessage("fare removed");
+					return true;
+				} else if (args[2].equals("pot")) {
+					game.prize = null;
+					game.pot = true;
 					sender.sendMessage("Prize set");
 					return true;
-				} catch (Exception e) {
+				} else {
+					try {
+						Material m = Material.getMaterial(args[2]);
+						if (m == null)
+							sender.sendMessage("Unknown material");
+						int amount = Integer.parseInt(args[3]);
+						game.fare = new ItemStack(m, amount);
+						sender.sendMessage("Fare set");
+						return true;
+					} catch (Exception e) {
+						return false;
+					}
+				}
+			}
+				
+		case "prize":
+			if (args.length < 1)
+				return false;
+			if (!args[0].equalsIgnoreCase("set")) {
+				// just wants information about the fare
+				game = Game.findGame(args[0]);
+				if (game == null) {
+					sender.sendMessage("Game not found");
+					return true;
+				} else {
+					if (game.prize != null)
+						sender.sendMessage("Prize: " + game.prize.getAmount() + " " + game.prize.getType());
+					else
+						if (game.pot == true)
+							sender.sendMessage("Game has a pot");
+						else
+							sender.sendMessage("No prize");
+					return true;
+				}
+			} else {
+				// set the fare amount
+				if (!sender.hasPermission("bomberman.op")) {
+					sender.sendMessage("You may only view what the prize is");
+					return true;
+				}
+				if (!(args.length == 3 || args.length == 4))
 					return false;
+				game = Game.findGame(args[1]);
+				if (game == null) {
+					sender.sendMessage("Game not found");
+					return true;
+				}
+				if (args[2].equals("none")) {
+					game.prize = null;
+					game.pot = false;
+					sender.sendMessage("Prize removed");
+					return true;
+				} else if (args[2].equals("pot")) {
+					game.prize = null;
+					game.pot = true;
+					sender.sendMessage("Prize set");
+					return true;
+				} else {
+					try {
+						Material m = Material.getMaterial(args[2]);
+						if (m == null)
+							sender.sendMessage("Unknown material");
+						int amount = Integer.parseInt(args[3]);
+						game.prize = new ItemStack(m, amount);
+						game.pot = false;
+						sender.sendMessage("Prize set");
+						return true;
+					} catch (Exception e) {
+						return false;
+					}
 				}
 			}
 			
@@ -358,19 +408,30 @@ public class GameCommander implements CommandExecutor, TabCompleter {
 				addGames(options, args[0]);
 			break;
 		
-		case "set-fare":
-		case "set-prize":
-			if (args.length == 1)
+		case "fare":
+		case "prize":
+			if (args.length == 1) {
+				if (sender.hasPermission("bomberman.op"))
+					if ("set".startsWith(args[0].toLowerCase()))
+					options.add("set");
 				addGames(options, args[0]);
-			else if (args.length == 2) {
-				for (Material m : Material.values()) {
-					if (m.toString().startsWith(args[1]))
-						options.add(m.toString());
+			} else if (args.length > 1 ) {
+				if (args[0].equalsIgnoreCase("set")) {
+					if (sender.hasPermission("bomberman.op")) {
+						if (args.length == 2)
+							addGames(options, args[1]);
+						else if (args.length == 3) {
+							if ("none".startsWith(args[2].toLowerCase()))
+								options.add("none");
+							if ("pot".startsWith(args[2].toLowerCase()))
+								options.add("pot");
+							for (Material m : Material.values()) {
+								if (m.toString().toLowerCase().startsWith(args[2].toLowerCase()))
+									options.add(m.toString());
+							}
+						}
+					}
 				}
-				if ("none".startsWith(args[1]))
-					options.add("none");
-				if ("pot".startsWith(args[1]))
-					options.add("pot");
 			}
 			break;
 		}
@@ -379,14 +440,14 @@ public class GameCommander implements CommandExecutor, TabCompleter {
 	
 	private void addGames(List<String> options, String start) {
 		for (String name : Game.allGames()) {
-			if (name.startsWith(start))
+			if (name.toLowerCase().startsWith(start.toLowerCase()))
 				options.add(name);
 		}
 	}
 	
 	private void addStyles(List<String> options, String start) {
 		for (String name : BoardGenerator.allBoards()) {
-			if (name.startsWith(start))
+			if (name.toLowerCase().startsWith(start.toLowerCase()))
 				options.add(name);
 		}
 	}
