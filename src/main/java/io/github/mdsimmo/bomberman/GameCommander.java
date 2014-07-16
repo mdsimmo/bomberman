@@ -266,9 +266,10 @@ public class GameCommander implements CommandExecutor, TabCompleter {
 			if (styles.size() == 0) {
 				sender.sendMessage("No styles");
 			} else {
-				sender.sendMessage("Current games:");
+				sender.sendMessage("Current styles:");
 				for (String name : styles) {
-					sender.sendMessage("* " + name);
+					if (!name.endsWith(".old"))
+						sender.sendMessage(" * " + name);
 				}
 			}
 			return true;
