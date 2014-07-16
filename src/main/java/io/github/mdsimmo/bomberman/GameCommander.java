@@ -31,7 +31,8 @@ public class GameCommander implements CommandExecutor, TabCompleter {
 				"list-styles",
 				"convert-to-game",
 				"fare",
-				"prize",};
+				"prize",
+				"info"};
 			for (String cmd : commands) {
 			plugin.getCommand(cmd).setExecutor(this);
 			plugin.getCommand(cmd).setTabCompleter(this);
@@ -247,7 +248,15 @@ public class GameCommander implements CommandExecutor, TabCompleter {
 			} else {
 				sender.sendMessage("Current games:");
 				for (String name : games) {
-					sender.sendMessage("* " + name);
+					game = Game.findGame(name);
+					String status = "*" + game.name;
+					status += " : " + game.players.size() + "/" + game.board.spawnPoints.size() + " : ";
+					if (game.isPlaying)
+						status += "playing";
+					else
+						status += "waiting  ";
+							
+					sender.sendMessage(status);
 				}
 			}
 			return true;
@@ -375,6 +384,39 @@ public class GameCommander implements CommandExecutor, TabCompleter {
 				}
 			}
 			
+		case "info":
+			if (args.length != 1)
+				return false;
+			game = Game.findGame(args[0]);
+			if (game == null) {
+				sender.sendMessage("Game not found");
+				return true;
+			}
+			String message = "About " + game.name + ":\n";
+			message += " * Status: ";
+			if (game.isPlaying)
+				message += "In progress\n";
+			else
+				message += "Waiting\n";
+			message += " * Players: " + game.players.size() + "\n";
+			message += " * Max players: " + game.board.spawnPoints.size() + "\n";
+			message += " * Entry fare: ";
+			if (game.fare == null)
+				message += "no fee \n";
+			else
+				message += game.fare.getType() + " x" + game.fare.getAmount() + "\n";
+			message += " * Winner's prize: ";
+			if (game.pot == true && game.fare != null)
+				message += "Pot currently at " + game.fare.getAmount()*game.players.size() + " " + game.fare.getType() + "\n";
+			else {
+				if (game.prize == null)
+					message += "No prize \n";
+				else
+					message += game.prize.getAmount() + " " + game.prize.getType() + "\n";
+			}
+			message += " * Style: " + game.board.name + "\n";
+			sender.sendMessage(message);
+			return true;
 		}
 			
 		return false;
@@ -399,6 +441,7 @@ public class GameCommander implements CommandExecutor, TabCompleter {
 				addStyles(options, args[1]);
 			break;
 			
+		case "info":
 		case "start-game":
 		case "stop-game":
 		case "join-game":

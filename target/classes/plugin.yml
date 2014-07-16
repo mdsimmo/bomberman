@@ -66,7 +66,10 @@ commands:
       \prize set <game> <material> <amount> - winner gets a fixed amount
       \prize set <game> <none> - winner only gets the glory
     permission: bomberman.player
-
+  info:
+    description: Gets all the information about a game
+    usage: \info <game>
+    permission: bomberman.player
   
 permissions:
   bomberman.*:
