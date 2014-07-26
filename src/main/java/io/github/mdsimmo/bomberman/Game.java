@@ -337,7 +337,7 @@ public class Game implements Listener {
 			default:
 				place = i+"th";
 			}			
-			display += " " + place + ": " + rep.player.getName() + "\n";
+			display += " " + place + ": " + rep.player.getName() + " (" + rep.kills + " kills)\n";
 		}
 		return display;
 	}
