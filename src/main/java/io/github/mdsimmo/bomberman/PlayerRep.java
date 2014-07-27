@@ -173,8 +173,8 @@ public class PlayerRep implements Listener {
 				else {
 					player.sendMessage("Hit by " + db.cause.player.getName());
 					cause.sendMessage("You hit " + player.getName());
-					db.cause.kills++;
 				}
+				db.cause.kills++;
 				new Immunity();
 			} else {
 				Player cause = db.cause.player;

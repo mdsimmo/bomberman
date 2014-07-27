@@ -150,6 +150,7 @@ public class Game implements Listener {
 	public int bombs = Config.bombs;
 	public int power = Config.power;
 	public int lives = Config.lives;
+	public int minPlayers = Config.minPlayers;
 	public ItemStack fare = Config.fare;
 	public ItemStack prize = Config.prize;
 	public boolean pot = Config.pot;
@@ -199,7 +200,7 @@ public class Game implements Listener {
 	 * @return true if the game was started succesfully
 	 */
 	public boolean startGame() {
-		if (players.size() > 0) {
+		if (players.size() >= minPlayers) {
 			new GameStarter();
 			return true;
 		} else {

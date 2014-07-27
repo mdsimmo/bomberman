@@ -3,6 +3,7 @@ package io.github.mdsimmo.bomberman;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.commons.lang.StringUtils;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.command.Command;
@@ -20,7 +21,11 @@ public class GameCommander implements CommandExecutor, TabCompleter {
 		String[] commands = {
 				"create-game", 
 				"destroy-game",
-				"set-style",
+				"style",
+				"lives",
+				"power", 
+				"bombs",
+				"min-players",
 				"create-style",
 				"reset-game", 
 				"join-game",
@@ -128,7 +133,6 @@ public class GameCommander implements CommandExecutor, TabCompleter {
 			sender.sendMessage("Game reset");
 			return true;
 			
-			
 		case "join-game":
 			if (args.length != 1)
 				return false;
@@ -187,7 +191,7 @@ public class GameCommander implements CommandExecutor, TabCompleter {
 				if (game.startGame())
 					sender.sendMessage("Game starting");
 				else
-					sender.sendMessage("There must be at least one player");
+					sender.sendMessage("There are not enough players");
 			}
 			return true;
 			
@@ -206,30 +210,77 @@ public class GameCommander implements CommandExecutor, TabCompleter {
 			}
 			return true;
 		
-		case "set-style":
-			if (args.length != 2)
+		case "style":
+			if (!(args.length == 1 || args.length == 2))
 				return false;
 			game = Game.findGame(args[0]);
 			if (game == null) {
 				sender.sendMessage("Game not found");
 				return true;
 			}
-			if (game.isPlaying) {
-				sender.sendMessage("Game in progress");
+			if (args.length == 1) {
+				sender.sendMessage("Style: " + game.board.name);
+				return true;
+			} else {
+				if (game.isPlaying) {
+					sender.sendMessage("Game in progress");
+					return true;
+				}
+					
+				Board board = BoardGenerator.loadBoard(args[1]);
+				if (board == null) {
+					sender.sendMessage("Style not found");
+					return true;
+				}
+				BoardGenerator.switchBoard(game.board, game.oldBoard, game.loc);
+				game.board = board;
+				game.oldBoard = BoardGenerator.createStyle(game.name+".old", game.loc, board.xSize, board.ySize, board.zSize);
+				BoardGenerator.switchBoard(game.oldBoard, board, game.loc);
+				sender.sendMessage("Game style changed");
 				return true;
 			}
-			Board board = BoardGenerator.loadBoard(args[1]);
-			if (board == null) {
-				sender.sendMessage("Style not found");
-				return true;
-			}
-			BoardGenerator.switchBoard(game.board, game.oldBoard, game.loc);
-			game.board = board;
-			game.oldBoard = BoardGenerator.createStyle(game.name+".old", game.loc, game.board.xSize, game.board.ySize, game.board.zSize);
-			BoardGenerator.switchBoard(game.oldBoard, game.board, game.loc);
-			sender.sendMessage("Game style changed");
-			return true;
 			
+		case "power":
+		case "bombs":
+		case "lives":
+		case "min-players":
+			if (!(args.length == 1 || args.length == 2))
+				return false;
+			game = Game.findGame(args[0]);
+			if (game == null) {
+				sender.sendMessage("Game not found");
+				return true;
+			} else {
+				if (args.length == 1) {
+					if (cmd.equals("bombs"))
+						sender.sendMessage("Starting bombs: " + game.bombs);
+					else if (cmd.equals("power"))
+						sender.sendMessage("Starting power: " + game.power);
+					else if (cmd.equals("lives"))
+						sender.sendMessage("Starting lives: " + game.lives);
+					else if (cmd.equals("min-players"))
+						sender.sendMessage("Min players: " + game.minPlayers);
+					return true;
+				} else {
+					int num = 0;
+					try {
+						 num = Integer.parseInt(args[1], 10);
+					} catch (NumberFormatException e) {
+						return false;
+					}
+					if (cmd.equals("bombs"))
+						game.bombs = num;
+					else if (cmd.equals("power"))
+						game.power = num;
+					else if (cmd.equals("lives"))
+						game.lives = num;
+					else if (cmd.equals("min-players"))
+						game.minPlayers = num;
+					sender.sendMessage(StringUtils.capitalize(cmd) + " set");
+					return true;
+				}
+			}
+		
 		case "create-style":
 			if (args.length != 1)
 				return false;
@@ -249,7 +300,7 @@ public class GameCommander implements CommandExecutor, TabCompleter {
 				sender.sendMessage("Current games:");
 				for (String name : games) {
 					game = Game.findGame(name);
-					String status = "*" + game.name;
+					String status = " * " + game.name;
 					status += " : " + game.players.size() + "/" + game.board.spawnPoints.size() + " : ";
 					if (game.isPlaying)
 						status += "playing";
@@ -400,7 +451,11 @@ public class GameCommander implements CommandExecutor, TabCompleter {
 			else
 				message += "Waiting\n";
 			message += " * Players: " + game.players.size() + "\n";
+			message += " * Min players: " + game.minPlayers+ "\n";
 			message += " * Max players: " + game.board.spawnPoints.size() + "\n";
+			message += " * Init bombs: " + game.bombs + "\n";
+			message += " * Init lives: " + game.lives + "\n";
+			message += " * Init power: " + game.power + "\n";
 			message += " * Entry fare: ";
 			if (game.fare == null)
 				message += "no fee \n";
@@ -435,12 +490,25 @@ public class GameCommander implements CommandExecutor, TabCompleter {
 			break;
 			
 		case "create-game":
-		case "set-style":
+			if (args.length == 1)
+				addGames(options, args[0]);
+			if (args.length == 2)
+				addStyles(options, args[1]);
+			break;
+		
+		case "style":
 			if (args.length == 1)
 				addGames(options, args[0]);
 			else if (args.length == 2)
-				addStyles(options, args[1]);
+				addStyles(options, args[2]);
 			break;
+		
+		case "lives":
+		case "bombs":
+		case "power":
+		case "min-players":
+			if (args.length == 1)
+				addGames(options, args[0]);
 			
 		case "info":
 		case "start-game":

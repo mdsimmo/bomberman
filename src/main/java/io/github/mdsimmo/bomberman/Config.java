@@ -15,6 +15,7 @@ public class Config {
 	public static String LIVES_PATH = "lives";
 	public static String BOMBS_PATH = "bombs";
 	public static String POWER_PATH = "power";
+	public static String MIN_PLAYERS_PATH = "minplayers";
 	public static String DEFAULT_STYLE = "defaultstyle";
 	
 	protected static ItemStack fare;
@@ -23,6 +24,7 @@ public class Config {
 	protected static int bombs;
 	protected static int lives;
 	protected static int power;
+	public static int minPlayers;
 	protected static String defaultBoard;
 	
 	public Config() {
@@ -30,6 +32,7 @@ public class Config {
 		bombs = c.getInt(BOMBS_PATH);
 		power = c.getInt(POWER_PATH);
 		lives = c.getInt(LIVES_PATH);
+		minPlayers = c.getInt(MIN_PLAYERS_PATH);
 		defaultBoard = c.getString(DEFAULT_STYLE);
 		
 		fare = c.getItemStack(FARE_PATH);
@@ -47,6 +50,7 @@ public class Config {
 		c.addDefault(LIVES_PATH, 3);
 		c.addDefault(BOMBS_PATH, 3);
 		c.addDefault(POWER_PATH, 3);
+		c.addDefault(MIN_PLAYERS_PATH, 1);
 		c.addDefault(DEFAULT_STYLE, "default");
 		c.addDefault(FARE_PATH, null);
 		c.addDefault(PRIZE_PATH, new ItemStack(Material.DIAMOND, 3));
