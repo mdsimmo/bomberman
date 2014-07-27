@@ -165,6 +165,7 @@ public class PlayerRep implements Listener {
 
 	public void damage(DeathBlock db) {
 		if (immunity <= 0) {
+			db.cause.kills++;
 			if (player.getHealth() > 1) {
 				player.damage(1);
 				Player cause = db.cause.player;
@@ -174,7 +175,6 @@ public class PlayerRep implements Listener {
 					player.sendMessage("Hit by " + db.cause.player.getName());
 					cause.sendMessage("You hit " + player.getName());
 				}
-				db.cause.kills++;
 				new Immunity();
 			} else {
 				Player cause = db.cause.player;
@@ -183,7 +183,6 @@ public class PlayerRep implements Listener {
 				else {
 					player.sendMessage(ChatColor.RED + "Killed by " + cause.getName());
 					cause.sendMessage(ChatColor.GREEN + "You killed " + player.getName());
-					db.cause.kills++;
 				}
 				kill(true);
 			}
