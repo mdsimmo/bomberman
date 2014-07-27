@@ -324,69 +324,22 @@ public class GameCommander implements CommandExecutor, TabCompleter {
 				}
 			}
 			return true;
-		
+			
+		case "prize":
 		case "fare":
-			if (args.length < 1)
+			if (args.length < 1 || args.length > 3)
 				return false;
-			if (!args[0].equalsIgnoreCase("set")) {
-				// just wants information about the fare
-				game = Game.findGame(args[0]);
-				if (game == null) {
-					sender.sendMessage("Game not found");
-					return true;
-				} else {
+			game = Game.findGame(args[0]);
+			if (game == null) {
+				sender.sendMessage("Game not found");
+				return true;
+			}
+			if (args.length == 1) {
+				if (cmd.equals("fare")) {
 					if (game.fare != null)
 						sender.sendMessage("Fare: " + game.fare.getAmount() + " " + game.fare.getType());
 					else
 						sender.sendMessage("No fare");
-					return true;
-				}
-			} else {
-				// set the fare amount
-				if (!sender.hasPermission("bomberman.op")) {
-					sender.sendMessage("You may only view what the current entry fee is");
-					return true;
-				}
-				if (!(args.length == 3 || args.length == 4))
-					return false;
-				game = Game.findGame(args[1]);
-				if (game == null) {
-					sender.sendMessage("Game not found");
-					return true;
-				}
-				if (args[2].equals("none")) {
-					game.fare = null;
-					sender.sendMessage("fare removed");
-					return true;
-				} else if (args[2].equals("pot")) {
-					game.prize = null;
-					game.pot = true;
-					sender.sendMessage("Prize set");
-					return true;
-				} else {
-					try {
-						Material m = Material.getMaterial(args[2]);
-						if (m == null)
-							sender.sendMessage("Unknown material");
-						int amount = Integer.parseInt(args[3]);
-						game.fare = new ItemStack(m, amount);
-						sender.sendMessage("Fare set");
-						return true;
-					} catch (Exception e) {
-						return false;
-					}
-				}
-			}
-				
-		case "prize":
-			if (args.length < 1)
-				return false;
-			if (!args[0].equalsIgnoreCase("set")) {
-				// just wants information about the fare
-				game = Game.findGame(args[0]);
-				if (game == null) {
-					sender.sendMessage("Game not found");
-					return true;
 				} else {
 					if (game.prize != null)
 						sender.sendMessage("Prize: " + game.prize.getAmount() + " " + game.prize.getType());
@@ -395,47 +348,54 @@ public class GameCommander implements CommandExecutor, TabCompleter {
 							sender.sendMessage("Game has a pot");
 						else
 							sender.sendMessage("No prize");
-					return true;
 				}
+				return true;
 			} else {
-				// set the fare amount
 				if (!sender.hasPermission("bomberman.op")) {
-					sender.sendMessage("You may only view what the prize is");
+					sender.sendMessage("You may only view what the " + cmd + " is");
 					return true;
 				}
-				if (!(args.length == 3 || args.length == 4))
+				if (args.length == 2) {
+					if (args[1].equalsIgnoreCase("pot")) {
+						game.prize = null;
+						game.pot = true;
+						sender.sendMessage("Prize set");
+						return true;
+					} else if (args[2].equals("none")) {
+						if (cmd.equalsIgnoreCase("fare")) {
+							game.fare = null;
+							sender.sendMessage("Fare removed");
+						} else {
+							game.prize = null;
+							game.pot = false;
+							sender.sendMessage("Prize removed");
+						}
+						return true;
+					}
 					return false;
-				game = Game.findGame(args[1]);
-				if (game == null) {
-					sender.sendMessage("Game not found");
-					return true;
 				}
-				if (args[2].equals("none")) {
-					game.prize = null;
-					game.pot = false;
-					sender.sendMessage("Prize removed");
-					return true;
-				} else if (args[2].equals("pot")) {
-					game.prize = null;
-					game.pot = true;
-					sender.sendMessage("Prize set");
-					return true;
-				} else {
+				if (args.length == 3) {
 					try {
 						Material m = Material.getMaterial(args[2]);
 						if (m == null)
 							sender.sendMessage("Unknown material");
 						int amount = Integer.parseInt(args[3]);
-						game.prize = new ItemStack(m, amount);
-						game.pot = false;
-						sender.sendMessage("Prize set");
+						if (cmd.equalsIgnoreCase("fare")) {
+							game.fare = new ItemStack(m, amount);
+							sender.sendMessage("Fare set");
+						} else {
+							game.prize = new ItemStack(m, amount);
+							game.pot = false;
+							sender.sendMessage("Prize set");
+						}
 						return true;
 					} catch (Exception e) {
 						return false;
 					}
 				}
 			}
-			
+			return false;
+					
 		case "info":
 			if (args.length != 1)
 				return false;
