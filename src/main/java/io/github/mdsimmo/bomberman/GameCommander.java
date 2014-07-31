@@ -80,7 +80,9 @@ public class GameCommander implements CommandExecutor, TabCompleter {
 						sender.sendMessage("Style not found");
 						return true;
 					}
-					createGame(args[0], ((Player)sender).getLocation(), style);
+					// long location getting line to round to integers...
+					Location l = ((Player)sender).getLocation().getBlock().getLocation();
+					createGame(args[0], l, style);
 					sender.sendMessage("Game created");
 				}
 			} else {

@@ -33,7 +33,6 @@ public class Board {
 			sw.writePart(v.getBlockX());
 			sw.writePart(v.getBlockY());
 			sw.writePart(v.getBlockZ());
-			
 		}
 		
 		sw.close();
@@ -57,7 +56,7 @@ public class Board {
 			delayed.put(place, block);
 		}
 		if (block.material == Material.WOOL) {
-			spawnPoints.add(place.add(new Vector(0, 1, 0)));
+			spawnPoints.add(place.add(new Vector(0.5, 1, 0.5)));
 		}
 	}
 	

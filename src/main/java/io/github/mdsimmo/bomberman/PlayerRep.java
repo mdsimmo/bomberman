@@ -68,8 +68,7 @@ public class PlayerRep implements Listener {
 			}
 			for (PlayerRep rep : game.observers)
 				rep.player.sendMessage(player.getName() + " joined");
-			// player.teleport() might seem better, but the players are teleported ~+-0.5 blocks out (and end up in the walls)
-			plugin.getServer().dispatchCommand(player, "tp " + (gameSpawn.getBlockX()+game.loc.getBlockX()) + " " + (double)(gameSpawn.getBlockY()+game.loc.getBlockY()) + " " + (gameSpawn.getBlockZ()+game.loc.getBlockZ()));
+			player.teleport(game.loc.clone().add(gameSpawn));
 		}
 		player.setGameMode(GameMode.SURVIVAL);
 		player.setHealth(game.lives);
