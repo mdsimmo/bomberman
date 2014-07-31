@@ -1,6 +1,6 @@
 Bomberman
 =========
 
-A bukkit plugin for minecraft.
+A Bukkit plugin for Minecraft which lets players play Bomberman. :D
 
-more info comming...
+http://dev.bukkit.org/bukkit-plugins/bomberman/
