@@ -205,21 +205,24 @@ public class Game implements Listener {
 	 * @return true if the game was started successfully
 	 */
 	public boolean startGame() {
-		return startGame(3);
+		return startGame(3, true);
 	}
 	
 	/**
      * Starts the game with a given delay
      * @return true if the game was started successfully
      */
-	public boolean startGame(int delay) {
+	public boolean startGame(int delay, boolean override) {
         if (players.size() >= minPlayers) {
+            if (override) {
+                if (countdownTimer != null)
+                    countdownTimer.destroy();
+                countdownTimer = new GameStarter(delay);
+            }
             if (countdownTimer == null) { 
                 countdownTimer = new GameStarter(delay);
-            }/* else {
-                plugin.getServer().getScheduler().cancelTask(countdownTimer.getTaskId());
-                countdownTimer = new GameStarter(delay);
-            } */
+                announceQueue();
+            }
             return true;
         } else {
             return false;
@@ -247,22 +250,22 @@ public class Game implements Listener {
 		}
 
 		public void run() {
-		    if (count == 30) {
-		        for (Player p : plugin.getServer().getOnlinePlayers()) {
-		            p.sendMessage(ChatColor.GREEN + "[BomberMan] " + ChatColor.WHITE + "Game " + ChatColor.YELLOW + name + ChatColor.WHITE + " is starting soon. Type " + ChatColor.AQUA + "/join-game " + name + ChatColor.WHITE + " to play!");
-		        }
-		        for (PlayerRep rep : players)
-                    rep.player.sendMessage("" + count);
-                plugin.getServer().getScheduler().scheduleSyncDelayedTask(plugin, this, 20);
-		    } else if (count == 15 || count == 10 || count == 5) {
-		        for (PlayerRep rep : players)
-                    rep.player.sendMessage("" + count);
-                plugin.getServer().getScheduler().scheduleSyncDelayedTask(plugin, this, 20);
+		    if (count == 30 || count == 15 || count == 10 || count == 5) {
+		        if (count == 30) {
+                    for (Player p : plugin.getServer().getOnlinePlayers()) {
+                        p.sendMessage(ChatColor.GREEN + "[BomberMan] " + ChatColor.WHITE + "Game " + ChatColor.YELLOW + name + ChatColor.WHITE + " starting in " + count + " seconds!");
+                    }
+                } else {
+    		        for (PlayerRep rep : players)
+    		            rep.player.sendMessage(ChatColor.GREEN + "[BomberMan] " + ChatColor.WHITE + "Game starting in " + count + "...");
+                }
+		        taskId = plugin.getServer().getScheduler().scheduleSyncDelayedTask(plugin, this, 20);
 		    } else if (count > 3) {
+		        taskId = plugin.getServer().getScheduler().scheduleSyncDelayedTask(plugin, this, 20);
 		    } else if (count > 0) {
 				for (PlayerRep rep : players)
-					rep.player.sendMessage("" + count);
-				plugin.getServer().getScheduler().scheduleSyncDelayedTask(plugin, this, 20);
+					rep.player.sendMessage(ChatColor.GREEN + "[BomberMan] " + ChatColor.WHITE + "Game starting in " + count + "...");
+				taskId = plugin.getServer().getScheduler().scheduleSyncDelayedTask(plugin, this, 20);
 			} else {
 				for (PlayerRep rep : observers) {
 					rep.player.sendMessage(ChatColor.YELLOW + "Game started!");
@@ -277,6 +280,12 @@ public class Game implements Listener {
 		    return taskId;
 		}
 
+	}
+	
+	public void announceQueue() {
+	    for (Player p : plugin.getServer().getOnlinePlayers()) {
+            p.sendMessage(ChatColor.GREEN + "[BomberMan] " + ChatColor.WHITE + "Game " + ChatColor.YELLOW + name + ChatColor.WHITE + " is starting soon. Type " + ChatColor.AQUA + "/join-game " + name + ChatColor.WHITE + " to play!");
+        }
 	}
 
 	public void drop(Location l) {

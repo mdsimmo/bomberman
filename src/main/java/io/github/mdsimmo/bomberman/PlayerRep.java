@@ -86,7 +86,9 @@ public class PlayerRep implements Listener {
 		    game.startGame();
 		} else if (game.players.size() >= game.minPlayers) {
 		    // Automatically start the game in 30 seconds after the minimum number of players have joined.
-		    game.startGame(30);
+		    game.startGame(30, false);
+		} else if (game.players.size() == 1) {
+		    game.announceQueue();
 		}
 	}
 
