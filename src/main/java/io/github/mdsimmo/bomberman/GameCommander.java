@@ -396,7 +396,7 @@ public class GameCommander implements CommandExecutor, TabCompleter {
 				}
 				if (args.length == 3) {
 					try {
-						Material m = Material.getMaterial(args[2]);
+						Material m = Material.getMaterial(args[2].toUpperCase());
 						if (m == null)
 							sender.sendMessage("Unknown material");
 						int amount = Integer.parseInt(args[3]);
