@@ -156,6 +156,7 @@ public class Game implements Listener {
 	public boolean pot = Config.pot;
 	public List<DeathBlock> deathBlocks = new ArrayList<>();
 	public Map<Block, Bomb> explosions = new HashMap<>();
+	public boolean autostart = false;
 	
 	public Game(String name, Location loc) {
 		this.name = name;
@@ -354,5 +355,11 @@ public class Game implements Listener {
 							+ " is out");
 			}
 		}
+	}
+
+	public void addPlayer(PlayerRep rep) {
+		players.add(rep);
+		if (autostart)
+			startGame();
 	}
 }

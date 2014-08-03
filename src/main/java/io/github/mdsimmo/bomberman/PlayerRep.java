@@ -80,7 +80,7 @@ public class PlayerRep implements Listener {
 						new ItemStack(Material.BLAZE_POWDER, game.power) });
 
 		isPlaying = true;
-		game.players.add(this);
+		game.addPlayer(this);
 	}
 
 	/**

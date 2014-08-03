@@ -51,6 +51,10 @@ commands:
     description: Sets the game's minimum players
     usage: \min-players <game> [amount]
     permission: bomberman.player
+  autostart:
+    description: If set to 'true', the game will start once the minimum amount of players have joined.
+    usage: \autostart <game> <true|false>
+    permission: bomberman.op
   create-style:
     description: Makes the thing you're looking at a standard board style
     usage: \create-style <style>

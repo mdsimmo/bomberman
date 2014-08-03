@@ -13,6 +13,7 @@ import org.bukkit.command.TabCompleter;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.bukkit.util.StringUtil;
 
 public class GameCommander implements CommandExecutor, TabCompleter {
 	
@@ -37,7 +38,8 @@ public class GameCommander implements CommandExecutor, TabCompleter {
 				"convert-to-game",
 				"fare",
 				"prize",
-				"info"};
+				"info",
+				"autostart"};
 			for (String cmd : commands) {
 			plugin.getCommand(cmd).setExecutor(this);
 			plugin.getCommand(cmd).setTabCompleter(this);
@@ -241,7 +243,23 @@ public class GameCommander implements CommandExecutor, TabCompleter {
 				sender.sendMessage("Game style changed");
 				return true;
 			}
-			
+		case "autostart":
+			if (args.length != 2)
+				return false;
+			game = Game.findGame(args[0]);
+			if (game == null) {
+				sender.sendMessage("Cannot find game");
+				return true;
+			}
+			if (args[1].equalsIgnoreCase("true")) {
+				game.autostart = true;
+			}
+			else if (args[1].equalsIgnoreCase("false"))
+				game.autostart = false;
+			else
+				return false;
+			sender.sendMessage("Autostart set to " + game.autostart);
+			return true;
 		case "power":
 		case "bombs":
 		case "lives":
@@ -465,13 +483,21 @@ public class GameCommander implements CommandExecutor, TabCompleter {
 				addStyles(options, args[2]);
 			break;
 		
+		case "autostart":
+			if (args.length == 1)
+				addGames(options, args[0]);
+			else if (args.length == 2) {
+				if (StringUtil.startsWithIgnoreCase("false", args[1]))
+					options.add("false");
+				if (StringUtil.startsWithIgnoreCase("true", args[1]))
+					options.add("true");
+			}
+			break;
+
 		case "lives":
 		case "bombs":
 		case "power":
 		case "min-players":
-			if (args.length == 1)
-				addGames(options, args[0]);
-			
 		case "info":
 		case "start-game":
 		case "stop-game":
