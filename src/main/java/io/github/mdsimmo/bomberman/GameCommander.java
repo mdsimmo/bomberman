@@ -436,6 +436,7 @@ public class GameCommander implements CommandExecutor, TabCompleter {
 			message += " * Init bombs: " + game.bombs + "\n";
 			message += " * Init lives: " + game.lives + "\n";
 			message += " * Init power: " + game.power + "\n";
+			message += " * Autostart: " + game.autostart + "\n";
 			message += " * Entry fare: ";
 			if (game.fare == null)
 				message += "no fee \n";
