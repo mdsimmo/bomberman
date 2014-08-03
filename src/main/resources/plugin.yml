@@ -1,6 +1,6 @@
 name: Bomberman
 main: io.github.mdsimmo.bomberman.Bomberman
-version: 0.0.2a
+version: 0.0.3
 
 commands:
   create-game:
