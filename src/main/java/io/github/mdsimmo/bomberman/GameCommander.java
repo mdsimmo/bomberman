@@ -172,9 +172,9 @@ public class GameCommander implements CommandExecutor, TabCompleter {
 					PlayerRep rep = game.getPlayerRep((Player)sender);
 					if (rep != null) {
 						rep.kill(true);
+						rep.game.observers.remove(rep);
 						return true;
 					}
-					
 				}
 			}
 			sender.sendMessage("You're not part of a game");

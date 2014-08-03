@@ -81,6 +81,13 @@ public class PlayerRep implements Listener {
 
 		isPlaying = true;
 		game.players.add(this);
+		if (game.findSpareSpawn() == null) {
+		    // Automatically start the game in 3 seconds if the game is full.
+		    game.startGame();
+		} else if (game.players.size() >= game.minPlayers) {
+		    // Automatically start the game in 30 seconds after the minimum number of players have joined.
+		    game.startGame(30);
+		}
 	}
 
 	/**
@@ -109,6 +116,9 @@ public class PlayerRep implements Listener {
 						});
 			if (alert)
 				game.alertRemoval(this);
+			
+			if (game.players.size() <= 1 && game.getCountdownTimer() != null)
+			    game.getCountdownTimer().destroy();
 		}
 	}
 	

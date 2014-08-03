@@ -28,19 +28,19 @@ import org.bukkit.util.Vector;
 
 public class Game implements Listener {
 
-	private static HashMap<String, Game> gameRegestry = new HashMap<>();
+	private static HashMap<String, Game> gameRegistry = new HashMap<>();
 	private static Plugin plugin = Bomberman.instance;
-
+	
 	/**
 	 * finds the game associated with the given name
 	 */
 	public static Game findGame(String name) {
-		return gameRegestry.get(name.toLowerCase());
+		return gameRegistry.get(name.toLowerCase());
 	}
 
 	public static List<String> allGames() {
 		List<String> games = new ArrayList<>();
-		for (String name : gameRegestry.keySet()) {
+		for (String name : gameRegistry.keySet()) {
 			games.add(name);
 		}
 		return games;
@@ -53,11 +53,11 @@ public class Game implements Listener {
 	 *            The game to register
 	 */
 	public static void register(Game game) {
-		gameRegestry.put(game.name.toLowerCase(), game);
+		gameRegistry.put(game.name.toLowerCase(), game);
 	}
 
 	public void deregister() {
-		gameRegestry.remove(name.toLowerCase());
+		gameRegistry.remove(name.toLowerCase());
 		EntityDamageEvent.getHandlerList();
 		terminate();
 		for (PlayerRep rep : new ArrayList<PlayerRep>(observers)) {
@@ -156,6 +156,7 @@ public class Game implements Listener {
 	public boolean pot = Config.pot;
 	public List<DeathBlock> deathBlocks = new ArrayList<>();
 	public Map<Block, Bomb> explosions = new HashMap<>();
+	private GameStarter countdownTimer = null;
 	
 	public Game(String name, Location loc) {
 		this.name = name;
@@ -163,6 +164,10 @@ public class Game implements Listener {
 		protector = new GameProtection(this);
 		plugin.getServer().getPluginManager().registerEvents(this, plugin);
 	}
+	
+	public GameStarter getCountdownTimer() {
+        return countdownTimer;
+    }
 
 	public boolean containsLocation(Location l) {
 		return (l.getBlockX() >= loc.getX() && l.getBlockX() < loc.getBlockX()
@@ -196,28 +201,65 @@ public class Game implements Listener {
 	}
 	
 	/**
-	 * Starts the game
-	 * @return true if the game was started succesfully
+	 * Starts the game with a default delay of 3 seconds
+	 * @return true if the game was started successfully
 	 */
 	public boolean startGame() {
-		if (players.size() >= minPlayers) {
-			new GameStarter();
-			return true;
-		} else {
-			return false;
-		}
+		return startGame(3);
 	}
+	
+	/**
+     * Starts the game with a given delay
+     * @return true if the game was started successfully
+     */
+	public boolean startGame(int delay) {
+        if (players.size() >= minPlayers) {
+            if (countdownTimer == null) { 
+                countdownTimer = new GameStarter(delay);
+            }/* else {
+                plugin.getServer().getScheduler().cancelTask(countdownTimer.getTaskId());
+                countdownTimer = new GameStarter(delay);
+            } */
+            return true;
+        } else {
+            return false;
+        }
+    }
 
-	private class GameStarter implements Runnable {
+	class GameStarter implements Runnable {
 		int count = 3;
+		private int taskId;
 
 		public GameStarter() {
-			plugin.getServer().getScheduler()
+			taskId = plugin.getServer().getScheduler()
 					.scheduleSyncDelayedTask(plugin, this);
+		}
+		
+		public GameStarter(int delay) {
+		    count = delay;
+            taskId = plugin.getServer().getScheduler()
+                    .scheduleSyncDelayedTask(plugin, this);
+        }
+		
+		public void destroy() {
+		    plugin.getServer().getScheduler().cancelTask(taskId);
+		    countdownTimer = null;
 		}
 
 		public void run() {
-			if (count > 0) {
+		    if (count == 30) {
+		        for (Player p : plugin.getServer().getOnlinePlayers()) {
+		            p.sendMessage(ChatColor.GREEN + "[BomberMan] " + ChatColor.WHITE + "Game " + ChatColor.YELLOW + name + ChatColor.WHITE + " is starting soon. Type " + ChatColor.AQUA + "/join-game " + name + ChatColor.WHITE + " to play!");
+		        }
+		        for (PlayerRep rep : players)
+                    rep.player.sendMessage("" + count);
+                plugin.getServer().getScheduler().scheduleSyncDelayedTask(plugin, this, 20);
+		    } else if (count == 15 || count == 10 || count == 5) {
+		        for (PlayerRep rep : players)
+                    rep.player.sendMessage("" + count);
+                plugin.getServer().getScheduler().scheduleSyncDelayedTask(plugin, this, 20);
+		    } else if (count > 3) {
+		    } else if (count > 0) {
 				for (PlayerRep rep : players)
 					rep.player.sendMessage("" + count);
 				plugin.getServer().getScheduler().scheduleSyncDelayedTask(plugin, this, 20);
@@ -225,9 +267,14 @@ public class Game implements Listener {
 				for (PlayerRep rep : observers) {
 					rep.player.sendMessage(ChatColor.YELLOW + "Game started!");
 					isPlaying = true;
+					countdownTimer = null;
 				}
 			}
 			count--;
+		}
+		
+		public int getTaskId() {
+		    return taskId;
 		}
 
 	}
