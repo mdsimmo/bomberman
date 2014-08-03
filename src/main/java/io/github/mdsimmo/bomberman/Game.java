@@ -94,29 +94,57 @@ public class Game implements Listener {
 		Game game = new Game(name, new Location(w, x, y, z));
 		game.board = BoardGenerator.loadBoard(save.getString("style.current"));
 		game.oldBoard = BoardGenerator.loadBoard(save.getString("style.old"));
-		String prize = save.getString(Config.PRIZE_PATH);
-		if (prize == null) {
-			game.prize = null;
-			game.pot = false;
-		} else if (prize.equals("pot")) {
-			game.prize = null;
-			game.pot = true;
+		if (save.contains(Config.PRIZE_PATH)) {
+			String prize = save.getString(Config.PRIZE_PATH);
+			if (prize == null) {
+				game.prize = null;
+				game.pot = false;
+			} else if (prize.equals("pot")) {
+				game.prize = null;
+				game.pot = true;
+			} else {
+				game.prize = save.getItemStack(Config.PRIZE_PATH);
+				game.pot = false;
+			}
 		} else {
-			game.prize = save.getItemStack(Config.PRIZE_PATH);
-			game.pot = false;
+			game.pot = Config.pot;
+			game.prize = Config.prize;
 		}
-		game.fare = save.getItemStack(Config.FARE_PATH);
+		if (save.contains(Config.FARE_PATH))
+			game.fare = save.getItemStack(Config.FARE_PATH);
+		else
+			game.fare = Config.fare;
+		
+		if (save.contains(Config.BOMBS_PATH))
+			game.bombs = save.getInt(Config.BOMBS_PATH);
+		else
+			game.bombs = Config.bombs;
+		
+		if (save.contains(Config.POWER_PATH))
+			game.power = save.getInt(Config.POWER_PATH);
+		else	
+			game.power = Config.power;
+		
+		if (save.contains(Config.LIVES_PATH))
+			game.lives = save.getInt(Config.LIVES_PATH);
+		else
+			game.lives = Config.lives;
+		
+		if (save.contains(Config.MIN_PLAYERS_PATH))
+			game.minPlayers = save.getInt(Config.MIN_PLAYERS_PATH);
+		else
+			game.minPlayers = Config.minPlayers;
+		
+		if (save.contains(Config.AUTOSTART_PATH))
+			game.autostart = save.getBoolean(Config.AUTOSTART_PATH);
+		else
+			game.autostart = Config.autostart;
 		register(game);
 	}
 
 	public void saveGame() {
+		YamlConfiguration save = new YamlConfiguration();
 		try {
-			YamlConfiguration save = new YamlConfiguration();
-			save.set(Config.FARE_PATH, fare);
-			if (pot)
-				save.set(Config.PRIZE_PATH, "pot");
-			else
-				save.set(Config.PRIZE_PATH, prize);
 			save.set("name", name);
 			save.set("location.world", loc.getWorld().getName());
 			save.set("location.x", loc.getBlockX());
@@ -124,6 +152,19 @@ public class Game implements Listener {
 			save.set("location.z", loc.getBlockZ());
 			save.set("style.current", board.name);
 			save.set("style.old", oldBoard.name);
+			
+			save.set(Config.FARE_PATH, fare);
+			if (pot)
+				save.set(Config.PRIZE_PATH, "pot");
+			else
+				save.set(Config.PRIZE_PATH, prize);
+			
+			save.set(Config.AUTOSTART_PATH, autostart);
+			save.set(Config.BOMBS_PATH, bombs);
+			save.set(Config.POWER_PATH, power);
+			save.set(Config.LIVES_PATH, lives);
+			save.set(Config.MIN_PLAYERS_PATH, minPlayers);
+			
 			save.save(new File(plugin.getDataFolder(), name.toLowerCase()+".game"));
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -156,7 +197,7 @@ public class Game implements Listener {
 	public boolean pot = Config.pot;
 	public List<DeathBlock> deathBlocks = new ArrayList<>();
 	public Map<Block, Bomb> explosions = new HashMap<>();
-	public boolean autostart = false;
+	public boolean autostart = Config.autostart;
 	
 	public Game(String name, Location loc) {
 		this.name = name;

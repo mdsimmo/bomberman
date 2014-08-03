@@ -17,7 +17,6 @@ public class Bomberman extends JavaPlugin {
 	@Override
 	public void onEnable() {
 		instance = this;
-		new Config();
 		new GameCommander();
 		Game.loadGames();
 	}
