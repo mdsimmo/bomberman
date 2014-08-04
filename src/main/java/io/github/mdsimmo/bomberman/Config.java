@@ -29,7 +29,8 @@ public abstract class Config {
 	public static final String DROPS_CHANCE = "drops.chance";
 	public static final String BLOCKS_DROPPING = "blocks.drop";
 	public static final String BLOCKS_DESTRUCTABLE = "blocks.destructable";
-	
+	public static final String SUDDEN_DEATH = "timeout.suddendeath";
+	public static final String TIME_OUT = "timeout.end";
 	
 	protected static ItemStack fare;
 	protected static ItemStack prize;
@@ -44,6 +45,8 @@ public abstract class Config {
 	protected static double dropChance;
 	protected static List<Material> destructables;
 	protected static List<Material> droppingBlocks;
+	protected static int timeout;
+	protected static int suddendeath;
 	
 	static {
 		// add defaults
@@ -55,6 +58,8 @@ public abstract class Config {
 		c.addDefault(DEFAULT_STYLE, "default");
 		c.addDefault(FARE_PATH, null);
 		c.addDefault(PRIZE_PATH, new ItemStack(Material.DIAMOND, 3));
+		c.addDefault(SUDDEN_DEATH, 35);
+		c.addDefault(TIME_OUT, 70);
 		ItemStack[] dropsTemp = { 
 				new ItemStack(Material.TNT, 3),
 				new ItemStack(Material.BLAZE_POWDER, 2),
@@ -92,7 +97,8 @@ public abstract class Config {
 			prize = c.getItemStack(PRIZE_PATH);
 			pot = false;
 		}
-		
+		timeout = c.getInt(TIME_OUT);
+		suddendeath = c.getInt(SUDDEN_DEATH);
 	}
 	
 	public static void writeMaterials(FileConfiguration config, String path, List<Material> materials) {

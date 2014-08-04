@@ -206,8 +206,12 @@ public class PlayerRep implements Listener {
 	public void onPlayerRegen(EntityRegainHealthEvent e) {
 		if (e.getEntity() == player && isPlaying) {
 			if (e.getRegainReason() == RegainReason.MAGIC)
-				player.setHealth(Math.min(player.getHealth() + 1,
-						player.getMaxHealth()));
+				if (game.isSuddenDeath())
+					player.sendMessage("No regen in sudden death!");
+				else
+					player.setHealth(Math.min(player.getHealth() + 1,
+							player.getMaxHealth()));
+					
 			e.setCancelled(true);
 		}
 	}

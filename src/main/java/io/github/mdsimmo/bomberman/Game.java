@@ -120,6 +120,8 @@ public class Game implements Listener {
 		game.droppingBlocks = Config.tryMaterialList(save, Config.BLOCKS_DROPPING);
 		game.drops = Config.tryStackList(save, Config.DROPS_ITEMS);
 		game.dropChance = Config.tryDouble(save, Config.DROPS_CHANCE);
+		game.suddenDeath = Config.tryInt(save, Config.SUDDEN_DEATH);
+		game.timeout = Config.tryInt(save, Config.TIME_OUT);
 		
 		register(game);
 	}
@@ -166,6 +168,9 @@ public class Game implements Listener {
 	private double dropChance = Config.dropChance;
 	private List<Material> destructables = Config.destructables;
 	private List<Material> droppingBlocks = Config.droppingBlocks;
+	private int suddenDeath = Config.suddendeath;
+	private boolean suddenDeathStarted = false;
+	private int timeout = Config.timeout;
 	
 	public Game(String name, Location loc) {
 		this.name = name;
@@ -235,6 +240,8 @@ public class Game implements Listener {
 				for (PlayerRep rep : observers) {
 					rep.player.sendMessage(ChatColor.YELLOW + "Game started!");
 					isPlaying = true;
+					if (suddenDeath >= 0 || timeout >= 0)
+						new SuddenDeathCounter(Game.this);
 				}
 			}
 			count--;
@@ -469,5 +476,34 @@ public class Game implements Listener {
 	public void setPrize(ItemStack prize, boolean pot) {
 		setPrize(prize);
 		setPot(pot);
+	}
+
+	public int getSuddenDeath() {
+		return suddenDeath;
+	}
+	
+	public void setSuddenDeath(int time) {
+		suddenDeath = time;
+		save.set(Config.SUDDEN_DEATH, time);
+	}
+	
+	public boolean isSuddenDeath() {
+		return suddenDeathStarted;
+	}
+	
+	public void setSuddenDeath(boolean started) {
+		if (started == true)
+			for (PlayerRep rep : players)
+				rep.player.setHealth(1d);
+		suddenDeathStarted = started;
+	}
+	
+	public int getTimeout() {
+		return timeout;
+	}
+
+	public void setTimeout(int time) {
+		timeout = time;
+		save.set(Config.TIME_OUT, time);
 	}
 }
