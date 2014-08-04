@@ -22,8 +22,6 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.Plugin;
-import org.bukkit.potion.Potion;
-import org.bukkit.potion.PotionType;
 import org.bukkit.util.Vector;
 
 public class Game implements Listener {
@@ -94,6 +92,7 @@ public class Game implements Listener {
 		Game game = new Game(name, new Location(w, x, y, z));
 		game.board = BoardGenerator.loadBoard(save.getString("style.current"));
 		game.oldBoard = BoardGenerator.loadBoard(save.getString("style.old"));
+		
 		if (save.contains(Config.PRIZE_PATH)) {
 			String prize = save.getString(Config.PRIZE_PATH);
 			if (prize == null) {
@@ -110,35 +109,17 @@ public class Game implements Listener {
 			game.pot = Config.pot;
 			game.prize = Config.prize;
 		}
-		if (save.contains(Config.FARE_PATH))
-			game.fare = save.getItemStack(Config.FARE_PATH);
-		else
-			game.fare = Config.fare;
+		game.fare = Config.tryStack(save, Config.FARE_PATH);
+		game.bombs = Config.tryInt(save, Config.BOMBS_PATH);
+		game.power = Config.tryInt(save, Config.POWER_PATH);
+		game.lives = Config.tryInt(save, Config.LIVES_PATH);
+		game.minPlayers = Config.tryInt(save, Config.MIN_PLAYERS_PATH);
+		game.autostart = Config.tryBoolean(save, Config.AUTOSTART_PATH);
+		game.destructables = Config.tryMaterialList(save, Config.BLOCKS_DESTRUCTABLE);
+		game.droppingBlocks = Config.tryMaterialList(save, Config.BLOCKS_DROPPING);
+		game.drops = Config.tryStackList(save, Config.DROPS_ITEMS);
+		game.dropChance = Config.tryDouble(save, Config.DROPS_CHANCE);
 		
-		if (save.contains(Config.BOMBS_PATH))
-			game.bombs = save.getInt(Config.BOMBS_PATH);
-		else
-			game.bombs = Config.bombs;
-		
-		if (save.contains(Config.POWER_PATH))
-			game.power = save.getInt(Config.POWER_PATH);
-		else	
-			game.power = Config.power;
-		
-		if (save.contains(Config.LIVES_PATH))
-			game.lives = save.getInt(Config.LIVES_PATH);
-		else
-			game.lives = Config.lives;
-		
-		if (save.contains(Config.MIN_PLAYERS_PATH))
-			game.minPlayers = save.getInt(Config.MIN_PLAYERS_PATH);
-		else
-			game.minPlayers = Config.minPlayers;
-		
-		if (save.contains(Config.AUTOSTART_PATH))
-			game.autostart = save.getBoolean(Config.AUTOSTART_PATH);
-		else
-			game.autostart = Config.autostart;
 		register(game);
 	}
 
@@ -164,6 +145,10 @@ public class Game implements Listener {
 			save.set(Config.POWER_PATH, power);
 			save.set(Config.LIVES_PATH, lives);
 			save.set(Config.MIN_PLAYERS_PATH, minPlayers);
+			save.set(Config.BLOCKS_DESTRUCTABLE, destructables);
+			save.set(Config.BLOCKS_DROPPING, droppingBlocks);
+			save.set(Config.DROPS_CHANCE, dropChance);
+			save.set(Config.DROPS_ITEMS, drops);
 			
 			save.save(new File(plugin.getDataFolder(), name.toLowerCase()+".game"));
 		} catch (IOException e) {
@@ -179,12 +164,6 @@ public class Game implements Listener {
 	protected Board oldBoard;
 	protected boolean isPlaying;
 	private GameProtection protector;
-	private ItemStack[] drops = { 
-			new ItemStack(Material.TNT),
-			new ItemStack(Material.TNT),
-			new ItemStack(Material.BLAZE_POWDER),
-			new Potion(PotionType.INSTANT_HEAL, 1).toItemStack(1),
-			new Potion(PotionType.SPEED, 2).toItemStack(1)};
 	protected ArrayList<PlayerRep> observers = new ArrayList<>();
 	public ArrayList<PlayerRep> players = new ArrayList<>();
 	public Board board;
@@ -198,6 +177,10 @@ public class Game implements Listener {
 	public List<DeathBlock> deathBlocks = new ArrayList<>();
 	public Map<Block, Bomb> explosions = new HashMap<>();
 	public boolean autostart = Config.autostart;
+	private List<ItemStack> drops;
+	private double dropChance;
+	public List<Material> destructables;
+	private List<Material> droppingBlocks;
 	
 	public Game(String name, Location loc) {
 		this.name = name;
@@ -274,10 +257,20 @@ public class Game implements Listener {
 
 	}
 
-	public void drop(Location l) {
-		if (Math.random() < 0.1) {
-			int rand = (int) (Math.random() * drops.length);
-			l.getWorld().dropItem(l, drops[rand]);
+	public void drop(Location l, Material type) {
+		if (Math.random() < dropChance && droppingBlocks.contains(type)) {
+			int sum = 0;
+			for (ItemStack stack : drops)
+				sum += stack.getAmount();
+			double rand = Math.random() * sum;
+			for (ItemStack stack : drops) {
+				rand -= stack.getAmount();
+				if (rand <= 0) {
+					ItemStack drop = stack.clone();
+					drop.setAmount(1);
+					l.getWorld().dropItem(l, drop);
+				}
+			}
 		}
 	}
 

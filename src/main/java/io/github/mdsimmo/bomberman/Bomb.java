@@ -84,8 +84,8 @@ public class Bomb implements Runnable {
 				Location l = spawn.clone().add(z, y, x);
 				Block b = l.getBlock();
 				
-				// desdtroy dirt
-				if (b.getType() == Material.DIRT) {
+				// destroy dirt (or other blocks that can be blown up)
+				if (game.destructables.contains(b.getType())) {
 					new DeathBlock(b, rep);
 					return true;
 				}
@@ -119,17 +119,17 @@ public class Bomb implements Runnable {
 
 		public class DeathBlock implements Runnable{
 
-			public Block block;
-			public int duration = 20;
 			public PlayerRep cause;
-			public boolean drop;
-			public int dbTaskId;
+			private Block block;
+			private int duration = 20;
+			private int dbTaskId;
+			private Material original;
 			
 			public DeathBlock(Block block, PlayerRep cause) {
 				this.block = block;
 				this.cause = cause;
 				
-				drop = block.getType().isSolid();
+				original = block.getType();
 				block.setType(Material.FIRE);
 				dbTaskId = plugin.getServer().getScheduler().scheduleSyncRepeatingTask(plugin, this, 0, 1);
 				
@@ -152,8 +152,7 @@ public class Bomb implements Runnable {
 				if (--duration <= 0) {
 					if (block.getType() == Material.FIRE)
 						block.setType(Material.AIR);
-					if (drop)
-						game.drop(block.getLocation());
+						game.drop(block.getLocation(), original);
 					plugin.getServer().getScheduler().cancelTask(dbTaskId);
 					game.deathBlocks.remove(this);
 				}
