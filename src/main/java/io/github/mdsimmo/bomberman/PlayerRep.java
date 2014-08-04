@@ -57,12 +57,12 @@ public class PlayerRep implements Listener {
 			player.sendMessage("game full");
 			return;
 		} else {
-			if (game.fare != null) {
-				if (player.getInventory().contains(game.fare.getType(), game.fare.getAmount())
+			if (game.getFare() != null) {
+				if (player.getInventory().contains(game.getFare().getType(), game.getFare().getAmount())
 						|| player.getGameMode() == GameMode.CREATIVE)
-					player.getInventory().removeItem(game.fare);
+					player.getInventory().removeItem(game.getFare());
 				else {
-					player.sendMessage("You need at least " + game.fare.getAmount() + " " + game.fare.getType().toString().toLowerCase());
+					player.sendMessage("You need at least " + game.getFare().getAmount() + " " + game.getFare().getType().toString().toLowerCase());
 					return;
 				}
 			}
@@ -71,13 +71,13 @@ public class PlayerRep implements Listener {
 			player.teleport(game.loc.clone().add(gameSpawn));
 		}
 		player.setGameMode(GameMode.SURVIVAL);
-		player.setHealth(game.lives);
-		player.setMaxHealth(game.lives);
-		player.setHealthScale(game.lives * 2);
+		player.setHealth(game.getLives());
+		player.setMaxHealth(game.getLives());
+		player.setHealthScale(game.getLives() * 2);
 		spawnInventory = player.getInventory().getContents();
 		player.getInventory().setContents(
-				new ItemStack[] { new ItemStack(Material.TNT, game.bombs),
-						new ItemStack(Material.BLAZE_POWDER, game.power) });
+				new ItemStack[] { new ItemStack(Material.TNT, game.getBombs()),
+						new ItemStack(Material.BLAZE_POWDER, game.getPower()) });
 
 		isPlaying = true;
 		game.addPlayer(this);

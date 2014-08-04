@@ -90,6 +90,7 @@ public class Game implements Listener {
 		int z = save.getInt("location.z");
 		World w = plugin.getServer().getWorld(save.getString("location.world"));
 		Game game = new Game(name, new Location(w, x, y, z));
+		game.save = save;
 		game.board = BoardGenerator.loadBoard(save.getString("style.current"));
 		game.oldBoard = BoardGenerator.loadBoard(save.getString("style.old"));
 		
@@ -124,7 +125,6 @@ public class Game implements Listener {
 	}
 
 	public void saveGame() {
-		YamlConfiguration save = new YamlConfiguration();
 		try {
 			save.set("name", name);
 			save.set("location.world", loc.getWorld().getName());
@@ -133,22 +133,6 @@ public class Game implements Listener {
 			save.set("location.z", loc.getBlockZ());
 			save.set("style.current", board.name);
 			save.set("style.old", oldBoard.name);
-			
-			save.set(Config.FARE_PATH, fare);
-			if (pot)
-				save.set(Config.PRIZE_PATH, "pot");
-			else
-				save.set(Config.PRIZE_PATH, prize);
-			
-			save.set(Config.AUTOSTART_PATH, autostart);
-			save.set(Config.BOMBS_PATH, bombs);
-			save.set(Config.POWER_PATH, power);
-			save.set(Config.LIVES_PATH, lives);
-			save.set(Config.MIN_PLAYERS_PATH, minPlayers);
-			save.set(Config.BLOCKS_DESTRUCTABLE, destructables);
-			save.set(Config.BLOCKS_DROPPING, droppingBlocks);
-			save.set(Config.DROPS_CHANCE, dropChance);
-			save.set(Config.DROPS_ITEMS, drops);
 			
 			save.save(new File(plugin.getDataFolder(), name.toLowerCase()+".game"));
 		} catch (IOException e) {
@@ -159,6 +143,7 @@ public class Game implements Listener {
 			BoardGenerator.saveBoard(oldBoard);
 	}
 
+	private YamlConfiguration save = new YamlConfiguration();
 	protected String name;
 	protected Location loc;
 	protected Board oldBoard;
@@ -166,21 +151,21 @@ public class Game implements Listener {
 	private GameProtection protector;
 	protected ArrayList<PlayerRep> observers = new ArrayList<>();
 	public ArrayList<PlayerRep> players = new ArrayList<>();
-	public Board board;
-	public int bombs = Config.bombs;
-	public int power = Config.power;
-	public int lives = Config.lives;
-	public int minPlayers = Config.minPlayers;
-	public ItemStack fare = Config.fare;
-	public ItemStack prize = Config.prize;
-	public boolean pot = Config.pot;
+	protected Board board;
+	private int bombs = Config.bombs;
+	private int power = Config.power;
+	private int lives = Config.lives;
+	private int minPlayers = Config.minPlayers;
+	private ItemStack fare = Config.fare;
+	private ItemStack prize = Config.prize;
+	private boolean pot = Config.pot;
 	public List<DeathBlock> deathBlocks = new ArrayList<>();
 	public Map<Block, Bomb> explosions = new HashMap<>();
-	public boolean autostart = Config.autostart;
-	private List<ItemStack> drops;
-	private double dropChance;
-	public List<Material> destructables;
-	private List<Material> droppingBlocks;
+	private boolean autostart = Config.autostart;
+	private List<ItemStack> drops = Config.drops;
+	private double dropChance = Config.dropChance;
+	private List<Material> destructables = Config.destructables;
+	private List<Material> droppingBlocks = Config.droppingBlocks;
 	
 	public Game(String name, Location loc) {
 		this.name = name;
@@ -395,5 +380,94 @@ public class Game implements Listener {
 		players.add(rep);
 		if (autostart)
 			startGame();
+	}
+	
+	public int getBombs() {
+		return bombs;
+	}
+	
+	public void setBombs(int bombs) {
+		this.bombs = bombs;
+		save.set(Config.BOMBS_PATH, bombs);
+	}
+	
+	public int getPower() {
+		return power;
+	}
+	
+	public void setPower(int power) {
+		this.power = power;
+		save.set(Config.POWER_PATH, power);
+	}
+
+	public int getLives() {
+		return lives;
+	}
+	
+	public void setLives(int lives) {
+		this.lives = lives;
+		save.set(Config.LIVES_PATH, lives);
+	}
+
+	public int getMinPlayers() {
+		return minPlayers;
+	}
+	
+	public void setMinPlayers(int minPlayers) {
+		this.minPlayers = minPlayers;
+		save.set(Config.MIN_PLAYERS_PATH, minPlayers);
+	}
+	
+	public boolean getAutostart() {
+		return autostart;
+	}
+	
+	public void setAutostart(boolean autostart) {
+		this.autostart = autostart;
+		save.set(Config.AUTOSTART_PATH, autostart);
+	}
+	
+	public List<Material> getDestructables() {
+		return destructables;
+	}
+	
+	public List<Material> getDroppingBlocks() {
+		return droppingBlocks;
+	}
+	
+	public ItemStack getFare() {
+		return fare;
+	}
+	
+	public void setFare(ItemStack fare) {
+		this.fare = fare;
+		save.set(Config.FARE_PATH, fare);
+	}
+	
+	public ItemStack getPrize() {
+		return prize;
+	}
+	
+	public void setPrize(ItemStack prize) {
+		this.prize = prize;
+		pot = false;
+		save.set(Config.PRIZE_PATH, prize);
+	}
+	
+	public boolean getPot() {
+		return pot;
+	}
+	
+	public void setPot(boolean pot) {
+		this.pot = pot;
+		if (pot)
+			save.set(Config.PRIZE_PATH, true);
+		else
+			save.set(Config.PRIZE_PATH, prize);
+	}
+	
+	public void setPrize(ItemStack prize, boolean pot) {
+		setPrize(prize);
+		setPot(pot);
 	}
 }

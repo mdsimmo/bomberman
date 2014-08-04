@@ -85,7 +85,7 @@ public class Bomb implements Runnable {
 				Block b = l.getBlock();
 				
 				// destroy dirt (or other blocks that can be blown up)
-				if (game.destructables.contains(b.getType())) {
+				if (game.getDestructables().contains(b.getType())) {
 					new DeathBlock(b, rep);
 					return true;
 				}

@@ -252,13 +252,12 @@ public class GameCommander implements CommandExecutor, TabCompleter {
 				return true;
 			}
 			if (args[1].equalsIgnoreCase("true")) {
-				game.autostart = true;
-			}
-			else if (args[1].equalsIgnoreCase("false"))
-				game.autostart = false;
+				game.setAutostart(true);
+			} else if (args[1].equalsIgnoreCase("false"))
+				game.setAutostart(false);
 			else
 				return false;
-			sender.sendMessage("Autostart set to " + game.autostart);
+			sender.sendMessage("Autostart set to " + game.getAutostart());
 			return true;
 		case "power":
 		case "bombs":
@@ -273,13 +272,13 @@ public class GameCommander implements CommandExecutor, TabCompleter {
 			} else {
 				if (args.length == 1) {
 					if (cmd.equals("bombs"))
-						sender.sendMessage("Starting bombs: " + game.bombs);
+						sender.sendMessage("Starting bombs: " + game.getBombs());
 					else if (cmd.equals("power"))
-						sender.sendMessage("Starting power: " + game.power);
+						sender.sendMessage("Starting power: " + game.getPower());
 					else if (cmd.equals("lives"))
-						sender.sendMessage("Starting lives: " + game.lives);
+						sender.sendMessage("Starting lives: " + game.getLives());
 					else if (cmd.equals("min-players"))
-						sender.sendMessage("Min players: " + game.minPlayers);
+						sender.sendMessage("Min players: " + game.getMinPlayers());
 					return true;
 				} else {
 					int num = 0;
@@ -289,13 +288,13 @@ public class GameCommander implements CommandExecutor, TabCompleter {
 						return false;
 					}
 					if (cmd.equals("bombs"))
-						game.bombs = num;
+						game.setBombs(num);
 					else if (cmd.equals("power"))
-						game.power = num;
+						game.setPower(num);
 					else if (cmd.equals("lives"))
-						game.lives = num;
+						game.setLives(num);
 					else if (cmd.equals("min-players"))
-						game.minPlayers = num;
+						game.setMinPlayers(num);
 					sender.sendMessage(StringUtils.capitalize(cmd) + " set");
 					return true;
 				}
@@ -356,15 +355,15 @@ public class GameCommander implements CommandExecutor, TabCompleter {
 			}
 			if (args.length == 1) {
 				if (cmd.equals("fare")) {
-					if (game.fare != null)
-						sender.sendMessage("Fare: " + game.fare.getAmount() + " " + game.fare.getType());
+					if (game.getFare() != null)
+						sender.sendMessage("Fare: " + game.getFare().getAmount() + " " + game.getFare().getType());
 					else
 						sender.sendMessage("No fare");
 				} else {
-					if (game.prize != null)
-						sender.sendMessage("Prize: " + game.prize.getAmount() + " " + game.prize.getType());
+					if (game.getPrize() != null)
+						sender.sendMessage("Prize: " + game.getPrize().getAmount() + " " + game.getPrize().getType());
 					else
-						if (game.pot == true)
+						if (game.getPot() == true)
 							sender.sendMessage("Game has a pot");
 						else
 							sender.sendMessage("No prize");
@@ -377,17 +376,15 @@ public class GameCommander implements CommandExecutor, TabCompleter {
 				}
 				if (args.length == 2) {
 					if (args[1].equalsIgnoreCase("pot")) {
-						game.prize = null;
-						game.pot = true;
+						game.setPrize(null, true);
 						sender.sendMessage("Prize set");
 						return true;
 					} else if (args[2].equals("none")) {
 						if (cmd.equalsIgnoreCase("fare")) {
-							game.fare = null;
+							game.setFare(null);
 							sender.sendMessage("Fare removed");
 						} else {
-							game.prize = null;
-							game.pot = false;
+							game.setPrize(null, false);
 							sender.sendMessage("Prize removed");
 						}
 						return true;
@@ -401,11 +398,10 @@ public class GameCommander implements CommandExecutor, TabCompleter {
 							sender.sendMessage("Unknown material");
 						int amount = Integer.parseInt(args[3]);
 						if (cmd.equalsIgnoreCase("fare")) {
-							game.fare = new ItemStack(m, amount);
+							game.setFare(new ItemStack(m, amount));
 							sender.sendMessage("Fare set");
 						} else {
-							game.prize = new ItemStack(m, amount);
-							game.pot = false;
+							game.setPrize(new ItemStack(m, amount), false);
 							sender.sendMessage("Prize set");
 						}
 						return true;
@@ -431,25 +427,25 @@ public class GameCommander implements CommandExecutor, TabCompleter {
 			else
 				message += "Waiting\n";
 			message += " * Players: " + game.players.size() + "\n";
-			message += " * Min players: " + game.minPlayers+ "\n";
+			message += " * Min players: " + game.getMinPlayers()+ "\n";
 			message += " * Max players: " + game.board.spawnPoints.size() + "\n";
-			message += " * Init bombs: " + game.bombs + "\n";
-			message += " * Init lives: " + game.lives + "\n";
-			message += " * Init power: " + game.power + "\n";
-			message += " * Autostart: " + game.autostart + "\n";
+			message += " * Init bombs: " + game.getBombs() + "\n";
+			message += " * Init lives: " + game.getLives() + "\n";
+			message += " * Init power: " + game.getPower() + "\n";
+			message += " * Autostart: " + game.getAutostart() + "\n";
 			message += " * Entry fare: ";
-			if (game.fare == null)
+			if (game.getFare() == null)
 				message += "no fee \n";
 			else
-				message += game.fare.getType() + " x" + game.fare.getAmount() + "\n";
+				message += game.getFare().getType() + " x" + game.getFare().getAmount() + "\n";
 			message += " * Winner's prize: ";
-			if (game.pot == true && game.fare != null)
-				message += "Pot currently at " + game.fare.getAmount()*game.players.size() + " " + game.fare.getType() + "\n";
+			if (game.getPot() == true && game.getFare() != null)
+				message += "Pot currently at " + game.getFare().getAmount()*game.players.size() + " " + game.getFare().getType() + "\n";
 			else {
-				if (game.prize == null)
+				if (game.getPrize() == null)
 					message += "No prize \n";
 				else
-					message += game.prize.getAmount() + " " + game.prize.getType() + "\n";
+					message += game.getPrize().getAmount() + " " + game.getPrize().getType() + "\n";
 			}
 			message += " * Style: " + game.board.name + "\n";
 			sender.sendMessage(message);
