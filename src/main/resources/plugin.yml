@@ -5,90 +5,90 @@ version: 0.0.3
 commands:
   create-game:
     description: generates a bomberman game
-    usage: \create-game <game> [style]
+    usage: /create-game <game> [style]
     permission: bomberman.op 
   destroy-game:
     description: destroys the game and reverts the land to how it was
-    usage: \destroy-game <game>
+    usage: /destroy-game <game>
     permission: bomberman.op
   reset-game:
     description: resets the game to the starting point
-    usage: \reset-game <game> 
+    usage: /reset-game <game> 
     permission: bomberman.op
   join-game:
     description: Places the player into the game
-    usage: \join-game <game>
+    usage: /join-game <game>
     permission: bomberman.player
   leave-game:
     description: Leave the currently joined game
-    useage: \leave-game
+    useage: /leave-game
     permission: bomberman.player
   start-game:
     description: Starts the game
-    usage: \start-game <game>
+    usage: /start-game <game>
     permission: bomberman.op
   stop-game:
     description: Stops the game
-    usage: \stop-game <game>
+    usage: /stop-game <game>
     permission: bomberman.op
   style:
     description: Sets the game's style
-    usage: \style <game> [style] 
+    usage: /style <game> [style] 
     permission: bomberman.player
   lives:
     description: Sets the game's initial lives
-    usage: \lives <game> [amount]
+    usage: /lives <game> [amount]
     permission: bomberman.player
   bombs:
     description: Sets the game's initial bombs
-    usage: \bombs <game> [amount]
+    usage: /bombs <game> [amount]
     permission: bomberman.player
   power:
     description: Sets the players' initial power
-    usage: \power <game> [amount]
+    usage: /power <game> [amount]
     permission: bomberman.player
   min-players:
     description: Sets the game's minimum players
-    usage: \min-players <game> [amount]
+    usage: /min-players <game> [amount]
     permission: bomberman.player
   autostart:
     description: If set to 'true', the game will start once the minimum amount of players have joined.
-    usage: \autostart <game> <true|false>
+    usage: /autostart <game> <true|false>
     permission: bomberman.op
   create-style:
     description: Makes the thing you're looking at a standard board style
-    usage: \create-style <style>
+    usage: /create-style <style>
     permission: bomberman.op
   convert-to-game:
     description: converts the stucture being looked at into an arena
-    usage: \convert-to-game <game>
+    usage: /convert-to-game <game>
     permission: bomberman.op
   list-games:
     description: List all games currently existing
-    usage: \list-games
+    usage: /list-games
     permission: bomberman.player
   list-styles:
     description: Lists all the style currently available
-    usage: \list-styles
+    usage: /list-styles
     permission: bomberman.player
   fare:
     description: Gets/sets what participants must pay to join a game
     usage: 
-      - \fare <game> - gets the game's entry fare
-      - \fare <game> <material> <amount> - set the game's entry fare
-      - \fare <game> none - removes the game's entry fare
+      - /fare <game> - gets the game's entry fare
+      - /fare <game> <material> <amount> - set the game's entry fare
+      - /fare <game> none - removes the game's entry fare
     permission: bomberman.player
   prize:
     description: Gets/sets the amount that the winner will receive. 
     usage:
-      - \prize <game> - gets the game's current prize
-      - \prize <game> pot - winner gets what the total of what the player's entry fare
-      - \prize <game> <material> <amount> - winner gets a fixed amount
-      - \prize <game> none - winner only gets the glory
+      - /prize <game> - gets the game's current prize
+      - /prize <game> pot - winner gets what the total of what the player's entry fare
+      - /prize <game> <material> <amount> - winner gets a fixed amount
+      - /prize <game> none - winner only gets the glory
     permission: bomberman.player
   info:
     description: Gets all the information about a game
-    usage: \info <game>
+    usage: /info <game>
     permission: bomberman.player
   
 permissions:
