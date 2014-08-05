@@ -26,10 +26,11 @@ public class BoardGenerator {
 	 * Loads the default board. If the needed save file is not made, it will create it.
 	 */
 	public static Board loadDefault() {
-		if (loadBoard(Config.defaultBoard) == null) {
+		String style = Config.DEFAULT_STYLE.getValue();
+		if (loadBoard(style) == null) {
 			try {
-				if (!Config.defaultBoard.equals("default"))
-					plugin.getLogger().info("Couldn't find \"" + Config.defaultBoard + ".board\". Using \"default.board\"");
+				if (!Config.DEFAULT_STYLE.getValue().equals("default"))
+					plugin.getLogger().info("Couldn't find \"" + style + ".board\". Using \"default.board\"");
 				InputStream inputStream = plugin.getResource("default.board");
 				File f = new File(plugin.getDataFolder() + "/default.board");
 	 			// write the inputStream to a FileOutputStream
@@ -48,7 +49,7 @@ public class BoardGenerator {
 				e.printStackTrace();
 			}
 		}
-		return loadBoard(Config.defaultBoard);
+		return loadBoard(style);
 	}
 	
 	/**

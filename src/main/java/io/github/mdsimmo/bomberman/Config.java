@@ -12,151 +12,91 @@ import org.bukkit.potion.Potion;
 import org.bukkit.potion.PotionType;
 
 @SuppressWarnings("unchecked")
-public abstract class Config {
+public enum Config {
 
+	FARE ("stake.fare", null),
+	PRIZE ("stake.prize", new ItemStack(Material.DIAMOND, 3)),
+	POT ("stake.pot", false),
+	LIVES ("lives", 3),
+	BOMBS ( "bombs", 3),
+	POWER ( "power", 3),
+	MIN_PLAYERS ( "minplayers", 2),
+	AUTOSTART ( "autostart", false ),
+	DEFAULT_STYLE ("defaultstyle", "default" ),
+	DROPS_ITEMS ("drops.items", Arrays.asList(new ItemStack[] {
+			new ItemStack(Material.TNT, 3),
+			new ItemStack(Material.BLAZE_POWDER, 2),
+			new Potion(PotionType.INSTANT_HEAL, 1).toItemStack(1),
+			new Potion(PotionType.SPEED, 2).toItemStack(1)
+	})),
+	DROPS_CHANCE ("drops.chance", 0.1d),
+	BLOCKS_DROPPING ("blocks.drop", Arrays.asList(new Material[] {
+			Material.DIRT
+		}), Material.class),
+	BLOCKS_DESTRUCTABLE ("blocks.destructable", Arrays.asList(new Material[] {
+			Material.DIRT
+		}), Material.class),
+	SUDDEN_DEATH ("timeout.suddendeath", 60*5),
+	TIME_OUT ("timeout.gameover", 60*8),
+	PROTECT_EXPLOSIONS ("griefprotection.explosion", false),
+	PROTECT_PLACING ("griefprotection.blockplacing", false),
+	PROTECT_DESTROYING ("griefprotection.blockdestroy", false),
+	PROTECT_FIRE ("griefprotection.fire", false);
+	
 	private static Plugin plugin = Bomberman.instance;
 	private static FileConfiguration c = plugin.getConfig();
 	
-	public static final String FARE_PATH = "stake.fare";
-	public static final String PRIZE_PATH = "stake.prize";
-	public static final String LIVES_PATH = "lives";
-	public static final String BOMBS_PATH = "bombs";
-	public static final String POWER_PATH = "power";
-	public static final String MIN_PLAYERS_PATH = "minplayers";
-	public static final String AUTOSTART_PATH = "autostart";
-	public static final String DEFAULT_STYLE = "defaultstyle";
-	public static final String DROPS_ITEMS = "drops.items";
-	public static final String DROPS_CHANCE = "drops.chance";
-	public static final String BLOCKS_DROPPING = "blocks.drop";
-	public static final String BLOCKS_DESTRUCTABLE = "blocks.destructable";
-	public static final String SUDDEN_DEATH = "timeout.suddendeath";
-	public static final String TIME_OUT = "timeout.end";
+	private final String path;
+	private final Object value;
 	
-	protected static ItemStack fare;
-	protected static ItemStack prize;
-	protected static boolean pot;
-	protected static int bombs;
-	protected static int lives;
-	protected static int power;
-	protected static int minPlayers;
-	protected static boolean autostart;
-	protected static String defaultBoard;
-	protected static List<ItemStack> drops;
-	protected static double dropChance;
-	protected static List<Material> destructables;
-	protected static List<Material> droppingBlocks;
-	protected static int timeout;
-	protected static int suddendeath;
+	Config(String path, Object standard) {
+		this(path, standard, Object.class);
+	}
+	
+	Config (String path, Object standard, Object clazzList) {
+		this.path = path;
+		FileConfiguration config = Bomberman.instance.getConfig();
+		if (clazzList == Material.class) {
+			config.addDefault(path, MaterialToString((List<Material>) standard));
+			value = StringtoMaterial((List<String>) config.get(path));
+		} else {
+			config.addDefault(path, standard);
+			value = config.get(path);
+		}
+	}
 	
 	static {
-		// add defaults
-		c.addDefault(LIVES_PATH, 3);
-		c.addDefault(BOMBS_PATH, 3);
-		c.addDefault(POWER_PATH, 3);
-		c.addDefault(AUTOSTART_PATH, false);
-		c.addDefault(MIN_PLAYERS_PATH, 2);
-		c.addDefault(DEFAULT_STYLE, "default");
-		c.addDefault(FARE_PATH, null);
-		c.addDefault(PRIZE_PATH, new ItemStack(Material.DIAMOND, 3));
-		c.addDefault(SUDDEN_DEATH, 35);
-		c.addDefault(TIME_OUT, 70);
-		ItemStack[] dropsTemp = { 
-				new ItemStack(Material.TNT, 3),
-				new ItemStack(Material.BLAZE_POWDER, 2),
-				new Potion(PotionType.INSTANT_HEAL, 1).toItemStack(1),
-				new Potion(PotionType.SPEED, 2).toItemStack(1)};
-		c.addDefault(DROPS_ITEMS, Arrays.asList(dropsTemp));
-		c.addDefault(DROPS_CHANCE, 0.1d);
-		writeMaterials(c, BLOCKS_DROPPING, Arrays.asList(new Material[] {
-			Material.DIRT
-		}));
-		writeMaterials(c, BLOCKS_DESTRUCTABLE, Arrays.asList(new Material[] {
-				Material.DIRT
-			}));
-		
-		// save defaults
 		c.options().copyDefaults(true);
 		plugin.saveConfig();
-
-		// load user preferences
-		bombs = c.getInt(BOMBS_PATH);
-		power = c.getInt(POWER_PATH);
-		lives = c.getInt(LIVES_PATH);
-		minPlayers = c.getInt(MIN_PLAYERS_PATH);
-		autostart = c.getBoolean(AUTOSTART_PATH);
-		defaultBoard = c.getString(DEFAULT_STYLE);
-		drops = (List<ItemStack>)c.getList(DROPS_ITEMS);
-		dropChance = c.getDouble(DROPS_CHANCE);
-		destructables = (List<Material>) c.getList(BLOCKS_DESTRUCTABLE);
-		droppingBlocks = (List<Material>) c.getList(BLOCKS_DROPPING);
-		fare = c.getItemStack(FARE_PATH);
-		if (c.getString(PRIZE_PATH).equals("pot")) {
-			prize = null;
-			pot = true;
-		} else {
-			prize = c.getItemStack(PRIZE_PATH);
-			pot = false;
-		}
-		timeout = c.getInt(TIME_OUT);
-		suddendeath = c.getInt(SUDDEN_DEATH);
 	}
 	
-	public static void writeMaterials(FileConfiguration config, String path, List<Material> materials) {
+	public <T> T getValue() {
+		return (T) value;
+	}
+	
+	public <T> T getValue(FileConfiguration config) {
+		if (config != null && config.contains(path))
+			return (T) config.get(path);
+		else
+			return (T) value;
+	}
+	
+	public String getPath() {
+		return path;
+	}
+	
+	private static List<String> MaterialToString(List<Material> materials) {
 		List<String> converted = new ArrayList<>();
-		for (Material m : materials) {
+		for (Material m : materials)
 			converted.add(m.toString());
-		}
-		config.set(path, converted);
+		return converted;
 	}
 	
-	public static List<Material> getMaterialList(FileConfiguration config, String path) {
+	private static List<Material> StringtoMaterial(List<String> strings) {
 		List<Material> materials = new ArrayList<>();
-		List<String> values = config.getStringList(path);
-		for (String s : values) {
+		for (String s : strings) {
 			materials.add(Material.valueOf(s));
 		}
 		return materials;
-	}
-	
-	public static int tryInt (FileConfiguration config, String path) {
-		if (config.contains(path))
-			return config.getInt(path);
-		else
-			return c.getInt(path);
-	}
-	
-	public static double tryDouble (FileConfiguration config, String path) {
-		if (config.contains(path))
-			return config.getDouble(path);
-		else
-			return c.getDouble(path);
-	}
-	
-	public static boolean tryBoolean (FileConfiguration config, String path) {
-		if (config.contains(path))
-			return config.getBoolean(path);
-		else
-			return c.getBoolean(path);
-	}
-	
-	public static ItemStack tryStack (FileConfiguration config, String path) {
-		if (config.contains(path))
-			return config.getItemStack(path);
-		else
-			return c.getItemStack(path);
-	}
-	
-	public static List<ItemStack> tryStackList (FileConfiguration config, String path) {
-		if (config.contains(path))
-			return (List<ItemStack>) config.getList(path);
-		else
-			return (List<ItemStack>) c.getList(path);
-	}
-	
-	public static List<Material> tryMaterialList (FileConfiguration config, String path) {
-		if (config.contains(path))
-			return getMaterialList(config, path);
-		else
-			return getMaterialList(c, path);
 	}
 }
