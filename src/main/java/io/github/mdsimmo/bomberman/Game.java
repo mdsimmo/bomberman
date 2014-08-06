@@ -259,6 +259,7 @@ public class Game implements Listener {
 					ItemStack drop = stack.clone();
 					drop.setAmount(1);
 					l.getWorld().dropItem(l, drop);
+					return;
 				}
 			}
 		}
