@@ -39,7 +39,8 @@ public class GameCommander implements CommandExecutor, TabCompleter {
 				"fare",
 				"prize",
 				"info",
-				"autostart"};
+				"autostart",
+				"autostartdelay"};
 			for (String cmd : commands) {
 			plugin.getCommand(cmd).setExecutor(this);
 			plugin.getCommand(cmd).setTabCompleter(this);
@@ -259,6 +260,24 @@ public class GameCommander implements CommandExecutor, TabCompleter {
 				return false;
 			sender.sendMessage("Autostart set to " + game.getAutostart());
 			return true;
+		case "autostartdelay":
+		    if (args.length != 2)
+		        return false;
+		    
+		    game = Game.findGame(args[0]);
+		    
+		    if (game == null) {
+		        sender.sendMessage("Cannot find game");
+		        return true;
+		    }
+		    
+		    try {
+		        game.setAutostartDelay(Integer.parseInt(args[1]));
+		        sender.sendMessage("Autostart delay set to " + game.getAutostartDelay());
+		    } catch (NumberFormatException e) {
+		        sender.sendMessage("Delay entered is not a valid number");
+		    }
+		    return true;
 		case "power":
 		case "bombs":
 		case "lives":

@@ -93,6 +93,7 @@ public class Game implements Listener {
 	}
 	
 	private boolean autostart;
+	private int autostartDelay;
 
 	protected Board board;
 	private int bombs;
@@ -275,6 +276,10 @@ public class Game implements Listener {
 	public boolean getAutostart() {
 		return autostart;
 	}
+	
+	public int getAutostartDelay() {
+	    return autostartDelay;
+	}
 
 	public int getBombs() {
 		return bombs;
@@ -403,6 +408,11 @@ public class Game implements Listener {
 	public void setAutostart(boolean autostart) {
 		this.autostart = autostart;
 		save.set(Config.AUTOSTART.getPath(), autostart);
+	}
+	
+	public void setAutostartDelay(int delay) {
+	    this.autostartDelay = delay;
+	    save.set(Config.AUTOSTART_DELAY.getPath(), delay);
 	}
 	
 	public void setBombs(int bombs) {

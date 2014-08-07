@@ -22,6 +22,7 @@ public enum Config {
 	POWER ( "power", 3),
 	MIN_PLAYERS ( "minplayers", 2),
 	AUTOSTART ( "autostart", false ),
+	AUTOSTART_DELAY ( "autostart.delay", 30 ),
 	DEFAULT_STYLE ("defaultstyle", "default" ),
 	DROPS_ITEMS ("drops.items", Arrays.asList(new ItemStack[] {
 			new ItemStack(Material.TNT, 3),
