@@ -219,12 +219,27 @@ public class Game implements Listener {
         }
 	}
 	
+	public void sendMessage(Player[] playerList, String message) {
+	    for(Player p : playerList) {
+	        sendMessage(p, message);
+	    }
 	}
 	
+	public void sendMessage(ArrayList<PlayerRep> playerList, String message) {
+	    for(PlayerRep p : playerList) {
+	        sendMessage(p.player, message);
+	    }
 	}
 	
+	private void sendMessage(Player p, String message) {
+	    p.sendMessage(ChatColor.GREEN + "[BomberMan] " + ChatColor.WHITE + message);
 	}
 
+	public void announceQueue() {
+        sendMessage(plugin.getServer().getOnlinePlayers(), "Game "
+                + ChatColor.YELLOW + name + ChatColor.WHITE
+                + " is starting soon. Type " + ChatColor.AQUA + "/join-game "
+                + name + ChatColor.WHITE + " to play!");
 	}
 
 	/**
