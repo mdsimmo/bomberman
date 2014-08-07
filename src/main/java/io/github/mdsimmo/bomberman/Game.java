@@ -26,6 +26,63 @@ import org.bukkit.util.Vector;
 
 public class Game implements Listener {
 
+	class GameStarter implements Runnable {
+		int count = 3;
+		private int taskId;
+
+		public GameStarter() {
+			taskId = plugin.getServer().getScheduler()
+					.scheduleSyncDelayedTask(plugin, this);
+		}
+		
+		public GameStarter(int delay) {
+		    count = delay;
+            taskId = plugin.getServer().getScheduler()
+                    .scheduleSyncDelayedTask(plugin, this);
+        }
+		
+		public void destroy() {
+		    plugin.getServer().getScheduler().cancelTask(taskId);
+		    countdownTimer = null;
+		}
+
+		public int getTaskId() {
+		    return taskId;
+		}
+		
+		public void run() {
+		    // Let online players know about the fun :)
+		    if (count == autostartDelay) {
+		        for (Player p : plugin.getServer().getOnlinePlayers()) {
+		            p.sendMessage(ChatColor.GREEN + "[BomberMan] " + ChatColor.WHITE + "Game " + ChatColor.YELLOW + name + ChatColor.WHITE + " starting in " + count + " seconds!");
+		        }
+		    }
+		    
+		    if (count > 0) {
+		        // Keep the timer running until it ends
+	            taskId = plugin.getServer().getScheduler().scheduleSyncDelayedTask(plugin, this, 20);
+	            
+		        // Notify waiting players every 15 seconds until count <= 15,
+		        // notify every 5 until count <= 3,
+		        // notify every second last 3 seconds
+		        if (count % 15 == 0 || (count < 15 && count % 5 == 0) || count <= 3)
+    				for (PlayerRep rep : observers)
+    					rep.player.sendMessage(ChatColor.GREEN + "[BomberMan] " + ChatColor.WHITE + "Game starting in " + count + "...");
+			} else {
+				for (PlayerRep rep : observers) {
+					rep.player.sendMessage(ChatColor.YELLOW + "Game started!");
+					isPlaying = true;
+					if (suddenDeath >= 0 || timeout >= 0)
+						new SuddenDeathCounter(Game.this);
+					
+					// Cleanup and destroy the countdown timer
+					destroy();
+				}
+			}
+			count--;
+		}
+
+	}
 	private static HashMap<String, Game> gameRegistry = new HashMap<>();
 	
 	private static Plugin plugin = Bomberman.instance;
@@ -130,6 +187,15 @@ public class Game implements Listener {
 		plugin.getServer().getPluginManager().registerEvents(this, plugin);
 	}
 	
+	public void addPlayer(PlayerRep rep) {
+		players.add(rep);
+		if (autostart) {
+		    if (findSpareSpawn() == null) {
+		        startGame();
+		    } else if (this.players.size() >= this.minPlayers) {
+		        startGame(autostartDelay, false);
+		    }
+		}
 			
 	}
 	
@@ -480,6 +546,31 @@ public class Game implements Listener {
 	 * Starts the game with a default delay of 3 seconds
 	 * @return true if the game was started successfully
 	 */
+	public boolean startGame() {
+		return startGame(3, true);
+	}
+	
+	/**
+     * Starts the game with a given delay
+     * @return true if the game was started successfully
+     */
+	public boolean startGame(int delay, boolean override) {
+        if (players.size() >= minPlayers) {
+            if (override) {
+                if (countdownTimer != null)
+                    countdownTimer.destroy();
+                countdownTimer = new GameStarter(delay);
+            }
+            if (countdownTimer == null) { 
+                countdownTimer = new GameStarter(delay);
+                announceQueue();
+            }
+            return true;
+        } else {
+            return false;
+        }
+    }
+
 	/** 
 	 * Terminates the game. <br>
 	 * Kicks all playes out. Doesn't give awards. Does not deregister the game
