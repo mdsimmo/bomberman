@@ -57,12 +57,12 @@ public class PlayerRep implements Listener {
 			player.sendMessage("game full");
 			return;
 		} else {
-			if (game.fare != null) {
-				if (player.getInventory().contains(game.fare.getType(), game.fare.getAmount())
+			if (game.getFare() != null) {
+				if (player.getInventory().contains(game.getFare().getType(), game.getFare().getAmount())
 						|| player.getGameMode() == GameMode.CREATIVE)
-					player.getInventory().removeItem(game.fare);
+					player.getInventory().removeItem(game.getFare());
 				else {
-					player.sendMessage("You need at least " + game.fare.getAmount() + " " + game.fare.getType().toString().toLowerCase());
+					player.sendMessage("You need at least " + game.getFare().getAmount() + " " + game.getFare().getType().toString().toLowerCase());
 					return;
 				}
 			}
@@ -71,25 +71,16 @@ public class PlayerRep implements Listener {
 			player.teleport(game.loc.clone().add(gameSpawn));
 		}
 		player.setGameMode(GameMode.SURVIVAL);
-		player.setHealth(game.lives);
-		player.setMaxHealth(game.lives);
-		player.setHealthScale(game.lives * 2);
+		player.setHealth(game.getLives());
+		player.setMaxHealth(game.getLives());
+		player.setHealthScale(game.getLives() * 2);
 		spawnInventory = player.getInventory().getContents();
 		player.getInventory().setContents(
-				new ItemStack[] { new ItemStack(Material.TNT, game.bombs),
-						new ItemStack(Material.BLAZE_POWDER, game.power) });
+				new ItemStack[] { new ItemStack(Material.TNT, game.getBombs()),
+						new ItemStack(Material.BLAZE_POWDER, game.getPower()) });
 
 		isPlaying = true;
-		game.players.add(this);
-		if (game.findSpareSpawn() == null) {
-		    // Automatically start the game in 3 seconds if the game is full.
-		    game.startGame();
-		} else if (game.players.size() >= game.minPlayers) {
-		    // Automatically start the game in 30 seconds after the minimum number of players have joined.
-		    game.startGame(30, false);
-		} else if (game.players.size() == 1) {
-		    game.announceQueue();
-		}
+		game.addPlayer(this);
 	}
 
 	/**
@@ -119,8 +110,12 @@ public class PlayerRep implements Listener {
 			if (alert)
 				game.alertRemoval(this);
 			
-			if (game.players.size() <= 1 && game.getCountdownTimer() != null)
+			if (game.players.size() <= 1 && game.getCountdownTimer() != null) {
 			    game.getCountdownTimer().destroy();
+			    for (PlayerRep p : game.players) {
+			        p.player.sendMessage(ChatColor.GREEN + "[BomberMan] " + ChatColor.WHITE + "Not enough players remaining. The countdown timer has been stopped.");
+			    }
+			}
 		}
 	}
 	
@@ -218,8 +213,12 @@ public class PlayerRep implements Listener {
 	public void onPlayerRegen(EntityRegainHealthEvent e) {
 		if (e.getEntity() == player && isPlaying) {
 			if (e.getRegainReason() == RegainReason.MAGIC)
-				player.setHealth(Math.min(player.getHealth() + 1,
-						player.getMaxHealth()));
+				if (game.isSuddenDeath())
+					player.sendMessage("No regen in sudden death!");
+				else
+					player.setHealth(Math.min(player.getHealth() + 1,
+							player.getMaxHealth()));
+					
 			e.setCancelled(true);
 		}
 	}

@@ -1,61 +1,102 @@
 package io.github.mdsimmo.bomberman;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
 import org.bukkit.Material;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.Plugin;
+import org.bukkit.potion.Potion;
+import org.bukkit.potion.PotionType;
 
-public class Config {
+@SuppressWarnings("unchecked")
+public enum Config {
 
+	FARE ("stake.fare", null),
+	PRIZE ("stake.prize", new ItemStack(Material.DIAMOND, 3)),
+	POT ("stake.pot", false),
+	LIVES ("lives", 3),
+	BOMBS ( "bombs", 3),
+	POWER ( "power", 3),
+	MIN_PLAYERS ( "minplayers", 2),
+	AUTOSTART ( "autostart", false ),
+	DEFAULT_STYLE ("defaultstyle", "default" ),
+	DROPS_ITEMS ("drops.items", Arrays.asList(new ItemStack[] {
+			new ItemStack(Material.TNT, 3),
+			new ItemStack(Material.BLAZE_POWDER, 2),
+			new Potion(PotionType.INSTANT_HEAL, 1).toItemStack(1),
+			new Potion(PotionType.SPEED, 2).toItemStack(1)
+	})),
+	DROPS_CHANCE ("drops.chance", 0.1d),
+	BLOCKS_DROPPING ("blocks.drop", Arrays.asList(new Material[] {
+			Material.DIRT
+		}), Material.class),
+	BLOCKS_DESTRUCTABLE ("blocks.destructable", Arrays.asList(new Material[] {
+			Material.DIRT
+		}), Material.class),
+	SUDDEN_DEATH ("timeout.suddendeath", 60*5),
+	TIME_OUT ("timeout.gameover", 60*8),
+	PROTECT_EXPLOSIONS ("griefprotection.explosion", false),
+	PROTECT_PLACING ("griefprotection.blockplacing", false),
+	PROTECT_DESTROYING ("griefprotection.blockdestroy", false),
+	PROTECT_FIRE ("griefprotection.fire", false);
+	
 	private static Plugin plugin = Bomberman.instance;
-	private FileConfiguration c = plugin.getConfig();
+	private static FileConfiguration c = plugin.getConfig();
 	
-	public static final String FARE_PATH = "stake.fare";
-	public static String PRIZE_PATH = "stake.prize";
-	public static String LIVES_PATH = "lives";
-	public static String BOMBS_PATH = "bombs";
-	public static String POWER_PATH = "power";
-	public static String MIN_PLAYERS_PATH = "minplayers";
-	public static String DEFAULT_STYLE = "defaultstyle";
+	private final String path;
+	private final Object value;
 	
-	protected static ItemStack fare;
-	protected static ItemStack prize;
-	protected static boolean pot;
-	protected static int bombs;
-	protected static int lives;
-	protected static int power;
-	public static int minPlayers;
-	protected static String defaultBoard;
-	
-	public Config() {
-		setupConfig();
-		bombs = c.getInt(BOMBS_PATH);
-		power = c.getInt(POWER_PATH);
-		lives = c.getInt(LIVES_PATH);
-		minPlayers = c.getInt(MIN_PLAYERS_PATH);
-		defaultBoard = c.getString(DEFAULT_STYLE);
-		
-		fare = c.getItemStack(FARE_PATH);
-		if (c.getString(PRIZE_PATH).equals("pot")) {
-			prize = null;
-			pot = true;
-		} else {
-			prize = c.getItemStack(PRIZE_PATH);
-			pot = false;
-		}
-		
+	Config(String path, Object standard) {
+		this(path, standard, Object.class);
 	}
 	
-	private void setupConfig() {
-		c.addDefault(LIVES_PATH, 3);
-		c.addDefault(BOMBS_PATH, 3);
-		c.addDefault(POWER_PATH, 3);
-		c.addDefault(MIN_PLAYERS_PATH, 1);
-		c.addDefault(DEFAULT_STYLE, "default");
-		c.addDefault(FARE_PATH, null);
-		c.addDefault(PRIZE_PATH, new ItemStack(Material.DIAMOND, 3));
+	Config (String path, Object standard, Object clazzList) {
+		this.path = path;
+		FileConfiguration config = Bomberman.instance.getConfig();
+		if (clazzList == Material.class) {
+			config.addDefault(path, MaterialToString((List<Material>) standard));
+			value = StringtoMaterial((List<String>) config.get(path));
+		} else {
+			config.addDefault(path, standard);
+			value = config.get(path);
+		}
+	}
+	
+	static {
 		c.options().copyDefaults(true);
 		plugin.saveConfig();
 	}
 	
+	public <T> T getValue() {
+		return (T) value;
+	}
+	
+	public <T> T getValue(FileConfiguration config) {
+		if (config != null && config.contains(path))
+			return (T) config.get(path);
+		else
+			return (T) value;
+	}
+	
+	public String getPath() {
+		return path;
+	}
+	
+	private static List<String> MaterialToString(List<Material> materials) {
+		List<String> converted = new ArrayList<>();
+		for (Material m : materials)
+			converted.add(m.toString());
+		return converted;
+	}
+	
+	private static List<Material> StringtoMaterial(List<String> strings) {
+		List<Material> materials = new ArrayList<>();
+		for (String s : strings) {
+			materials.add(Material.valueOf(s));
+		}
+		return materials;
+	}
 }
