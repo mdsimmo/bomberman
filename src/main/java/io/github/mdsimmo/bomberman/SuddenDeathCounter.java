@@ -26,33 +26,33 @@ public class SuddenDeathCounter implements Runnable {
 		timeout--;
 		suddenDeath--;
 		if (timeout == 30)
-		    game.sendMessage(game.players, "Game over in "
+		    Bomberman.sendMessage(game.players, "Game over in "
                     + ChatColor.YELLOW + timeout + ChatColor.WHITE
                     + " seconds!");
 		if (timeout == 10)
-		    game.sendMessage(game.observers, "Game over in "
+		    Bomberman.sendMessage(game.observers, "Game over in "
                     + ChatColor.YELLOW + timeout + ChatColor.WHITE
                     + " seconds!");
 		else if (timeout < 10 && timeout > 0)
-		    game.sendMessage(game.players, "" + timeout);
+		    Bomberman.sendMessage(game.players, "" + timeout);
 		else if (timeout == 0) {
-		    game.sendMessage(game.observers, "Game over!");
+		    Bomberman.sendMessage(game.observers, "Game over!");
 			game.terminate();
 		}
 		
 		if (suddenDeath == 30)
-            game.sendMessage(game.players, "Sudden death in "
+		    Bomberman.sendMessage(game.players, "Sudden death in "
                     + ChatColor.YELLOW + suddenDeath + ChatColor.WHITE
                     + " seconds!");
 		
 		if (suddenDeath <= 10) {
 		    if (suddenDeath == 10)
-                game.sendMessage(game.observers, "Sudden death in " + ChatColor.YELLOW
+		        Bomberman.sendMessage(game.observers, "Sudden death in " + ChatColor.YELLOW
                         + suddenDeath + ChatColor.WHITE + " seconds!");
 		    else if (suddenDeath > 0) {
-		        game.sendMessage(game.players, "" + suddenDeath);
+		        Bomberman.sendMessage(game.players, "" + suddenDeath);
 		    } else {
-		        game.sendMessage(game.observers, ChatColor.RED + "Sudden death!");
+		        Bomberman.sendMessage(game.observers, ChatColor.RED + "Sudden death!");
 	            game.setSuddenDeath(true);
 		    }
 		}

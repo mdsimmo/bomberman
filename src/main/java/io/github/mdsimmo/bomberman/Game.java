@@ -214,13 +214,13 @@ public class Game implements Listener {
 	 */
 	public void alertRemoval(PlayerRep player) {
 		if (!checkFinish()) {
-            sendMessage(observers, ChatColor.YELLOW + player.player.getName()
+            Bomberman.sendMessage(observers, ChatColor.YELLOW + player.player.getName()
                     + ChatColor.WHITE + " is out.");
         }
 	}
 	
 	public void announceQueue() {
-        sendMessage(plugin.getServer().getOnlinePlayers(), "Game "
+        Bomberman.sendMessage(plugin.getServer().getOnlinePlayers(), "Game "
                 + ChatColor.YELLOW + name + ChatColor.WHITE
                 + " is starting soon. Type " + ChatColor.AQUA + "/join-game "
                 + name + ChatColor.WHITE + " to play!");

@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.command.Command;
@@ -197,7 +198,7 @@ public class GameCommander implements CommandExecutor, TabCompleter {
         if (sender instanceof Player) {
             Game game = Game.findGame(argsList.get(0)); 
             if (game == null) {
-                sender.sendMessage("Game not found");
+                Bomberman.sendMessage(sender, "Game not found");
             } else {
                 if (game.isPlaying == false) {
                     PlayerRep rep = game.getPlayerRep((Player)sender); 
@@ -206,18 +207,18 @@ public class GameCommander implements CommandExecutor, TabCompleter {
                     for (String name : Game.allGames()) {
                         for (PlayerRep test : Game.findGame(name).players)
                             if (test.player == rep.player) {
-                                sender.sendMessage("You can't join twice!");
+                                Bomberman.sendMessage(sender, "You can't join twice!");
                                 return true;
                             }
                     }
                     rep.joinGame();
                     
                 } else {
-                    sender.sendMessage("Game has already started");
+                    Bomberman.sendMessage(sender, "Game has already started");
                 }
             }
         } else {
-            sender.sendMessage("You must be a player to join");
+            Bomberman.sendMessage(sender, "You must be a player to join");
         }
         return true;
     }
@@ -234,7 +235,7 @@ public class GameCommander implements CommandExecutor, TabCompleter {
                 }
             }
         }
-        sender.sendMessage("You're not part of a game");
+        Bomberman.sendMessage(sender, "You're not part of a game");
         return true;
     }
 
@@ -244,7 +245,7 @@ public class GameCommander implements CommandExecutor, TabCompleter {
         
         Game game = Game.findGame(argsList.get(0));
         if (game == null) {
-            sender.sendMessage("Game not found");
+            Bomberman.sendMessage(sender, "Game not found");
             return true;
         }
         String message = "About " + game.name + ":\n";
@@ -275,16 +276,16 @@ public class GameCommander implements CommandExecutor, TabCompleter {
                 message += game.getPrize().getAmount() + " " + game.getPrize().getType() + "\n";
         }
         message += " * Arena: " + game.board.name + "\n";
-        sender.sendMessage(message);
+        Bomberman.sendMessage(sender, message);
         return true;
     }
 
     private boolean listCommand(CommandSender sender, ArrayList<String> argsList) {
         List<String> games = Game.allGames();
         if (games.size() == 0) {
-            sender.sendMessage("No games");
+            Bomberman.sendMessage(sender, "No games");
         } else {
-            sender.sendMessage("Current games:");
+            Bomberman.sendMessage(sender, "Current games:");
             for (String name : games) {
                 Game game = Game.findGame(name);
                 String status = " * " + game.name;
@@ -294,7 +295,7 @@ public class GameCommander implements CommandExecutor, TabCompleter {
                 else
                     status += "waiting  ";
                         
-                sender.sendMessage(status);
+                Bomberman.sendMessage(sender, status);
             }
         }
         return true;
@@ -305,7 +306,7 @@ public class GameCommander implements CommandExecutor, TabCompleter {
             return false;
         if (sender instanceof Player) {
             if (Game.findGame(argsList.get(0)) != null) {
-                sender.sendMessage("Game already exists");
+                Bomberman.sendMessage(sender, "Game already exists");
             } else {
                 Board arena;
                 if (argsList.size() == 2) {
@@ -314,16 +315,16 @@ public class GameCommander implements CommandExecutor, TabCompleter {
                     arena = BoardGenerator.loadDefault();
                 }
                 if (arena == null) {
-                    sender.sendMessage("Arena not found");
+                    Bomberman.sendMessage(sender, "Arena not found");
                     return true;
                 }
                 // long location getting line to round to integers...
                 Location l = ((Player)sender).getLocation().getBlock().getLocation();
                 createGame(argsList.get(0), l, arena);
-                sender.sendMessage("Game created");
+                Bomberman.sendMessage(sender, "Game created");
             }
         } else {
-            sender.sendMessage("You must be a player");
+            Bomberman.sendMessage(sender, "You must be a player");
         }
         return true;
     }
@@ -334,9 +335,9 @@ public class GameCommander implements CommandExecutor, TabCompleter {
         Game game = Game.findGame(argsList.get(0)); 
         if (game != null) {
             destroyGame(game);
-            sender.sendMessage("Game destroyed");
+            Bomberman.sendMessage(sender, "Game destroyed");
         } else
-            sender.sendMessage("Game not found");
+            Bomberman.sendMessage(sender, "Game not found");
         return true;
     }
     
@@ -345,7 +346,7 @@ public class GameCommander implements CommandExecutor, TabCompleter {
             return false;
         if (sender instanceof Player) {
             if (Game.findGame(argsList.get(0)) != null) {
-                sender.sendMessage("Game already exists");
+                Bomberman.sendMessage(sender, "Game already exists");
             } else {
                 Location[] locations = BoardGenerator.getBoundingStructure((Player)sender, argsList.get(0));
                 Board board = BoardGenerator.createArena(argsList.get(0), locations[0], locations[1]);
@@ -354,10 +355,10 @@ public class GameCommander implements CommandExecutor, TabCompleter {
                 game.board = board;
                 game.oldBoard = board;
                 Game.register(game);
-                sender.sendMessage("Game created");
+                Bomberman.sendMessage(sender, "Game created");
             }
         } else {
-            sender.sendMessage("You must be a player");
+            Bomberman.sendMessage(sender, "You must be a player");
         }
         return true;
     }
@@ -368,14 +369,14 @@ public class GameCommander implements CommandExecutor, TabCompleter {
         }
         Game game = Game.findGame(argsList.get(0));
         if (game == null)
-            sender.sendMessage("Game not found");
+            Bomberman.sendMessage(sender, "Game not found");
         else if (game.isPlaying)
-            sender.sendMessage("Game already started");
+            Bomberman.sendMessage(sender, "Game already started");
         else {
             if (game.startGame())
-                sender.sendMessage("Game starting");
+                Bomberman.sendMessage(sender, "Game starting");
             else
-                sender.sendMessage("There are not enough players");
+                Bomberman.sendMessage(sender, "There are not enough players");
         }
         return true;
     }
@@ -386,12 +387,12 @@ public class GameCommander implements CommandExecutor, TabCompleter {
         }
         Game game = Game.findGame(argsList.get(0));
         if (game == null)
-            sender.sendMessage("Game not found");
+            Bomberman.sendMessage(sender, "Game not found");
         else if (!game.isPlaying)
-            sender.sendMessage("Game hasn't started");
+            Bomberman.sendMessage(sender, "Game hasn't started");
         else {
             game.terminate();
-            sender.sendMessage("Game stopped");
+            Bomberman.sendMessage(sender, "Game stopped");
         }
         return true;
     }
@@ -401,12 +402,12 @@ public class GameCommander implements CommandExecutor, TabCompleter {
             return false;
         Game game = Game.findGame(argsList.get(0));
         if (game == null) {
-            sender.sendMessage("Game not found");
+            Bomberman.sendMessage(sender, "Game not found");
             return true;
         }
         game.terminate();
         BoardGenerator.switchBoard(game.board, game.board, game.loc);
-        sender.sendMessage("Game reset");
+        Bomberman.sendMessage(sender, "Game reset");
         return true;
     }
 
@@ -415,28 +416,28 @@ public class GameCommander implements CommandExecutor, TabCompleter {
             return false;
         Game game = Game.findGame(argsList.get(0));
         if (game == null) {
-            sender.sendMessage("Game not found");
+            Bomberman.sendMessage(sender, "Game not found");
             return true;
         }
         if (argsList.size() == 1) {
-            sender.sendMessage("Arena: " + game.board.name);
+            Bomberman.sendMessage(sender, "Arena: " + game.board.name);
             return true;
         } else {
             if (game.isPlaying) {
-                sender.sendMessage("Game in progress");
+                Bomberman.sendMessage(sender, "Game in progress");
                 return true;
             }
                 
             Board board = BoardGenerator.loadBoard(argsList.get(1));
             if (board == null) {
-                sender.sendMessage("Arena not found");
+                Bomberman.sendMessage(sender, "Arena not found");
                 return true;
             }
             BoardGenerator.switchBoard(game.board, game.oldBoard, game.loc);
             game.board = board;
             game.oldBoard = BoardGenerator.createArena(game.name+".old", game.loc, board.xSize, board.ySize, board.zSize);
             BoardGenerator.switchBoard(game.oldBoard, board, game.loc);
-            sender.sendMessage("Game arena changed");
+            Bomberman.sendMessage(sender, "Game arena changed");
             return true;
         }
     }
@@ -448,18 +449,18 @@ public class GameCommander implements CommandExecutor, TabCompleter {
         Game game = Game.findGame(argsList.get(0));
         
         if (game == null) {
-            sender.sendMessage("Game not found");
+            Bomberman.sendMessage(sender, "Game not found");
             return true;
         } else {
             if (argsList.size() == 1) {
                 if (attribute.equals("bombs"))
-                    sender.sendMessage("Starting " + attribute + ": " + game.getBombs());
+                    Bomberman.sendMessage(sender, "Starting " + attribute + ": " + game.getBombs());
                 else if (attribute.equals("power"))
-                    sender.sendMessage("Starting " + attribute + ": " + game.getPower());
+                    Bomberman.sendMessage(sender, "Starting " + attribute + ": " + game.getPower());
                 else if (attribute.equals("lives"))
-                    sender.sendMessage("Starting " + attribute + ": " + game.getLives());
+                    Bomberman.sendMessage(sender, "Starting " + attribute + ": " + game.getLives());
                 else if (attribute.equals("minplayers"))
-                    sender.sendMessage("Minimum players: " + game.getMinPlayers());
+                    Bomberman.sendMessage(sender, "Minimum players: " + game.getMinPlayers());
                 return true;
             } else {
                 int num = 0;
@@ -478,7 +479,7 @@ public class GameCommander implements CommandExecutor, TabCompleter {
                 else if (attribute.equals("minplayers"))
                     game.setMinPlayers(num);
 
-                sender.sendMessage(attribute.toUpperCase() + " set");
+                Bomberman.sendMessage(sender, attribute.toUpperCase() + " set");
                 return true;
             }
         }
@@ -489,7 +490,7 @@ public class GameCommander implements CommandExecutor, TabCompleter {
             return false;
         Game game = Game.findGame(argsList.get(0));
         if (game == null) {
-            sender.sendMessage("Cannot find game");
+            Bomberman.sendMessage(sender, "Cannot find game");
             return true;
         }
         if (argsList.get(1).equalsIgnoreCase("true")) {
@@ -498,7 +499,7 @@ public class GameCommander implements CommandExecutor, TabCompleter {
             game.setAutostart(false);
         else
             return false;
-        sender.sendMessage("Autostart set to " + game.getAutostart());
+        Bomberman.sendMessage(sender, "Autostart set to " + game.getAutostart());
         return true;
     }
 
@@ -509,15 +510,15 @@ public class GameCommander implements CommandExecutor, TabCompleter {
         Game game = Game.findGame(argsList.get(0));
         
         if (game == null) {
-            sender.sendMessage("Cannot find game");
+            Bomberman.sendMessage(sender, "Cannot find game");
             return true;
         }
         
         try {
             game.setAutostartDelay(Integer.parseInt(argsList.get(1)));
-            sender.sendMessage("Autostart delay set to " + game.getAutostartDelay());
+            Bomberman.sendMessage(sender, "Autostart delay set to " + game.getAutostartDelay());
         } catch (NumberFormatException e) {
-            sender.sendMessage("Delay entered is not a valid number");
+            Bomberman.sendMessage(sender, "Delay entered is not a valid number");
         }
         return true;
     }
@@ -527,42 +528,42 @@ public class GameCommander implements CommandExecutor, TabCompleter {
             return false;
         Game game = Game.findGame(argsList.get(0));
         if (game == null) {
-            sender.sendMessage("Game not found");
+            Bomberman.sendMessage(sender, "Game not found");
             return true;
         }
         if (argsList.size() == 1) {
             if (attribute.equals("fare")) {
                 if (game.getFare() != null)
-                    sender.sendMessage("Fare: " + game.getFare().getAmount() + " " + game.getFare().getType());
+                    Bomberman.sendMessage(sender, "Fare: " + game.getFare().getAmount() + " " + game.getFare().getType());
                 else
-                    sender.sendMessage("No fare");
+                    Bomberman.sendMessage(sender, "No fare");
             } else {
                 if (game.getPrize() != null)
-                    sender.sendMessage("Prize: " + game.getPrize().getAmount() + " " + game.getPrize().getType());
+                    Bomberman.sendMessage(sender, "Prize: " + game.getPrize().getAmount() + " " + game.getPrize().getType());
                 else
                     if (game.getPot() == true)
-                        sender.sendMessage("Game has a pot");
+                        Bomberman.sendMessage(sender, "Game has a pot");
                     else
-                        sender.sendMessage("No prize");
+                        Bomberman.sendMessage(sender, "No prize");
             }
             return true;
         } else {
             if (!sender.hasPermission("bomberman.op")) {
-                sender.sendMessage("You may only view what the " + attribute + " is");
+                Bomberman.sendMessage(sender, "You may only view what the " + attribute + " is");
                 return true;
             }
             if (argsList.size() == 2) {
                 if (argsList.get(1).equalsIgnoreCase("pot")) {
                     game.setPrize(null, true);
-                    sender.sendMessage("Prize set");
+                    Bomberman.sendMessage(sender, "Prize set");
                     return true;
                 } else if (argsList.get(1).equals("none")) {
                     if (attribute.equalsIgnoreCase("fare")) {
                         game.setFare(null);
-                        sender.sendMessage("Fare removed");
+                        Bomberman.sendMessage(sender, "Fare removed");
                     } else {
                         game.setPrize(null, false);
-                        sender.sendMessage("Prize removed");
+                        Bomberman.sendMessage(sender, "Prize removed");
                     }
                     return true;
                 }
@@ -572,14 +573,14 @@ public class GameCommander implements CommandExecutor, TabCompleter {
                 try {
                     Material m = Material.getMaterial(argsList.get(1).toUpperCase());
                     if (m == null)
-                        sender.sendMessage("Unknown material");
+                        Bomberman.sendMessage(sender, "Unknown material");
                     int amount = Integer.parseInt(argsList.get(2));
                     if (attribute.equalsIgnoreCase("fare")) {
                         game.setFare(new ItemStack(m, amount));
-                        sender.sendMessage("Fare set");
+                        Bomberman.sendMessage(sender, "Fare set");
                     } else {
                         game.setPrize(new ItemStack(m, amount), false);
-                        sender.sendMessage("Prize set");
+                        Bomberman.sendMessage(sender, "Prize set");
                     }
                     return true;
                 } catch (Exception e) {
@@ -597,7 +598,7 @@ public class GameCommander implements CommandExecutor, TabCompleter {
             Location[] locations = BoardGenerator.getBoundingStructure((Player)sender, argsList.get(0));
             Board board2 = BoardGenerator.createArena(argsList.get(0), locations[0], locations[1]);
             BoardGenerator.saveBoard(board2);
-            sender.sendMessage("Arena created");
+            Bomberman.sendMessage(sender, "Arena created");
         }
         return true;
     }
@@ -605,12 +606,12 @@ public class GameCommander implements CommandExecutor, TabCompleter {
     private boolean listArenasCommand(CommandSender sender, ArrayList<String> argsList) {
         List<String> arenas = BoardGenerator.allBoards();
         if (arenas.size() == 0) {
-            sender.sendMessage("No arenas");
+            Bomberman.sendMessage(sender, "No arenas");
         } else {
-            sender.sendMessage("Current arenas:");
+            Bomberman.sendMessage(sender, "Current arenas:");
             for (String name : arenas) {
                 if (!name.endsWith(".old"))
-                    sender.sendMessage(" * " + name);
+                    Bomberman.sendMessage(sender, " * " + name);
             }
         }
         return true;
