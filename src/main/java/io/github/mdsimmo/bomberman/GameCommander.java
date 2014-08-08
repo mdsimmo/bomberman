@@ -1,6 +1,7 @@
 package io.github.mdsimmo.bomberman;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import org.apache.commons.lang.StringUtils;
@@ -65,6 +66,114 @@ public class GameCommander implements CommandExecutor, TabCompleter {
 			String label, String[] args) {
 		String cmd = command.getName().toLowerCase();
 		Game game;
+		
+		ArrayList<String> argsList = (ArrayList<String>) Arrays.asList(args);
+		
+		if (argsList.size() == 0) {
+		    return sendCommandInfo(sender, "bm");
+		} else {
+		    String arg = argsList.remove(0);
+		    String commandInfo = arg;
+		    
+		    if (argsList.size() == 0) {
+		        return sendCommandInfo(sender, commandInfo);
+		    }
+		    
+		    switch (arg) {
+		    case "game":
+	            arg = argsList.remove(0);
+	            commandInfo += "." + arg;
+	            
+	            if (argsList.size() == 0) {
+	                return sendCommandInfo(sender, commandInfo);
+	            }
+	            
+	            switch (arg) {
+	            case "join":
+                    // return joinCommand(argsList);
+	            case "leave":
+                    // return leaveCommand(argsList);
+	            case "info":
+	                // return infoCommand(argsList);
+	            case "list":
+	                // return listCommand(argsList);
+	            case "create":
+	                // return createCommand(argsList);
+	            case "destroy":
+	                // return destroyCommand(argsList);
+	            case "force":
+	                arg = argsList.remove(0);
+	                commandInfo += "." + arg;
+	                
+	                if (argsList.size() == 0) {
+	                    return sendCommandInfo(sender, commandInfo);
+	                }
+	                
+                    switch (arg) {
+                    case "start":
+                        // return startGameCommand(argsList);
+                    case "stop":
+                        // return stopGameCommand(argsList);
+                    case "reset":
+                        // return resetGameCommand(argsList);
+                    default:
+                        return sendCommandInfo(sender, commandInfo);
+                    }
+	            case "set":
+                    arg = argsList.remove(0);
+                    commandInfo += "." + arg;
+                    
+                    if (argsList.size() == 0) {
+                        return sendCommandInfo(sender, commandInfo);
+                    }
+                    
+                    switch (arg) {
+                    case "arena":
+                        // return setArenaCommand(argsList);
+                    case "lives":
+                        // return setLivesCommand(argsList);
+                    case "bombs":
+                        // return setBombsCommand(argsList);
+                    case "power":
+                        // return setPowerCommand(argsList);
+                    case "minplayers":
+                        // return setMinplayersCommand(argsList);
+                    case "autostart":
+                        // return setAutostartCommand(argsList);
+                    case "autostartdelay":
+                        // return setAutostartDelayCommand(argsList);
+                    case "fare":
+                        // return setFareCommand(argsList);
+                    case "prize":
+                        // return setPrizeCommand(argsList);
+                    default:
+                        return sendCommandInfo(sender, commandInfo);
+                    }
+                default:
+                    return sendCommandInfo(sender, commandInfo);
+	            }
+		    case "arena":
+		        arg = argsList.remove(0);
+		        commandInfo += "." + arg;
+		        
+		        if (argsList.size() == 0) {
+		            return sendCommandInfo(sender, commandInfo);
+		        }
+		        
+		        switch (arg) {
+		        case "create":
+		            // return createArenaCommand(argsList);
+		        case "list":
+		            // return listArenasCommand(argsList);
+	            default:
+	                return sendCommandInfo(sender, commandInfo);
+		        }
+	        default:
+	            return sendCommandInfo(sender, commandInfo);
+		    }
+		}
+		
+		/*
 		switch (cmd) {
 		case "create-game":
 			if (!(args.length == 1 || args.length == 2))
@@ -470,8 +579,7 @@ public class GameCommander implements CommandExecutor, TabCompleter {
 			sender.sendMessage(message);
 			return true;
 		}
-			
-		return false;
+		*/
 	}
 
 	@Override
@@ -552,6 +660,64 @@ public class GameCommander implements CommandExecutor, TabCompleter {
 			break;
 		}
 		return options;
+	}
+	
+	private boolean sendCommandInfo(CommandSender sender, String command) {
+	    switch(command) {
+	    case "bm":
+            break;
+	    case "game":
+            break;
+	    case "game.join":
+            break;
+	    case "game.leave":
+            break;
+	    case "game.info":
+            break;
+	    case "game.list":
+            break;
+	    case "game.create":
+            break;
+	    case "game.destroy":
+            break;
+	    case "game.force":
+            break;
+	    case "game.force.start":
+            break;
+	    case "game.force.stop":
+            break;
+	    case "game.force.reset":
+            break;
+	    case "game.set":
+            break;
+	    case "game.set.arena":
+            break;
+	    case "game.set.lives":
+            break;
+	    case "game.set.bombs":
+            break;
+	    case "game.set.power":
+            break;
+	    case "game.set.minplayers":
+            break;
+	    case "game.set.autostart":
+            break;
+	    case "game.set.autostartdelay":
+            break;
+	    case "game.set.fare":
+            break;
+	    case "game.set.prize":
+            break;
+	    case "arena":
+            break;
+	    case "arena.create":
+            break;
+        case "arena.list":
+            break;
+        default:
+            return false;
+	    }
+	    return true;
 	}
 	
 	private void addGames(List<String> options, String start) {

@@ -3,6 +3,10 @@ main: io.github.mdsimmo.bomberman.Bomberman
 version: 0.0.3
 
 commands:
+  bm:
+    description: Main command for BomberMan - contains all sub-commands.
+    usage: /<command> <game|arena> [...]
+    permission: bomberman.player
   create-game:
     description: generates a bomberman game
     usage: /create-game <game> [arena]
