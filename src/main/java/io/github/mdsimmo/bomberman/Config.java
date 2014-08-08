@@ -23,7 +23,7 @@ public enum Config {
 	MIN_PLAYERS ( "minplayers", 2),
 	AUTOSTART ( "autostart", false ),
 	AUTOSTART_DELAY ( "autostart.delay", 30 ),
-	DEFAULT_STYLE ("defaultstyle", "default" ),
+	DEFAULT_ARENA ("defaultarena", "default" ),
 	DROPS_ITEMS ("drops.items", Arrays.asList(new ItemStack[] {
 			new ItemStack(Material.TNT, 3),
 			new ItemStack(Material.BLAZE_POWDER, 2),

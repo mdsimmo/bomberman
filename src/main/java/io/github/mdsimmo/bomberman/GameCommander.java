@@ -22,19 +22,19 @@ public class GameCommander implements CommandExecutor, TabCompleter {
 		String[] commands = {
 				"create-game", 
 				"destroy-game",
-				"style",
+				"arena",
 				"lives",
 				"power", 
 				"bombs",
 				"min-players",
-				"create-style",
+				"create-arena",
 				"reset-game", 
 				"join-game",
 				"leave-game",
 				"start-game",
 				"stop-game",
 				"list-games",
-				"list-styles",
+				"list-arenas",
 				"convert-to-game",
 				"fare",
 				"prize",
@@ -47,10 +47,10 @@ public class GameCommander implements CommandExecutor, TabCompleter {
 		}
 	}
 	
-	private void createGame(String name, Location l, Board style) {
+	private void createGame(String name, Location l, Board arena) {
 		Game game = new Game(name, l);
-		game.board = style;
-		game.oldBoard = BoardGenerator.createStyle(name+".old", game.loc, game.board.xSize, game.board.ySize, game.board.zSize);
+		game.board = arena;
+		game.oldBoard = BoardGenerator.createArena(name+".old", game.loc, game.board.xSize, game.board.ySize, game.board.zSize);
 		BoardGenerator.switchBoard(game.oldBoard, game.board, game.loc);
 		Game.register(game);
 	}
@@ -73,19 +73,19 @@ public class GameCommander implements CommandExecutor, TabCompleter {
 				if (Game.findGame(args[0]) != null) {
 					sender.sendMessage("Game already exists");
 				} else {
-					Board style;
+					Board arena;
 					if (args.length == 2) {
-						style = BoardGenerator.loadBoard(args[1]);
+						arena = BoardGenerator.loadBoard(args[1]);
 					} else {
-						style = BoardGenerator.loadDefault();
+						arena = BoardGenerator.loadDefault();
 					}
-					if (style == null) {
-						sender.sendMessage("Style not found");
+					if (arena == null) {
+						sender.sendMessage("Arena not found");
 						return true;
 					}
 					// long location getting line to round to integers...
 					Location l = ((Player)sender).getLocation().getBlock().getLocation();
-					createGame(args[0], l, style);
+					createGame(args[0], l, arena);
 					sender.sendMessage("Game created");
 				}
 			} else {
@@ -101,7 +101,7 @@ public class GameCommander implements CommandExecutor, TabCompleter {
 					sender.sendMessage("Game already exists");
 				} else {
 					Location[] locations = BoardGenerator.getBoundingStructure((Player)sender, args[0]);
-					Board board = BoardGenerator.createStyle(args[0], locations[0], locations[1]);
+					Board board = BoardGenerator.createArena(args[0], locations[0], locations[1]);
 					BoardGenerator.saveBoard(board);
 					game = new Game(args[0], locations[0]);
 					game.board = board;
@@ -215,7 +215,7 @@ public class GameCommander implements CommandExecutor, TabCompleter {
 			}
 			return true;
 		
-		case "style":
+		case "arena":
 			if (!(args.length == 1 || args.length == 2))
 				return false;
 			game = Game.findGame(args[0]);
@@ -224,7 +224,7 @@ public class GameCommander implements CommandExecutor, TabCompleter {
 				return true;
 			}
 			if (args.length == 1) {
-				sender.sendMessage("Style: " + game.board.name);
+				sender.sendMessage("Arena: " + game.board.name);
 				return true;
 			} else {
 				if (game.isPlaying) {
@@ -234,14 +234,14 @@ public class GameCommander implements CommandExecutor, TabCompleter {
 					
 				Board board = BoardGenerator.loadBoard(args[1]);
 				if (board == null) {
-					sender.sendMessage("Style not found");
+					sender.sendMessage("Arena not found");
 					return true;
 				}
 				BoardGenerator.switchBoard(game.board, game.oldBoard, game.loc);
 				game.board = board;
-				game.oldBoard = BoardGenerator.createStyle(game.name+".old", game.loc, board.xSize, board.ySize, board.zSize);
+				game.oldBoard = BoardGenerator.createArena(game.name+".old", game.loc, board.xSize, board.ySize, board.zSize);
 				BoardGenerator.switchBoard(game.oldBoard, board, game.loc);
-				sender.sendMessage("Game style changed");
+				sender.sendMessage("Game arena changed");
 				return true;
 			}
 		case "autostart":
@@ -319,14 +319,14 @@ public class GameCommander implements CommandExecutor, TabCompleter {
 				}
 			}
 		
-		case "create-style":
+		case "create-arena":
 			if (args.length != 1)
 				return false;
 			if (sender instanceof Player) {
 				Location[] locations = BoardGenerator.getBoundingStructure((Player)sender, args[0]);
-				Board board2 = BoardGenerator.createStyle(args[0], locations[0], locations[1]);
+				Board board2 = BoardGenerator.createArena(args[0], locations[0], locations[1]);
 				BoardGenerator.saveBoard(board2);
-				sender.sendMessage("Style created");
+				sender.sendMessage("Arena created");
 			}
 			return true;
 			
@@ -350,13 +350,13 @@ public class GameCommander implements CommandExecutor, TabCompleter {
 			}
 			return true;
 		
-		case "list-styles":
-			List<String> styles = BoardGenerator.allBoards();
-			if (styles.size() == 0) {
-				sender.sendMessage("No styles");
+		case "list-arenas":
+			List<String> arenas = BoardGenerator.allBoards();
+			if (arenas.size() == 0) {
+				sender.sendMessage("No arenas");
 			} else {
-				sender.sendMessage("Current styles:");
-				for (String name : styles) {
+				sender.sendMessage("Current arenas:");
+				for (String name : arenas) {
 					if (!name.endsWith(".old"))
 						sender.sendMessage(" * " + name);
 				}
@@ -466,7 +466,7 @@ public class GameCommander implements CommandExecutor, TabCompleter {
 				else
 					message += game.getPrize().getAmount() + " " + game.getPrize().getType() + "\n";
 			}
-			message += " * Style: " + game.board.name + "\n";
+			message += " * Arena: " + game.board.name + "\n";
 			sender.sendMessage(message);
 			return true;
 		}
@@ -480,23 +480,23 @@ public class GameCommander implements CommandExecutor, TabCompleter {
 		String cmd = command.getName().toLowerCase();
 		List<String> options = new ArrayList<>();
 		switch (cmd) {
-		case "create-style":
+		case "create-arena":
 			if (args.length == 1)
-				addStyles(options, args[0]);
+				addArenas(options, args[0]);
 			break;
 			
 		case "create-game":
 			if (args.length == 1)
 				addGames(options, args[0]);
 			if (args.length == 2)
-				addStyles(options, args[1]);
+				addArenas(options, args[1]);
 			break;
 		
-		case "style":
+		case "arena":
 			if (args.length == 1)
 				addGames(options, args[0]);
 			else if (args.length == 2)
-				addStyles(options, args[2]);
+				addArenas(options, args[2]);
 			break;
 		
 		case "autostart":
@@ -561,7 +561,7 @@ public class GameCommander implements CommandExecutor, TabCompleter {
 		}
 	}
 	
-	private void addStyles(List<String> options, String start) {
+	private void addArenas(List<String> options, String start) {
 		for (String name : BoardGenerator.allBoards()) {
 			if (name.toLowerCase().startsWith(start.toLowerCase()))
 				options.add(name);

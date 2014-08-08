@@ -5,7 +5,7 @@ version: 0.0.3
 commands:
   create-game:
     description: generates a bomberman game
-    usage: /create-game <game> [style]
+    usage: /create-game <game> [arena]
     permission: bomberman.op 
   destroy-game:
     description: destroys the game and reverts the land to how it was
@@ -31,9 +31,9 @@ commands:
     description: Stops the game
     usage: /stop-game <game>
     permission: bomberman.op
-  style:
-    description: Sets the game's style
-    usage: /style <game> [style] 
+  arena:
+    description: Sets the game's arena
+    usage: /arena <game> [arena] 
     permission: bomberman.player
   lives:
     description: Sets the game's initial lives
@@ -55,9 +55,9 @@ commands:
     description: If set to 'true', the game will start once the minimum amount of players have joined.
     usage: /autostart <game> <true|false>
     permission: bomberman.op
-  create-style:
-    description: Makes the thing you're looking at a standard board style
-    usage: /create-style <style>
+  create-arena:
+    description: Makes the thing you're looking at a standard board arena
+    usage: /create-arena <arena>
     permission: bomberman.op
   convert-to-game:
     description: converts the stucture being looked at into an arena
@@ -67,9 +67,9 @@ commands:
     description: List all games currently existing
     usage: /list-games
     permission: bomberman.player
-  list-styles:
-    description: Lists all the style currently available
-    usage: /list-styles
+  list-arenas:
+    description: Lists all the arena currently available
+    usage: /list-arenas
     permission: bomberman.player
   fare:
     description: Gets/sets what participants must pay to join a game

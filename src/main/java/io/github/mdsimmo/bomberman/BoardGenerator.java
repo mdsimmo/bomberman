@@ -26,11 +26,11 @@ public class BoardGenerator {
 	 * Loads the default board. If the needed save file is not made, it will create it.
 	 */
 	public static Board loadDefault() {
-		String style = Config.DEFAULT_STYLE.getValue();
-		if (loadBoard(style) == null) {
+		String arena = Config.DEFAULT_ARENA.getValue();
+		if (loadBoard(arena) == null) {
 			try {
-				if (!Config.DEFAULT_STYLE.getValue().equals("default"))
-					plugin.getLogger().info("Couldn't find \"" + style + ".board\". Using \"default.board\"");
+				if (!Config.DEFAULT_ARENA.getValue().equals("default"))
+					plugin.getLogger().info("Couldn't find \"" + arena + ".board\". Using \"default.board\"");
 				InputStream inputStream = plugin.getResource("default.board");
 				File f = new File(plugin.getDataFolder() + "/default.board");
 	 			// write the inputStream to a FileOutputStream
@@ -49,14 +49,14 @@ public class BoardGenerator {
 				e.printStackTrace();
 			}
 		}
-		return loadBoard(style);
+		return loadBoard(arena);
 	}
 	
 	/**
 	 * deletes the given board
 	 * @return false if the board never existed
 	 */
-	public static boolean deleteStyle(String name) {
+	public static boolean deleteArena(String name) {
 		Board board = loadBoard(name);
 		plugin.getLogger().info("1");
 		if (board == null)
@@ -168,7 +168,7 @@ public class BoardGenerator {
 	 * @return an array with the minimum and maximm points. 
 	 */
 	@SuppressWarnings("unchecked")
-	public static Location[] getBoundingStructure(Player p, String style) {
+	public static Location[] getBoundingStructure(Player p, String arena) {
 		@SuppressWarnings("deprecation")
 		Block target = p.getTargetBlock(null, 100);
 		
@@ -209,20 +209,20 @@ public class BoardGenerator {
 	/**
 	 * Creates a board style 
 	 */
-	public static Board createStyle(String style, Location min, Location max) {
+	public static Board createArena(String arena, Location min, Location max) {
 		int xSize = max.getBlockX() - min.getBlockX()+1;
 		int ySize = max.getBlockY() - min.getBlockY()+1;
 		int zSize = max.getBlockZ() - min.getBlockZ()+1;
-		return createStyle(style, min, xSize, ySize, zSize);
+		return createArena(arena, min, xSize, ySize, zSize);
 	}
 
 	/**
 	 * Creates a board style 
 	 */
-	public static Board createStyle(String style, Location loc, int xSize, int ySize
+	public static Board createArena(String arena, Location loc, int xSize, int ySize
 			, int zSize) {
 		Board board = new Board();
-		board.name = style;
+		board.name = arena;
 		board.xSize = xSize;
 		board.ySize = ySize;
 		board.zSize = zSize;		
