@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import org.apache.commons.lang.StringUtils;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.command.Command;
@@ -20,32 +19,35 @@ public class GameCommander implements CommandExecutor, TabCompleter {
 	
 	private JavaPlugin plugin = Bomberman.instance;
 	public GameCommander() {
-		String[] commands = {
-				"create-game", 
-				"destroy-game",
-				"arena",
-				"lives",
-				"power", 
-				"bombs",
-				"min-players",
-				"create-arena",
-				"reset-game", 
-				"join-game",
-				"leave-game",
-				"start-game",
-				"stop-game",
-				"list-games",
-				"list-arenas",
-				"convert-to-game",
-				"fare",
-				"prize",
-				"info",
-				"autostart",
-				"autostartdelay"};
-			for (String cmd : commands) {
-			plugin.getCommand(cmd).setExecutor(this);
-			plugin.getCommand(cmd).setTabCompleter(this);
-		}
+//		String[] commands = {
+//			"create-game", 
+//			"destroy-game",
+//			"arena",
+//			"lives",
+//			"power", 
+//			"bombs",
+//			"min-players",
+//			"create-arena",
+//			"reset-game", 
+//			"join-game",
+//			"leave-game",
+//			"start-game",
+//			"stop-game",
+//			"list-games",
+//			"list-arenas",
+//			"convert-to-game",
+//			"fare",
+//			"prize",
+//			"info",
+//			"autostart",
+//			"autostartdelay"
+//		};
+//		for (String cmd : commands) {
+//			plugin.getCommand(cmd).setExecutor(this);
+//			plugin.getCommand(cmd).setTabCompleter(this);
+//		}
+		plugin.getCommand("bm").setExecutor(this);
+		plugin.getCommand("bm").setTabCompleter(this);
 	}
 	
 	private void createGame(String name, Location l, Board arena) {
@@ -64,10 +66,7 @@ public class GameCommander implements CommandExecutor, TabCompleter {
 	@Override
 	public boolean onCommand(CommandSender sender, Command command,
 			String label, String[] args) {
-		String cmd = command.getName().toLowerCase();
-		Game game;
-		
-		ArrayList<String> argsList = (ArrayList<String>) Arrays.asList(args);
+		ArrayList<String> argsList = new ArrayList<String>(Arrays.asList(args));
 		
 		if (argsList.size() == 0) {
 		    return sendCommandInfo(sender, "bm");
