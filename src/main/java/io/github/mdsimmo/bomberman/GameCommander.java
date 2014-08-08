@@ -90,17 +90,19 @@ public class GameCommander implements CommandExecutor, TabCompleter {
 	            
 	            switch (arg) {
 	            case "join":
-                    // return joinCommand(argsList);
+                    return joinCommand(sender, argsList);
 	            case "leave":
-                    // return leaveCommand(argsList);
+                    return leaveCommand(sender, argsList);
 	            case "info":
-	                // return infoCommand(argsList);
+	                return infoCommand(sender, argsList);
 	            case "list":
-	                // return listCommand(argsList);
+	                return listCommand(sender, argsList);
 	            case "create":
-	                // return createCommand(argsList);
+	                return createCommand(sender, argsList);
 	            case "destroy":
-	                // return destroyCommand(argsList);
+	                return destroyCommand(sender, argsList);
+	            case "convert":
+	                return convertCommand(sender, argsList);
 	            case "force":
 	                arg = argsList.remove(0);
 	                commandInfo += "." + arg;
@@ -111,11 +113,11 @@ public class GameCommander implements CommandExecutor, TabCompleter {
 	                
                     switch (arg) {
                     case "start":
-                        // return startGameCommand(argsList);
+                        return startGameCommand(sender, argsList);
                     case "stop":
-                        // return stopGameCommand(argsList);
+                        return stopGameCommand(sender, argsList);
                     case "reset":
-                        // return resetGameCommand(argsList);
+                        return resetGameCommand(sender, argsList);
                     default:
                         return sendCommandInfo(sender, commandInfo);
                     }
@@ -129,23 +131,19 @@ public class GameCommander implements CommandExecutor, TabCompleter {
                     
                     switch (arg) {
                     case "arena":
-                        // return setArenaCommand(argsList);
+                        return setArenaCommand(sender, argsList);
                     case "lives":
-                        // return setLivesCommand(argsList);
                     case "bombs":
-                        // return setBombsCommand(argsList);
                     case "power":
-                        // return setPowerCommand(argsList);
                     case "minplayers":
-                        // return setMinplayersCommand(argsList);
+                        return setGameAttributeCommand(sender, argsList, arg);
                     case "autostart":
-                        // return setAutostartCommand(argsList);
+                        return setAutostartCommand(sender, argsList);
                     case "autostartdelay":
-                        // return setAutostartDelayCommand(argsList);
+                        return setAutostartDelayCommand(sender, argsList);
                     case "fare":
-                        // return setFareCommand(argsList);
                     case "prize":
-                        // return setPrizeCommand(argsList);
+                        return setEconomyAttributeCommand(sender, argsList, arg);
                     default:
                         return sendCommandInfo(sender, commandInfo);
                     }
@@ -162,9 +160,9 @@ public class GameCommander implements CommandExecutor, TabCompleter {
 		        
 		        switch (arg) {
 		        case "create":
-		            // return createArenaCommand(argsList);
+		            return createArenaCommand(sender, argsList);
 		        case "list":
-		            // return listArenasCommand(argsList);
+		            return listArenasCommand(sender, argsList);
 	            default:
 	                return sendCommandInfo(sender, commandInfo);
 		        }
@@ -172,417 +170,435 @@ public class GameCommander implements CommandExecutor, TabCompleter {
 	            return sendCommandInfo(sender, commandInfo);
 		    }
 		}
-		
-		/*
-		switch (cmd) {
-		case "create-game":
-			if (!(args.length == 1 || args.length == 2))
-				return false;
-			if (sender instanceof Player) {
-				if (Game.findGame(args[0]) != null) {
-					sender.sendMessage("Game already exists");
-				} else {
-					Board arena;
-					if (args.length == 2) {
-						arena = BoardGenerator.loadBoard(args[1]);
-					} else {
-						arena = BoardGenerator.loadDefault();
-					}
-					if (arena == null) {
-						sender.sendMessage("Arena not found");
-						return true;
-					}
-					// long location getting line to round to integers...
-					Location l = ((Player)sender).getLocation().getBlock().getLocation();
-					createGame(args[0], l, arena);
-					sender.sendMessage("Game created");
-				}
-			} else {
-				sender.sendMessage("You must be a player");
-			}
-			return true;
-			
-		case "convert-to-game":
-			if (args.length != 1)
-				return false;
-			if (sender instanceof Player) {
-				if (Game.findGame(args[0]) != null) {
-					sender.sendMessage("Game already exists");
-				} else {
-					Location[] locations = BoardGenerator.getBoundingStructure((Player)sender, args[0]);
-					Board board = BoardGenerator.createArena(args[0], locations[0], locations[1]);
-					BoardGenerator.saveBoard(board);
-					game = new Game(args[0], locations[0]);
-					game.board = board;
-					game.oldBoard = board;
-					Game.register(game);
-					sender.sendMessage("Game created");
-				}
-			} else {
-				sender.sendMessage("You must be a player");
-			}
-			return true;
-		
-		case "destroy-game":
-			if (args.length != 1)
-				return false;
-			game = Game.findGame(args[0]); 
-			if (game != null) {
-				destroyGame(game);
-				sender.sendMessage("Game destroyed");
-			} else
-				sender.sendMessage("Game not found");
-			return true;
-			
-		case "reset-game":
-			if (args.length != 1)
-				return false;
-			game = Game.findGame(args[0]);
-			if (game == null) {
-				sender.sendMessage("Game not found");
-				return true;
-			}
-			game.terminate();
-			BoardGenerator.switchBoard(game.board, game.board, game.loc);
-			sender.sendMessage("Game reset");
-			return true;
-			
-		case "join-game":
-			if (args.length != 1)
-				return false;
-			if (sender instanceof Player) {
-				game = Game.findGame(args[0]); 
-				if (game == null) {
-					sender.sendMessage("Game not found");
-				} else {
-					if (game.isPlaying == false) {
-						PlayerRep rep = game.getPlayerRep((Player)sender); 
-						if (rep == null)
-							rep = new PlayerRep((Player)sender, game);
-						for (String name : Game.allGames()) {
-							for (PlayerRep test : Game.findGame(name).players)
-								if (test.player == rep.player) {
-									sender.sendMessage("You can't join twice!");
-									return true;
-								}
-						}
-						rep.joinGame();
-						
-					} else {
-						sender.sendMessage("Game has already started");
-					}
-				}
-			} else {
-				sender.sendMessage("You must be a player to join");
-			}
-			return true;
-		
-		case "leave-game":
-			if (sender instanceof Player) {
-				for (String name : Game.allGames()) {
-					game = Game.findGame(name);
-					PlayerRep rep = game.getPlayerRep((Player)sender);
-					if (rep != null) {
-						rep.kill(true);
-						rep.game.observers.remove(rep);
-						return true;
-					}
-				}
-			}
-			sender.sendMessage("You're not part of a game");
-			return true;
-			
-		case "start-game":
-			if (args.length != 1) {
-				return false;
-			}
-			game = Game.findGame(args[0]);
-			if (game == null)
-				sender.sendMessage("Game not found");
-			else if (game.isPlaying)
-				sender.sendMessage("Game already started");
-			else {
-				if (game.startGame())
-					sender.sendMessage("Game starting");
-				else
-					sender.sendMessage("There are not enough players");
-			}
-			return true;
-			
-		case "stop-game":
-			if (args.length != 1) {
-				return false;
-			}
-			game = Game.findGame(args[0]);
-			if (game == null)
-				sender.sendMessage("Game not found");
-			else if (!game.isPlaying)
-				sender.sendMessage("Game hasn't started");
-			else {
-				game.terminate();
-				sender.sendMessage("Game stopped");
-			}
-			return true;
-		
-		case "arena":
-			if (!(args.length == 1 || args.length == 2))
-				return false;
-			game = Game.findGame(args[0]);
-			if (game == null) {
-				sender.sendMessage("Game not found");
-				return true;
-			}
-			if (args.length == 1) {
-				sender.sendMessage("Arena: " + game.board.name);
-				return true;
-			} else {
-				if (game.isPlaying) {
-					sender.sendMessage("Game in progress");
-					return true;
-				}
-					
-				Board board = BoardGenerator.loadBoard(args[1]);
-				if (board == null) {
-					sender.sendMessage("Arena not found");
-					return true;
-				}
-				BoardGenerator.switchBoard(game.board, game.oldBoard, game.loc);
-				game.board = board;
-				game.oldBoard = BoardGenerator.createArena(game.name+".old", game.loc, board.xSize, board.ySize, board.zSize);
-				BoardGenerator.switchBoard(game.oldBoard, board, game.loc);
-				sender.sendMessage("Game arena changed");
-				return true;
-			}
-		case "autostart":
-			if (args.length != 2)
-				return false;
-			game = Game.findGame(args[0]);
-			if (game == null) {
-				sender.sendMessage("Cannot find game");
-				return true;
-			}
-			if (args[1].equalsIgnoreCase("true")) {
-				game.setAutostart(true);
-			} else if (args[1].equalsIgnoreCase("false"))
-				game.setAutostart(false);
-			else
-				return false;
-			sender.sendMessage("Autostart set to " + game.getAutostart());
-			return true;
-		case "autostartdelay":
-		    if (args.length != 2)
-		        return false;
-		    
-		    game = Game.findGame(args[0]);
-		    
-		    if (game == null) {
-		        sender.sendMessage("Cannot find game");
-		        return true;
-		    }
-		    
-		    try {
-		        game.setAutostartDelay(Integer.parseInt(args[1]));
-		        sender.sendMessage("Autostart delay set to " + game.getAutostartDelay());
-		    } catch (NumberFormatException e) {
-		        sender.sendMessage("Delay entered is not a valid number");
-		    }
-		    return true;
-		case "power":
-		case "bombs":
-		case "lives":
-		case "min-players":
-			if (!(args.length == 1 || args.length == 2))
-				return false;
-			game = Game.findGame(args[0]);
-			if (game == null) {
-				sender.sendMessage("Game not found");
-				return true;
-			} else {
-				if (args.length == 1) {
-					if (cmd.equals("bombs"))
-						sender.sendMessage("Starting bombs: " + game.getBombs());
-					else if (cmd.equals("power"))
-						sender.sendMessage("Starting power: " + game.getPower());
-					else if (cmd.equals("lives"))
-						sender.sendMessage("Starting lives: " + game.getLives());
-					else if (cmd.equals("min-players"))
-						sender.sendMessage("Min players: " + game.getMinPlayers());
-					return true;
-				} else {
-					int num = 0;
-					try {
-						 num = Integer.parseInt(args[1], 10);
-					} catch (NumberFormatException e) {
-						return false;
-					}
-					if (cmd.equals("bombs"))
-						game.setBombs(num);
-					else if (cmd.equals("power"))
-						game.setPower(num);
-					else if (cmd.equals("lives"))
-						game.setLives(num);
-					else if (cmd.equals("min-players"))
-						game.setMinPlayers(num);
-					sender.sendMessage(StringUtils.capitalize(cmd) + " set");
-					return true;
-				}
-			}
-		
-		case "create-arena":
-			if (args.length != 1)
-				return false;
-			if (sender instanceof Player) {
-				Location[] locations = BoardGenerator.getBoundingStructure((Player)sender, args[0]);
-				Board board2 = BoardGenerator.createArena(args[0], locations[0], locations[1]);
-				BoardGenerator.saveBoard(board2);
-				sender.sendMessage("Arena created");
-			}
-			return true;
-			
-		case "list-games":
-			List<String> games = Game.allGames();
-			if (games.size() == 0) {
-				sender.sendMessage("No games");
-			} else {
-				sender.sendMessage("Current games:");
-				for (String name : games) {
-					game = Game.findGame(name);
-					String status = " * " + game.name;
-					status += " : " + game.players.size() + "/" + game.board.spawnPoints.size() + " : ";
-					if (game.isPlaying)
-						status += "playing";
-					else
-						status += "waiting  ";
-							
-					sender.sendMessage(status);
-				}
-			}
-			return true;
-		
-		case "list-arenas":
-			List<String> arenas = BoardGenerator.allBoards();
-			if (arenas.size() == 0) {
-				sender.sendMessage("No arenas");
-			} else {
-				sender.sendMessage("Current arenas:");
-				for (String name : arenas) {
-					if (!name.endsWith(".old"))
-						sender.sendMessage(" * " + name);
-				}
-			}
-			return true;
-			
-		case "prize":
-		case "fare":
-			if (args.length < 1 || args.length > 3)
-				return false;
-			game = Game.findGame(args[0]);
-			if (game == null) {
-				sender.sendMessage("Game not found");
-				return true;
-			}
-			if (args.length == 1) {
-				if (cmd.equals("fare")) {
-					if (game.getFare() != null)
-						sender.sendMessage("Fare: " + game.getFare().getAmount() + " " + game.getFare().getType());
-					else
-						sender.sendMessage("No fare");
-				} else {
-					if (game.getPrize() != null)
-						sender.sendMessage("Prize: " + game.getPrize().getAmount() + " " + game.getPrize().getType());
-					else
-						if (game.getPot() == true)
-							sender.sendMessage("Game has a pot");
-						else
-							sender.sendMessage("No prize");
-				}
-				return true;
-			} else {
-				if (!sender.hasPermission("bomberman.op")) {
-					sender.sendMessage("You may only view what the " + cmd + " is");
-					return true;
-				}
-				if (args.length == 2) {
-					if (args[1].equalsIgnoreCase("pot")) {
-						game.setPrize(null, true);
-						sender.sendMessage("Prize set");
-						return true;
-					} else if (args[2].equals("none")) {
-						if (cmd.equalsIgnoreCase("fare")) {
-							game.setFare(null);
-							sender.sendMessage("Fare removed");
-						} else {
-							game.setPrize(null, false);
-							sender.sendMessage("Prize removed");
-						}
-						return true;
-					}
-					return false;
-				}
-				if (args.length == 3) {
-					try {
-						Material m = Material.getMaterial(args[2].toUpperCase());
-						if (m == null)
-							sender.sendMessage("Unknown material");
-						int amount = Integer.parseInt(args[3]);
-						if (cmd.equalsIgnoreCase("fare")) {
-							game.setFare(new ItemStack(m, amount));
-							sender.sendMessage("Fare set");
-						} else {
-							game.setPrize(new ItemStack(m, amount), false);
-							sender.sendMessage("Prize set");
-						}
-						return true;
-					} catch (Exception e) {
-						return false;
-					}
-				}
-			}
-			return false;
-					
-		case "info":
-			if (args.length != 1)
-				return false;
-			game = Game.findGame(args[0]);
-			if (game == null) {
-				sender.sendMessage("Game not found");
-				return true;
-			}
-			String message = "About " + game.name + ":\n";
-			message += " * Status: ";
-			if (game.isPlaying)
-				message += "In progress\n";
-			else
-				message += "Waiting\n";
-			message += " * Players: " + game.players.size() + "\n";
-			message += " * Min players: " + game.getMinPlayers()+ "\n";
-			message += " * Max players: " + game.board.spawnPoints.size() + "\n";
-			message += " * Init bombs: " + game.getBombs() + "\n";
-			message += " * Init lives: " + game.getLives() + "\n";
-			message += " * Init power: " + game.getPower() + "\n";
-			message += " * Autostart: " + game.getAutostart() + "\n";
-			message += " * Entry fare: ";
-			if (game.getFare() == null)
-				message += "no fee \n";
-			else
-				message += game.getFare().getType() + " x" + game.getFare().getAmount() + "\n";
-			message += " * Winner's prize: ";
-			if (game.getPot() == true && game.getFare() != null)
-				message += "Pot currently at " + game.getFare().getAmount()*game.players.size() + " " + game.getFare().getType() + "\n";
-			else {
-				if (game.getPrize() == null)
-					message += "No prize \n";
-				else
-					message += game.getPrize().getAmount() + " " + game.getPrize().getType() + "\n";
-			}
-			message += " * Arena: " + game.board.name + "\n";
-			sender.sendMessage(message);
-			return true;
-		}
-		*/
 	}
 
-	@Override
+	private boolean joinCommand(CommandSender sender, ArrayList<String> argsList) {
+	    if (argsList.size() != 1)
+            return false;
+	    
+        if (sender instanceof Player) {
+            Game game = Game.findGame(argsList.get(0)); 
+            if (game == null) {
+                sender.sendMessage("Game not found");
+            } else {
+                if (game.isPlaying == false) {
+                    PlayerRep rep = game.getPlayerRep((Player)sender); 
+                    if (rep == null)
+                        rep = new PlayerRep((Player)sender, game);
+                    for (String name : Game.allGames()) {
+                        for (PlayerRep test : Game.findGame(name).players)
+                            if (test.player == rep.player) {
+                                sender.sendMessage("You can't join twice!");
+                                return true;
+                            }
+                    }
+                    rep.joinGame();
+                    
+                } else {
+                    sender.sendMessage("Game has already started");
+                }
+            }
+        } else {
+            sender.sendMessage("You must be a player to join");
+        }
+        return true;
+    }
+
+    private boolean leaveCommand(CommandSender sender, ArrayList<String> argsList) {
+        if (sender instanceof Player) {
+            for (String name : Game.allGames()) {
+                Game game = Game.findGame(name);
+                PlayerRep rep = game.getPlayerRep((Player)sender);
+                if (rep != null) {
+                    rep.kill(true);
+                    rep.game.observers.remove(rep);
+                    return true;
+                }
+            }
+        }
+        sender.sendMessage("You're not part of a game");
+        return true;
+    }
+
+    private boolean infoCommand(CommandSender sender, ArrayList<String> argsList) {
+        if (argsList.size() != 1)
+            return false;
+        
+        Game game = Game.findGame(argsList.get(0));
+        if (game == null) {
+            sender.sendMessage("Game not found");
+            return true;
+        }
+        String message = "About " + game.name + ":\n";
+        message += " * Status: ";
+        if (game.isPlaying)
+            message += "In progress\n";
+        else
+            message += "Waiting\n";
+        message += " * Players: " + game.players.size() + "\n";
+        message += " * Min players: " + game.getMinPlayers()+ "\n";
+        message += " * Max players: " + game.board.spawnPoints.size() + "\n";
+        message += " * Init bombs: " + game.getBombs() + "\n";
+        message += " * Init lives: " + game.getLives() + "\n";
+        message += " * Init power: " + game.getPower() + "\n";
+        message += " * Autostart: " + game.getAutostart() + "\n";
+        message += " * Entry fare: ";
+        if (game.getFare() == null)
+            message += "no fee \n";
+        else
+            message += game.getFare().getType() + " x" + game.getFare().getAmount() + "\n";
+        message += " * Winner's prize: ";
+        if (game.getPot() == true && game.getFare() != null)
+            message += "Pot currently at " + game.getFare().getAmount()*game.players.size() + " " + game.getFare().getType() + "\n";
+        else {
+            if (game.getPrize() == null)
+                message += "No prize \n";
+            else
+                message += game.getPrize().getAmount() + " " + game.getPrize().getType() + "\n";
+        }
+        message += " * Arena: " + game.board.name + "\n";
+        sender.sendMessage(message);
+        return true;
+    }
+
+    private boolean listCommand(CommandSender sender, ArrayList<String> argsList) {
+        List<String> games = Game.allGames();
+        if (games.size() == 0) {
+            sender.sendMessage("No games");
+        } else {
+            sender.sendMessage("Current games:");
+            for (String name : games) {
+                Game game = Game.findGame(name);
+                String status = " * " + game.name;
+                status += " : " + game.players.size() + "/" + game.board.spawnPoints.size() + " : ";
+                if (game.isPlaying)
+                    status += "playing";
+                else
+                    status += "waiting  ";
+                        
+                sender.sendMessage(status);
+            }
+        }
+        return true;
+    }
+
+    private boolean createCommand(CommandSender sender, ArrayList<String> argsList) {
+        if (!(argsList.size() == 1 || argsList.size() == 2))
+            return false;
+        if (sender instanceof Player) {
+            if (Game.findGame(argsList.get(0)) != null) {
+                sender.sendMessage("Game already exists");
+            } else {
+                Board arena;
+                if (argsList.size() == 2) {
+                    arena = BoardGenerator.loadBoard(argsList.get(1));
+                } else {
+                    arena = BoardGenerator.loadDefault();
+                }
+                if (arena == null) {
+                    sender.sendMessage("Arena not found");
+                    return true;
+                }
+                // long location getting line to round to integers...
+                Location l = ((Player)sender).getLocation().getBlock().getLocation();
+                createGame(argsList.get(0), l, arena);
+                sender.sendMessage("Game created");
+            }
+        } else {
+            sender.sendMessage("You must be a player");
+        }
+        return true;
+    }
+
+    private boolean destroyCommand(CommandSender sender, ArrayList<String> argsList) {
+        if (argsList.size() != 1)
+            return false;
+        Game game = Game.findGame(argsList.get(0)); 
+        if (game != null) {
+            destroyGame(game);
+            sender.sendMessage("Game destroyed");
+        } else
+            sender.sendMessage("Game not found");
+        return true;
+    }
+    
+    private boolean convertCommand(CommandSender sender, ArrayList<String> argsList) {
+        if (argsList.size() != 1)
+            return false;
+        if (sender instanceof Player) {
+            if (Game.findGame(argsList.get(0)) != null) {
+                sender.sendMessage("Game already exists");
+            } else {
+                Location[] locations = BoardGenerator.getBoundingStructure((Player)sender, argsList.get(0));
+                Board board = BoardGenerator.createArena(argsList.get(0), locations[0], locations[1]);
+                BoardGenerator.saveBoard(board);
+                Game game = new Game(argsList.get(0), locations[0]);
+                game.board = board;
+                game.oldBoard = board;
+                Game.register(game);
+                sender.sendMessage("Game created");
+            }
+        } else {
+            sender.sendMessage("You must be a player");
+        }
+        return true;
+    }
+
+    private boolean startGameCommand(CommandSender sender, ArrayList<String> argsList) {
+        if (argsList.size() != 1) {
+            return false;
+        }
+        Game game = Game.findGame(argsList.get(0));
+        if (game == null)
+            sender.sendMessage("Game not found");
+        else if (game.isPlaying)
+            sender.sendMessage("Game already started");
+        else {
+            if (game.startGame())
+                sender.sendMessage("Game starting");
+            else
+                sender.sendMessage("There are not enough players");
+        }
+        return true;
+    }
+
+    private boolean stopGameCommand(CommandSender sender, ArrayList<String> argsList) {
+        if (argsList.size() != 1) {
+            return false;
+        }
+        Game game = Game.findGame(argsList.get(0));
+        if (game == null)
+            sender.sendMessage("Game not found");
+        else if (!game.isPlaying)
+            sender.sendMessage("Game hasn't started");
+        else {
+            game.terminate();
+            sender.sendMessage("Game stopped");
+        }
+        return true;
+    }
+
+    private boolean resetGameCommand(CommandSender sender, ArrayList<String> argsList) {
+        if (argsList.size() != 1)
+            return false;
+        Game game = Game.findGame(argsList.get(0));
+        if (game == null) {
+            sender.sendMessage("Game not found");
+            return true;
+        }
+        game.terminate();
+        BoardGenerator.switchBoard(game.board, game.board, game.loc);
+        sender.sendMessage("Game reset");
+        return true;
+    }
+
+    private boolean setArenaCommand(CommandSender sender, ArrayList<String> argsList) {
+        if (!(argsList.size() == 1 || argsList.size() == 2))
+            return false;
+        Game game = Game.findGame(argsList.get(0));
+        if (game == null) {
+            sender.sendMessage("Game not found");
+            return true;
+        }
+        if (argsList.size() == 1) {
+            sender.sendMessage("Arena: " + game.board.name);
+            return true;
+        } else {
+            if (game.isPlaying) {
+                sender.sendMessage("Game in progress");
+                return true;
+            }
+                
+            Board board = BoardGenerator.loadBoard(argsList.get(1));
+            if (board == null) {
+                sender.sendMessage("Arena not found");
+                return true;
+            }
+            BoardGenerator.switchBoard(game.board, game.oldBoard, game.loc);
+            game.board = board;
+            game.oldBoard = BoardGenerator.createArena(game.name+".old", game.loc, board.xSize, board.ySize, board.zSize);
+            BoardGenerator.switchBoard(game.oldBoard, board, game.loc);
+            sender.sendMessage("Game arena changed");
+            return true;
+        }
+    }
+
+    private boolean setGameAttributeCommand(CommandSender sender, ArrayList<String> argsList, String attribute) {
+        if (!(argsList.size() == 1 || argsList.size() == 2))
+            return false;
+        
+        Game game = Game.findGame(argsList.get(0));
+        
+        if (game == null) {
+            sender.sendMessage("Game not found");
+            return true;
+        } else {
+            if (argsList.size() == 1) {
+                if (attribute.equals("bombs"))
+                    sender.sendMessage("Starting " + attribute + ": " + game.getBombs());
+                else if (attribute.equals("power"))
+                    sender.sendMessage("Starting " + attribute + ": " + game.getPower());
+                else if (attribute.equals("lives"))
+                    sender.sendMessage("Starting " + attribute + ": " + game.getLives());
+                else if (attribute.equals("minplayers"))
+                    sender.sendMessage("Minimum players: " + game.getMinPlayers());
+                return true;
+            } else {
+                int num = 0;
+                try {
+                     num = Integer.parseInt(argsList.get(1), 10);
+                } catch (NumberFormatException e) {
+                    return false;
+                }
+
+                if (attribute.equals("bombs"))
+                    game.setBombs(num);
+                else if (attribute.equals("power"))
+                    game.setPower(num);
+                else if (attribute.equals("lives"))
+                    game.setLives(num);
+                else if (attribute.equals("minplayers"))
+                    game.setMinPlayers(num);
+
+                sender.sendMessage(attribute.toUpperCase() + " set");
+                return true;
+            }
+        }
+    }
+
+    private boolean setAutostartCommand(CommandSender sender, ArrayList<String> argsList) {
+        if (argsList.size() != 2)
+            return false;
+        Game game = Game.findGame(argsList.get(0));
+        if (game == null) {
+            sender.sendMessage("Cannot find game");
+            return true;
+        }
+        if (argsList.get(1).equalsIgnoreCase("true")) {
+            game.setAutostart(true);
+        } else if (argsList.get(1).equalsIgnoreCase("false"))
+            game.setAutostart(false);
+        else
+            return false;
+        sender.sendMessage("Autostart set to " + game.getAutostart());
+        return true;
+    }
+
+    private boolean setAutostartDelayCommand(CommandSender sender, ArrayList<String> argsList) {
+        if (argsList.size() != 2)
+            return false;
+        
+        Game game = Game.findGame(argsList.get(0));
+        
+        if (game == null) {
+            sender.sendMessage("Cannot find game");
+            return true;
+        }
+        
+        try {
+            game.setAutostartDelay(Integer.parseInt(argsList.get(1)));
+            sender.sendMessage("Autostart delay set to " + game.getAutostartDelay());
+        } catch (NumberFormatException e) {
+            sender.sendMessage("Delay entered is not a valid number");
+        }
+        return true;
+    }
+
+    private boolean setEconomyAttributeCommand(CommandSender sender, ArrayList<String> argsList, String attribute) {
+        if (argsList.size() < 1 || argsList.size() > 3)
+            return false;
+        Game game = Game.findGame(argsList.get(0));
+        if (game == null) {
+            sender.sendMessage("Game not found");
+            return true;
+        }
+        if (argsList.size() == 1) {
+            if (attribute.equals("fare")) {
+                if (game.getFare() != null)
+                    sender.sendMessage("Fare: " + game.getFare().getAmount() + " " + game.getFare().getType());
+                else
+                    sender.sendMessage("No fare");
+            } else {
+                if (game.getPrize() != null)
+                    sender.sendMessage("Prize: " + game.getPrize().getAmount() + " " + game.getPrize().getType());
+                else
+                    if (game.getPot() == true)
+                        sender.sendMessage("Game has a pot");
+                    else
+                        sender.sendMessage("No prize");
+            }
+            return true;
+        } else {
+            if (!sender.hasPermission("bomberman.op")) {
+                sender.sendMessage("You may only view what the " + attribute + " is");
+                return true;
+            }
+            if (argsList.size() == 2) {
+                if (argsList.get(1).equalsIgnoreCase("pot")) {
+                    game.setPrize(null, true);
+                    sender.sendMessage("Prize set");
+                    return true;
+                } else if (argsList.get(1).equals("none")) {
+                    if (attribute.equalsIgnoreCase("fare")) {
+                        game.setFare(null);
+                        sender.sendMessage("Fare removed");
+                    } else {
+                        game.setPrize(null, false);
+                        sender.sendMessage("Prize removed");
+                    }
+                    return true;
+                }
+                return false;
+            }
+            if (argsList.size() == 3) {
+                try {
+                    Material m = Material.getMaterial(argsList.get(1).toUpperCase());
+                    if (m == null)
+                        sender.sendMessage("Unknown material");
+                    int amount = Integer.parseInt(argsList.get(2));
+                    if (attribute.equalsIgnoreCase("fare")) {
+                        game.setFare(new ItemStack(m, amount));
+                        sender.sendMessage("Fare set");
+                    } else {
+                        game.setPrize(new ItemStack(m, amount), false);
+                        sender.sendMessage("Prize set");
+                    }
+                    return true;
+                } catch (Exception e) {
+                    return false;
+                }
+            }
+        }
+        return false;
+    }
+
+    private boolean createArenaCommand(CommandSender sender, ArrayList<String> argsList) {
+        if (argsList.size() != 1)
+            return false;
+        if (sender instanceof Player) {
+            Location[] locations = BoardGenerator.getBoundingStructure((Player)sender, argsList.get(0));
+            Board board2 = BoardGenerator.createArena(argsList.get(0), locations[0], locations[1]);
+            BoardGenerator.saveBoard(board2);
+            sender.sendMessage("Arena created");
+        }
+        return true;
+    }
+
+    private boolean listArenasCommand(CommandSender sender, ArrayList<String> argsList) {
+        List<String> arenas = BoardGenerator.allBoards();
+        if (arenas.size() == 0) {
+            sender.sendMessage("No arenas");
+        } else {
+            sender.sendMessage("Current arenas:");
+            for (String name : arenas) {
+                if (!name.endsWith(".old"))
+                    sender.sendMessage(" * " + name);
+            }
+        }
+        return true;
+    }
+
+    @Override
 	public List<String> onTabComplete(CommandSender sender, Command command,
 			String alias, String[] args) {
 		String cmd = command.getName().toLowerCase();
@@ -680,6 +696,8 @@ public class GameCommander implements CommandExecutor, TabCompleter {
             break;
 	    case "game.destroy":
             break;
+	    case "game.convert":
+	        break;
 	    case "game.force":
             break;
 	    case "game.force.start":
