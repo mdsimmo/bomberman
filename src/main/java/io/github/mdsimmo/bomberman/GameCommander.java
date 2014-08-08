@@ -83,26 +83,41 @@ public class GameCommander implements CommandExecutor, TabCompleter {
 	            arg = argsList.remove(0);
 	            commandInfo += "." + arg;
 	            
-	            if (argsList.size() == 0) {
-	                return sendCommandInfo(sender, commandInfo);
-	            }
-	            
 	            switch (arg) {
 	            case "join":
+	                if (argsList.size() == 0) {
+	                    return sendCommandInfo(sender, commandInfo);
+	                }
                     return joinCommand(sender, argsList);
 	            case "leave":
                     return leaveCommand(sender, argsList);
 	            case "info":
+	                if (argsList.size() == 0) {
+	                    return sendCommandInfo(sender, commandInfo);
+	                }
 	                return infoCommand(sender, argsList);
 	            case "list":
 	                return listCommand(sender, argsList);
 	            case "create":
+	                if (argsList.size() == 0) {
+	                    return sendCommandInfo(sender, commandInfo);
+	                }
 	                return createCommand(sender, argsList);
 	            case "destroy":
+	                if (argsList.size() == 0) {
+	                    return sendCommandInfo(sender, commandInfo);
+	                }
 	                return destroyCommand(sender, argsList);
 	            case "convert":
+	                if (argsList.size() == 0) {
+	                    return sendCommandInfo(sender, commandInfo);
+	                }
 	                return convertCommand(sender, argsList);
 	            case "force":
+	                if (argsList.size() == 0) {
+	                    return sendCommandInfo(sender, commandInfo);
+	                }
+	                
 	                arg = argsList.remove(0);
 	                commandInfo += "." + arg;
 	                
@@ -121,6 +136,10 @@ public class GameCommander implements CommandExecutor, TabCompleter {
                         return sendCommandInfo(sender, commandInfo);
                     }
 	            case "set":
+	                if (argsList.size() == 0) {
+	                    return sendCommandInfo(sender, commandInfo);
+	                }
+	                
                     arg = argsList.remove(0);
                     commandInfo += "." + arg;
                     
