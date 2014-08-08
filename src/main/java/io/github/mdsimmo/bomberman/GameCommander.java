@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -163,6 +164,8 @@ public class GameCommander implements CommandExecutor, TabCompleter {
                     case "fare":
                     case "prize":
                         return setEconomyAttributeCommand(sender, argsList, arg);
+                    case "handicap":
+                    	return setPlayerHandicapCommand(sender, argsList);
                     default:
                         return sendCommandInfo(sender, commandInfo);
                     }
@@ -591,6 +594,37 @@ public class GameCommander implements CommandExecutor, TabCompleter {
         return false;
     }
 
+	private boolean setPlayerHandicapCommand(CommandSender sender, ArrayList<String> argsList) {
+		if (argsList.size() != 3)
+			return false;
+		Game game = Game.findGame(argsList.get(0));
+		if (game == null) {
+			sender.sendMessage("cannot find game");
+			return true;
+		}
+		@SuppressWarnings("deprecation")
+		PlayerRep rep = game.getPlayerRep(Bukkit.getPlayer(argsList.get(1)));
+		if (rep == null) {
+			sender.sendMessage("Cannot find the player (they must have joined the game)");
+			return true;
+		}
+		int handicap = 0;
+		try {
+			handicap = Integer.parseInt(argsList.get(2));
+		} catch (NumberFormatException e) {
+			return false;
+		}
+		rep.handicap = handicap;
+		if (handicap > 0)
+			sender.sendMessage("Handicap set");
+		else if (handicap == 0)
+			sender.sendMessage("Handicap removed");
+		else
+			sender.sendMessage("Help added");
+		game.initialise(rep);
+		return true;
+	}
+    
     private boolean createArenaCommand(CommandSender sender, ArrayList<String> argsList) {
         if (argsList.size() != 1)
             return false;
@@ -692,6 +726,12 @@ public class GameCommander implements CommandExecutor, TabCompleter {
 					}
 				}
 			}
+			
+		case "handicap":
+			if (args.length == 1)
+				addGames(options, args[0]);
+			if (args.length == 2)
+				return null; // a list of players
 			break;
 		}
 		return options;
@@ -841,6 +881,7 @@ public class GameCommander implements CommandExecutor, TabCompleter {
             sender.sendMessage(ChatColor.GOLD + "   /bm game set autostartdelay");
             sender.sendMessage(ChatColor.GOLD + "   /bm game set fare");
             sender.sendMessage(ChatColor.GOLD + "   /bm game set prize");
+            sender.sendMessage(ChatColor.GOLD + "   /bm game set handicap");
             sender.sendMessage("" + ChatColor.YELLOW + ChatColor.BOLD
                     + "=============================================");
             break;
@@ -928,6 +969,15 @@ public class GameCommander implements CommandExecutor, TabCompleter {
             sender.sendMessage(ChatColor.GOLD + "   /bm game set prize <game> <material> <amount>");
             sender.sendMessage(ChatColor.GOLD + "   /bm game set prize <game> none");
             sender.sendMessage(ChatColor.GOLD + "   /bm game set prize <game> pot");
+            sender.sendMessage("" + ChatColor.YELLOW + ChatColor.BOLD
+                    + "=============================================");
+            break;
+	    case "game.set.handicap":
+            sender.sendMessage("" + ChatColor.YELLOW + ChatColor.BOLD
+                    + "=============================================");
+            sender.sendMessage(ChatColor.GOLD + "Description: Gives a player a handicap/advantage");
+            sender.sendMessage(ChatColor.GOLD + "Usage:");
+            sender.sendMessage(ChatColor.GOLD + "   /bm game set handicap <game> <player>");
             sender.sendMessage("" + ChatColor.YELLOW + ChatColor.BOLD
                     + "=============================================");
             break;
