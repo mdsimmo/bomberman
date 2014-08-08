@@ -22,26 +22,27 @@ public enum Config {
 	POWER ( "power", 3),
 	MIN_PLAYERS ( "minplayers", 2),
 	AUTOSTART ( "autostart", false ),
-	DEFAULT_STYLE ("defaultstyle", "default" ),
-	DROPS_ITEMS ("drops.items", Arrays.asList(
+	AUTOSTART_DELAY ( "autostart.delay", 30 ),
+	DEFAULT_ARENA ("defaultarena", "default" ),
+	DROPS_ITEMS ("drops.items", Arrays.asList(new ItemStack[] {
 			new ItemStack(Material.TNT, 3),
 			new ItemStack(Material.BLAZE_POWDER, 2),
 			new Potion(PotionType.INSTANT_HEAL, 1).toItemStack(1),
-			new Potion(PotionType.SPEED, 2).toItemStack(1))),
+			new Potion(PotionType.SPEED, 2).toItemStack(1)
+	})),
 	DROPS_CHANCE ("drops.chance", 0.1d),
-	BLOCKS_DROPPING ("blocks.drop", Arrays.asList(
-			Material.DIRT), Material.class),
-	BLOCKS_DESTRUCTABLE ("blocks.destructable", Arrays.asList(
-			Material.DIRT), Material.class),
+	BLOCKS_DROPPING ("blocks.drop", Arrays.asList(new Material[] {
+			Material.DIRT
+		}), Material.class),
+	BLOCKS_DESTRUCTABLE ("blocks.destructable", Arrays.asList(new Material[] {
+			Material.DIRT
+		}), Material.class),
 	SUDDEN_DEATH ("timeout.suddendeath", 60*5),
 	TIME_OUT ("timeout.gameover", 60*8),
 	PROTECT_EXPLOSIONS ("griefprotection.explosion", false),
 	PROTECT_PLACING ("griefprotection.blockplacing", false),
 	PROTECT_DESTROYING ("griefprotection.blockdestroy", false),
-	PROTECT_FIRE ("griefprotection.fire", false),
-	INITIAL_ITEMS("initialitems", Arrays.asList(
-			new ItemStack(Material.TNT, 3),
-			new ItemStack(Material.BLAZE_POWDER, 3)));
+	PROTECT_FIRE ("griefprotection.fire", false);
 	
 	private static Plugin plugin = Bomberman.instance;
 	private static FileConfiguration c = plugin.getConfig();

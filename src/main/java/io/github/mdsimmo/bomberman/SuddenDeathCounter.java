@@ -26,33 +26,35 @@ public class SuddenDeathCounter implements Runnable {
 		timeout--;
 		suddenDeath--;
 		if (timeout == 30)
-			for (PlayerRep rep : game.players)
-				rep.player.sendMessage(ChatColor.YELLOW + "Game over in 30 seconds!");
+		    Bomberman.sendMessage(game.players, "Game over in "
+                    + ChatColor.YELLOW + timeout + ChatColor.WHITE
+                    + " seconds!");
 		if (timeout == 10)
-			for (PlayerRep rep : game.observers)
-				rep.player.sendMessage(ChatColor.RED + "Game over in 10 seconds!");
+		    Bomberman.sendMessage(game.observers, "Game over in "
+                    + ChatColor.YELLOW + timeout + ChatColor.WHITE
+                    + " seconds!");
 		else if (timeout < 10 && timeout > 0)
-			for (PlayerRep rep : game.players)
-				rep.player.sendMessage(" " + timeout);
+		    Bomberman.sendMessage(game.players, "" + timeout);
 		else if (timeout == 0) {
-			for (PlayerRep rep : game.observers)
-				rep.player.sendMessage(ChatColor.RED + "Game over!");
+		    Bomberman.sendMessage(game.observers, "Game over!");
 			game.terminate();
 		}
 		
 		if (suddenDeath == 30)
-			for (PlayerRep rep : game.players)
-				rep.player.sendMessage(ChatColor.YELLOW + "Sudden death in 30 seconds!");
-		if (suddenDeath == 10)
-			for (PlayerRep rep : game.observers)
-				rep.player.sendMessage(ChatColor.RED + "Sudden death in 10 seconds!");
-		else if (suddenDeath < 10 && suddenDeath > 0)
-			for (PlayerRep rep : game.players)
-				rep.player.sendMessage("" + suddenDeath);
-		else if (suddenDeath == 0) {
-			for (PlayerRep rep : game.observers)
-				rep.player.sendMessage(ChatColor.RED + "Sudden death!");
-			game.setSuddenDeath(true);
+		    Bomberman.sendMessage(game.players, "Sudden death in "
+                    + ChatColor.YELLOW + suddenDeath + ChatColor.WHITE
+                    + " seconds!");
+		
+		if (suddenDeath <= 10) {
+		    if (suddenDeath == 10)
+		        Bomberman.sendMessage(game.observers, "Sudden death in " + ChatColor.YELLOW
+                        + suddenDeath + ChatColor.WHITE + " seconds!");
+		    else if (suddenDeath > 0) {
+		        Bomberman.sendMessage(game.players, "" + suddenDeath);
+		    } else {
+		        Bomberman.sendMessage(game.observers, ChatColor.RED + "Sudden death!");
+	            game.setSuddenDeath(true);
+		    }
 		}
 	}
 }
