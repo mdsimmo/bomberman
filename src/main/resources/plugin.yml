@@ -90,6 +90,10 @@ commands:
     description: Gets all the information about a game
     usage: /info <game>
     permission: bomberman.player
+  handicap:
+    description: gives a handicap to a player (neg values give advantage)
+    usage: /handicap <game> <player> <level>
+    permission: bomberman.op
   
 permissions:
   bomberman.*:

@@ -42,6 +42,7 @@ public class PlayerRep implements Listener {
 	public int immunity = 0;
 	public long deathTime = -1;
 	public int kills = 0;
+	public int handicap = 0;
 	
 	public PlayerRep(Player player, Game game) {
 		this.player = player;
@@ -75,10 +76,7 @@ public class PlayerRep implements Listener {
 		player.setMaxHealth(game.getLives());
 		player.setHealthScale(game.getLives() * 2);
 		spawnInventory = player.getInventory().getContents();
-		player.getInventory().setContents(
-				new ItemStack[] { new ItemStack(Material.TNT, game.getBombs()),
-						new ItemStack(Material.BLAZE_POWDER, game.getPower()) });
-
+		game.initialise(this);
 		isPlaying = true;
 		game.addPlayer(this);
 	}

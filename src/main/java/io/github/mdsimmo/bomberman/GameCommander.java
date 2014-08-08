@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.commons.lang.StringUtils;
+import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.command.Command;
@@ -39,8 +40,9 @@ public class GameCommander implements CommandExecutor, TabCompleter {
 				"fare",
 				"prize",
 				"info",
-				"autostart"};
-			for (String cmd : commands) {
+				"autostart",
+				"handicap"};
+		for (String cmd : commands) {
 			plugin.getCommand(cmd).setExecutor(this);
 			plugin.getCommand(cmd).setTabCompleter(this);
 		}
@@ -450,6 +452,37 @@ public class GameCommander implements CommandExecutor, TabCompleter {
 			message += " * Style: " + game.board.name + "\n";
 			sender.sendMessage(message);
 			return true;
+			
+		case "handicap":
+			if (args.length != 3)
+				return false;
+			game = Game.findGame(args[0]);
+			if (game == null) {
+				sender.sendMessage("cannot find game");
+				return true;
+			}
+			@SuppressWarnings("deprecation")
+			PlayerRep rep = game.getPlayerRep(Bukkit.getPlayer(args[1]));
+			if (rep == null) {
+				sender.sendMessage("Cannot find the player (they must have joined the game)");
+				return true;
+			}
+			int handicap = 0;
+			try {
+				handicap = Integer.parseInt(args[2]); 
+			} catch (NumberFormatException e) {
+				return false;
+			}			
+			rep.handicap = handicap;
+			if (handicap > 0)
+				sender.sendMessage("Handicap set");
+			else if (handicap == 0)
+				sender.sendMessage("Handicap removed");
+			else
+				sender.sendMessage("Help added");
+			game.initialise(rep);
+			return true;
+				
 		}
 			
 		return false;
@@ -531,6 +564,12 @@ public class GameCommander implements CommandExecutor, TabCompleter {
 				}
 			}
 			break;
+			
+		case "handicap":
+			if (args.length == 1)
+				addGames(options, args[0]);
+			if (args.length == 2)
+				return null; // a list of players
 		}
 		return options;
 	}

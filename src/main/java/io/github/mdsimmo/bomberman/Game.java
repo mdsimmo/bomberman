@@ -22,6 +22,8 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.Plugin;
+import org.bukkit.potion.PotionEffect;
+import org.bukkit.potion.PotionEffectType;
 import org.bukkit.util.Vector;
 
 public class Game implements Listener {
@@ -150,6 +152,7 @@ public class Game implements Listener {
 	private int suddenDeath;
 	private boolean suddenDeathStarted = false;
 	private int timeout;
+	private List<ItemStack> initialitems;
 	
 	public Game(String name, Location loc) {
 		this.name = name;
@@ -175,6 +178,7 @@ public class Game implements Listener {
 		dropChance		= Config.DROPS_CHANCE.getValue(config);
 		suddenDeath		= Config.SUDDEN_DEATH.getValue(config);
 		timeout			= Config.TIME_OUT.getValue(config);
+		initialitems	= Config.INITIAL_ITEMS.getValue(config);
 	}
 
 	public boolean containsLocation(Location l) {
@@ -236,11 +240,12 @@ public class Game implements Listener {
 				plugin.getServer().getScheduler().scheduleSyncDelayedTask(plugin, this, 20);
 			} else {
 				for (PlayerRep rep : observers) {
+					initialise(rep);
 					rep.player.sendMessage(ChatColor.YELLOW + "Game started!");
-					isPlaying = true;
-					if (suddenDeath >= 0 || timeout >= 0)
-						new SuddenDeathCounter(Game.this);
 				}
+				isPlaying = true;
+				if (suddenDeath >= 0 || timeout >= 0)
+					new SuddenDeathCounter(Game.this);
 			}
 			count--;
 		}
@@ -504,5 +509,24 @@ public class Game implements Listener {
 	public void setTimeout(int time) {
 		timeout = time;
 		save.set(Config.TIME_OUT.getPath(), time);
+	}
+	
+	/**
+	 * initialises the players inventory for a game handelling player's handycas and things <br>
+	 * make sure the player's inventory is cleared before calling this.
+	 * @param rep the playerrep to initialise
+	 */
+	public void initialise(PlayerRep rep) {
+		rep.player.getInventory().clear();
+		for (ItemStack stack : initialitems) {
+			ItemStack s = stack.clone();
+			s.setAmount(s.getAmount() - rep.handicap);
+			rep.player.getInventory().addItem(s);
+		}
+		if (rep.handicap >= 1)
+			rep.player.setHealth(Math.max(rep.player.getHealth()-rep.handicap, 1));
+		if (rep.handicap >= 2)
+			rep.player.addPotionEffect(
+				new PotionEffect(PotionEffectType.SLOW, rep.handicap*20*60, rep.handicap));
 	}
 }
