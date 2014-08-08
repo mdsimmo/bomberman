@@ -700,58 +700,283 @@ public class GameCommander implements CommandExecutor, TabCompleter {
 	private boolean sendCommandInfo(CommandSender sender, String command) {
 	    switch(command) {
 	    case "bm":
+	        sender.sendMessage("" + ChatColor.YELLOW + ChatColor.BOLD
+	                + "=============================================");
+	        sender.sendMessage(ChatColor.GOLD + "Description: Main command for BomberMan.");
+	        sender.sendMessage(ChatColor.GOLD + "Commands:");
+	        sender.sendMessage(ChatColor.GOLD + "   /bm game [...]");
+	        sender.sendMessage(ChatColor.GOLD + "   /bm arena [...]");
+	        sender.sendMessage("" + ChatColor.YELLOW + ChatColor.BOLD
+                    + "=============================================");
             break;
 	    case "game":
+	        sender.sendMessage("" + ChatColor.YELLOW + ChatColor.BOLD
+                    + "=============================================");
+            sender.sendMessage(ChatColor.GOLD + "Description: Game management and interaction command.");
+            sender.sendMessage(ChatColor.GOLD + "Commands:");
+            sender.sendMessage(ChatColor.GOLD + "   /bm game join");
+            sender.sendMessage(ChatColor.GOLD + "   /bm game leave");
+            sender.sendMessage(ChatColor.GOLD + "   /bm game info");
+            sender.sendMessage(ChatColor.GOLD + "   /bm game list");
+            sender.sendMessage(ChatColor.GOLD + "   /bm game create");
+            sender.sendMessage(ChatColor.GOLD + "   /bm game destroy");
+            sender.sendMessage(ChatColor.GOLD + "   /bm game convert");
+            sender.sendMessage(ChatColor.GOLD + "   /bm game force [...]");
+            sender.sendMessage(ChatColor.GOLD + "   /bm game set [...]");
+            sender.sendMessage("" + ChatColor.YELLOW + ChatColor.BOLD
+                    + "=============================================");
             break;
 	    case "game.join":
+	        sender.sendMessage("" + ChatColor.YELLOW + ChatColor.BOLD
+                    + "=============================================");
+            sender.sendMessage(ChatColor.GOLD + "Description: Join a game.");
+            sender.sendMessage(ChatColor.GOLD + "Usage:");
+            sender.sendMessage(ChatColor.GOLD + "   /bm game join <game>");
+            sender.sendMessage("" + ChatColor.YELLOW + ChatColor.BOLD
+                    + "=============================================");
             break;
 	    case "game.leave":
+            sender.sendMessage("" + ChatColor.YELLOW + ChatColor.BOLD
+                    + "=============================================");
+            sender.sendMessage(ChatColor.GOLD + "Description: Leave the game you're in.");
+            sender.sendMessage(ChatColor.GOLD + "Usage:");
+            sender.sendMessage(ChatColor.GOLD + "   /bm game leave");
+            sender.sendMessage("" + ChatColor.YELLOW + ChatColor.BOLD
+                    + "=============================================");
             break;
 	    case "game.info":
+            sender.sendMessage("" + ChatColor.YELLOW + ChatColor.BOLD
+                    + "=============================================");
+            sender.sendMessage(ChatColor.GOLD + "Description: Show information about a game.");
+            sender.sendMessage(ChatColor.GOLD + "Usage:");
+            sender.sendMessage(ChatColor.GOLD + "   /bm game info <game>");
+            sender.sendMessage("" + ChatColor.YELLOW + ChatColor.BOLD
+                    + "=============================================");
             break;
 	    case "game.list":
+            sender.sendMessage("" + ChatColor.YELLOW + ChatColor.BOLD
+                    + "=============================================");
+            sender.sendMessage(ChatColor.GOLD + "Description: Show all existing games.");
+            sender.sendMessage(ChatColor.GOLD + "Usage:");
+            sender.sendMessage(ChatColor.GOLD + "   /bm game list");
+            sender.sendMessage("" + ChatColor.YELLOW + ChatColor.BOLD
+                    + "=============================================");
             break;
 	    case "game.create":
+            sender.sendMessage("" + ChatColor.YELLOW + ChatColor.BOLD
+                    + "=============================================");
+            sender.sendMessage(ChatColor.GOLD + "Description: Generate a BomberMan game.");
+            sender.sendMessage(ChatColor.GOLD + "Usage:");
+            sender.sendMessage(ChatColor.GOLD + "   /bm game create <game> [arena]");
+            sender.sendMessage("" + ChatColor.YELLOW + ChatColor.BOLD
+                    + "=============================================");
             break;
 	    case "game.destroy":
+            sender.sendMessage("" + ChatColor.YELLOW + ChatColor.BOLD
+                    + "=============================================");
+            sender.sendMessage(ChatColor.GOLD + "Description: Destroy a game and revert the land to its previous state.");
+            sender.sendMessage(ChatColor.GOLD + "Usage:");
+            sender.sendMessage(ChatColor.GOLD + "   /bm game destroy <game>");
+            sender.sendMessage("" + ChatColor.YELLOW + ChatColor.BOLD
+                    + "=============================================");
             break;
 	    case "game.convert":
+            sender.sendMessage("" + ChatColor.YELLOW + ChatColor.BOLD
+                    + "=============================================");
+            sender.sendMessage(ChatColor.GOLD + "Description: Converts the structure under the cursor into a BomberMan game.");
+            sender.sendMessage(ChatColor.GOLD + "Usage:");
+            sender.sendMessage(ChatColor.GOLD + "   /bm game convert <game>");
+            sender.sendMessage("" + ChatColor.YELLOW + ChatColor.BOLD
+                    + "=============================================");
 	        break;
 	    case "game.force":
+            sender.sendMessage("" + ChatColor.YELLOW + ChatColor.BOLD
+                    + "=============================================");
+            sender.sendMessage(ChatColor.GOLD + "Description: Force actions on a game.");
+            sender.sendMessage(ChatColor.GOLD + "Commands:");
+            sender.sendMessage(ChatColor.GOLD + "   /bm game force start");
+            sender.sendMessage(ChatColor.GOLD + "   /bm game force stop");
+            sender.sendMessage(ChatColor.GOLD + "   /bm game force reset");
+            sender.sendMessage("" + ChatColor.YELLOW + ChatColor.BOLD
+                    + "=============================================");
             break;
 	    case "game.force.start":
+            sender.sendMessage("" + ChatColor.YELLOW + ChatColor.BOLD
+                    + "=============================================");
+            sender.sendMessage(ChatColor.GOLD + "Description: Forcibly start a game.");
+            sender.sendMessage(ChatColor.GOLD + "Usage:");
+            sender.sendMessage(ChatColor.GOLD + "   /bm game force start <game>");
+            sender.sendMessage("" + ChatColor.YELLOW + ChatColor.BOLD
+                    + "=============================================");
             break;
 	    case "game.force.stop":
+            sender.sendMessage("" + ChatColor.YELLOW + ChatColor.BOLD
+                    + "=============================================");
+            sender.sendMessage(ChatColor.GOLD + "Description: Forcibly stop a game.");
+            sender.sendMessage(ChatColor.GOLD + "Usage:");
+            sender.sendMessage(ChatColor.GOLD + "   /bm game force stop <game>");
+            sender.sendMessage("" + ChatColor.YELLOW + ChatColor.BOLD
+                    + "=============================================");
             break;
 	    case "game.force.reset":
+            sender.sendMessage("" + ChatColor.YELLOW + ChatColor.BOLD
+                    + "=============================================");
+            sender.sendMessage(ChatColor.GOLD + "Description: Forcibly reset a game to its starting point.");
+            sender.sendMessage(ChatColor.GOLD + "Usage:");
+            sender.sendMessage(ChatColor.GOLD + "   /bm game force reset <game>");
+            sender.sendMessage("" + ChatColor.YELLOW + ChatColor.BOLD
+                    + "=============================================");
             break;
 	    case "game.set":
+            sender.sendMessage("" + ChatColor.YELLOW + ChatColor.BOLD
+                    + "=============================================");
+            sender.sendMessage(ChatColor.GOLD + "Description: Change a game's settings.");
+            sender.sendMessage(ChatColor.GOLD + "Commands:");
+            sender.sendMessage(ChatColor.GOLD + "   /bm game set arena");
+            sender.sendMessage(ChatColor.GOLD + "   /bm game set lives");
+            sender.sendMessage(ChatColor.GOLD + "   /bm game set bombs");
+            sender.sendMessage(ChatColor.GOLD + "   /bm game set power");
+            sender.sendMessage(ChatColor.GOLD + "   /bm game set minplayers");
+            sender.sendMessage(ChatColor.GOLD + "   /bm game set autostart");
+            sender.sendMessage(ChatColor.GOLD + "   /bm game set autostartdelay");
+            sender.sendMessage(ChatColor.GOLD + "   /bm game set fare");
+            sender.sendMessage(ChatColor.GOLD + "   /bm game set prize");
+            sender.sendMessage("" + ChatColor.YELLOW + ChatColor.BOLD
+                    + "=============================================");
             break;
 	    case "game.set.arena":
+            sender.sendMessage("" + ChatColor.YELLOW + ChatColor.BOLD
+                    + "=============================================");
+            sender.sendMessage(ChatColor.GOLD + "Description: Change a game's arena.");
+            sender.sendMessage(ChatColor.GOLD + "Usage:");
+            sender.sendMessage(ChatColor.GOLD + "   /bm game set arena <game> [arena]");
+            sender.sendMessage("" + ChatColor.YELLOW + ChatColor.BOLD
+                    + "=============================================");
             break;
 	    case "game.set.lives":
+            sender.sendMessage("" + ChatColor.YELLOW + ChatColor.BOLD
+                    + "=============================================");
+            sender.sendMessage(ChatColor.GOLD + "Description: Change a game's lives.");
+            sender.sendMessage(ChatColor.GOLD + "Usage:");
+            sender.sendMessage(ChatColor.GOLD + "   /bm game set lives <game> [lives]");
+            sender.sendMessage("" + ChatColor.YELLOW + ChatColor.BOLD
+                    + "=============================================");
             break;
 	    case "game.set.bombs":
+            sender.sendMessage("" + ChatColor.YELLOW + ChatColor.BOLD
+                    + "=============================================");
+            sender.sendMessage(ChatColor.GOLD + "Description: Change a game's bombs.");
+            sender.sendMessage(ChatColor.GOLD + "Usage:");
+            sender.sendMessage(ChatColor.GOLD + "   /bm game set bombs <game> [bombs]");
+            sender.sendMessage("" + ChatColor.YELLOW + ChatColor.BOLD
+                    + "=============================================");
             break;
 	    case "game.set.power":
+            sender.sendMessage("" + ChatColor.YELLOW + ChatColor.BOLD
+                    + "=============================================");
+            sender.sendMessage(ChatColor.GOLD + "Description: Change a game's power.");
+            sender.sendMessage(ChatColor.GOLD + "Usage:");
+            sender.sendMessage(ChatColor.GOLD + "   /bm game set power <game> [power]");
+            sender.sendMessage("" + ChatColor.YELLOW + ChatColor.BOLD
+                    + "=============================================");
             break;
 	    case "game.set.minplayers":
+            sender.sendMessage("" + ChatColor.YELLOW + ChatColor.BOLD
+                    + "=============================================");
+            sender.sendMessage(ChatColor.GOLD + "Description: Change a game's minimum number of players.");
+            sender.sendMessage(ChatColor.GOLD + "Usage:");
+            sender.sendMessage(ChatColor.GOLD + "   /bm game set minplayers <game> [minplayers]");
+            sender.sendMessage("" + ChatColor.YELLOW + ChatColor.BOLD
+                    + "=============================================");
             break;
 	    case "game.set.autostart":
+            sender.sendMessage("" + ChatColor.YELLOW + ChatColor.BOLD
+                    + "=============================================");
+            sender.sendMessage(ChatColor.GOLD + "Description: Change whether a game starts automatically with minimum players.");
+            sender.sendMessage(ChatColor.GOLD + "Usage:");
+            sender.sendMessage(ChatColor.GOLD + "   /bm game set autostart <game> <true|false>");
+            sender.sendMessage("" + ChatColor.YELLOW + ChatColor.BOLD
+                    + "=============================================");
             break;
 	    case "game.set.autostartdelay":
+            sender.sendMessage("" + ChatColor.YELLOW + ChatColor.BOLD
+                    + "=============================================");
+            sender.sendMessage(ChatColor.GOLD + "Description: Change the delay on a game's automated start.");
+            sender.sendMessage(ChatColor.GOLD + "Usage:");
+            sender.sendMessage(ChatColor.GOLD + "   /bm game set autostartdelay <game> [delay]");
+            sender.sendMessage("" + ChatColor.YELLOW + ChatColor.BOLD
+                    + "=============================================");
             break;
 	    case "game.set.fare":
+            sender.sendMessage("" + ChatColor.YELLOW + ChatColor.BOLD
+                    + "=============================================");
+            sender.sendMessage(ChatColor.GOLD + "Description: Change a game's fare.");
+            sender.sendMessage(ChatColor.GOLD + "Usage:");
+            sender.sendMessage(ChatColor.GOLD + "   /bm game set fare <game>");
+            sender.sendMessage(ChatColor.GOLD + "   /bm game set fare <game> <material> <amount>");
+            sender.sendMessage(ChatColor.GOLD + "   /bm game set fare <game> none");
+            sender.sendMessage(ChatColor.GOLD + "   /bm game set fare <game> pot");
+            sender.sendMessage("" + ChatColor.YELLOW + ChatColor.BOLD
+                    + "=============================================");
             break;
 	    case "game.set.prize":
+            sender.sendMessage("" + ChatColor.YELLOW + ChatColor.BOLD
+                    + "=============================================");
+            sender.sendMessage(ChatColor.GOLD + "Description: Change a game's prize.");
+            sender.sendMessage(ChatColor.GOLD + "Usage:");
+            sender.sendMessage(ChatColor.GOLD + "   /bm game set prize <game>");
+            sender.sendMessage(ChatColor.GOLD + "   /bm game set prize <game> <material> <amount>");
+            sender.sendMessage(ChatColor.GOLD + "   /bm game set prize <game> none");
+            sender.sendMessage(ChatColor.GOLD + "   /bm game set prize <game> pot");
+            sender.sendMessage("" + ChatColor.YELLOW + ChatColor.BOLD
+                    + "=============================================");
             break;
 	    case "arena":
+            sender.sendMessage("" + ChatColor.YELLOW + ChatColor.BOLD
+                    + "=============================================");
+            sender.sendMessage(ChatColor.GOLD + "Description: Arena management command.");
+            sender.sendMessage(ChatColor.GOLD + "Commands:");
+            sender.sendMessage(ChatColor.GOLD + "   /bm arena create");
+            sender.sendMessage(ChatColor.GOLD + "   /bm arena list");
+            sender.sendMessage("" + ChatColor.YELLOW + ChatColor.BOLD
+                    + "=============================================");
             break;
 	    case "arena.create":
+            sender.sendMessage("" + ChatColor.YELLOW + ChatColor.BOLD
+                    + "=============================================");
+            sender.sendMessage(ChatColor.GOLD + "Description: Create a new arena type for games to use.");
+            sender.sendMessage(ChatColor.GOLD + "Usage:");
+            sender.sendMessage(ChatColor.GOLD + "   /bm arena create <arena>");
+            sender.sendMessage("" + ChatColor.YELLOW + ChatColor.BOLD
+                    + "=============================================");
             break;
         case "arena.list":
+            sender.sendMessage("" + ChatColor.YELLOW + ChatColor.BOLD
+                    + "=============================================");
+            sender.sendMessage(ChatColor.GOLD + "Description: List available arena types.");
+            sender.sendMessage(ChatColor.GOLD + "Usage:");
+            sender.sendMessage(ChatColor.GOLD + "   /bm arena list");
+            sender.sendMessage("" + ChatColor.YELLOW + ChatColor.BOLD
+                    + "=============================================");
             break;
         default:
+            sender.sendMessage("" + ChatColor.YELLOW + ChatColor.BOLD
+                    + "=============================================");
+            sender.sendMessage(ChatColor.GOLD + "You entered an unknown command.");
+            sender.sendMessage(ChatColor.GOLD + "Commands:");
+            sender.sendMessage(ChatColor.GOLD + "   /bm game join");
+            sender.sendMessage(ChatColor.GOLD + "   /bm game leave");
+            sender.sendMessage(ChatColor.GOLD + "   /bm game info");
+            sender.sendMessage(ChatColor.GOLD + "   /bm game list");
+            sender.sendMessage(ChatColor.GOLD + "   /bm game create");
+            sender.sendMessage(ChatColor.GOLD + "   /bm game destroy");
+            sender.sendMessage(ChatColor.GOLD + "   /bm game convert");
+            sender.sendMessage(ChatColor.GOLD + "   /bm game force [...]");
+            sender.sendMessage(ChatColor.GOLD + "   /bm game set [...]");
+            sender.sendMessage(ChatColor.GOLD + "   /bm arena create");
+            sender.sendMessage(ChatColor.GOLD + "   /bm arena list");
+            sender.sendMessage("" + ChatColor.YELLOW + ChatColor.BOLD
+                    + "=============================================");
             return false;
 	    }
 	    return true;
