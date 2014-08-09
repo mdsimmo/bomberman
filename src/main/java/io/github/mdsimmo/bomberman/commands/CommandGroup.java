@@ -47,17 +47,14 @@ public abstract class CommandGroup extends Command {
 				}
 			}
 		}
-		sender.sendMessage("" + ChatColor.YELLOW + ChatColor.BOLD
-				+ "=============================================");
-		sender.sendMessage(ChatColor.GOLD + info());
-		sender.sendMessage("" + ChatColor.YELLOW + ChatColor.BOLD
-				+ "=============================================");
+		sender.sendMessage(heading(name()));
+		sender.sendMessage(info());
 	}
 	
 	@Override
 	public String info() {
-		String info = "Description: " + description() + "\n";
-		info += "Commands: \n";
+		String info = ChatColor.GOLD + "Description: " + ChatColor.WHITE + description() + " \n";
+		info += ChatColor.GOLD + "Commands: \n" + ChatColor.WHITE;
 		info += usage();
 		return info;
 	}

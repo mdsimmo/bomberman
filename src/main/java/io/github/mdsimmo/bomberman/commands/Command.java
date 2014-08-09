@@ -54,24 +54,30 @@ public abstract class Command {
 	 */
 	public abstract boolean run (CommandSender sender, List<String> args);
 	
+	public String heading (String text) {
+		String head = ChatColor.YELLOW + "---------"
+				+ ChatColor.WHITE + " /" + name() + " " + ChatColor.YELLOW;
+		for (int i = name().length(); i < 36; i++) {
+			head += "-";
+		}
+		return head;
+	}
+	
 	/**
 	 * displays the help
 	 * @param sender person to send to
 	 */
 	public void displayHelp(CommandSender sender, List<String> args) {
-		sender.sendMessage("" + ChatColor.YELLOW + ChatColor.BOLD
-				+ "=============================================");
-		sender.sendMessage(ChatColor.GOLD + info());
-		sender.sendMessage("" + ChatColor.YELLOW + ChatColor.BOLD
-				+ "=============================================");
+		sender.sendMessage(heading(name()));
+		sender.sendMessage(info());
 	}
 	
 	/**
 	 * @return Some info about the command
 	 */
 	public String info() {
-		return "Description: " + description() + " \n"
-				+ "Usage: " + usage() + "\n";
+		return ChatColor.GOLD + "Description: " + ChatColor.WHITE + description() + " \n"
+				+ ChatColor.GOLD + "Usage: " + ChatColor.WHITE + usage() + "\n";
 	}
 	/**
 	 * @return A sentence describing the command
