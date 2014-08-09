@@ -37,6 +37,24 @@ public abstract class CommandGroup extends Command {
 	public abstract String description();
 	
 	@Override
+	public void displayHelp(CommandSender sender, List<String> args) {
+		if (args.size() != 0) {
+			for (Command c : children) {
+				if (c.name().equalsIgnoreCase(args.get(0))) {
+					args.remove(0);
+					c.displayHelp(sender, args);
+					return;
+				}
+			}
+		}
+		sender.sendMessage("" + ChatColor.YELLOW + ChatColor.BOLD
+				+ "=============================================");
+		sender.sendMessage(ChatColor.GOLD + info());
+		sender.sendMessage("" + ChatColor.YELLOW + ChatColor.BOLD
+				+ "=============================================");
+	}
+	
+	@Override
 	public String info() {
 		String info = "Description: " + description() + "\n";
 		info += "Commands: \n";
@@ -64,7 +82,7 @@ public abstract class CommandGroup extends Command {
 	@Override
 	public boolean run(CommandSender sender, List<String> args) {
 		if (args.size() == 0) {
-			displayHelp(sender);
+			displayHelp(sender, args);
 			return true;
 		} else {
 			for (Command c : children) {
@@ -76,5 +94,20 @@ public abstract class CommandGroup extends Command {
 			sender.sendMessage(ChatColor.GOLD + "You entered an unknown command.");
 			return false;
 		}
+	}
+	
+	public Command getCommand(CommandSender sender, List<String> args) {
+		if (args.size() == 0)
+			return this;
+		for (Command c : children) {
+			if (c.name().equalsIgnoreCase(args.get(0))) {
+				args.remove(0);
+				if (c instanceof CommandGroup)
+					return ((CommandGroup)c).getCommand(sender, args);
+				else
+					return c;
+			}
+		}
+		return this;
 	}
 }

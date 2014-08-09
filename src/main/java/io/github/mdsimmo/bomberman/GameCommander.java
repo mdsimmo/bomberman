@@ -27,9 +27,10 @@ public class GameCommander implements CommandExecutor, TabCompleter {
 	@Override
 	public boolean onCommand(CommandSender sender, Command command,
 			String s, String[] args) {
-		
-		if (!handler.run(sender, new ArrayList<String>(Arrays.asList(args)))) {
-			handler.displayHelp(sender);
+		List<String> arguments = new ArrayList<String>(Arrays.asList(args));
+		io.github.mdsimmo.bomberman.commands.Command c = handler.getCommand(sender, arguments);
+		if (!c.run(sender, arguments)) {
+			c.displayHelp(sender, arguments);
 		}
 		return true;
 	}
@@ -37,8 +38,13 @@ public class GameCommander implements CommandExecutor, TabCompleter {
 	@Override
 	public List<String> onTabComplete(CommandSender sender,
 			Command command, String s, String[] args) {
+		List<String> arguments = new ArrayList<String>(Arrays.asList(args));
+		io.github.mdsimmo.bomberman.commands.Command c = handler.getCommand(sender, arguments);
 		List<String> options = new ArrayList<>();
-		for (String option : handler.options(sender, Arrays.asList(args))) {
+		List<String> all = c.options(sender, arguments);
+		if (all == null)
+			all = new ArrayList<>();
+		for (String option : all) {
 			if (StringUtil.startsWithIgnoreCase(option, args[args.length-1]))
 					options.add(option);
 		}

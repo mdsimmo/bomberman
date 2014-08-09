@@ -2,6 +2,7 @@ package io.github.mdsimmo.bomberman.commands;
 
 import java.util.List;
 
+import org.bukkit.ChatColor;
 import org.bukkit.command.CommandSender;
 
 public abstract class Command {
@@ -57,15 +58,19 @@ public abstract class Command {
 	 * displays the help
 	 * @param sender person to send to
 	 */
-	public void displayHelp(CommandSender sender) {
-		sender.sendMessage(info());
+	public void displayHelp(CommandSender sender, List<String> args) {
+		sender.sendMessage("" + ChatColor.YELLOW + ChatColor.BOLD
+				+ "=============================================");
+		sender.sendMessage(ChatColor.GOLD + info());
+		sender.sendMessage("" + ChatColor.YELLOW + ChatColor.BOLD
+				+ "=============================================");
 	}
 	
 	/**
 	 * @return Some info about the command
 	 */
 	public String info() {
-		return "Description: " + description() + " +\n"
+		return "Description: " + description() + " \n"
 				+ "Usage: " + usage() + "\n";
 	}
 	/**

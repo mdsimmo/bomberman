@@ -26,7 +26,7 @@ public class Fare extends Command {
 	public List<String> options(CommandSender sender, List<String> args) {
 		if (args.size() == 1) {
 			return Game.allGames();
-		} else if (args.size() == 1 ) {
+		} else if (args.size() == 2 ) {
 			List<String> options = new ArrayList<>();
 			options.add("none");
 			for (Material m : Material.values())
