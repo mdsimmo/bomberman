@@ -74,7 +74,7 @@ public class Fare extends Command {
 	}
 
 	@Override
-	public String usage() {
+	public String usage(CommandSender sender) {
 		 String usage = "\n";
          usage += "   /" + path() + "<game> <material> <amount> \n";
          usage += "   /" + path() + "<game> none \n";

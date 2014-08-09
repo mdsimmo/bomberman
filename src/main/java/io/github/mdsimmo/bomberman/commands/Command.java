@@ -54,6 +54,19 @@ public abstract class Command {
 	 */
 	public abstract boolean run (CommandSender sender, List<String> args);
 	
+	public boolean excecute(CommandSender sender, List<String> args) {
+		if (isAllowedBy(sender))
+			return run(sender, args);
+		else {
+			denyPermission(sender);
+			return true;
+		}
+	}
+	
+	public void denyPermission(CommandSender sender) {
+		sender.sendMessage(ChatColor.RED + "You do not have permission!");
+	}
+	
 	public String heading (String text) {
 		String head = ChatColor.YELLOW + "---------"
 				+ ChatColor.WHITE + " /" + name() + " " + ChatColor.YELLOW;
@@ -69,15 +82,16 @@ public abstract class Command {
 	 */
 	public void displayHelp(CommandSender sender, List<String> args) {
 		sender.sendMessage(heading(name()));
-		sender.sendMessage(info());
+		sender.sendMessage(info(sender));
 	}
 	
 	/**
+	 * @param sender TODO
 	 * @return Some info about the command
 	 */
-	public String info() {
+	public String info(CommandSender sender) {
 		return ChatColor.GOLD + "Description: " + ChatColor.WHITE + description() + " \n"
-				+ ChatColor.GOLD + "Usage: " + ChatColor.WHITE + usage() + "\n";
+				+ ChatColor.GOLD + "Usage: " + ChatColor.WHITE + usage(sender) + "\n";
 	}
 	/**
 	 * @return A sentence describing the command
@@ -85,9 +99,10 @@ public abstract class Command {
 	public abstract String description();
 	
 	/**
+	 * @param sender TODO
 	 * @return How to use the command
 	 */
-	public abstract String usage();
+	public abstract String usage(CommandSender sender);
 	
 	/**
 	 * @return the permission needed to run this command
@@ -121,5 +136,8 @@ public abstract class Command {
 			path += parent.path(seperator);
 		path += name() + seperator;
 		return path;
+	}
+	public void incorrectUsage(CommandSender sender) {
+		sender.sendMessage(ChatColor.RED + "Incorrect usage!");
 	}
 }

@@ -76,7 +76,7 @@ public class Handicap extends Command {
 	}
 
 	@Override
-	public String usage() {
+	public String usage(CommandSender sender) {
 		return "/" + path() + "<game> <player> <level> (neg values for advantage)";
 	}
 

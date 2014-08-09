@@ -54,7 +54,7 @@ public class AutostartDelay extends Command {
 	}
 
 	@Override
-	public String usage() {
+	public String usage(CommandSender sender) {
 		return "/" + path() + "<game> <amount>";
 	}
 

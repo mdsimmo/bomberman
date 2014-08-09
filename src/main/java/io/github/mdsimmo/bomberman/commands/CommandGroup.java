@@ -48,21 +48,24 @@ public abstract class CommandGroup extends Command {
 			}
 		}
 		sender.sendMessage(heading(name()));
-		sender.sendMessage(info());
+		sender.sendMessage(info(sender));
 	}
 	
 	@Override
-	public String info() {
+	public String info(CommandSender sender) {
 		String info = ChatColor.GOLD + "Description: " + ChatColor.WHITE + description() + " \n";
 		info += ChatColor.GOLD + "Commands: \n" + ChatColor.WHITE;
-		info += usage();
+		info += usage(sender);
 		return info;
 	}
 	
 	@Override
-	public String usage() {
+	public String usage(CommandSender sender) {
 		String usage = "";
 		for (Command c : children) {
+			if (!c.isAllowedBy(sender))
+				continue;
+			
 			if (c instanceof CommandGroup)
 				usage += "    " + c.name() + " [...]\n";
 			else
@@ -85,10 +88,10 @@ public abstract class CommandGroup extends Command {
 			for (Command c : children) {
 				if (c.name().equalsIgnoreCase(args.get(0))) {
 					args.remove(0);
-					return c.run(sender, args);
+					return c.excecute(sender, args);
 				}				
 			}
-			sender.sendMessage(ChatColor.GOLD + "You entered an unknown command.");
+			sender.sendMessage(ChatColor.RED + "You entered an unknown command!");
 			return false;
 		}
 	}

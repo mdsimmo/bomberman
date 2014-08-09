@@ -29,7 +29,8 @@ public class GameCommander implements CommandExecutor, TabCompleter {
 			String s, String[] args) {
 		List<String> arguments = new ArrayList<String>(Arrays.asList(args));
 		io.github.mdsimmo.bomberman.commands.Command c = handler.getCommand(sender, arguments);
-		if (!c.run(sender, arguments)) {
+		if (!c.excecute(sender, arguments)) {
+			c.incorrectUsage(sender);
 			c.displayHelp(sender, arguments);
 		}
 		return true;
