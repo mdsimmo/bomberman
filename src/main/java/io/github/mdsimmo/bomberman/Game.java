@@ -154,7 +154,7 @@ public class Game implements Listener {
 	private boolean autostart;
 	private int autostartDelay;
 
-	protected Board board;
+	public Board board;
 	private int bombs;
 	private GameStarter countdownTimer = null;
 	public List<DeathBlock> deathBlocks = new ArrayList<>();
@@ -164,13 +164,13 @@ public class Game implements Listener {
 	private List<ItemStack> drops;
 	public Map<Block, Bomb> explosions = new HashMap<>();
 	private ItemStack fare;
-	protected boolean isPlaying;
+	public boolean isPlaying;
 	private int lives;
-	protected Location loc;
+	public Location loc;
 	private int minPlayers;
-	protected String name;
-	protected ArrayList<PlayerRep> observers = new ArrayList<>();
-	protected Board oldBoard;
+	public String name;
+	public ArrayList<PlayerRep> observers = new ArrayList<>();
+	public Board oldBoard;
 	public ArrayList<PlayerRep> players = new ArrayList<>();
 	private boolean pot;
 	private int power;

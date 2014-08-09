@@ -9,17 +9,32 @@ commands:
     - /<command>
     - /<command> game [...]
     - /<command> arena [...]
-    permission: bomberman.player
+    permission: bomberman.observer
   
 permissions:
   bomberman.*:
     description: Gives access to all Bomberman commands
     children:
-      bomberman.op: true
+      bomberman.observer: true
       bomberman.player: true
-  bomberman.player:
-    description: Allows you to partake in the Bommerman fun
+      bomberman.operator: true
+      bomberman.dictator: true
+      bomberman.arena: true
+  bomberman.observer:
+    description: Allows viewing of Bomberman information
     default: true
-  bomberman.op:
-    description: Allows you to create and modify games
+  bomberman.player:
+    description: Allows you to join/leave bomberman games
+    default: true
+  bomberman.operator:
+    description: Allows you control games (eg, start/stop)
     default: op
+  bomberman.dictator:
+    description: Complete control over a bomberman game settings
+    default: op
+  bomberman.arena:
+    description: Create and edit arenas 
+    default: op
+  
+    
+  
