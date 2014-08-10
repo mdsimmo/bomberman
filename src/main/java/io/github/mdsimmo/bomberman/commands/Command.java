@@ -55,9 +55,19 @@ public abstract class Command {
 	public abstract boolean run (CommandSender sender, List<String> args);
 	
 	public boolean excecute(CommandSender sender, List<String> args) {
-		if (isAllowedBy(sender))
-			return run(sender, args);
-		else {
+		if (isAllowedBy(sender)) {
+			if (run(sender, args))
+				return true;
+			else {
+				if (args.size() == 0) {
+					// assume asking for help
+					displayHelp(sender, args);
+					return true;
+				} else
+					return false;
+			}
+				
+		} else {
 			denyPermission(sender);
 			return true;
 		}
@@ -68,9 +78,9 @@ public abstract class Command {
 	}
 	
 	public String heading (String text) {
-		String head = ChatColor.YELLOW + "---------"
-				+ ChatColor.WHITE + " /" + name() + " " + ChatColor.YELLOW;
-		for (int i = name().length(); i < 36; i++) {
+		String head = ChatColor.YELLOW + "--------- "
+				+ ChatColor.WHITE + text + " " + ChatColor.YELLOW;
+		for (int i = text.length(); i < 38; i++) {
 			head += "-";
 		}
 		return head;
@@ -81,13 +91,14 @@ public abstract class Command {
 	 * @param sender person to send to
 	 */
 	public void displayHelp(CommandSender sender, List<String> args) {
-		sender.sendMessage(heading(name()));
+		sender.sendMessage(heading("Help: /" + name()));
 		sender.sendMessage(info(sender));
 	}
 	
 	/**
-	 * @param sender TODO
-	 * @return Some info about the command
+	 * Some info about the command
+	 * @param sender the sender
+	 * @return the (coloured) info
 	 */
 	public String info(CommandSender sender) {
 		return ChatColor.GOLD + "Description: " + ChatColor.WHITE + description() + " \n"

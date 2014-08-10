@@ -38,17 +38,11 @@ public abstract class CommandGroup extends Command {
 	
 	@Override
 	public void displayHelp(CommandSender sender, List<String> args) {
-		if (args.size() != 0) {
-			for (Command c : children) {
-				if (c.name().equalsIgnoreCase(args.get(0))) {
-					args.remove(0);
-					c.displayHelp(sender, args);
-					return;
-				}
-			}
-		}
-		sender.sendMessage(heading(name()));
-		sender.sendMessage(info(sender));
+		Command c = getCommand(sender, args);
+		if (c == this)
+			super.displayHelp(sender, args);
+		else
+			c.displayHelp(sender, args);
 	}
 	
 	@Override
@@ -92,7 +86,8 @@ public abstract class CommandGroup extends Command {
 				}				
 			}
 			sender.sendMessage(ChatColor.RED + "You entered an unknown command!");
-			return false;
+			displayHelp(sender, args);
+			return true;
 		}
 	}
 	
