@@ -5,6 +5,8 @@ import io.github.mdsimmo.bomberman.Game;
 import io.github.mdsimmo.bomberman.commands.Command;
 
 import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
 
 import org.bukkit.command.CommandSender;
 
@@ -26,24 +28,27 @@ public class GameList extends Command {
 
 	@Override
 	public boolean run(CommandSender sender, List<String> args) {
-		 List<String> games = Game.allGames();
-	        if (games.size() == 0) {
-	            Bomberman.sendMessage(sender, "No games");
-	        } else {
-	            Bomberman.sendMessage(sender, "Current games:");
-	            for (String name : games) {
-	                Game game = Game.findGame(name);
-	                String status = " * " + game.name;
-	                status += " : " + game.players.size() + "/" + game.board.spawnPoints.size() + " : ";
-	                if (game.isPlaying)
-	                    status += "playing";
-	                else
-	                    status += "waiting  ";
-	                        
-	                Bomberman.sendMessage(sender, status);
-	            }
-	        }
-	        return true;
+		if (args.size() != 0)
+			return false;
+		List<String> games = Game.allGames();
+		if (games.size() == 0) {
+			Bomberman.sendMessage(sender, "No games");
+		} else {
+			Bomberman.sendHeading(sender, "List: Games");
+			Map<String, String> list = new TreeMap<>();
+			for (String name : games) {
+				Game game = Game.findGame(name);
+				String status = game.players.size() + "/"
+						+ game.board.spawnPoints.size() + " : ";
+				if (game.isPlaying)
+					status += "playing";
+				else
+					status += "waiting  ";
+				list.put(game.name, status);
+			}
+			Bomberman.sendMessage(sender, list);
+		}
+		return true;
 	}
 
 	@Override

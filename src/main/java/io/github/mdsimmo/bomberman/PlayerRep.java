@@ -111,7 +111,7 @@ public class PlayerRep implements Listener {
 			if (game.players.size() <= 1 && game.getCountdownTimer() != null) {
 			    game.getCountdownTimer().destroy();
 			    for (PlayerRep p : game.players) {
-			        p.player.sendMessage(ChatColor.GREEN + "[BomberMan] " + ChatColor.WHITE + "Not enough players remaining. The countdown timer has been stopped.");
+			        Bomberman.sendMessage(p.player, "Not enough players remaining. The countdown timer has been stopped.");
 			    }
 			}
 		}

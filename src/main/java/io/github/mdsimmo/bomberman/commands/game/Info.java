@@ -1,12 +1,14 @@
 package io.github.mdsimmo.bomberman.commands.game;
 
-import java.util.List;
-
-import org.bukkit.command.CommandSender;
-
 import io.github.mdsimmo.bomberman.Bomberman;
 import io.github.mdsimmo.bomberman.Game;
 import io.github.mdsimmo.bomberman.commands.Command;
+
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+
+import org.bukkit.command.CommandSender;
 
 public class Info extends Command {
 
@@ -40,49 +42,49 @@ public class Info extends Command {
 	@Override
 	public boolean run(CommandSender sender, List<String> args) {
 		if (args.size() != 1)
-            return false;
-        
-        Game game = Game.findGame(args.get(0));
-        if (game == null) {
-            Bomberman.sendMessage(sender, "Game not found");
-            return true;
-        }
-        String message = "About " + game.name + ":\n";
-        message += " * Status: ";
-        if (game.isPlaying)
-            message += "In progress\n";
-        else
-            message += "Waiting\n";
-        message += " * Players: " + game.players.size() + "\n";
-        message += " * Min players: " + game.getMinPlayers()+ "\n";
-        message += " * Max players: " + game.board.spawnPoints.size() + "\n";
-        message += " * Init bombs: " + game.getBombs() + "\n";
-        message += " * Init lives: " + game.getLives() + "\n";
-        message += " * Init power: " + game.getPower() + "\n";
-        message += " * Autostart: " + game.getAutostart() + "\n";
-        message += " * Entry fare: ";
-        if (game.getFare() == null)
-            message += "no fee \n";
-        else
-            message += game.getFare().getType() + " x" + game.getFare().getAmount() + "\n";
-        message += " * Winner's prize: ";
-        if (game.getPot() == true && game.getFare() != null)
-            message += "Pot currently at " + game.getFare().getAmount()*game.players.size() + " " + game.getFare().getType() + "\n";
-        else {
-            if (game.getPrize() == null)
-                message += "No prize \n";
-            else
-                message += game.getPrize().getAmount() + " " + game.getPrize().getType() + "\n";
-        }
-        message += " * Arena: " + game.board.name + "\n";
-        Bomberman.sendMessage(sender, message);
-        return true;
+			return false;
+
+		Game game = Game.findGame(args.get(0));
+		if (game == null) {
+			Bomberman.sendMessage(sender, "Game not found");
+			return true;
+		}
+		Bomberman.sendHeading(sender, "Info: " + game.name);
+		Map<String, String> list = new LinkedHashMap<>();
+		if (game.isPlaying)
+			list.put("Status", "In progress");
+		else
+			list.put("Status", "Waiting");
+		list.put("Players ", "" + game.players.size());
+		list.put("Min players", "" + game.getMinPlayers());
+		list.put("Max players", "" + game.board.spawnPoints.size());
+		list.put("Init bombs", "" + game.getBombs());
+		list.put("Init lives", "" + game.getLives());
+		list.put("Init power", "" + game.getPower());
+		list.put("Autostart", "" + game.getAutostart());
+		if (game.getFare() == null)
+			list.put("Entry fare", "no fee");
+		else
+			list.put("Entry fare", game.getFare().getType() + " x"
+					+ game.getFare().getAmount());
+		if (game.getPot() == true && game.getFare() != null)
+			list.put("Prize", "Pot currently at " + game.getFare().getAmount()
+					* game.players.size() + " " + game.getFare().getType());
+		else {
+			if (game.getPrize() == null)
+				list.put("Prize", "No prize");
+			else
+				list.put("Prize", game.getPrize().getAmount() + " "
+						+ game.getPrize().getType());
+		}
+		list.put("Arena", game.board.name);
+		Bomberman.sendMessage(sender, list);
+		return true;
 	}
 
 	@Override
 	public String usage(CommandSender sender) {
 		return "/" + path() + "<game>";
 	}
-
 
 }

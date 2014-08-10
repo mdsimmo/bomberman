@@ -1,7 +1,7 @@
-package io.github.mdsimmo.bomberman;
+package io.github.mdsimmo.bomberman.commands;
 
 
-import io.github.mdsimmo.bomberman.commands.Bm;
+import io.github.mdsimmo.bomberman.Bomberman;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -14,12 +14,12 @@ import org.bukkit.command.TabCompleter;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.util.StringUtil;
 
-public class GameCommander implements CommandExecutor, TabCompleter {
+public class CommandHandler implements CommandExecutor, TabCompleter {
 	
 	private JavaPlugin plugin = Bomberman.instance;
 	private Bm handler = new Bm();
 	
-	public GameCommander() {
+	public CommandHandler() {
 		plugin.getCommand("bm").setExecutor(this);
 		plugin.getCommand("bm").setTabCompleter(this);
 	}

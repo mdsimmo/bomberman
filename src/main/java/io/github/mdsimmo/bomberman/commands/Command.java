@@ -1,5 +1,7 @@
 package io.github.mdsimmo.bomberman.commands;
 
+import io.github.mdsimmo.bomberman.Bomberman;
+
 import java.util.List;
 
 import org.bukkit.ChatColor;
@@ -77,21 +79,12 @@ public abstract class Command {
 		sender.sendMessage(ChatColor.RED + "You do not have permission!");
 	}
 	
-	public String heading (String text) {
-		String head = ChatColor.YELLOW + "--------- "
-				+ ChatColor.WHITE + text + " " + ChatColor.YELLOW;
-		for (int i = text.length(); i < 38; i++) {
-			head += "-";
-		}
-		return head;
-	}
-	
 	/**
 	 * displays the help
 	 * @param sender person to send to
 	 */
 	public void displayHelp(CommandSender sender, List<String> args) {
-		sender.sendMessage(heading("Help: /" + name()));
+		Bomberman.sendHeading(sender, "Help: /" + name());
 		sender.sendMessage(info(sender));
 	}
 	

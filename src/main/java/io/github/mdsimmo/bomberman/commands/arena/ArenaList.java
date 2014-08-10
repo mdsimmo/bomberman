@@ -1,12 +1,13 @@
 package io.github.mdsimmo.bomberman.commands.arena;
 
-import java.util.List;
-
-import org.bukkit.command.CommandSender;
-
 import io.github.mdsimmo.bomberman.BoardGenerator;
 import io.github.mdsimmo.bomberman.Bomberman;
 import io.github.mdsimmo.bomberman.commands.Command;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import org.bukkit.command.CommandSender;
 
 public class ArenaList extends Command {
 
@@ -26,17 +27,21 @@ public class ArenaList extends Command {
 
 	@Override
 	public boolean run(CommandSender sender, List<String> args) {
-		 List<String> arenas = BoardGenerator.allBoards();
-	        if (arenas.size() == 0) {
-	            Bomberman.sendMessage(sender, "No arenas");
-	        } else {
-	            Bomberman.sendMessage(sender, "Current arenas:");
-	            for (String name : arenas) {
-	                if (!name.endsWith(".old"))
-	                    Bomberman.sendMessage(sender, " * " + name);
-	            }
-	        }
-	        return true;
+		if (args.size() != 0)
+			return false;
+		List<String> arenas = BoardGenerator.allBoards();
+		if (arenas.size() == 0) {
+			Bomberman.sendMessage(sender, "No arenas");
+		} else {
+			Bomberman.sendHeading(sender, "List: Arenas");
+			List<String> list = new ArrayList<>();
+			for (String name : arenas) {
+				if (!name.endsWith(".old"))
+					list.add(name);
+			}
+			Bomberman.sendMessage(sender, list);
+		}
+		return true;
 	}
 
 	@Override
@@ -53,5 +58,4 @@ public class ArenaList extends Command {
 	public Permission permission() {
 		return Permission.OBSERVER;
 	}
-
 }
