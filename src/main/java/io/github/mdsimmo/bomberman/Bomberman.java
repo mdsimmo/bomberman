@@ -15,14 +15,6 @@ public class Bomberman extends JavaPlugin {
 	
 	public static Bomberman instance;
 	
-	/* TODO FEATURES
-	 * make chests (and other like things) spawn with contents
-	 * more styles and underground styles
-	*/
-	
-	/* TODO BUGS
-	 */
-	
 	public static void sendMessage(Player[] playerList, String message) {
         for(Player p : playerList) {
             sendMessage(p, message);
