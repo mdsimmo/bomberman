@@ -82,7 +82,7 @@ public abstract class CommandGroup extends Command {
 			for (Command c : children) {
 				if (c.name().equalsIgnoreCase(args.get(0))) {
 					args.remove(0);
-					return c.excecute(sender, args);
+					return c.execute(sender, args);
 				}				
 			}
 			sender.sendMessage(ChatColor.RED + "You entered an unknown command!");
