@@ -35,6 +35,6 @@ permissions:
   bomberman.arena:
     description: Create and edit arenas 
     default: op
-  
-    
-  
+  bomberman.void-protection:
+    description: Protections placed on the game don't effect you
+    default: op

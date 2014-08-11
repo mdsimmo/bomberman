@@ -175,6 +175,13 @@ public class Game implements Listener {
 	private boolean pot;
 	private int power;
 	private ItemStack prize;
+	private boolean protection;
+	private boolean protectFire;
+	private boolean protectPlace;
+	private boolean protectBreak;
+	private boolean protectExplosion;
+	private boolean protectDamage;
+	private boolean protectPVP;
 	private GameProtection protector;
 	private YamlConfiguration save = new YamlConfiguration();
 	private int suddenDeath;
@@ -443,6 +450,13 @@ public class Game implements Listener {
 		droppingBlocks	= Config.BLOCKS_DROPPING.getValue(config);
 		drops			= Config.DROPS_ITEMS.getValue(config);
 		dropChance		= Config.DROPS_CHANCE.getValue(config);
+		protection		= Config.PROTECT.getValue(config);
+		protectBreak	= Config.PROTECT_DESTROYING.getValue(config);
+		protectPlace	= Config.PROTECT_PLACING.getValue(config);
+		protectFire		= Config.PROTECT_FIRE.getValue(config);
+		protectExplosion= Config.PROTECT_EXPLOSIONS.getValue(config);
+		protectDamage	= Config.PROTECT_DAMAGE.getValue(config);
+		protectPVP		= Config.PROTECT_PVP.getValue(config);
 		suddenDeath		= Config.SUDDEN_DEATH.getValue(config);
 		timeout			= Config.TIME_OUT.getValue(config);
 		initialitems 	= Config.INITIAL_ITEMS.getValue(config);
@@ -548,6 +562,34 @@ public class Game implements Listener {
 	public void setPrize(ItemStack prize, boolean pot) {
 		setPrize(prize);
 		setPot(pot);
+	}
+	
+	public boolean getProtected(Config protection) {
+		if (!this.protection)
+			return false;
+		switch (protection) {
+		case PROTECT:
+			return this.protection;
+		case PROTECT_DESTROYING:
+			return protectBreak;
+		case PROTECT_EXPLOSIONS:
+			return protectExplosion;
+		case PROTECT_FIRE:
+			return protectFire;
+		case PROTECT_PLACING:
+			return protectPlace;
+		case PROTECT_DAMAGE:
+			return protectDamage;
+		case PROTECT_PVP:
+			return protectPVP;
+		default:
+			throw new IllegalArgumentException("must use one of the protection options");
+		}
+	}
+	
+	public void setProteced(boolean enable) {
+		this.protection = enable;
+		save.set(Config.PROTECT.getPath(), enable);
 	}
 
 	public void setSuddenDeath(boolean started) {

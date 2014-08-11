@@ -21,6 +21,7 @@ public class Game extends CommandGroup {
 				new Convert(this),
 				new Join(this),
 				new Leave(this),
+				new Protect(this),
 				new GameList(this),
 				new Info(this)
 			);

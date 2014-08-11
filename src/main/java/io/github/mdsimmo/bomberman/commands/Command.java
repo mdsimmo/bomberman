@@ -15,12 +15,17 @@ public abstract class Command {
 		PLAYER("bomberman.player"),
 		GAME_OPERATE("bomberman.operator"),
 		GAME_DICTATE("bomberman.dictator"),
-		ARENA_EDITING("bomberman.arena");
+		ARENA_EDITING("bomberman.arena"), 
+		PROTECTION_VOID("bomberman.void-protection");
 		
 		public final String permission;
 		
 		Permission(String permission) {
 			this.permission = permission;
+		}
+		
+		public boolean isAllowedBy(CommandSender sender) {
+			return sender.hasPermission(permission);
 		}
 	}
 	
@@ -119,7 +124,7 @@ public abstract class Command {
 	 * @return true if they have permission
 	 */
 	public boolean isAllowedBy(CommandSender sender) {
-		return sender.hasPermission(permission().permission);
+		return permission().isAllowedBy(sender);
 	}
 	
 	/**

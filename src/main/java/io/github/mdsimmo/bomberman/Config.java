@@ -21,7 +21,7 @@ public enum Config {
 	BOMBS ( "bombs", 3),
 	POWER ( "power", 3),
 	MIN_PLAYERS ( "minplayers", 2),
-	AUTOSTART ( "autostart", false ),
+	AUTOSTART ( "autostart.enabled", false ),
 	AUTOSTART_DELAY ( "autostart.delay", 30 ),
 	DEFAULT_ARENA ("defaultarena", "default" ),
 	DROPS_ITEMS ("drops.items", Arrays.asList(
@@ -36,10 +36,13 @@ public enum Config {
 			Material.DIRT), Material.class),
 	SUDDEN_DEATH ("timeout.suddendeath", 60*5),
 	TIME_OUT ("timeout.gameover", 60*8),
-	PROTECT_EXPLOSIONS ("griefprotection.explosion", false),
-	PROTECT_PLACING ("griefprotection.blockplacing", false),
-	PROTECT_DESTROYING ("griefprotection.blockdestroy", false),
-	PROTECT_FIRE ("griefprotection.fire", false),
+	PROTECT ("protection.enabled", true),
+	PROTECT_EXPLOSIONS ("protection.explosion", true),
+	PROTECT_PLACING ("protection.blockplacing", true),
+	PROTECT_DESTROYING ("protection.blockdestroy", true),
+	PROTECT_FIRE ("protection.fire", true),
+	PROTECT_PVP ("protection.pvp", true),
+	PROTECT_DAMAGE ("protection.damage", true),
 	INITIAL_ITEMS("initialitems", Arrays.asList(
 			new ItemStack(Material.TNT, 3),
 			new ItemStack(Material.BLAZE_POWDER, 3)));
