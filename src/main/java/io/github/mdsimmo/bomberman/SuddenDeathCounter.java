@@ -54,6 +54,7 @@ public class SuddenDeathCounter implements Runnable {
 		    } else {
 		        Bomberman.sendMessage(game.observers, ChatColor.RED + "Sudden death!");
 	            game.setSuddenDeath(true);
+	            plugin.getServer().getScheduler().cancelTask(taskId);
 		    }
 		}
 	}
