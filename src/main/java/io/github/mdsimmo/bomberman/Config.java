@@ -21,7 +21,7 @@ public enum Config {
 	BOMBS ( "bombs", 3),
 	POWER ( "power", 3),
 	MIN_PLAYERS ( "minplayers", 2),
-	AUTOSTART ( "autostart", false ),
+	AUTOSTART ( "autostart.enabled", false ),
 	AUTOSTART_DELAY ( "autostart.delay", 30 ),
 	DEFAULT_ARENA ("defaultarena", "default" ),
 	DROPS_ITEMS ("drops.items", Arrays.asList(
