@@ -44,7 +44,7 @@ public class Handicap extends Command {
 			return false;
 		Game game = Game.findGame(args.get(0));
 		if (game == null) {
-			sender.sendMessage("cannot find game");
+			Bomberman.sendMessage(sender, "Cannot find game " + args.get(0));
 			return true;
 		}
 		@SuppressWarnings("deprecation")
