@@ -23,6 +23,8 @@ public class Board {
 	private BlockRep[][][] blocks;
 	HashMap<Vector, BlockRep> delayed = new HashMap<>();
 	public ArrayList<Vector> spawnPoints = new ArrayList<>();
+	private List<Material> destructables = Config.BLOCKS_DESTRUCTABLE.getValue();
+	private List<Material> droppingBlocks = Config.BLOCKS_DROPPING.getValue();
 	
 	public Board(String name, int xSize, int ySize, int zSize) {
 		this.name = name;
@@ -148,6 +150,10 @@ public class Board {
 			BlockRep b = BlockRep.loadFrom(parts.get(3));
 			board.addBlock(b, v);
 		}
+		
+		board.destructables = Config.BLOCKS_DESTRUCTABLE.getValue(save);
+		board.droppingBlocks = Config.BLOCKS_DROPPING.getValue(save);
+		
 		return board;
 	}
 	
@@ -213,5 +219,13 @@ public class Board {
 		public void setValue(String value) {
 			this.value = value;
 		}
+	}
+	
+	public boolean isDestructable(Material m) {
+		return destructables.contains(m) || isDropping(m);
+	}
+	
+	public boolean isDropping(Material m) {
+		return droppingBlocks.contains(m);
 	}
 }

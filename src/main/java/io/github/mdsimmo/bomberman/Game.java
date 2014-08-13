@@ -155,9 +155,7 @@ public class Game implements Listener {
 	private int bombs;
 	private GameStarter countdownTimer = null;
 	public List<DeathBlock> deathBlocks = new ArrayList<>();
-	private List<Material> destructables;
 	private double dropChance;
-	private List<Material> droppingBlocks;
 	private List<ItemStack> drops;
 	public Map<Block, Bomb> explosions = new HashMap<>();
 	private ItemStack fare;
@@ -311,7 +309,7 @@ public class Game implements Listener {
 	}
 
 	public void drop(Location l, Material type) {
-		if (Math.random() < dropChance && droppingBlocks.contains(type)) {
+		if (Math.random() < dropChance && board.isDropping(type)) {
 			int sum = 0;
 			for (ItemStack stack : drops)
 				sum += stack.getAmount();
@@ -352,14 +350,6 @@ public class Game implements Listener {
         return countdownTimer;
     }
 	
-	public List<Material> getDestructables() {
-		return destructables;
-	}
-	
-	public List<Material> getDroppingBlocks() {
-		return droppingBlocks;
-	}
-
 	public ItemStack getFare() {
 		return fare;
 	}
@@ -434,8 +424,6 @@ public class Game implements Listener {
 		minPlayers		= Config.MIN_PLAYERS.getValue(config);
 		autostart		= Config.AUTOSTART.getValue(config);
 		autostartDelay  = Config.AUTOSTART_DELAY.getValue(config);
-		destructables	= Config.BLOCKS_DESTRUCTABLE.getValue(config);
-		droppingBlocks	= Config.BLOCKS_DROPPING.getValue(config);
 		drops			= Config.DROPS_ITEMS.getValue(config);
 		dropChance		= Config.DROPS_CHANCE.getValue(config);
 		suddenDeath		= Config.SUDDEN_DEATH.getValue(config);
