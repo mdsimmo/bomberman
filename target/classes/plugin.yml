@@ -1,6 +1,6 @@
 name: Bomberman
 main: io.github.mdsimmo.bomberman.Bomberman
-version: 0.0.3
+version: 0.0.3-SNAPSHOT
 
 commands:
   bm:
@@ -35,6 +35,6 @@ permissions:
   bomberman.arena:
     description: Create and edit arenas 
     default: op
-  
-    
-  
+  bomberman.void-protection:
+    description: Protections placed on the game don't effect you
+    default: op
