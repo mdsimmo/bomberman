@@ -56,7 +56,7 @@ public abstract class Command {
 	 */
 	public abstract boolean run (CommandSender sender, List<String> args);
 	
-	public boolean excecute(CommandSender sender, List<String> args) {
+	public boolean execute(CommandSender sender, List<String> args) {
 		if (isAllowedBy(sender)) {
 			if (run(sender, args))
 				return true;

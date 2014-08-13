@@ -55,7 +55,7 @@ public class PlayerRep implements Listener {
 		this.spawn = player.getLocation();
 		Vector gameSpawn = game.findSpareSpawn();
 		if (gameSpawn == null) {
-			player.sendMessage("game full");
+			Bomberman.sendMessage(this, "Game " + game.name + " is full.");
 			return;
 		} else {
 			if (game.getFare() != null) {
@@ -63,12 +63,11 @@ public class PlayerRep implements Listener {
 						|| player.getGameMode() == GameMode.CREATIVE)
 					player.getInventory().removeItem(game.getFare());
 				else {
-					player.sendMessage("You need at least " + game.getFare().getAmount() + " " + game.getFare().getType().toString().toLowerCase());
+					Bomberman.sendMessage(this, "You need at least " + game.getFare().getAmount() + " " + game.getFare().getType().toString().toLowerCase());
 					return;
 				}
 			}
-			for (PlayerRep rep : game.observers)
-				rep.player.sendMessage(player.getName() + " joined");
+			Bomberman.sendMessage(game.observers, player.getName() + " joined game " + game.name + ".");
 			player.teleport(game.loc.clone().add(gameSpawn));
 		}
 		player.setGameMode(GameMode.SURVIVAL);
@@ -174,19 +173,19 @@ public class PlayerRep implements Listener {
 				player.damage(1);
 				Player cause = db.cause.player;
 				if (cause == player)
-					player.sendMessage("You hit yourself!");
+					Bomberman.sendMessage(this, "You hit yourself!");
 				else {
-					player.sendMessage("Hit by " + db.cause.player.getName());
-					cause.sendMessage("You hit " + player.getName());
+					Bomberman.sendMessage(this, "You were hit by " + db.cause.player.getName());
+					Bomberman.sendMessage(db.cause, "You hit " + player.getName());
 				}
 				new Immunity();
 			} else {
 				Player cause = db.cause.player;
 				if (cause == player)
-					player.sendMessage(ChatColor.RED + "You killed yourself!");
+					Bomberman.sendMessage(this, ChatColor.RED + "You killed yourself!");
 				else {
-					player.sendMessage(ChatColor.RED + "Killed by " + cause.getName());
-					cause.sendMessage(ChatColor.GREEN + "You killed " + player.getName());
+					Bomberman.sendMessage(this, ChatColor.RED + "Killed by " + cause.getName());
+					Bomberman.sendMessage(db.cause, ChatColor.GREEN + "You killed " + player.getName());
 				}
 				kill(true);
 			}
@@ -212,7 +211,7 @@ public class PlayerRep implements Listener {
 		if (e.getEntity() == player && isPlaying) {
 			if (e.getRegainReason() == RegainReason.MAGIC)
 				if (game.isSuddenDeath())
-					player.sendMessage("No regen in sudden death!");
+					Bomberman.sendMessage(this, "No regen in sudden death!");
 				else
 					player.setHealth(Math.min(player.getHealth() + 1,
 							player.getMaxHealth()));

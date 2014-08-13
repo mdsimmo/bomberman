@@ -55,9 +55,7 @@ public class Game implements Listener {
 		public void run() {
 		    // Let online players know about the fun :)
 		    if (count == autostartDelay) {
-		        for (Player p : plugin.getServer().getOnlinePlayers()) {
-		            p.sendMessage(ChatColor.GREEN + "[BomberMan] " + ChatColor.WHITE + "Game " + ChatColor.YELLOW + name + ChatColor.WHITE + " starting in " + count + " seconds!");
-		        }
+		        Bomberman.sendMessage(plugin.getServer().getOnlinePlayers(), "Game " + ChatColor.YELLOW + name + ChatColor.WHITE + " starting in " + count + " seconds!");
 		    }
 		    
 		    if (count > 0) {
@@ -68,11 +66,10 @@ public class Game implements Listener {
 		        // notify every 5 until count <= 3,
 		        // notify every second last 3 seconds
 		        if (count % 15 == 0 || (count < 15 && count % 5 == 0) || count <= 3)
-    				for (PlayerRep rep : observers)
-    					rep.player.sendMessage(ChatColor.GREEN + "[BomberMan] " + ChatColor.WHITE + "Game starting in " + count + "...");
+		            Bomberman.sendMessage(observers, "Game starting in " + count + "...");
 			} else {
 				for (PlayerRep rep : observers) {
-					rep.player.sendMessage(ChatColor.YELLOW + "Game started!");
+					Bomberman.sendMessage(rep, ChatColor.YELLOW + "Game started!");
 					isPlaying = true;
 					if (suddenDeath >= 0 || timeout >= 0)
 						new SuddenDeathCounter(Game.this);
@@ -278,10 +275,8 @@ public class Game implements Listener {
 			}
 			
 			// display the scores
-			for (PlayerRep rep : observers) {
-				rep.player.sendMessage(ChatColor.YELLOW + "The game is over!");
-				rep.player.sendMessage(scoreDisplay(winners));
-			}
+			Bomberman.sendMessage(observers, ChatColor.YELLOW + "The game is over!");
+			Bomberman.sendMessage(observers, scoreDisplay(winners));
 			
 			// reset the game
 			BoardGenerator.switchBoard(this.board, this.board, loc);
