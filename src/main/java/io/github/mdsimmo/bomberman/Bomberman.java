@@ -92,16 +92,13 @@ public class Bomberman extends JavaPlugin {
 			}
 		});
 		for (String filename : files) {
-			getLogger().info(filename);
+			getLogger().info("converting " + filename);
 			File file = new File(getDataFolder(), filename);
-			getLogger().info("0");
 			try {
 				Board board = loadArena(file);
-				getLogger().info("4");
 				BoardGenerator.saveBoard(board);
 				board = null;
 				file.delete();
-				getLogger().info("5");
 			} catch (Exception e) {
 				e.printStackTrace();
 				getLogger().info("Couldn't convert " + file.getName());
@@ -114,7 +111,6 @@ public class Bomberman extends JavaPlugin {
 		SaveReader sr = new SaveReader(file);
 		String name = file.getName().split("\\.board")[0];
 		Board board = new Board(name, sr.readInt(), sr.readInt(), sr.readInt());
-		getLogger().info("1");
 		for (int i = 0; i < board.xSize; i++) {
 			for (int j = 0; j < board.ySize; j++) {
 				for (int k = 0; k < board.zSize; k++) {
@@ -123,7 +119,6 @@ public class Bomberman extends JavaPlugin {
 				}
 			}
 		}
-		getLogger().info("2");
 		// read out the delayed blocks
 		while (true) {
 			try {
@@ -140,7 +135,6 @@ public class Bomberman extends JavaPlugin {
 				break;
 			}
 		}
-		getLogger().info("3");
 		return board;
 	}
 	
