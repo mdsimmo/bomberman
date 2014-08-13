@@ -467,8 +467,7 @@ public class Game implements Listener {
 			e.printStackTrace();
 		}
 		
-		if (BoardGenerator.loadBoard(oldBoard.name) == null)
-			BoardGenerator.saveBoard(oldBoard);
+		BoardGenerator.saveBoard(oldBoard);
 	}
 	
 	public String scoreDisplay(ArrayList<PlayerRep> winners) {

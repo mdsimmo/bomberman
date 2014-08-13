@@ -19,6 +19,7 @@ public class Board {
 	public final int xSize;
 	public final int ySize;
 	public final int zSize;
+	private Vector shift = new Vector();
 	private BlockRep[][][] blocks;
 	HashMap<Vector, BlockRep> delayed = new HashMap<>();
 	public ArrayList<Vector> spawnPoints = new ArrayList<>();
@@ -37,6 +38,8 @@ public class Board {
 		save.set("size.x", xSize);
 		save.set("size.y", ySize);
 		save.set("size.z", zSize);
+		
+		save.set("shift", shift);
 		
 		// save standard blocks
 		CompressedSection section = new CompressedSection();
@@ -109,7 +112,12 @@ public class Board {
 		int x = save.getInt("size.x");
 		int y = save.getInt("size.y");
 		int z = save.getInt("size.z");
+		
 		Board board = new Board(save.getString("name"), x, y, z);
+		
+		board.shift = save.getVector("shift");
+		if (board.shift == null)
+			board.shift = new Vector();
 		
 		// Read out normal blocks
 		CompressedSection blocks = new CompressedSection();
@@ -143,6 +151,20 @@ public class Board {
 		return board;
 	}
 	
+	public void setShift(int x, int y, int z) {
+		shift.setX(x);
+		shift.setY(y);
+		shift.setZ(z);
+	}
+	
+	public void addShift(int x, int y, int z) {
+		setShift(x+shift.getBlockX(), y+shift.getBlockY(), z+shift.getBlockZ());
+	}
+	
+	public Vector getShift() {
+		return shift.clone();
+	}
+
 	public static class CompressedSection {
 
 		private String value = "";

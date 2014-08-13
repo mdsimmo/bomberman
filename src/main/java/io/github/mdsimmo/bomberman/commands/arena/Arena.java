@@ -17,8 +17,9 @@ public class Arena extends CommandGroup {
 	@Override
 	public void setChildren() {
 		addChildren(
-				new ArenaList(this),
-				new Create(this)
+				new Create(this),
+				//new Shift(this),
+				new ArenaList(this)
 			);
 	}
 
