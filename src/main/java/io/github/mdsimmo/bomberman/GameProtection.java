@@ -108,7 +108,7 @@ public class GameProtection implements Listener {
 			Player player = (Player) e.getDamager();
 			if (game.getProtected(Config.PROTECT_DAMAGE)
 					&& game.containsLocation(e.getDamager().getLocation())
-					&& Permission.PROTECTION_VOID.isAllowedBy(player))
+					&& !Permission.PROTECTION_VOID.isAllowedBy(player))
 				e.setCancelled(true);
 		}
 	}
