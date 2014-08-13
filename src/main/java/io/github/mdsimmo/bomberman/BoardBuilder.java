@@ -8,8 +8,7 @@ public class BoardBuilder implements Runnable {
 	private static Plugin plugin = Bomberman.instance;
 	private Board board;
 	private Location location;
-	private int ticks = 0;
-	private int count = 0;
+	private int ticks = 0, count = 0;
 	private int id;
 	
 		
@@ -25,10 +24,10 @@ public class BoardBuilder implements Runnable {
 		while (true) {
 			if (count > ticks*500)
 				return;
-			Location l = location.clone().add(count/(board.ySize*board.zSize), (count/board.zSize)%board.ySize, count%board.zSize);
-			board.blocks.get(count).setBlock(l.getBlock());
+			Location l = location.clone().add(board.countToVector(count));
+			board.getBlock(count).setBlock(l.getBlock());
 			count++;
-			if (count >= board.blocks.size()) {
+			if (count >= board.xSize*board.ySize*board.zSize) {
 				// finishing touches
 				for (Vector v : board.delayed.keySet()) {
 					l = location.clone().add(v);

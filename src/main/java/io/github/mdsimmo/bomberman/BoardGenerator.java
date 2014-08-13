@@ -30,9 +30,9 @@ public class BoardGenerator {
 		if (loadBoard(arena) == null) {
 			try {
 				if (!Config.DEFAULT_ARENA.getValue().equals("default"))
-					plugin.getLogger().info("Couldn't find \"" + arena + ".board\". Using \"default.board\"");
-				InputStream inputStream = plugin.getResource("default.board");
-				File f = new File(plugin.getDataFolder() + "/default.board");
+					plugin.getLogger().info("Couldn't find \"" + arena + ".arena\". Using \"default.arena\"");
+				InputStream inputStream = plugin.getResource("default.arena");
+				File f = new File(plugin.getDataFolder() + "/default.arena");
 	 			// write the inputStream to a FileOutputStream
 				FileOutputStream fos = new FileOutputStream(f);
 				int read = 0;
@@ -63,7 +63,7 @@ public class BoardGenerator {
 			return false;
 		plugin.getLogger().info("2");
 		loadedBoards.remove(board);
-		File f = new File(plugin.getDataFolder() + "/" + name + ".board");
+		File f = new File(plugin.getDataFolder() + "/" + name + ".arena");
 		plugin.getLogger().info(f.toString());
 		plugin.getLogger().info("+ " + f.delete());
 		return true;
@@ -88,8 +88,8 @@ public class BoardGenerator {
 	
 	
 	/**
-	 * Loads a board style out of cache/save files.
-	 * @param name the style name
+	 * Loads a board arena out of cache/save files.
+	 * @param name the arena name
 	 * @return the loaded board
 	 */
 	public static Board loadBoard(String name){
@@ -108,11 +108,11 @@ public class BoardGenerator {
 
 			@Override
 			public boolean accept(File dir, String name) {
-				return (name.endsWith(".board"));
+				return (name.endsWith(".arena"));
 			}
 		});
 		for (File f : files) {
-			boards.add(f.getName().split(".board")[0]);
+			boards.add(f.getName().split(".arena")[0]);
 		}
 		return boards;
 	}
@@ -207,7 +207,7 @@ public class BoardGenerator {
 	}
 	
 	/**
-	 * Creates a board style 
+	 * Creates a board arena 
 	 */
 	public static Board createArena(String arena, Location min, Location max) {
 		int xSize = max.getBlockX() - min.getBlockX()+1;
@@ -217,15 +217,11 @@ public class BoardGenerator {
 	}
 
 	/**
-	 * Creates a board style 
+	 * Creates a board arena 
 	 */
 	public static Board createArena(String arena, Location loc, int xSize, int ySize
 			, int zSize) {
-		Board board = new Board();
-		board.name = arena;
-		board.xSize = xSize;
-		board.ySize = ySize;
-		board.zSize = zSize;		
+		Board board = new Board(arena, xSize, ySize, zSize);
 		for (int i = 0; i < xSize; i++) {
 			for (int j = 0; j < ySize; j++) {
 				for (int k = 0; k < zSize; k++) {
