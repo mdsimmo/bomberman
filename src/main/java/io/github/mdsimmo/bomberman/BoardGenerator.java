@@ -221,8 +221,7 @@ public class BoardGenerator {
 	 */
 	public static Board createArena(String arena, Location loc, int xSize, int ySize
 			, int zSize) {
-		Board board = new Board(xSize, ySize, zSize);
-		board.name = arena;
+		Board board = new Board(arena, xSize, ySize, zSize);
 		for (int i = 0; i < xSize; i++) {
 			for (int j = 0; j < ySize; j++) {
 				for (int k = 0; k < zSize; k++) {

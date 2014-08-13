@@ -24,11 +24,8 @@ public class BoardBuilder implements Runnable {
 		while (true) {
 			if (count > ticks*500)
 				return;
-			int i = count/(board.ySize*board.zSize);
-			int j = (count/board.zSize)%board.ySize;
-			int k = count%board.zSize;
-			Location l = location.clone().add(i, j, k);
-			board.blocks[i][j][k].setBlock(l.getBlock());
+			Location l = location.clone().add(board.countToVector(count));
+			board.getBlock(count).setBlock(l.getBlock());
 			count++;
 			if (count >= board.xSize*board.ySize*board.zSize) {
 				// finishing touches

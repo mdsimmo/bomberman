@@ -15,15 +15,16 @@ import org.bukkit.util.Vector;
 public class Board {
 
 	private static Plugin plugin = Bomberman.instance;
-	public String name;
+	public final String name;
 	public final int xSize;
 	public final int ySize;
 	public final int zSize;
-	public BlockRep[][][] blocks;
+	private BlockRep[][][] blocks;
 	HashMap<Vector, BlockRep> delayed = new HashMap<>();
 	public ArrayList<Vector> spawnPoints = new ArrayList<>();
 	
-	public Board(int xSize, int ySize, int zSize) {
+	public Board(String name, int xSize, int ySize, int zSize) {
+		this.name = name;
 		this.xSize = xSize;
 		this.ySize = ySize;
 		this.zSize = zSize;
@@ -84,14 +85,31 @@ public class Board {
 		}
 	}
 	
+	public BlockRep getBlock(int x, int y, int z) {
+		return blocks[x][y][z];
+	}
+	
+	public BlockRep getBlock(int i) {
+		int x = i/(ySize*zSize);
+		int y = (i/zSize)%ySize;
+		int z = i%zSize;
+		return getBlock(x, y, z);
+	}
+	
+	public Vector countToVector(int i) {
+		int x = i/(ySize*zSize);
+		int y = (i/zSize)%ySize;
+		int z = i%zSize;
+		return new Vector(x, y, z);
+	}
+	
 	public static Board loadBoard(String name) throws IOException {
 		File f = new File(plugin.getDataFolder(), name.toLowerCase() + ".arena");
 		YamlConfiguration save = YamlConfiguration.loadConfiguration(f);
 		int x = save.getInt("size.x");
 		int y = save.getInt("size.y");
 		int z = save.getInt("size.z");
-		Board board = new Board(x, y, z);
-		board.name = save.getString("name");
+		Board board = new Board(save.getString("name"), x, y, z);
 		
 		// Read out normal blocks
 		CompressedSection blocks = new CompressedSection();
