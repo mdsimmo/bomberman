@@ -581,9 +581,33 @@ public class Game implements Listener {
 		}
 	}
 	
-	public void setProteced(boolean enable) {
-		this.protection = enable;
-		save.set(Config.PROTECT.getPath(), enable);
+	public void setProteced(Config protection, boolean enable) {
+		switch (protection) {
+		case PROTECT:
+			this.protection = enable;
+			break;
+		case PROTECT_DESTROYING:
+			protectBreak = enable;
+			break;
+		case PROTECT_EXPLOSIONS:
+			protectExplosion = enable;
+			break;
+		case PROTECT_FIRE:
+			protectFire = enable;
+			break;
+		case PROTECT_PLACING:
+			protectPlace = enable;
+			break;
+		case PROTECT_DAMAGE:
+			protectDamage = enable;
+			break;
+		case PROTECT_PVP:
+			protectPVP = enable;
+			break;
+		default:
+			throw new IllegalArgumentException("must use one of the protection options");
+		}
+		save.set(protection.getPath(), enable);
 	}
 
 	public void setSuddenDeath(boolean started) {
