@@ -117,8 +117,8 @@ public class Game implements Listener {
 		World w = plugin.getServer().getWorld(save.getString("location.world"));
 		Game game = new Game(name, new Location(w, x, y, z));
 		game.save = save;
-		game.board = BoardGenerator.loadBoard(save.getString("style.current"));
-		game.oldBoard = BoardGenerator.loadBoard(save.getString("style.old"));
+		game.board = BoardGenerator.loadBoard(save.getString("arena.current"));
+		game.oldBoard = BoardGenerator.loadBoard(save.getString("arena.old"));
 	
 		game.initVars();
 		
@@ -459,8 +459,8 @@ public class Game implements Listener {
 			save.set("location.x", loc.getBlockX());
 			save.set("location.y", loc.getBlockY());
 			save.set("location.z", loc.getBlockZ());
-			save.set("style.current", board.name);
-			save.set("style.old", oldBoard.name);
+			save.set("arena.current", board.name);
+			save.set("arena.old", oldBoard.name);
 			
 			save.save(getSaveFile(name));
 		} catch (IOException e) {

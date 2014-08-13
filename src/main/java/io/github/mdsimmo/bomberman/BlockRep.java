@@ -1,6 +1,8 @@
 package io.github.mdsimmo.bomberman;
 
-import java.io.IOException;
+import io.github.mdsimmo.bomberman.Board.CompressedSection;
+
+import java.util.List;
 
 import org.bukkit.Material;
 import org.bukkit.block.Block;
@@ -8,19 +10,31 @@ import org.bukkit.inventory.ItemStack;
 
 public class BlockRep {
 	
-	protected Material material = Material.AIR;
-	protected byte data = 0;
-	protected ItemStack[] chestContents;
+	public Material material = Material.AIR;
+	public byte data = 0;
+	public ItemStack[] chestContents;
 	
+	/**
+	 * creates a block rep of air
+	 */
 	public BlockRep() {
 	}
 	
+	/**
+	 * creates a block representing the given block
+	 * @param b the block to represent
+	 */
 	@SuppressWarnings("deprecation")
 	public BlockRep(Block b) {
 		material = b.getType();
 		data = b.getData();
 	}
 
+	
+	/**
+	 * Sets the given block to be the same as this block
+	 * @param b the block to set
+	 */
 	@SuppressWarnings("deprecation")
 	public void setBlock(Block b) {
 		/*if (material == Material.DIRT && Math.random() < 0.25) {
@@ -37,15 +51,36 @@ public class BlockRep {
 		//}
 	}
 	
-	public void save(SaveWriter sw) throws IOException {
-		sw.writePart(material);
-		sw.writePart(data);
-	}
+	private static CompressedSection sub = new CompressedSection(',');
 
-	public static BlockRep loadBlock(SaveReader sr) throws IOException {
+	@Override
+	public String toString() {
+		// write a the internal data
+		sub.reset();
+		sub.addParts(material.toString());
+		sub.addParts(data);
+		
+		if (material == Material.CHEST)
+			sub.addParts("THIS IS A CHEST");
+		
+		return sub.getValue();
+	}
+	
+	/**
+	 * Loads a block from a string
+	 * @param section the string to load from. This must be exactly as it is from saveTo()
+	 * @return the loaded block
+	 */
+	public static BlockRep loadFrom(String section) {
+		sub.setValue(section);
+		List<String> sections = sub.readParts();
 		BlockRep rep = new BlockRep();
-		rep.material = Material.valueOf(sr.readPart());
-		rep.data = Byte.parseByte(sr.readPart(), 10);
+		rep.material = Material.getMaterial(sections.get(0));
+		rep.data = Byte.parseByte(sections.get(1), 10);
+		
+		if (rep.material == Material.CHEST)
+			System.out.println(sections.get(2));
+		
 		return rep;
 	}
 }
