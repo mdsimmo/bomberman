@@ -29,6 +29,7 @@ public class Protect extends Command {
 		else if (args.size() == 2) {
 			list.add("true");
 			list.add("false");
+			list.add("placing");
 			list.add("enabled");
 			list.add("pvp");
 			list.add("destroy");

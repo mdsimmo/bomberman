@@ -49,7 +49,7 @@ public class GameProtection implements Listener {
 		if (e.getBlock().getType() == Material.TNT) {
 			PlayerRep rep = game.getPlayerRep(e.getPlayer());
 			if (rep != null && rep.isPlaying) {
-				if (game.isPlaying)
+				if (!game.isPlaying)
 					e.setCancelled(true);
 				return;
 			}
