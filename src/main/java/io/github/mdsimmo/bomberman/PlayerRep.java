@@ -3,6 +3,7 @@ package io.github.mdsimmo.bomberman;
 import io.github.mdsimmo.bomberman.Bomb.DeathBlock;
 
 import java.util.Calendar;
+import java.util.HashMap;
 
 import org.bukkit.ChatColor;
 import org.bukkit.GameMode;
@@ -34,6 +35,7 @@ import org.bukkit.util.Vector;
 public class PlayerRep implements Listener {
 
 	private static JavaPlugin plugin = Bomberman.instance;
+	private static HashMap<Player, PlayerRep> lookup = new HashMap<>();
 	public Player player;
 	public ItemStack[] spawnInventory;
 	public Location spawn;
@@ -47,8 +49,13 @@ public class PlayerRep implements Listener {
 	public PlayerRep(Player player, Game game) {
 		this.player = player;
 		this.game = game;
+		lookup.put(player, this);
 		plugin.getServer().getPluginManager().registerEvents(this, plugin);
 		game.observers.add(this);
+	}
+	
+	public static PlayerRep findPlayerRep(Player player) {
+		return lookup.get(player);
 	}
 
 	public void joinGame() {
@@ -123,6 +130,7 @@ public class PlayerRep implements Listener {
 		kill(false);
 		game.players.remove(this);
 		game.observers.remove(this);
+		lookup.remove(this);
 		HandlerList.unregisterAll(this);
 	}
 
