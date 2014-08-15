@@ -6,6 +6,7 @@ import java.util.List;
 
 import org.bukkit.Material;
 import org.bukkit.block.Block;
+import org.bukkit.block.BlockState;
 import org.bukkit.inventory.ItemStack;
 
 public class BlockRep {
@@ -24,13 +25,17 @@ public class BlockRep {
 	 * creates a block representing the given block
 	 * @param b the block to represent
 	 */
-	@SuppressWarnings("deprecation")
 	public BlockRep(Block b) {
-		material = b.getType();
-		data = b.getData();
+		this(b.getState());
 	}
 
 	
+	@SuppressWarnings("deprecation")
+	public BlockRep(BlockState b) {
+		material = b.getType();
+		data = b.getData().getData();
+	}
+
 	/**
 	 * Sets the given block to be the same as this block
 	 * @param b the block to set

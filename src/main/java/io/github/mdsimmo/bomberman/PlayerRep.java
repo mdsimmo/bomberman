@@ -4,6 +4,8 @@ import io.github.mdsimmo.bomberman.Bomb.DeathBlock;
 
 import java.util.Calendar;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 import org.bukkit.ChatColor;
 import org.bukkit.GameMode;
@@ -15,6 +17,7 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.HandlerList;
 import org.bukkit.event.Listener;
+import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.entity.EntityRegainHealthEvent;
 import org.bukkit.event.entity.EntityRegainHealthEvent.RegainReason;
@@ -45,6 +48,8 @@ public class PlayerRep implements Listener {
 	public long deathTime = -1;
 	public int kills = 0;
 	public int handicap = 0;
+	private boolean editMode = false;
+	private LinkedHashMap<Block, BlockRep> changes; 
 	
 	public PlayerRep(Player player, Game game) {
 		this.player = player;
@@ -135,14 +140,25 @@ public class PlayerRep implements Listener {
 	}
 
 	@EventHandler
-	public void onPlayerPlaceTNT(BlockPlaceEvent e) {
+	public void onPlayerPlaceBlock(BlockPlaceEvent e) {
 		if (e.isCancelled())
 			return;
 		Block b = e.getBlock();
 		if (e.getPlayer() == player && isPlaying) {
 			if (b.getType() == Material.TNT && game.isPlaying) {
 				new Bomb(game, this, e.getBlock());
+				return;
 			}
+			if (editMode) {
+				changes.put(e.getBlock(), new BlockRep(e.getBlockReplacedState()));
+			}
+		}
+	}
+	
+	@EventHandler
+	public void onBlockBreak(BlockBreakEvent e) {
+		if (e.getPlayer() == player && editMode) {
+			changes.put(e.getBlock(), new BlockRep(e.getBlock()));
 		}
 	}
 
@@ -266,6 +282,36 @@ public class PlayerRep implements Listener {
 						player.setItemInHand(null);
 					}
 				});
+			}
+		}
+	}
+
+	public boolean startEditMode() {
+		if (isPlaying || editMode)
+			return false;
+		else {
+			editMode = true;
+			if (changes == null)
+				changes = new LinkedHashMap<>();
+			else
+				changes.clear();
+			return true;
+		}
+	}
+	
+	public void commitChanges(boolean save) {
+		editMode = false;
+		if (save) {
+			for (Block b : changes.keySet()) {
+				Vector v = b.getLocation().subtract(game.loc).toVector();
+				game.board.addBlock(new BlockRep(b), v);
+			}
+			BoardGenerator.saveBoard(game.board);
+		} else { 
+			for (Map.Entry<Block, BlockRep> entry : changes.entrySet()) {
+				Block current = entry.getKey();
+				BlockRep previous = entry.getValue();
+				previous.setBlock(current);
 			}
 		}
 	}
