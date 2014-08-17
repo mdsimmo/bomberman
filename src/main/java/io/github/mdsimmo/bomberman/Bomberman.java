@@ -1,5 +1,6 @@
 package io.github.mdsimmo.bomberman;
 
+import io.github.mdsimmo.bomberman.commands.Command;
 import io.github.mdsimmo.bomberman.commands.CommandHandler;
 
 import java.io.File;
@@ -23,41 +24,103 @@ public class Bomberman extends JavaPlugin {
 	
 	public static Bomberman instance;
 	
-	public static void sendMessage(Player[] playerList, String message) {
+	/**
+	 * Puts the given objects into the string and colors them. <br>
+	 * use '%' to specify where to put the objects in the string.
+	 * use '%b' for a Board, 'c' for a command (as a String or a Command), 'p' for a Player or PlayerRep and 'g' for a Game. 
+	 * @param s the string to color
+	 * @param objects the objects 
+	 * @return the formated string
+	 */
+	public static String format(String s, Object ... objects) {
+		String formated = "";
+		int objectIndex = 0;
+		for (int i = 0; i < s.length(); i++) {
+			char c = s.charAt(i);
+			switch (c) {
+			case '%':
+				char lastChar = s.charAt(Math.max(0, i-1));
+				if (lastChar == '\\') {
+					formated += c;
+					break;
+				}
+				switch (s.charAt(i+1)) {
+				case 'p':
+					PlayerRep p;
+					Object o = objects[objectIndex]; 
+					if (o instanceof Player)
+						p = PlayerRep.getPlayerRep((Player)o);
+					else
+						p = (PlayerRep)o;
+					formated += ChatColor.YELLOW + p.getName() + ChatColor.RESET;
+					break;
+				case 'g':
+					Game g = (Game) objects[objectIndex];
+					formated += ChatColor.YELLOW + g.name + ChatColor.RESET;
+					break;
+				case 'b':
+					Board b = (Board) objects[objectIndex];
+					formated += ChatColor.YELLOW + b.name + ChatColor.RESET;
+					break;
+				case 'c':
+					String command;
+					Object o2 = objects[objectIndex]; 
+					if (o2 instanceof Command) {
+						Command cmd = (Command)o2;
+						command = "/" + cmd.path() + cmd.name();
+					} else
+						command = (String)o2;
+					formated += ChatColor.AQUA + command + ChatColor.RESET;
+					break;
+				default:
+					throw new IllegalArgumentException("Can only use 'c', 'b', 'g' or 'p' after '%'");
+				}
+				objectIndex++;
+				break;
+			default:
+				formated += c;
+				break;
+			}
+		}
+		return formated;
+		
+	}
+	
+	public static void sendMessage(Player[] playerList, String message, Object ... objs) {
         for(Player p : playerList) {
-            sendMessage(p, message);
+            sendMessage(p, message, objs);
         }
     }
     
-    public static void sendMessage(ArrayList<PlayerRep> playerList, String message) {
+    public static void sendMessage(ArrayList<PlayerRep> playerList, String message, Object ... objs) {
         for(PlayerRep p : playerList) {
-            sendMessage(p, message);
+            sendMessage(p, message, objs);
         }
     }
     
-    public static void sendMessage(PlayerRep rep, String message) {
-        sendMessage(rep.player, message);
+    public static void sendMessage(PlayerRep rep, String message, Object ... objs) {
+        sendMessage(rep.player, message, objs);
     }
     
-    public static void sendMessage(CommandSender sender, String message) {
-        sender.sendMessage(ChatColor.GREEN + "[BomberMan] " + ChatColor.WHITE + message);
+    public static void sendMessage(CommandSender sender, String message, Object ... objs) {
+        sender.sendMessage(format(ChatColor.GREEN + "[BomberMan] " + ChatColor.RESET + message, objs));
     }
     
-    public static void sendMessage(CommandSender sender, Map<String, String> points) {
+    public static void sendMessage(CommandSender sender, Map<String, String> points, Object ... objs) {
     	for (Map.Entry<String, String> point : points.entrySet()) {
-    		sender.sendMessage("   " + ChatColor.GOLD + point.getKey() + ": " + ChatColor.WHITE + point.getValue());
+    		sender.sendMessage(format("   " + ChatColor.GOLD + point.getKey() + ": " + ChatColor.RESET + point.getValue(), objs));
     	}
     }
     
-    public static void sendMessage(CommandSender sender, List<String> list) {
+    public static void sendMessage(CommandSender sender, List<String> list, Object ... objs) {
     	for (String line : list) {
-    		sender.sendMessage("   " + ChatColor.WHITE + line);
+    		sender.sendMessage(format("   " + ChatColor.RESET + line, objs));
     	}
     }
     
 	public static String heading (String text) {
 		String head = ChatColor.YELLOW + "--------- "
-				+ ChatColor.WHITE + text + " " + ChatColor.YELLOW;
+				+ ChatColor.RESET + text + " " + ChatColor.YELLOW;
 		for (int i = text.length(); i < 38; i++) {
 			head += "-";
 		}
