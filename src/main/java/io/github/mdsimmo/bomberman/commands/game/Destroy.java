@@ -42,7 +42,7 @@ public class Destroy extends Command {
 	}
 	
 	private void destroyGame(Game game) {
-		game.deregister();
+		game.destroy();
 		BoardGenerator.switchBoard(game.board, game.oldBoard, game.loc);
 	}
 

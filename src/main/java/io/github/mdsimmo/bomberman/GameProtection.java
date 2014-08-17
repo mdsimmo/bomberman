@@ -21,7 +21,7 @@ import org.bukkit.plugin.Plugin;
  */
 public class GameProtection implements Listener {
 
-	private Game game;
+	private final Game game;
 	private Plugin plugin = Bomberman.instance;
 
 	public GameProtection(Game game) {
@@ -31,8 +31,8 @@ public class GameProtection implements Listener {
 	
 	@EventHandler
 	public void onBlockBreak(BlockBreakEvent e) {
-		PlayerRep rep = game.getPlayerRep(e.getPlayer());
-		if (rep != null && rep.isPlaying) {
+		PlayerRep rep = PlayerRep.getPlayerRep(e.getPlayer());
+		if (rep.getGamePlaying() == game) {
 			if (game.containsLocation(e.getBlock().getLocation())) {
 				e.setCancelled(true);
 				return;
@@ -47,8 +47,8 @@ public class GameProtection implements Listener {
 	@EventHandler
 	public void onPlaceBlock(BlockPlaceEvent e) {
 		if (e.getBlock().getType() == Material.TNT) {
-			PlayerRep rep = game.getPlayerRep(e.getPlayer());
-			if (rep != null && rep.isPlaying) {
+			PlayerRep rep = PlayerRep.getPlayerRep(e.getPlayer());
+			if (rep.getGamePlaying() == game) {
 				if (!game.isPlaying)
 					e.setCancelled(true);
 				return;
@@ -89,8 +89,8 @@ public class GameProtection implements Listener {
 		Entity entity = e.getEntity();
 		if (entity instanceof Player) {
 			Player player = (Player)entity;
-			PlayerRep rep = game.getPlayerRep(player);
-			if (rep != null && rep.isPlaying) {
+			PlayerRep rep = PlayerRep.getPlayerRep(player);
+			if (rep.getGamePlaying() == game) {
 				player.setFireTicks(0);
 				e.setCancelled(true);
 				return;

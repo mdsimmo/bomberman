@@ -37,7 +37,8 @@ public class Reset extends Command {
             Bomberman.sendMessage(sender, "Game not found");
             return true;
         }
-        game.terminate();
+        Bomberman.sendMessage(game.players, "Game reseting");
+        game.stop();
         BoardGenerator.switchBoard(game.board, game.board, game.loc);
         Bomberman.sendMessage(sender, "Game reset");
         return true;

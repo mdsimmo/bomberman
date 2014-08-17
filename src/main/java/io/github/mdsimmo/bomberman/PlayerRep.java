@@ -1,13 +1,9 @@
 package io.github.mdsimmo.bomberman;
 
-import io.github.mdsimmo.bomberman.Bomb.DeathBlock;
-
-import java.util.Calendar;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-import org.bukkit.ChatColor;
 import org.bukkit.GameMode;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -15,7 +11,6 @@ import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
-import org.bukkit.event.HandlerList;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
@@ -39,36 +34,73 @@ public class PlayerRep implements Listener {
 
 	private static JavaPlugin plugin = Bomberman.instance;
 	private static HashMap<Player, PlayerRep> lookup = new HashMap<>();
-	public Player player;
-	public ItemStack[] spawnInventory;
-	public Location spawn;
-	public Game game;
-	public boolean isPlaying = false;
-	public int immunity = 0;
-	public long deathTime = -1;
-	public int kills = 0;
-	public int handicap = 0;
-	private boolean editMode = false;
-	private LinkedHashMap<Block, BlockRep> changes; 
 	
-	public PlayerRep(Player player, Game game) {
+	public static PlayerRep getPlayerRep(Player player) {
+		PlayerRep rep = lookup.get(player);
+		if (rep == null)
+			return new PlayerRep(player);
+		else
+			return rep;
+	}
+	
+	public final Player player;
+	private ItemStack[] spawnInventory;
+	private Location spawn;
+	private Game game;
+	private Game gamePlaying = null;
+	private int immunity = 0;
+	private Game editGame = null;
+	private LinkedHashMap<Block, BlockRep> changes;
+	
+	public PlayerRep(Player player) {
 		this.player = player;
-		this.game = game;
 		lookup.put(player, this);
 		plugin.getServer().getPluginManager().registerEvents(this, plugin);
-		game.observers.add(this);
 	}
 	
-	public static PlayerRep findPlayerRep(Player player) {
-		return lookup.get(player);
+	/**
+	 * Gets the game that the player changed last
+	 * @return the active game
+	 */
+	public Game getGameAcive() {
+		return game;
+	}
+	
+	/**
+	 * Sets the game that the player last did something to
+	 * @param game the nre active game
+	 */
+	public void setGameActive(Game game) {
+		this.game = game;
+	}
+	
+	/**
+	 * @return The game currently being played. If not playing, then null.
+	 */
+	public Game getGamePlaying() {
+		return gamePlaying;
+	}
+	
+	/**
+	 * @return the Player this PlayerRep represents
+	 */
+	public Player getPlayer() {
+		return player;
 	}
 
-	public void joinGame() {
+	/**
+	 * Join the active game
+	 * @return true if joined successfully
+	 */
+	public boolean joinGame() {
+		if (game == null)
+			return false;
+		
 		this.spawn = player.getLocation();
 		Vector gameSpawn = game.findSpareSpawn();
 		if (gameSpawn == null) {
 			Bomberman.sendMessage(this, "Game " + game.name + " is full.");
-			return;
+			return false;
 		} else {
 			if (game.getFare() != null) {
 				if (player.getInventory().contains(game.getFare().getType(), game.getFare().getAmount())
@@ -76,7 +108,7 @@ public class PlayerRep implements Listener {
 					player.getInventory().removeItem(game.getFare());
 				else {
 					Bomberman.sendMessage(this, "You need at least " + game.getFare().getAmount() + " " + game.getFare().getType().toString().toLowerCase());
-					return;
+					return false;
 				}
 			}
 			Bomberman.sendMessage(game.observers, player.getName() + " joined game " + game.name + ".");
@@ -88,68 +120,52 @@ public class PlayerRep implements Listener {
 		player.setHealthScale(game.getLives() * 2);
 		spawnInventory = player.getInventory().getContents();
 		game.initialise(this);
-		isPlaying = true;
-		game.addPlayer(this);
+		gamePlaying = game; 
+		gamePlaying.addPlayer(this);
+		return true;
 	}
 
 	/**
-	 * Removes the player from the game and restores the player to how they were
-	 * before joining
+	 * Kills the player and notifies the joined game
+	 * @return true if killed successfully
 	 */
-	public void kill(boolean alert) {
-		if (isPlaying) {
-			deathTime = Calendar.getInstance().getTimeInMillis();
-			isPlaying = false;
-			game.players.remove(this);
-			player.getInventory().setContents(spawnInventory);
-			player.setMaxHealth(20);
-			player.setHealth(20);
-			player.setHealthScale(20);
-			player.teleport(spawn);
-			// needed to prevent crash when reloading
-			if (plugin.isEnabled())
-				plugin.getServer().getScheduler()
-						.scheduleSyncDelayedTask(plugin, new Runnable() {
-
-							@Override
-							public void run() {
-								player.setFireTicks(0);
-							}
-						});
-			if (alert)
-				game.alertRemoval(this);
-			
-			if (game.players.size() <= 1 && game.getCountdownTimer() != null) {
-			    game.getCountdownTimer().destroy();
-			    for (PlayerRep p : game.players) {
-			        Bomberman.sendMessage(p.player, "Not enough players remaining. The countdown timer has been stopped.");
-			    }
-			}
-		}
+	public boolean kill() {
+		if (gamePlaying == null)
+			return false;
+	
+		player.getInventory().setContents(spawnInventory);
+		player.setMaxHealth(20);
+		player.setHealth(20);
+		player.setHealthScale(20);
+		player.teleport(spawn);
+		if (plugin.isEnabled())
+			plugin.getServer().getScheduler()
+					.scheduleSyncDelayedTask(plugin, new Runnable() {
+						@Override
+						public void run() {
+							player.setFireTicks(0);
+						}
+					});	
+		gamePlaying.alertRemoval(this);
+		gamePlaying = null;
+		return true;
 	}
 	
-	/**
-	 * compleatly destroys this object.
-	 */
-	public void destroy() {
-		kill(false);
-		game.players.remove(this);
-		game.observers.remove(this);
-		lookup.remove(this);
-		HandlerList.unregisterAll(this);
-	}
-
 	@EventHandler
 	public void onPlayerPlaceBlock(BlockPlaceEvent e) {
 		if (e.isCancelled())
 			return;
-		Block b = e.getBlock();
-		if (e.getPlayer() == player && isPlaying) {
-			if (b.getType() == Material.TNT && game.isPlaying) {
-				new Bomb(game, this, e.getBlock());
-				return;
+		if (e.getPlayer() == player) {
+			Block b = e.getBlock();
+			// create a bomb when placing tnt
+			if (gamePlaying != null) {
+				if (b.getType() == Material.TNT && gamePlaying.isPlaying) {
+					new Bomb(game, this, e.getBlock());
+					return;
+				}
 			}
-			if (editMode) {
+			// track edit mode changes
+			if (editGame != null) {
 				changes.put(e.getBlock(), new BlockRep(e.getBlockReplacedState()));
 			}
 		}
@@ -157,7 +173,7 @@ public class PlayerRep implements Listener {
 	
 	@EventHandler
 	public void onBlockBreak(BlockBreakEvent e) {
-		if (e.getPlayer() == player && editMode) {
+		if (e.getPlayer() == player && editGame != null) {
 			changes.put(e.getBlock(), new BlockRep(e.getBlock()));
 		}
 	}
@@ -165,7 +181,7 @@ public class PlayerRep implements Listener {
 	@EventHandler
 	public void playerMove(PlayerMoveEvent e) {
 		Player p = e.getPlayer();
-		if (p == this.player && isPlaying && !game.isPlaying) {
+		if (p == this.player && gamePlaying != null && !gamePlaying.isPlaying) {
 			// stop the player from moving
 			Location from = e.getFrom();
 			double xfrom = e.getFrom().getX();
@@ -190,29 +206,16 @@ public class PlayerRep implements Listener {
 		return strength;
 	}
 
-	public void damage(DeathBlock db) {
+	public boolean damage() {
 		if (immunity <= 0) {
-			db.cause.kills++;
-			if (player.getHealth() > 1) {
+			if (player.getHealth() > 1)
 				player.damage(1);
-				Player cause = db.cause.player;
-				if (cause == player)
-					Bomberman.sendMessage(this, "You hit yourself!");
-				else {
-					Bomberman.sendMessage(this, "You were hit by " + db.cause.player.getName());
-					Bomberman.sendMessage(db.cause, "You hit " + player.getName());
-				}
-				new Immunity();
-			} else {
-				Player cause = db.cause.player;
-				if (cause == player)
-					Bomberman.sendMessage(this, ChatColor.RED + "You killed yourself!");
-				else {
-					Bomberman.sendMessage(this, ChatColor.RED + "Killed by " + cause.getName());
-					Bomberman.sendMessage(db.cause, ChatColor.GREEN + "You killed " + player.getName());
-				}
-				kill(true);
-			}
+			else
+				kill();
+			new Immunity();
+			return true;
+		} else {
+			return false;
 		}
 	}
 
@@ -232,9 +235,9 @@ public class PlayerRep implements Listener {
 
 	@EventHandler
 	public void onPlayerRegen(EntityRegainHealthEvent e) {
-		if (e.getEntity() == player && isPlaying) {
+		if (e.getEntity() == player && gamePlaying != null) {
 			if (e.getRegainReason() == RegainReason.MAGIC)
-				if (game.isSuddenDeath())
+				if (gamePlaying.isSuddenDeath())
 					Bomberman.sendMessage(this, "No regen in sudden death!");
 				else
 					player.setHealth(Math.min(player.getHealth() + 1,
@@ -247,7 +250,7 @@ public class PlayerRep implements Listener {
 	@EventHandler
 	public void onPlayerLeave(PlayerQuitEvent e) {
 		if (e.getPlayer() == player) {
-			kill(true);
+			kill();
 		}
 	}
 	
@@ -255,7 +258,7 @@ public class PlayerRep implements Listener {
 	// an attempt at making potion effects shorter
 	@EventHandler(priority = EventPriority.HIGHEST)
 	public void onPlayerDrinkPotion(PlayerItemConsumeEvent e) {
-		if (e.getPlayer() == player && isPlaying) {
+		if (e.getPlayer() == player && gamePlaying != null) {
 			if (e.getItem().getType() == Material.POTION) {
 				Potion potion = Potion.fromItemStack(e.getItem());
 				if (potion.getType() == PotionType.INSTANT_HEAL
@@ -287,10 +290,10 @@ public class PlayerRep implements Listener {
 	}
 
 	public boolean startEditMode() {
-		if (isPlaying || editMode)
+		if (gamePlaying != null || editGame != null)
 			return false;
 		else {
-			editMode = true;
+			editGame = game;
 			if (changes == null)
 				changes = new LinkedHashMap<>();
 			else
@@ -300,7 +303,6 @@ public class PlayerRep implements Listener {
 	}
 	
 	public void commitChanges(boolean save) {
-		editMode = false;
 		if (save) {
 			for (Block b : changes.keySet()) {
 				Vector v = b.getLocation().subtract(game.loc).toVector();
@@ -314,5 +316,14 @@ public class PlayerRep implements Listener {
 				previous.setBlock(current);
 			}
 		}
+		editGame = null;
+	}
+	
+	public boolean isPlaying() {
+		return gamePlaying != null;
+	}
+	
+	public String getName() {
+		return player.getName();
 	}
 }

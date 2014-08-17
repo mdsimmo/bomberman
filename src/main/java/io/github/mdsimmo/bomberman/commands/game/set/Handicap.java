@@ -48,7 +48,7 @@ public class Handicap extends Command {
 			return true;
 		}
 		@SuppressWarnings("deprecation")
-		PlayerRep rep = game.getPlayerRep(Bukkit.getPlayer(args.get(1)));
+		PlayerRep rep = PlayerRep.getPlayerRep(Bukkit.getPlayer(args.get(1)));
 		if (rep == null) {
 			Bomberman.sendMessage(sender, "Cannot find the player (they must be joined into the game)");
 			return true;
@@ -59,7 +59,7 @@ public class Handicap extends Command {
 		} catch (NumberFormatException e) {
 			return false;
 		}
-		rep.handicap = handicap;
+		game.setHandicap(rep, handicap);
 		if (handicap > 0)
 			Bomberman.sendMessage(sender, "Handicap set");
 		else if (handicap == 0)

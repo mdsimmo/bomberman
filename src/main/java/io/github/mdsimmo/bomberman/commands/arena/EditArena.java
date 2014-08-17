@@ -39,7 +39,7 @@ public class EditArena extends Command {
 			return true;
 		}
 		Player player = (Player)sender;
-		PlayerRep rep = PlayerRep.findPlayerRep(player);
+		PlayerRep rep = PlayerRep.getPlayerRep(player);
 		if (rep == null) {
 			sender.sendMessage("You're not registed with a game");
 			return true;

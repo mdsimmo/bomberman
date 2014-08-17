@@ -38,8 +38,10 @@ public class Stop extends Command{
         else if (!game.isPlaying)
             Bomberman.sendMessage(sender, "Game hasn't started");
         else {
-            game.terminate();
-            Bomberman.sendMessage(sender, "Game stopped");
+        	game.stop();
+            if (!game.players.contains(sender))
+            	Bomberman.sendMessage(sender, "Game stopped");
+            Bomberman.sendMessage(game.players, "Game stopped");
         }
         return true;
 	}

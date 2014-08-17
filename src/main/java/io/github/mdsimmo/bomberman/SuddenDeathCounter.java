@@ -37,7 +37,7 @@ public class SuddenDeathCounter implements Runnable {
 		    Bomberman.sendMessage(game.players, "" + timeout);
 		else if (timeout == 0) {
 		    Bomberman.sendMessage(game.observers, "Game over!");
-			game.terminate();
+			game.stop();
 		}
 		
 		if (suddenDeath == 30)

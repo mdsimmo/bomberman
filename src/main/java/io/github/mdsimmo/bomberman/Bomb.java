@@ -111,7 +111,7 @@ public class Bomb implements Runnable {
 
 			@Override
 			public void run() {
-				if (rep.isPlaying)
+				if (rep.getGamePlaying() == game)
 					rep.player.getInventory().addItem(new ItemStack(Material.TNT));
 			}
 			
@@ -146,7 +146,7 @@ public class Bomb implements Runnable {
 			public void run() {
 				for (PlayerRep rep : new ArrayList<PlayerRep>(game.players)) {
 					if (touching(rep.player)) {
-						rep.damage(this);
+						game.damagePlayer(rep, cause);
 					}
 				}
 				if (--duration <= 0) {

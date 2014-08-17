@@ -79,7 +79,7 @@ public class Bomberman extends JavaPlugin {
 	@Override
 	public void onDisable() {
 		for (String game : Game.allGames()) {
-			Game.findGame(game).terminate();
+			Game.findGame(game).stop();
 			Game.findGame(game).saveGame();
 		}
 	}
