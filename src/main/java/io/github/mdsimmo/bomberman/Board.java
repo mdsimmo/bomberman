@@ -81,6 +81,7 @@ public class Board {
 			int y = place.getBlockY();
 			int z = place.getBlockZ();
 			blocks[x][y][z] = block;
+			delayed.remove(place);
 		} else {
 			blocks[place.getBlockX()][place.getBlockY()][place.getBlockZ()] = new BlockRep();
 			delayed.put(place, block);

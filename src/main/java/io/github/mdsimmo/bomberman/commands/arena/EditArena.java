@@ -5,6 +5,7 @@ import io.github.mdsimmo.bomberman.Game;
 import io.github.mdsimmo.bomberman.PlayerRep;
 import io.github.mdsimmo.bomberman.commands.Command;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.bukkit.command.CommandSender;
@@ -23,9 +24,19 @@ public class EditArena extends Command {
 
 	@Override
 	public List<String> options(CommandSender sender, List<String> args) {
-		if (args.size() == 1)
-			return Game.allGames();
-		else
+		if (sender instanceof Player == false)
+			return null;
+		PlayerRep rep = PlayerRep.getPlayerRep((Player)sender);
+		if (args.size() == 1) {
+			if (rep.isEditting()) {
+				List<String> list = new ArrayList<>();
+				list.add("save");
+				list.add("discard");
+				return list;
+			} else {
+				return Game.allGames();
+			}
+		} else
 			return null;
 	}
 
@@ -40,10 +51,6 @@ public class EditArena extends Command {
 		}
 		Player player = (Player)sender;
 		PlayerRep rep = PlayerRep.getPlayerRep(player);
-		if (rep == null) {
-			sender.sendMessage("You're not registed with a game");
-			return true;
-		}
 		if (args.size() == 0) {
 			if (!rep.startEditMode()) {
 				Bomberman.sendMessage(sender, "Couldn't start edit mode");
@@ -53,15 +60,26 @@ public class EditArena extends Command {
 		} else {
 			switch (args.get(0).toLowerCase()) {
 			case "save":
-				rep.commitChanges(true);
-				Bomberman.sendMessage(sender, "Changes saved");
+				if (rep.commitChanges(true))
+					Bomberman.sendMessage(sender, "Changes saved");
+				else
+					Bomberman.sendMessage(sender, "Couldn't save changes");
 				break;
 			case "discard":
-				rep.commitChanges(false);
-				Bomberman.sendMessage(sender, "Changes removed");
+				if (rep.commitChanges(false))
+					Bomberman.sendMessage(sender, "Changes removed");
+				else
+					Bomberman.sendMessage(sender, "Changes couldn't be removed");
 				break;
 			default:
-				return false;
+				Game game = Game.findGame(args.get(0));
+				if (game == null)
+					return false;
+				else {
+					rep.setGameActive(game);
+					args.remove(0);
+					return run(sender, args);
+				}
 			}
 		}
 		return true;

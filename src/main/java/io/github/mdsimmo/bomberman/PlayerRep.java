@@ -304,7 +304,7 @@ public class PlayerRep implements Listener {
 	}
 
 	public boolean startEditMode() {
-		if (gamePlaying != null || editGame != null)
+		if (gamePlaying != null || editGame != null || game == null)
 			return false;
 		else {
 			editGame = game;
@@ -316,7 +316,9 @@ public class PlayerRep implements Listener {
 		}
 	}
 	
-	public void commitChanges(boolean save) {
+	public boolean commitChanges(boolean save) {
+		if (editGame == null)
+			return false;
 		if (save) {
 			for (Block b : changes.keySet()) {
 				Vector v = b.getLocation().subtract(game.loc).toVector();
@@ -331,6 +333,7 @@ public class PlayerRep implements Listener {
 			}
 		}
 		editGame = null;
+		return true;
 	}
 	
 	public boolean isPlaying() {
@@ -339,5 +342,13 @@ public class PlayerRep implements Listener {
 	
 	public String getName() {
 		return player.getName();
+	}
+	
+	public boolean isEditting() {
+		return editGame != null;
+	}
+	
+	public Game getEditting() {
+		return editGame;
 	}
 }
