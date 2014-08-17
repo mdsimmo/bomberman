@@ -109,32 +109,32 @@ public class PlayerRep implements Listener {
 			Bomberman.sendMessage(this, "You cannot be part of two games");
 			return false;
 		}
+		gamePlaying = game;
 		
 		this.spawn = player.getLocation();
-		Vector gameSpawn = game.findSpareSpawn();
+		Vector gameSpawn = gamePlaying.findSpareSpawn();
 		if (gameSpawn == null) {
-			Bomberman.sendMessage(this, "Game " + game.name + " is full.");
+			Bomberman.sendMessage(this, "Game " + gamePlaying.name + " is full.");
 			return false;
 		} else {
-			if (game.getFare() != null) {
-				if (player.getInventory().contains(game.getFare().getType(), game.getFare().getAmount())
+			if (gamePlaying.getFare() != null) {
+				if (player.getInventory().contains(gamePlaying.getFare().getType(), gamePlaying.getFare().getAmount())
 						|| player.getGameMode() == GameMode.CREATIVE)
-					player.getInventory().removeItem(game.getFare());
+					player.getInventory().removeItem(gamePlaying.getFare());
 				else {
-					Bomberman.sendMessage(this, "You need at least " + game.getFare().getAmount() + " " + game.getFare().getType().toString().toLowerCase());
+					Bomberman.sendMessage(this, "You need at least " + gamePlaying.getFare().getAmount() + " " + gamePlaying.getFare().getType().toString().toLowerCase());
 					return false;
 				}
 			}
-			Bomberman.sendMessage(game.observers, player.getName() + " joined game " + game.name + ".");
-			player.teleport(game.loc.clone().add(gameSpawn));
+			Bomberman.sendMessage(gamePlaying.observers, player.getName() + " joined game " + gamePlaying.name + ".");
+			player.teleport(gamePlaying.loc.clone().add(gameSpawn));
 		}
 		player.setGameMode(GameMode.SURVIVAL);
-		player.setHealth(game.getLives());
-		player.setMaxHealth(game.getLives());
-		player.setHealthScale(game.getLives() * 2);
+		player.setHealth(gamePlaying.getLives());
+		player.setMaxHealth(gamePlaying.getLives());
+		player.setHealthScale(gamePlaying.getLives() * 2);
 		spawnInventory = player.getInventory().getContents();
-		game.initialise(this);
-		gamePlaying = game; 
+		gamePlaying.initialise(this); 
 		gamePlaying.addPlayer(this);
 		return true;
 	}
@@ -174,13 +174,18 @@ public class PlayerRep implements Listener {
 			// create a bomb when placing tnt
 			if (gamePlaying != null) {
 				if (b.getType() == Material.TNT && gamePlaying.isPlaying) {
-					new Bomb(game, this, e.getBlock());
+					new Bomb(gamePlaying, this, e.getBlock());
 					return;
 				}
 			}
 			// track edit mode changes
 			if (editGame != null) {
-				changes.put(e.getBlock(), new BlockRep(e.getBlockReplacedState()));
+				if (editGame.containsLocation(e.getBlock().getLocation()))
+					changes.put(e.getBlock(), new BlockRep(e.getBlockReplacedState()));
+				else {
+					e.setCancelled(true);
+					Bomberman.sendMessage(this, "Cannot build outside while in editmode");
+				}
 			}
 		}
 	}
@@ -188,7 +193,13 @@ public class PlayerRep implements Listener {
 	@EventHandler
 	public void onBlockBreak(BlockBreakEvent e) {
 		if (e.getPlayer() == player && editGame != null) {
-			changes.put(e.getBlock(), new BlockRep(e.getBlock()));
+			Block b = e.getBlock();
+			if (editGame.containsLocation(b.getLocation()))
+				changes.put(e.getBlock(), new BlockRep(e.getBlock()));
+			else {
+				e.setCancelled(true);
+				Bomberman.sendMessage(this, "Cannot destroy blocks outside while in editmode");
+			}
 		}
 	}
 
@@ -321,10 +332,11 @@ public class PlayerRep implements Listener {
 			return false;
 		if (save) {
 			for (Block b : changes.keySet()) {
-				Vector v = b.getLocation().subtract(game.loc).toVector();
-				game.board.addBlock(new BlockRep(b), v);
+				Vector v = b.getLocation().subtract(editGame.loc).toVector();
+				if (editGame.containsLocation(b.getLocation()))
+					editGame.board.addBlock(new BlockRep(b), v);
 			}
-			BoardGenerator.saveBoard(game.board);
+			BoardGenerator.saveBoard(editGame.board);
 		} else { 
 			for (Map.Entry<Block, BlockRep> entry : changes.entrySet()) {
 				Block current = entry.getKey();
