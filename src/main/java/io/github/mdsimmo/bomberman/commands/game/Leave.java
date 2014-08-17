@@ -31,8 +31,14 @@ public class Leave extends Command {
 			return false;
 		if (sender instanceof Player) {
 			PlayerRep rep = PlayerRep.getPlayerRep((Player) sender);
-			if (!rep.kill())
-				Bomberman.sendMessage(sender, "Couldn't remove you");
+			if (!rep.kill()) {
+				if (rep.getGamePlaying() == null)
+					Bomberman.sendMessage(sender, "You're not part of a game");
+				else
+					Bomberman.sendMessage(sender, "Couldn't remove you");
+			}
+		} else {
+			Bomberman.sendMessage(sender, "You must be a player");
 		}
 		return true;
 	}

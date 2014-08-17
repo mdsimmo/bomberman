@@ -3,12 +3,13 @@ package io.github.mdsimmo.bomberman.commands.game.set;
 import io.github.mdsimmo.bomberman.Bomberman;
 import io.github.mdsimmo.bomberman.Game;
 import io.github.mdsimmo.bomberman.commands.Command;
+import io.github.mdsimmo.bomberman.commands.game.GameCommand;
 
 import java.util.List;
 
 import org.bukkit.command.CommandSender;
 
-public class AutostartDelay extends Command {
+public class AutostartDelay extends GameCommand {
 
 	public AutostartDelay(Command parent) {
 		super(parent);
@@ -20,27 +21,17 @@ public class AutostartDelay extends Command {
 	}
 
 	@Override
-	public List<String> options(CommandSender sender, List<String> args) {
-		if (args.size() == 1)
-			return Game.allGames();
-		else
-			return null;
+	public List<String> shortOptions(CommandSender sender, List<String> args) {
+		return null;
 	}
 
 	@Override
-	public boolean run(CommandSender sender, List<String> args) {
-		if (args.size() != 2)
-            return false;
-        
-        Game game = Game.findGame(args.get(0));
-        
-        if (game == null) {
-            Bomberman.sendMessage(sender, "Cannot find game");
-            return true;
-        }
-        
+	public boolean runShort(CommandSender sender, List<String> args, Game game) {
+		if (args.size() != 1)
+			return false;
+		        
         try {
-            game.setAutostartDelay(Integer.parseInt(args.get(1)));
+            game.setAutostartDelay(Integer.parseInt(args.get(0)));
             Bomberman.sendMessage(sender, "Autostart delay set to " + game.getAutostartDelay());
         } catch (NumberFormatException e) {
             Bomberman.sendMessage(sender, "Delay entered is not a valid number");
@@ -48,6 +39,11 @@ public class AutostartDelay extends Command {
         return true;
 	}
 
+	@Override
+	public boolean firstIsGame(List<String> args) {
+		return args.size() == 2;
+	}
+	
 	@Override
 	public String description() {
 		return "Change the delay on a game's automated start";

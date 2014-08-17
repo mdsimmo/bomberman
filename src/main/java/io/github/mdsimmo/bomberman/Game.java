@@ -312,11 +312,14 @@ public class Game implements Listener {
 		stop();
 		HandlerList.unregisterAll(protector);
 		HandlerList.unregisterAll(this);
-		Bomberman.sendMessage(observers, "Game destroyed");
+		Bomberman.sendMessage(observers, "Game %g destroyed", this);
 		File f = new File(plugin.getDataFolder() + "/" + name + ".game");
 		f.delete();
 		f = new File(plugin.getDataFolder() + "/" + name + ".old.board");
 		f.delete();
+		for (PlayerRep rep : PlayerRep.allPlayers())
+			if (rep.getGameActive() == this)
+				rep.setGameActive(null);
 	}
 
 	public void drop(Location l, Material type) {

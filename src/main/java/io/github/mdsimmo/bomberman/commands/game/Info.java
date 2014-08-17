@@ -10,7 +10,7 @@ import java.util.Map;
 
 import org.bukkit.command.CommandSender;
 
-public class Info extends Command {
+public class Info extends GameCommand {
 
 	public Info(Command parent) {
 		super(parent);
@@ -32,23 +32,15 @@ public class Info extends Command {
 	}
 
 	@Override
-	public List<String> options(CommandSender sender, List<String> args) {
-		if (args.size() == 1)
-			return Game.allGames();
-		else
-			return null;
+	public List<String> shortOptions(CommandSender sender, List<String> args) {
+		return null;
 	}
 
 	@Override
-	public boolean run(CommandSender sender, List<String> args) {
-		if (args.size() != 1)
+	public boolean runShort(CommandSender sender, List<String> args, Game game) {
+		if (args.size() != 0)
 			return false;
 
-		Game game = Game.findGame(args.get(0));
-		if (game == null) {
-			Bomberman.sendMessage(sender, "Game not found");
-			return true;
-		}
 		Bomberman.sendHeading(sender, "Info: " + game.name);
 		Map<String, String> list = new LinkedHashMap<>();
 		if (game.isPlaying)
@@ -80,6 +72,11 @@ public class Info extends Command {
 		list.put("Arena", game.board.name);
 		Bomberman.sendMessage(sender, list);
 		return true;
+	}
+	
+	@Override
+	public boolean firstIsGame(List<String> args) {
+		return args.size() == 1;
 	}
 
 	@Override

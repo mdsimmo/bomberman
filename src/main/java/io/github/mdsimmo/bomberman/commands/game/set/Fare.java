@@ -3,6 +3,7 @@ package io.github.mdsimmo.bomberman.commands.game.set;
 import io.github.mdsimmo.bomberman.Bomberman;
 import io.github.mdsimmo.bomberman.Game;
 import io.github.mdsimmo.bomberman.commands.Command;
+import io.github.mdsimmo.bomberman.commands.game.GameCommand;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -11,7 +12,7 @@ import org.bukkit.Material;
 import org.bukkit.command.CommandSender;
 import org.bukkit.inventory.ItemStack;
 
-public class Fare extends Command {
+public class Fare extends GameCommand {
 
 	public Fare(Command parent) {
 		super(parent);
@@ -23,10 +24,8 @@ public class Fare extends Command {
 	}
 
 	@Override
-	public List<String> options(CommandSender sender, List<String> args) {
-		if (args.size() == 1) {
-			return Game.allGames();
-		} else if (args.size() == 2 ) {
+	public List<String> shortOptions(CommandSender sender, List<String> args) {
+		if (args.size() == 1 ) {
 			List<String> options = new ArrayList<>();
 			options.add("none");
 			for (Material m : Material.values())
@@ -37,26 +36,22 @@ public class Fare extends Command {
 	}
 
 	@Override
-	public boolean run(CommandSender sender, List<String> args) {
-		if (args.size() < 2 || args.size() > 3)
+	public boolean runShort(CommandSender sender, List<String> args, Game game) {
+		if (args.size() < 1 || args.size() > 2)
 			return false;
-		Game game = Game.findGame(args.get(0));
-		if (game == null) {
-			Bomberman.sendMessage(sender, "Game not found");
-			return true;
-		}
-		if (args.size() == 2 && args.get(1).equalsIgnoreCase("none")) {
+		
+		if (args.size() == 1 && args.get(0).equalsIgnoreCase("none")) {
 			game.setFare(null);
 			Bomberman.sendMessage(sender, "Fare removed");
 			return false;
-		} else if (args.size() == 3) {
+		} else if (args.size() == 2) {
 			try {
-				Material m = Material.getMaterial(args.get(1).toUpperCase());
+				Material m = Material.getMaterial(args.get(0).toUpperCase());
 				if (m == null) {
 					Bomberman.sendMessage(sender, "Unknown material");
 					return true;
 				}
-				int amount = Integer.parseInt(args.get(2));
+				int amount = Integer.parseInt(args.get(1));
 				game.setFare(new ItemStack(m, amount));
 				Bomberman.sendMessage(sender, "Fare set");
 				return true;
@@ -66,6 +61,13 @@ public class Fare extends Command {
 		} else {
 			return false;
 		}
+	}
+	
+	@Override
+	public boolean firstIsGame(List<String> args) {
+		if (args.size() == 3)
+			return true;
+		else return (args.size() == 2 && args.get(1).equalsIgnoreCase("none"));
 	}
 
 	@Override

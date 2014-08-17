@@ -10,7 +10,7 @@ import io.github.mdsimmo.bomberman.Config;
 import io.github.mdsimmo.bomberman.Game;
 import io.github.mdsimmo.bomberman.commands.Command;
 
-public class Protect extends Command {
+public class Protect extends GameCommand {
 
 	public Protect(Command parent) {
 		super(parent);
@@ -22,11 +22,9 @@ public class Protect extends Command {
 	}
 
 	@Override
-	public List<String> options(CommandSender sender, List<String> args) {
+	public List<String> shortOptions(CommandSender sender, List<String> args) {
 		List<String> list = new ArrayList<>();
-		if (args.size() == 1)
-			return Game.allGames();
-		else if (args.size() == 2) {
+		if (args.size() == 1) {
 			list.add("true");
 			list.add("false");
 			list.add("placing");
@@ -37,7 +35,7 @@ public class Protect extends Command {
 			list.add("fire");
 			list.add("explosion");
 			return list;
-		} else if (args.size() == 3) {
+		} else if (args.size() == 2) {
 			list.add("true");
 			list.add("false");
 			return list;
@@ -46,29 +44,24 @@ public class Protect extends Command {
 	}
 
 	@Override
-	public boolean run(CommandSender sender, List<String> args) {
-		if (args.size() < 2 || args.size() > 3)
+	public boolean runShort(CommandSender sender, List<String> args, Game game) {
+		if (args.size() < 1 || args.size() > 2)
 			return false;
-		Game game = Game.findGame(args.get(0));
-		if (game == null) {
-			Bomberman.sendMessage(sender, "Game not found");
-			return true;
-		}
 		
 		boolean enable;
 		try {
-			if (args.size() == 3)
-				enable = Boolean.parseBoolean(args.get(2));
-			else
+			if (args.size() == 2)
 				enable = Boolean.parseBoolean(args.get(1));
+			else
+				enable = Boolean.parseBoolean(args.get(0));
 		} catch (NumberFormatException e) {
 			return false;
 		}
 		
-		if (args.size() == 2)
+		if (args.size() == 1)
 			game.setProteced(Config.PROTECT, enable);
 		else {		
-			switch (args.get(1).toLowerCase()) {
+			switch (args.get(0).toLowerCase()) {
 			case "enabled":
 				game.setProteced(Config.PROTECT, enable); break;
 			case "pvp":
@@ -93,6 +86,16 @@ public class Protect extends Command {
 		else
 			Bomberman.sendMessage(sender, "Game un-protected");
 		return true;
+	}
+	
+	@Override
+	public boolean firstIsGame(List<String> args) {
+		if (args.size() == 3)
+			return true;
+		else if (args.size() == 2) {
+			return Game.allGames().contains(args.get(0)); 
+		} else
+			return false;
 	}
 
 	@Override

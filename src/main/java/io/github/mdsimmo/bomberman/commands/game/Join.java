@@ -10,7 +10,7 @@ import java.util.List;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
-public class Join extends Command {
+public class Join extends GameCommand {
 
 	public Join(Command parent) {
 		super(parent);
@@ -22,35 +22,31 @@ public class Join extends Command {
 	}
 
 	@Override
-	public List<String> options(CommandSender sender, List<String> args) {
-		if (args.size() == 1)
-			return Game.allGames();
-		else
-			return null;
+	public List<String> shortOptions(CommandSender sender, List<String> args) {
+		return null;
 	}
 
 	@Override
-	public boolean run(CommandSender sender, List<String> args) {
-		if (args.size() != 1)
+	public boolean runShort(CommandSender sender, List<String> args, Game game) {
+		if (args.size() != 0)
 			return false;
-		if (sender instanceof Player) {
-			Game game = Game.findGame(args.get(0));
-			if (game == null) {
-				Bomberman.sendMessage(sender, "Game not found");
-			} else {
-				if (game.isPlaying == false) {
-					PlayerRep rep = PlayerRep.getPlayerRep((Player) sender);
-					rep.setGameActive(game);
-					if (!rep.joinGame())
-						Bomberman.sendMessage(sender, "couldn't join the game");;
-				} else {
-					Bomberman.sendMessage(sender, "Game has already started");
-				}
-			}
-		} else {
+		if (sender instanceof Player == false) {
 			Bomberman.sendMessage(sender, "You must be a player to join");
+			return true;
+		}	
+		if (game.isPlaying) {
+			Bomberman.sendMessage(sender, "Game has already started");
+			return true;
 		}
+		PlayerRep rep = PlayerRep.getPlayerRep((Player) sender);
+		rep.setGameActive(game);
+		rep.joinGame();
 		return true;
+	}
+	
+	@Override
+	public boolean firstIsGame(List<String> args) {
+		return args.size() == 1;
 	}
 
 	@Override

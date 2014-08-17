@@ -5,12 +5,13 @@ import io.github.mdsimmo.bomberman.BoardGenerator;
 import io.github.mdsimmo.bomberman.Bomberman;
 import io.github.mdsimmo.bomberman.Game;
 import io.github.mdsimmo.bomberman.commands.Command;
+import io.github.mdsimmo.bomberman.commands.game.GameCommand;
 
 import java.util.List;
 
 import org.bukkit.command.CommandSender;
 
-public class Arena extends Command {
+public class Arena extends GameCommand {
 
 	public Arena(Command parent) {
 		super(parent);
@@ -22,45 +23,35 @@ public class Arena extends Command {
 	}
 
 	@Override
-	public List<String> options(CommandSender sender, List<String> args) {
-		if (args.size() == 1)
-			return Game.allGames();
-		else if (args.size() == 2)
+	public List<String> shortOptions(CommandSender sender, List<String> args) {
+		if (args.size() == 0)
 			return BoardGenerator.allBoards();
 		else
 			return null;
 	}
 
 	@Override
-	public boolean run(CommandSender sender, List<String> args) {
-		if (!(args.size() == 1 || args.size() == 2))
-            return false;
-        Game game = Game.findGame(args.get(0));
-        if (game == null) {
-            Bomberman.sendMessage(sender, "Game not found");
-            return true;
-        }
-        if (args.size() == 1) {
-            Bomberman.sendMessage(sender, "Arena: " + game.board.name);
-            return true;
-        } else {
-            if (game.isPlaying) {
-                Bomberman.sendMessage(sender, "Game in progress");
-                return true;
-            }
-                
-            Board board = BoardGenerator.loadBoard(args.get(1));
-            if (board == null) {
-                Bomberman.sendMessage(sender, "Arena not found");
-                return true;
-            }
-            BoardGenerator.switchBoard(game.board, game.oldBoard, game.loc);
-            game.board = board;
-            game.oldBoard = BoardGenerator.createArena(game.name+".old", game.loc, board.xSize, board.ySize, board.zSize);
-            BoardGenerator.switchBoard(game.oldBoard, board, game.loc);
-            Bomberman.sendMessage(sender, "Game arena changed");
-            return true;
-        }
+	public boolean runShort(CommandSender sender, List<String> args, Game game) {
+		if (args.size() != 1)
+			return false;
+		
+		if (game.isPlaying) {
+			Bomberman.sendMessage(sender, "Game %g in progress. Cannot change arena", game);
+			return true;
+		}
+
+		Board board = BoardGenerator.loadBoard(args.get(0));
+		if (board == null) {
+			Bomberman.sendMessage(sender, "Arena %b not found", board);
+			return true;
+		}
+		BoardGenerator.switchBoard(game.board, game.oldBoard, game.loc);
+		game.board = board;
+		game.oldBoard = BoardGenerator.createArena(game.name + ".old",
+				game.loc, board.xSize, board.ySize, board.zSize);
+		BoardGenerator.switchBoard(game.oldBoard, board, game.loc);
+		Bomberman.sendMessage(sender, "Game %g arena's changed", game);
+		return true;
 	}
 
 	@Override
@@ -76,6 +67,11 @@ public class Arena extends Command {
 	@Override
 	public Permission permission() {
 		return Permission.GAME_DICTATE;
+	}
+
+	@Override
+	public boolean firstIsGame(List<String> args) {
+		return args.size() == 2;
 	}
 
 }

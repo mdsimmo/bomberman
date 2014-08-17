@@ -3,13 +3,14 @@ package io.github.mdsimmo.bomberman.commands.game.set;
 import io.github.mdsimmo.bomberman.Bomberman;
 import io.github.mdsimmo.bomberman.Game;
 import io.github.mdsimmo.bomberman.commands.Command;
+import io.github.mdsimmo.bomberman.commands.game.GameCommand;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import org.bukkit.command.CommandSender;
 
-public class Autostart extends Command {
+public class Autostart extends GameCommand {
 
 	public Autostart(Command parent) {
 		super(parent);
@@ -21,10 +22,8 @@ public class Autostart extends Command {
 	}
 
 	@Override
-	public List<String> options(CommandSender sender, List<String> args) {
-		if (args.size() == 1)
-			return Game.allGames();
-		else if (args.size() == 2) {
+	public List<String> shortOptions(CommandSender sender, List<String> args) {
+		if (args.size() == 1) {
 			List<String> options = new ArrayList<String>();
 			options.add("false");
 			options.add("true");
@@ -35,23 +34,25 @@ public class Autostart extends Command {
 	}
 
 	@Override
-	public boolean run(CommandSender sender, List<String> args) {
-		if (args.size() != 2)
+	public boolean runShort(CommandSender sender, List<String> args, Game game) {
+		if (args.size() != 1)
 			return false;
-		Game game = Game.findGame(args.get(0));
-		if (game == null) {
-			Bomberman.sendMessage(sender, "Game not found");
-			return true;
-		}
-		if (args.get(1).equalsIgnoreCase("false")) {
+		
+		if (args.get(0).equalsIgnoreCase("false")) {
 			game.setAutostart(false);
-		} else if (args.get(1).equalsIgnoreCase("true")) {
+			Bomberman.sendMessage(sender, "Autostart disabled");
+		} else if (args.get(0).equalsIgnoreCase("true")) {
 			game.setAutostart(true);
+			Bomberman.sendMessage(sender, "Autostart enabled");
 		} else {
 			return false;
 		}
-		Bomberman.sendMessage(sender, "Autostart set");
 		return true;
+	}
+	
+	@Override
+	public boolean firstIsGame(List<String> args) {
+		return args.size() == 2;
 	}
 
 	@Override

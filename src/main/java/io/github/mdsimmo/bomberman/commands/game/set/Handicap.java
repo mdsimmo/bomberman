@@ -4,6 +4,7 @@ import io.github.mdsimmo.bomberman.Bomberman;
 import io.github.mdsimmo.bomberman.Game;
 import io.github.mdsimmo.bomberman.PlayerRep;
 import io.github.mdsimmo.bomberman.commands.Command;
+import io.github.mdsimmo.bomberman.commands.game.GameCommand;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -12,7 +13,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
-public class Handicap extends Command {
+public class Handicap extends GameCommand {
 
 	public Handicap(Command parent) {
 		super(parent);
@@ -24,10 +25,8 @@ public class Handicap extends Command {
 	}
 
 	@Override
-	public List<String> options(CommandSender sender, List<String> args) {
-		if (args.size() == 1)
-			return Game.allGames();
-		else if (args.size() == 2) {
+	public List<String> shortOptions(CommandSender sender, List<String> args) {
+		if (args.size() == 1) {
 			List<String> options = new ArrayList<>();
 			for (Player p : Bukkit.getServer().getOnlinePlayers())
 				options.add(p.getName());
@@ -39,25 +38,21 @@ public class Handicap extends Command {
 	}
 
 	@Override
-	public boolean run(CommandSender sender, List<String> args) {
-		if (args.size() != 3)
+	public boolean runShort(CommandSender sender, List<String> args, Game game) {
+		if (args.size() != 2)
 			return false;
-		Game game = Game.findGame(args.get(0));
-		if (game == null) {
-			Bomberman.sendMessage(sender, "Cannot find game " + args.get(0));
-			return true;
-		}
+		
 		@SuppressWarnings("deprecation")
-		PlayerRep rep = PlayerRep.getPlayerRep(Bukkit.getPlayer(args.get(1)));
+		PlayerRep rep = PlayerRep.getPlayerRep(Bukkit.getPlayer(args.get(0)));
 		if (rep == null) {
-			Bomberman.sendMessage(sender, "Cannot find the player (they must be joined into the game)");
+			Bomberman.sendMessage(sender, "Cannot find the player");
 			return true;
 		}
 		int handicap = 0;
 		try {
-			handicap = Integer.parseInt(args.get(2));
+			handicap = Integer.parseInt(args.get(1));
 		} catch (NumberFormatException e) {
-			return false;
+			Bomberman.sendMessage(sender, "Invalid number");
 		}
 		game.setHandicap(rep, handicap);
 		if (handicap > 0)
@@ -68,6 +63,11 @@ public class Handicap extends Command {
 			Bomberman.sendMessage(sender, "Advantage added");
 		game.initialise(rep);
 		return true;
+	}
+	
+	@Override
+	public boolean firstIsGame(List<String> args) {
+		return args.size() == 3;
 	}
 
 	@Override

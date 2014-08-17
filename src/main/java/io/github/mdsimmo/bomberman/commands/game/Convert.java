@@ -10,6 +10,7 @@ import io.github.mdsimmo.bomberman.Board;
 import io.github.mdsimmo.bomberman.BoardGenerator;
 import io.github.mdsimmo.bomberman.Bomberman;
 import io.github.mdsimmo.bomberman.Game;
+import io.github.mdsimmo.bomberman.PlayerRep;
 import io.github.mdsimmo.bomberman.commands.Command;
 
 public class Convert extends Command {
@@ -34,24 +35,27 @@ public class Convert extends Command {
 	@Override
 	public boolean run(CommandSender sender, List<String> args) {
 		if (args.size() != 1)
-            return false;
-        if (sender instanceof Player) {
-            if (Game.findGame(args.get(0)) != null) {
-                Bomberman.sendMessage(sender, "Game already exists");
-            } else {
-                Location[] locations = BoardGenerator.getBoundingStructure((Player)sender, args.get(0));
-                Board board = BoardGenerator.createArena(args.get(0), locations[0], locations[1]);
-                BoardGenerator.saveBoard(board);
-                Game game = new Game(args.get(0), locations[0]);
-                game.board = board;
-                game.oldBoard = board;
-                Game.register(game);
-                Bomberman.sendMessage(sender, "Game created");
-            }
-        } else {
-            Bomberman.sendMessage(sender, "You must be a player");
-        }
-        return true;
+			return false;
+		if (sender instanceof Player) {
+			if (Game.findGame(args.get(0)) != null) {
+				Bomberman.sendMessage(sender, "Game already exists");
+			} else {
+				Location[] locations = BoardGenerator.getBoundingStructure(
+						(Player) sender, args.get(0));
+				Board board = BoardGenerator.createArena(args.get(0),
+						locations[0], locations[1]);
+				BoardGenerator.saveBoard(board);
+				Game game = new Game(args.get(0), locations[0]);
+				game.board = board;
+				game.oldBoard = board;
+				Game.register(game);
+				PlayerRep.getPlayerRep((Player)sender).setGameActive(game);
+				Bomberman.sendMessage(sender, "Game created");
+			}
+		} else {
+			Bomberman.sendMessage(sender, "You must be a player");
+		}
+		return true;
 	}
 
 	@Override

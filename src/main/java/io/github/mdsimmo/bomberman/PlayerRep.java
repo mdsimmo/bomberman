@@ -1,7 +1,9 @@
 package io.github.mdsimmo.bomberman;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.bukkit.GameMode;
@@ -43,6 +45,10 @@ public class PlayerRep implements Listener {
 			return rep;
 	}
 	
+	public static List<PlayerRep> allPlayers() {
+		return new ArrayList<>(lookup.values());
+	}
+	
 	public final Player player;
 	private ItemStack[] spawnInventory;
 	private Location spawn;
@@ -62,7 +68,7 @@ public class PlayerRep implements Listener {
 	 * Gets the game that the player changed last
 	 * @return the active game
 	 */
-	public Game getGameAcive() {
+	public Game getGameActive() {
 		return game;
 	}
 	
@@ -72,6 +78,8 @@ public class PlayerRep implements Listener {
 	 */
 	public void setGameActive(Game game) {
 		this.game = game;
+		if (!game.observers.contains(this))
+			game.observers.add(this);
 	}
 	
 	/**
@@ -93,8 +101,14 @@ public class PlayerRep implements Listener {
 	 * @return true if joined successfully
 	 */
 	public boolean joinGame() {
-		if (game == null)
+		if (game == null) {
+			Bomberman.sendMessage(this, "You must specify a game");
 			return false;
+		}
+		if (gamePlaying != null) {
+			Bomberman.sendMessage(this, "You cannot be part of two games");
+			return false;
+		}
 		
 		this.spawn = player.getLocation();
 		Vector gameSpawn = game.findSpareSpawn();

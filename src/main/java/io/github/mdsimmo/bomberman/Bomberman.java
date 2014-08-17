@@ -44,37 +44,44 @@ public class Bomberman extends JavaPlugin {
 					formated += c;
 					break;
 				}
+				String part;
+				Object o = objects[objectIndex]; 
 				switch (s.charAt(i+1)) {
 				case 'p':
-					PlayerRep p;
-					Object o = objects[objectIndex]; 
 					if (o instanceof Player)
-						p = PlayerRep.getPlayerRep((Player)o);
+						part = PlayerRep.getPlayerRep((Player)o).getName();
+					else if (o instanceof PlayerRep)
+						part = ((PlayerRep)o).getName();
 					else
-						p = (PlayerRep)o;
-					formated += ChatColor.YELLOW + p.getName() + ChatColor.RESET;
+						part = (String)o;
+					formated += ChatColor.YELLOW + part + ChatColor.RESET;
 					break;
 				case 'g':
-					Game g = (Game) objects[objectIndex];
-					formated += ChatColor.YELLOW + g.name + ChatColor.RESET;
+					if (o instanceof Game) 
+						part = ((Game) o).name;
+					else
+						part = (String) o;
+					formated += ChatColor.YELLOW + part + ChatColor.RESET;
 					break;
 				case 'b':
-					Board b = (Board) objects[objectIndex];
-					formated += ChatColor.YELLOW + b.name + ChatColor.RESET;
+					if (o instanceof Board) 
+						part = ((Board) o).name;
+					else
+						part = (String) o;
+					formated += ChatColor.YELLOW + part + ChatColor.RESET;
 					break;
 				case 'c':
-					String command;
-					Object o2 = objects[objectIndex]; 
-					if (o2 instanceof Command) {
-						Command cmd = (Command)o2;
-						command = "/" + cmd.path() + cmd.name();
+					if (o instanceof Command) {
+						Command cmd = (Command)o;
+						part = "/" + cmd.path();
 					} else
-						command = (String)o2;
-					formated += ChatColor.AQUA + command + ChatColor.RESET;
+						part = (String)o;
+					formated += ChatColor.AQUA + part + ChatColor.RESET;
 					break;
 				default:
 					throw new IllegalArgumentException("Can only use 'c', 'b', 'g' or 'p' after '%'");
 				}
+				i++;
 				objectIndex++;
 				break;
 			default:

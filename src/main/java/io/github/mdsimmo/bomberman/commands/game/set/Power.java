@@ -7,8 +7,9 @@ import org.bukkit.command.CommandSender;
 import io.github.mdsimmo.bomberman.Bomberman;
 import io.github.mdsimmo.bomberman.Game;
 import io.github.mdsimmo.bomberman.commands.Command;
+import io.github.mdsimmo.bomberman.commands.game.GameCommand;
 
-public class Power extends Command {
+public class Power extends GameCommand {
 
 	public Power(Command parent) {
 		super(parent);
@@ -20,31 +21,29 @@ public class Power extends Command {
 	}
 
 	@Override
-	public List<String> options(CommandSender sender, List<String> args) {
-		if (args.size() == 1)
-			return Game.allGames();
-		else
-			return null;
+	public List<String> shortOptions(CommandSender sender, List<String> args) {
+		return null;
 	}
 
 	@Override
-	public boolean run(CommandSender sender, List<String> args) {
-		if (args.size() != 2)
+	public boolean runShort(CommandSender sender, List<String> args, Game game) {
+		if (args.size() != 1)
 			return false;
-		Game game = Game.findGame(args.get(0));
-		if (game == null) {
-			Bomberman.sendMessage(sender, "Game not found");
-			return true;
-		}
+
 		int amount;
 		try {
-			amount = Integer.parseInt(args.get(1));
+			amount = Integer.parseInt(args.get(0));
 		} catch (Exception e) {
 			return false;
 		}
 		game.setPower(amount);	
 		Bomberman.sendMessage(sender, "Power set");
 		return true;
+	}
+	
+	@Override
+	public boolean firstIsGame(List<String> args) {
+		return args.size() == 2;
 	}
 
 	@Override
