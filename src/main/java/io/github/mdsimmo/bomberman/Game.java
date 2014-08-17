@@ -52,7 +52,6 @@ public class Game implements Listener {
 		}
 
 		public void run() {
-			System.out.print("GAME STARTER RUNNING");
 			// Let online players know about the fun :)
 			if (count == autostartDelay) {
 				Bomberman.sendMessage(plugin.getServer().getOnlinePlayers(),
@@ -405,11 +404,8 @@ public class Game implements Listener {
 	public void initialise(PlayerRep rep) {
 		rep.player.getInventory().clear();
 		Stats stat = Stats.get(rep);
-		plugin.getLogger().info("stats: " + stat);
 		for (ItemStack stack : initialitems) {
 			ItemStack s = stack.clone();
-			plugin.getLogger().info("stack: " + stat);
-			plugin.getLogger().info("handicap: " + stat.hadicapLevel);
 			s.setAmount(s.getAmount() - stat.hadicapLevel);
 			rep.player.getInventory().addItem(s);
 		}
