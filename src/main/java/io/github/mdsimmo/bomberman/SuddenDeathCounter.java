@@ -41,12 +41,12 @@ public class SuddenDeathCounter implements Runnable {
 
 		if (suddenDeath == 30)
 			Bomberman.sendMessage(game.players,
-					"Sudden death in %d seconds!", timeout);
+					"Sudden death in %d seconds!", suddenDeath);
 
 		if (suddenDeath <= 10) {
 			if (suddenDeath == 10)
 				Bomberman.sendMessage(game.observers,
-						"Sudden death in %d seconds!", timeout);
+						"Sudden death in %d seconds!", suddenDeath);
 			else if (suddenDeath > 0) {
 				Bomberman.sendMessage(game.players, "%d", suddenDeath);
 			} else {
