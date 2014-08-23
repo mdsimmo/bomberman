@@ -327,17 +327,23 @@ public class PlayerRep implements Listener {
 		}
 	}
 	
-	public boolean commitChanges(boolean save) {
+	public boolean saveChanges() {
 		if (editGame == null)
 			return false;
-		if (save) {
-			for (Block b : changes.keySet()) {
-				Vector v = b.getLocation().subtract(editGame.loc).toVector();
-				if (editGame.containsLocation(b.getLocation()))
-					editGame.board.addBlock(new BlockRep(b), v);
-			}
-			BoardGenerator.saveBoard(editGame.board);
-		} else { 
+		for (Block b : changes.keySet()) {
+			Vector v = b.getLocation().subtract(editGame.loc).toVector();
+			if (editGame.containsLocation(b.getLocation()))
+				editGame.board.addBlock(new BlockRep(b), v);
+		}
+		BoardGenerator.saveBoard(editGame.board);
+		editGame = null;
+		return true;
+	}
+	
+	public boolean discardChanges(boolean remove) {
+		if (editGame == null)
+			return false;
+		if (remove) { 
 			for (Map.Entry<Block, BlockRep> entry : changes.entrySet()) {
 				Block current = entry.getKey();
 				BlockRep previous = entry.getValue();

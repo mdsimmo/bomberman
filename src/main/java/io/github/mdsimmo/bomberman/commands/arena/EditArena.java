@@ -32,6 +32,7 @@ public class EditArena extends Command {
 				List<String> list = new ArrayList<>();
 				list.add("save");
 				list.add("discard");
+				list.add("ignore");
 				return list;
 			} else {
 				return Game.allGames();
@@ -52,24 +53,35 @@ public class EditArena extends Command {
 		Player player = (Player)sender;
 		PlayerRep rep = PlayerRep.getPlayerRep(player);
 		if (args.size() == 0) {
-			if (!rep.startEditMode()) {
-				Bomberman.sendMessage(sender, "Couldn't start edit mode");
+			if (rep.startEditMode()) {
+				Bomberman.sendMessage(sender, "Edit mode started in game %g", rep.getEditting());
 			} else {
-				Bomberman.sendMessage(sender, "Edit mode started");
+				if (rep.isEditting())
+					Bomberman.sendMessage(sender, "You're already editting %g", rep.getEditting());
+				else
+					Bomberman.sendMessage(sender, "Couldn't start edit mode in game %g", rep.getEditting());
 			}
 		} else {
 			switch (args.get(0).toLowerCase()) {
 			case "save":
-				if (rep.commitChanges(true))
+				if (rep.saveChanges())
 					Bomberman.sendMessage(sender, "Changes saved");
 				else
-					Bomberman.sendMessage(sender, "Couldn't save changes");
+					Bomberman.sendMessage(sender, "Edit mode needs to be started first");
 				break;
 			case "discard":
-				if (rep.commitChanges(false))
+				if (rep.discardChanges(true))
 					Bomberman.sendMessage(sender, "Changes removed");
-				else
-					Bomberman.sendMessage(sender, "Changes couldn't be removed");
+				else {
+					Bomberman.sendMessage(sender, "Edit mode needs to be started first");
+				}
+				break;
+			case "ignore":
+				if (rep.discardChanges(true))
+					Bomberman.sendMessage(sender, "Edit mode quit");
+				else {
+					Bomberman.sendMessage(sender, "Edit mode needs to be started first");
+				}
 				break;
 			default:
 				Game game = Game.findGame(args.get(0));
@@ -94,7 +106,9 @@ public class EditArena extends Command {
 	public String usage(CommandSender sender) {
 		return "\n"
 				+ "/" + path() + "- start edit mode\n"
-				+ "/" + path() + "[save/discard] - commit changes";
+				+ "/" + path() + "save - save changes"
+				+ "/" + path() + "discard - remove changes"
+				+ "/" + path() + "ignore - keep changes but don't save them";
 	}
 
 	@Override
