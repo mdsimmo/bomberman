@@ -34,9 +34,9 @@ public class Start extends GameCommand {
 			Bomberman.sendMessage(sender, "Game %g already started", game);
 		else {
 			if (game.startGame())
-				Bomberman.sendMessage(sender, "Game %g starting", game);
+				Bomberman.sendMessage(sender, "Game %g starting...", game);
 			else
-				Bomberman.sendMessage(sender, "There are not enough players");
+				Bomberman.sendMessage(sender, "There needs to be %d players", game.getMinPlayers());
 		}
 		return true;
 	}

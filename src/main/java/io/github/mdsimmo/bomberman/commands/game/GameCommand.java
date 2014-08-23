@@ -1,5 +1,6 @@
 package io.github.mdsimmo.bomberman.commands.game;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.bukkit.command.CommandSender;
@@ -17,8 +18,15 @@ public abstract class GameCommand extends Command {
 	}
 
 	public final List<String> options(CommandSender sender, List<String> args) {
-		if (args.size() == 1) {
-			return Game.allGames();
+		if (args.size() <= 1) {
+			List<String> list = new ArrayList<>(Game.allGames());
+			if (sender instanceof Player
+					&& PlayerRep.getPlayerRep((Player) sender).getGameActive() != null) {
+				List<String> options = shortOptions(sender, args);
+				if (options != null)
+					list.addAll(options);
+			}
+			return list;
 		} else {
 			args.remove(0);
 			return shortOptions(sender, args);

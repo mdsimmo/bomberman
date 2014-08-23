@@ -48,12 +48,13 @@ public class Fare extends GameCommand {
 			try {
 				Material m = Material.getMaterial(args.get(0).toUpperCase());
 				if (m == null) {
-					Bomberman.sendMessage(sender, "Unknown material");
+					Bomberman.sendMessage(sender, "Unknown material %i", args.get(0));
+					displayHelp(sender, args);
 					return true;
 				}
 				int amount = Integer.parseInt(args.get(1));
 				game.setFare(new ItemStack(m, amount));
-				Bomberman.sendMessage(sender, "Fare set");
+				Bomberman.sendMessage(sender, "Fare set to %i", game.getFare());
 				return true;
 			} catch (Exception e) {
 				return false;

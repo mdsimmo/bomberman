@@ -102,33 +102,31 @@ public class PlayerRep implements Listener {
 	 */
 	public boolean joinGame() {
 		if (game == null) {
-			Bomberman.sendMessage(this, "You must specify a game");
+			Bomberman.sendMessage(this, "You must specify a game to join");
 			return false;
 		}
 		if (gamePlaying != null) {
-			Bomberman.sendMessage(this, "You cannot be part of two games");
+			Bomberman.sendMessage(this, "You're already part of %g", gamePlaying);
 			return false;
+		}
+		this.spawn = player.getLocation();
+		Vector gameSpawn = game.findSpareSpawn();
+		if (gameSpawn == null) {
+			Bomberman.sendMessage(this, "Game %g is full.", game);
+			return false;
+		}
+		if (game.getFare() != null) {
+			if (player.getInventory().containsAtLeast(game.getFare(), game.getFare().getAmount())
+					|| player.getGameMode() == GameMode.CREATIVE)
+				player.getInventory().removeItem(game.getFare());
+			else {
+				Bomberman.sendMessage(this, "You need %i to join", game.getFare());
+				return false;
+			}
 		}
 		gamePlaying = game;
-		
-		this.spawn = player.getLocation();
-		Vector gameSpawn = gamePlaying.findSpareSpawn();
-		if (gameSpawn == null) {
-			Bomberman.sendMessage(this, "Game " + gamePlaying.name + " is full.");
-			return false;
-		} else {
-			if (gamePlaying.getFare() != null) {
-				if (player.getInventory().contains(gamePlaying.getFare().getType(), gamePlaying.getFare().getAmount())
-						|| player.getGameMode() == GameMode.CREATIVE)
-					player.getInventory().removeItem(gamePlaying.getFare());
-				else {
-					Bomberman.sendMessage(this, "You need at least " + gamePlaying.getFare().getAmount() + " " + gamePlaying.getFare().getType().toString().toLowerCase());
-					return false;
-				}
-			}
-			Bomberman.sendMessage(gamePlaying.observers, player.getName() + " joined game " + gamePlaying.name + ".");
-			player.teleport(gamePlaying.loc.clone().add(gameSpawn));
-		}
+		Bomberman.sendMessage(gamePlaying.observers, "%p joined game %g", this, gamePlaying);
+		player.teleport(gamePlaying.loc.clone().add(gameSpawn));
 		player.setGameMode(GameMode.SURVIVAL);
 		player.setHealth(gamePlaying.getLives());
 		player.setMaxHealth(gamePlaying.getLives());

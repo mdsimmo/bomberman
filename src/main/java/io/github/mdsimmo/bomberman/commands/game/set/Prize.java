@@ -58,8 +58,8 @@ public class Prize extends GameCommand {
 					return true;
 				}
 				int amount = Integer.parseInt(args.get(1));
-				game.setFare(new ItemStack(m, amount));
-				Bomberman.sendMessage(sender, "Prize set");
+				game.setPrize(new ItemStack(m, amount));
+				Bomberman.sendMessage(sender, "Prize set to %i", game.getPrize());
 			} catch (Exception e) {
 				return false;
 			}

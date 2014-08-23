@@ -20,6 +20,27 @@ public class Reset extends GameCommand {
 	public String name() {
 		return "reset";
 	}
+	
+	@Override
+	public List<String> shortOptions(CommandSender sender, List<String> args) {
+		return null;
+	}
+
+	@Override
+	public boolean runShort(CommandSender sender, List<String> args, Game game) {
+		if (args.size() != 0)
+			return false;
+		Bomberman.sendMessage(game.players, "Game %g resetting", game);
+		game.stop();
+		BoardGenerator.switchBoard(game.board, game.board, game.loc);
+		Bomberman.sendMessage(sender, "Game reset", game);
+		return true;
+	}
+
+	@Override
+	public boolean firstIsGame(List<String> args) {
+		return args.size() == 1;
+	}
 
 	@Override
 	public String description() {
@@ -35,26 +56,4 @@ public class Reset extends GameCommand {
 	public Permission permission() {
 		return Permission.GAME_OPERATE;
 	}
-
-	@Override
-	public List<String> shortOptions(CommandSender sender, List<String> args) {
-		return null;
-	}
-
-	@Override
-	public boolean runShort(CommandSender sender, List<String> args, Game game) {
-		if (args.size() != 0)
-			return false;
-		Bomberman.sendMessage(game.players, "Game resetting");
-		game.stop();
-		BoardGenerator.switchBoard(game.board, game.board, game.loc);
-		Bomberman.sendMessage(sender, "Game %g reset", game);
-		return true;
-	}
-
-	@Override
-	public boolean firstIsGame(List<String> args) {
-		return args.size() == 1;
-	}
-
 }

@@ -53,8 +53,7 @@ public class Game implements Listener {
 			// Let online players know about the fun :)
 			if (count == autostartDelay) {
 				Bomberman.sendMessage(plugin.getServer().getOnlinePlayers(),
-						"Game " + ChatColor.YELLOW + name + ChatColor.WHITE
-								+ " starting in " + count + " seconds!");
+						"Game %g is starting soon. Type %c to play!", Game.this, "/bm game join" + name);
 			}
 
 			if (count > 0) {
@@ -67,8 +66,7 @@ public class Game implements Listener {
 				// notify every second last 3 seconds
 				if (count % 15 == 0 || (count < 15 && count % 5 == 0)
 						|| count <= 3)
-					Bomberman.sendMessage(observers, "Game starting in "
-							+ count + "...");
+					Bomberman.sendMessage(observers, "Game starting in %d...", count);
 			} else {
 				Bomberman.sendMessage(observers, ChatColor.YELLOW
 						+ "Game started!");
@@ -197,8 +195,7 @@ public class Game implements Listener {
 		addWinner(rep);
 		players.remove(rep);
 		if (!checkFinish()) {
-			Bomberman.sendMessage(observers, ChatColor.YELLOW + rep.getName()
-					+ ChatColor.WHITE + " is out.");
+			Bomberman.sendMessage(observers, "%p is out!", rep.getName());
 		}
 		if (players.size() <= minPlayers && getCountdownTimer() != null) {
 			getCountdownTimer().destroy();
@@ -208,13 +205,6 @@ public class Game implements Listener {
 								"Not enough players remaining. The countdown timer has been stopped.");
 			}
 		}
-	}
-
-	public void announceQueue() {
-		Bomberman.sendMessage(plugin.getServer().getOnlinePlayers(), "Game "
-				+ ChatColor.YELLOW + name + ChatColor.WHITE
-				+ " is starting soon. Type " + ChatColor.AQUA + "/join-game "
-				+ name + ChatColor.WHITE + " to play!");
 	}
 
 	/**
@@ -598,10 +588,8 @@ public class Game implements Listener {
 					countdownTimer.destroy();
 				countdownTimer = new GameStarter(delay);
 			}
-			if (countdownTimer == null) {
+			if (countdownTimer == null)
 				countdownTimer = new GameStarter(delay);
-				announceQueue();
-			}
 			return true;
 		} else {
 			return false;

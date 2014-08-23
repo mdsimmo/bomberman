@@ -1,6 +1,7 @@
 package io.github.mdsimmo.bomberman;
 
 import io.github.mdsimmo.bomberman.commands.Command;
+import io.github.mdsimmo.bomberman.commands.Command.Permission;
 import io.github.mdsimmo.bomberman.commands.CommandHandler;
 import io.github.mdsimmo.bomberman.save.BoardSaver;
 
@@ -11,6 +12,7 @@ import java.util.Map;
 import org.bukkit.ChatColor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.java.JavaPlugin;
 
 public class Bomberman extends JavaPlugin {
@@ -19,10 +21,16 @@ public class Bomberman extends JavaPlugin {
 	
 	/**
 	 * Puts the given objects into the string and colors them. <br>
-	 * use '%' to specify where to put the objects in the string.
-	 * use '%b' for a Board, 'c' for a command (as a String or a Command), 'p' for a Player or PlayerRep and 'g' for a Game. 
-	 * @param s the string to color
-	 * @param objects the objects 
+	 * To specify where to put the objects in the string, use '%' followed by:<br>
+	 * <b>b:</b> a Board<br>
+	 * <b>c:</b> a command<br>
+	 * <b>p:</b> for a Player or PlayerRep<br>
+	 * <b>g:</b> a Game<br>
+	 * <b>i:</b> an ItemStack<br>
+	 * <b>other:</b> passed to String.format()<br>
+	 * All values can be passed as a string.  
+	 * @param s the string to format
+	 * @param objects the objects
 	 * @return the formated string
 	 */
 	public static String format(String s, Object ... objects) {
@@ -38,8 +46,9 @@ public class Bomberman extends JavaPlugin {
 					break;
 				}
 				String part;
-				Object o = objects[objectIndex]; 
-				switch (s.charAt(i+1)) {
+				Object o = objects[objectIndex];
+				char formater = s.charAt(i+1);
+				switch (formater) {
 				case 'p':
 					if (o instanceof Player)
 						part = PlayerRep.getPlayerRep((Player)o).getName();
@@ -71,8 +80,17 @@ public class Bomberman extends JavaPlugin {
 						part = (String)o;
 					formated += ChatColor.AQUA + part + ChatColor.RESET;
 					break;
+				case 'i':
+					if (o instanceof ItemStack) {
+						ItemStack stack = (ItemStack)o;
+						part = stack.getAmount() + " " + stack.getType().toString().toLowerCase();
+					} else
+						part = (String)o;
+					formated += ChatColor.GREEN + part + ChatColor.RESET;
+					break;
 				default:
-					throw new IllegalArgumentException("Can only use 'c', 'b', 'g' or 'p' after '%'");
+					formated += ChatColor.YELLOW + String.format("%" + formater, o) + ChatColor.RESET;
+					break;
 				}
 				i++;
 				objectIndex++;
@@ -103,19 +121,24 @@ public class Bomberman extends JavaPlugin {
     }
     
     public static void sendMessage(CommandSender sender, String message, Object ... objs) {
-        sender.sendMessage(format(ChatColor.GREEN + "[BomberMan] " + ChatColor.RESET + message, objs));
+        message(sender, ChatColor.GREEN + "[BomberMan] " + ChatColor.RESET + message, objs);
     }
     
     public static void sendMessage(CommandSender sender, Map<String, String> points, Object ... objs) {
     	for (Map.Entry<String, String> point : points.entrySet()) {
-    		sender.sendMessage(format("   " + ChatColor.GOLD + point.getKey() + ": " + ChatColor.RESET + point.getValue(), objs));
+    		message(sender, "   " + ChatColor.GOLD + point.getKey() + ": " + ChatColor.RESET + point.getValue(), objs);
     	}
     }
     
     public static void sendMessage(CommandSender sender, List<String> list, Object ... objs) {
     	for (String line : list) {
-    		sender.sendMessage(format("   " + ChatColor.RESET + line, objs));
+    		message(sender, "   " + line, objs);
     	}
+    }
+    
+    private static void message(CommandSender sender, String message, Object ... objs) {
+    	if (Permission.OBSERVER.isAllowedBy(sender))
+    		sender.sendMessage(format(message, objs));
     }
     
 	public static String heading (String text) {

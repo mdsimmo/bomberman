@@ -40,10 +40,10 @@ public class Autostart extends GameCommand {
 		
 		if (args.get(0).equalsIgnoreCase("false")) {
 			game.setAutostart(false);
-			Bomberman.sendMessage(sender, "Autostart disabled");
+			Bomberman.sendMessage(sender, "Autostart disabled in game %g", game);
 		} else if (args.get(0).equalsIgnoreCase("true")) {
 			game.setAutostart(true);
-			Bomberman.sendMessage(sender, "Autostart enabled");
+			Bomberman.sendMessage(sender, "Autostart enabled in game %g", game);
 		} else {
 			return false;
 		}
