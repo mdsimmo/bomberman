@@ -146,7 +146,7 @@ public class Bomb implements Runnable {
 			public void run() {
 				for (PlayerRep rep : new ArrayList<PlayerRep>(game.players)) {
 					if (touching(rep.player)) {
-						game.damagePlayer(rep, cause);
+						rep.damage(cause);
 					}
 				}
 				if (--duration <= 0) {

@@ -375,10 +375,10 @@ public class Game implements Listener {
 	 */
 	public void initialise(PlayerRep rep) {
 		rep.player.getInventory().clear();
-		Stats stat = Stats.get(rep);
+		Stats stat = getStats(rep);
 		for (ItemStack stack : initialitems) {
 			ItemStack s = stack.clone();
-			s.setAmount(s.getAmount() - stat.hadicapLevel);
+			s.setAmount(Math.max(s.getAmount() - stat.hadicapLevel, 1));
 			rep.player.getInventory().addItem(s);
 		}
 		if (stat.hadicapLevel >= 1)
@@ -440,7 +440,7 @@ public class Game implements Listener {
 				place = i + "th";
 			}
 			display += " " + place + ": " + rep.player.getName() + " ("
-					+ Stats.get(rep).kills + " kills)\n";
+					+ getStats(rep).kills + " kills)\n";
 		}
 		return display;
 	}
@@ -608,70 +608,43 @@ public class Game implements Listener {
 		for (PlayerRep rep : new ArrayList<PlayerRep>(players))
 			rep.kill();
 		winners.clear();
-	}
-
-	public void damagePlayer(PlayerRep player, PlayerRep attacker) {
-		if (!player.damage())
-			return;
-
-		Stats playerStats = Stats.get(player);
-		Stats attackerStats = Stats.get(attacker);
-
-		attackerStats.hitGiven++;
-		playerStats.hitTaken++;
-
-		if (player.isPlaying()) {
-			if (player == attacker) {
-				Bomberman.sendMessage(player, "You hit yourself!");
-			} else {
-				Bomberman.sendMessage(player,
-						"You were hit by " + attacker.getName());
-				Bomberman.sendMessage(attacker, "You hit " + player.getName());
-			}
-		} else {
-			playerStats.deaths++;
-			attackerStats.kills++;
-			if (player == attacker) {
-				Bomberman.sendMessage(player, ChatColor.RED
-						+ "You killed yourself!");
-				playerStats.suicides++;
-			} else {
-				Bomberman.sendMessage(player, ChatColor.RED + "Killed by "
-						+ attacker.getName());
-				Bomberman.sendMessage(attacker, ChatColor.GREEN + "You killed "
-						+ player.getName());
-			}
+		for (Stats stat : stats.values()) {
+			stat.reset();
 		}
 	}
 
-	@SuppressWarnings("unused")
-	private static class Stats {
+	private HashMap<PlayerRep, Stats> stats = new HashMap<>();
 
-		private static HashMap<PlayerRep, Stats> stats = new HashMap<>();
-
-		public static Stats get(PlayerRep rep) {
-			Stats stat = stats.get(rep);
-			if (stat == null)
-				return new Stats(rep);
-			else
-				return stat;
-		}
+	public Stats getStats(PlayerRep rep) {
+		Stats stat = stats.get(rep);
+		if (stat == null)
+			return new Stats(rep);
+		else
+			return stat;
+	}
+	
+	public class Stats {
 
 		public final PlayerRep rep;
 		public int deaths = 0;
 		public int kills = 0;
-		public int hitTaken = 0;
-		public int hitGiven = 0;
+		public int hitsTaken = 0;
+		public int hitsGiven = 0;
 		public int suicides = 0;
 		public int hadicapLevel = 0;
 
 		public Stats(PlayerRep rep) {
 			this.rep = rep;
+			stats.put(rep, this);
+		}
+		
+		public void reset() {
+			deaths = kills = hitsGiven = hitsTaken = suicides = 0;
 		}
 	}
 
 	public void setHandicap(PlayerRep rep, int handicap) {
-		Stats.get(rep).hadicapLevel = handicap;
+		getStats(rep).hadicapLevel = handicap;
 	}
 
 	public void saveGame() {

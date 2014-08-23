@@ -61,7 +61,9 @@ public class Handicap extends GameCommand {
 			Bomberman.sendMessage(sender, "Handicap removed");
 		else
 			Bomberman.sendMessage(sender, "Advantage added");
-		game.initialise(rep);
+		
+		if (rep.isPlaying() && !rep.getGamePlaying().isPlaying)
+			game.initialise(rep);
 		return true;
 	}
 	

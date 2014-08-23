@@ -1,11 +1,14 @@
 package io.github.mdsimmo.bomberman;
 
+import io.github.mdsimmo.bomberman.Game.Stats;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.bukkit.ChatColor;
 import org.bukkit.GameMode;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -135,6 +138,7 @@ public class PlayerRep implements Listener {
 		player.setExhaustion(0);
 		spawnHunger = player.getFoodLevel();
 		player.setFoodLevel(10000); // just a big number
+		removeEffects();
 		spawnInventory = player.getInventory().getContents();
 		gamePlaying.initialise(this); 
 		gamePlaying.addPlayer(this);
@@ -155,14 +159,7 @@ public class PlayerRep implements Listener {
 		player.setHealthScale(20);
 		player.setFoodLevel(spawnHunger);
 		player.teleport(spawn);
-		if (plugin.isEnabled())
-			plugin.getServer().getScheduler()
-					.scheduleSyncDelayedTask(plugin, new Runnable() {
-						@Override
-						public void run() {
-							player.setFireTicks(0);
-						}
-					});	
+		removeEffects();	
 		gamePlaying.alertRemoval(this);
 		gamePlaying = null;
 		return true;
@@ -234,17 +231,47 @@ public class PlayerRep implements Listener {
 		return strength;
 	}
 
-	public boolean damage() {
-		if (immunity <= 0) {
-			if (player.getHealth() > 1)
-				player.damage(1);
-			else
-				kill();
-			new Immunity();
-			return true;
+	public void damage(PlayerRep attacker) {
+		boolean dead = false;
+		if (immunity > 0)
+			return;
+		if (player.getHealth() > 1)
+			player.damage(1);
+		else
+			dead = true;
+		new Immunity();
+
+		Stats playerStats = gamePlaying.getStats(this);
+		Stats attackerStats = gamePlaying.getStats(attacker);
+
+		attackerStats.hitsGiven++;
+		playerStats.hitsTaken++;
+
+		if (!dead) {
+			if (attacker == this) {
+				Bomberman.sendMessage(player, "You hit yourself!");
+			} else {
+				Bomberman.sendMessage(player,
+						"You were hit by " + attacker.getName());
+				Bomberman.sendMessage(attacker, "You hit " + player.getName());
+			}
 		} else {
-			return false;
+			playerStats.deaths++;
+			attackerStats.kills++;
+			if (attacker == this) {
+				Bomberman.sendMessage(player, ChatColor.RED
+						+ "You killed yourself!");
+				playerStats.suicides++;
+			} else {
+				Bomberman.sendMessage(player, ChatColor.RED + "Killed by "
+						+ attacker.getName());
+				Bomberman.sendMessage(attacker, ChatColor.GREEN + "You killed "
+						+ player.getName());
+			}
 		}
+		
+		if (dead)
+			kill();
 	}
 
 	private class Immunity implements Runnable {
@@ -371,5 +398,19 @@ public class PlayerRep implements Listener {
 	
 	public Game getEditting() {
 		return editGame;
+	}
+	private void removeEffects() {
+		for (PotionEffect effect : player.getActivePotionEffects()) {
+		    plugin.getLogger().info(effect.getType().toString());
+			player.removePotionEffect(effect.getType());
+		}
+		if (plugin.isEnabled())
+			plugin.getServer().getScheduler()
+					.scheduleSyncDelayedTask(plugin, new Runnable() {
+						@Override
+						public void run() {
+							player.setFireTicks(0);
+						}
+					});
 	}
 }
