@@ -78,7 +78,7 @@ public class PlayerRep implements Listener {
 	 */
 	public void setGameActive(Game game) {
 		this.game = game;
-		if (!game.observers.contains(this))
+		if (game != null && !game.observers.contains(this))
 			game.observers.add(this);
 	}
 	

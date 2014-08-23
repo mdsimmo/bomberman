@@ -283,9 +283,12 @@ public class Game implements Listener {
 		f.delete();
 		f = new File(plugin.getDataFolder() + "/" + name + ".old.board");
 		f.delete();
-		for (PlayerRep rep : PlayerRep.allPlayers())
+		for (PlayerRep rep : PlayerRep.allPlayers()) {
 			if (rep.getGameActive() == this)
 				rep.setGameActive(null);
+			if (rep.getEditting() == this)
+				rep.discardChanges(false);
+		}
 	}
 
 	public void drop(Location l, Material type) {
