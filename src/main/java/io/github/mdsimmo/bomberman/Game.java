@@ -53,7 +53,7 @@ public class Game implements Listener {
 			// Let online players know about the fun :)
 			if (count == autostartDelay) {
 				Bomberman.sendMessage(plugin.getServer().getOnlinePlayers(),
-						"Game %g is starting soon. Type %c to play!", Game.this, "/bm game join" + name);
+						"Game %g is starting soon. Type %c to play!", Game.this, "/bm game join " + name);
 			}
 
 			if (count > 0) {

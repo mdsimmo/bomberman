@@ -131,6 +131,7 @@ public class PlayerRep implements Listener {
 		player.setHealth(gamePlaying.getLives());
 		player.setMaxHealth(gamePlaying.getLives());
 		player.setHealthScale(gamePlaying.getLives() * 2);
+		player.setExhaustion(0);
 		spawnInventory = player.getInventory().getContents();
 		gamePlaying.initialise(this); 
 		gamePlaying.addPlayer(this);
