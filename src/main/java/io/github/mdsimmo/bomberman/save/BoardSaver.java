@@ -67,6 +67,7 @@ public class BoardSaver extends Save{
 	@SuppressWarnings("unchecked")
 	public static Board loadBoard(File file) throws IOException {
 		BoardSaver save = new BoardSaver(file);
+		save.convert(save.getVersion("version"));
 		int x = save.getInt("size.x");
 		int y = save.getInt("size.y");
 		int z = save.getInt("size.z");
@@ -114,9 +115,9 @@ public class BoardSaver extends Save{
 		case FUTURE:
 			plugin.getLogger().info("Unkowen verion " + version + " in " + file.getName());
 			break;
-		case V0_0_3_SNAPSHOT:
 		case V0_0_3:
 			break;
+		case PAST:
 		default:
 			break;
 		}

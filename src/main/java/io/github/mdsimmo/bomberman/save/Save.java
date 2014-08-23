@@ -62,6 +62,7 @@ public abstract class Save extends YamlConfiguration {
 	}
 	
 	public void save() {
+		set("version", plugin.getDescription().getVersion());
 		try {
 			super.save(file);
 		} catch (IOException e) {
