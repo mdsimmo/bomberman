@@ -153,7 +153,7 @@ public class PlayerRep implements Listener {
 		player.setMaxHealth(20);
 		player.setHealth(20);
 		player.setHealthScale(20);
-		player.setFlySpeed(spawnHunger);
+		player.setFoodLevel(spawnHunger);
 		player.teleport(spawn);
 		if (plugin.isEnabled())
 			plugin.getServer().getScheduler()
