@@ -52,6 +52,7 @@ public class PlayerRep implements Listener {
 	public final Player player;
 	private ItemStack[] spawnInventory;
 	private Location spawn;
+	private int spawnHunger;
 	private Game game;
 	private Game gamePlaying = null;
 	private int immunity = 0;
@@ -132,6 +133,8 @@ public class PlayerRep implements Listener {
 		player.setMaxHealth(gamePlaying.getLives());
 		player.setHealthScale(gamePlaying.getLives() * 2);
 		player.setExhaustion(0);
+		spawnHunger = player.getFoodLevel();
+		player.setFoodLevel(10000); // just a big number
 		spawnInventory = player.getInventory().getContents();
 		gamePlaying.initialise(this); 
 		gamePlaying.addPlayer(this);
@@ -150,6 +153,7 @@ public class PlayerRep implements Listener {
 		player.setMaxHealth(20);
 		player.setHealth(20);
 		player.setHealthScale(20);
+		player.setFlySpeed(spawnHunger);
 		player.teleport(spawn);
 		if (plugin.isEnabled())
 			plugin.getServer().getScheduler()
