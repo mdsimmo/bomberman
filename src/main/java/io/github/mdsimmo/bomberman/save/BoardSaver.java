@@ -131,11 +131,12 @@ public class BoardSaver extends Save{
 			}
 		});
 		for (File file : files) {
-			plugin.getLogger().info("converting " + file.getAbsolutePath());
+			plugin.getLogger().info("converting " + file.getName());
 			try {
 				Board board = loadOldArena(file);
 				BoardGenerator.saveBoard(board);
-				plugin.getLogger().info("deleted + " + file.delete());
+				if (!file.delete())
+					plugin.getLogger().info("Couldn't delete " + file.getName() + ". Please delete it manually");
 			} catch (Exception e) {
 				e.printStackTrace();
 				plugin.getLogger().info("Couldn't convert " + file.getName());
