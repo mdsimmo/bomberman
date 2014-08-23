@@ -1,5 +1,7 @@
 package io.github.mdsimmo.bomberman;
 
+import io.github.mdsimmo.bomberman.save.BoardSaver;
+
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.FilenameFilter;
@@ -23,33 +25,32 @@ public class BoardGenerator {
 	private static Plugin plugin = Bomberman.instance;
 	
 	/**
-	 * Loads the default board. If the needed save file is not made, it will create it.
+	 * Copies all the default boards into the config folder
 	 */
-	public static Board loadDefault() {
-		String arena = Config.DEFAULT_ARENA.getValue();
-		if (loadBoard(arena) == null) {
+	public static void copyDefaults() {
+		String[] defaults = {"default"};
+		for (String name : defaults) {
+			File file = toFile(name);
+			if (file.exists()) {
+				// already copied
+				continue;
+			}
 			try {
-				if (!Config.DEFAULT_ARENA.getValue().equals("default"))
-					plugin.getLogger().info("Couldn't find \"" + arena + ".arena\". Using \"default.arena\"");
-				InputStream inputStream = plugin.getResource("default.arena");
-				File f = new File(plugin.getDataFolder() + "/default.arena");
-	 			// write the inputStream to a FileOutputStream
-				FileOutputStream fos = new FileOutputStream(f);
+				InputStream inputStream = plugin.getResource(name + ".arena");
+				FileOutputStream fos = new FileOutputStream(file);
 				int read = 0;
 				byte[] bytes = new byte[1024];
 			
 				while ((read = inputStream.read(bytes)) != -1)
 					fos.write(bytes, 0, read);
-
+	
 				fos.flush();
 				fos.close();
 				inputStream.close();
-				return loadBoard("default");
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
 		}
-		return loadBoard(arena);
 	}
 	
 	/**
@@ -57,16 +58,9 @@ public class BoardGenerator {
 	 * @return false if the board never existed
 	 */
 	public static boolean deleteArena(String name) {
-		Board board = loadBoard(name);
-		plugin.getLogger().info("1");
-		if (board == null)
-			return false;
-		plugin.getLogger().info("2");
-		loadedBoards.remove(board);
-		File f = new File(plugin.getDataFolder() + "/" + name + ".arena");
-		plugin.getLogger().info(f.toString());
-		plugin.getLogger().info("+ " + f.delete());
-		return true;
+		if (loadedBoards.containsKey(name))
+			loadedBoards.remove(name);
+		return toFile(name).delete();
 	}
 	
 	/**
@@ -96,10 +90,14 @@ public class BoardGenerator {
 		try {
 			if (loadedBoards.containsKey(name))
 				return loadedBoards.get(name);
-			return Board.loadBoard(name);
+			return BoardSaver.loadBoard(toFile(name));
 		} catch (IOException e) {
 			return null;
 		}
+	}
+	
+	public static File toFile(String name) {
+		return new File(plugin.getDataFolder(), name + ".arena");
 	}
 	
 	public static List<String> allBoards() {
@@ -118,12 +116,8 @@ public class BoardGenerator {
 	}
 	
 	public static void saveBoard(Board board) {
-		try {
-			loadedBoards.put(board.name, board);
-			board.saveBoard();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
+		loadedBoards.put(board.name, board);
+		new BoardSaver(board).save();
 	}
 	
 	private static Material[] bannedArray = {

@@ -23,7 +23,7 @@ public enum Config {
 	MIN_PLAYERS ( "minplayers", 2),
 	AUTOSTART ( "autostart.enabled", false ),
 	AUTOSTART_DELAY ( "autostart.delay", 30 ),
-	DEFAULT_ARENA ("defaultarena", "default" ),
+	DEFAULT_ARENA ("arena", "default" ),
 	DROPS_ITEMS ("drops.items", Arrays.asList(
 			new ItemStack(Material.TNT, 3),
 			new ItemStack(Material.BLAZE_POWDER, 2),
@@ -70,6 +70,11 @@ public enum Config {
 	}
 	
 	static {
+		if (c.contains("defaultstyle")) {
+			String arena = c.getString("defaultstyle");
+			c.set(DEFAULT_ARENA.path, arena);
+			c.set("defaultstyle", null);
+		}
 		c.options().copyDefaults(true);
 		plugin.saveConfig();
 	}

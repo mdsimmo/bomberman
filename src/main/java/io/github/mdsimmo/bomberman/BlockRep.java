@@ -1,6 +1,6 @@
 package io.github.mdsimmo.bomberman;
 
-import io.github.mdsimmo.bomberman.Board.CompressedSection;
+import io.github.mdsimmo.bomberman.save.Save.CompressedSection;
 
 import java.util.List;
 
@@ -68,7 +68,7 @@ public class BlockRep {
 		if (material == Material.CHEST)
 			sub.addParts("THIS IS A CHEST");
 		
-		return sub.getValue();
+		return sub.toString();
 	}
 	
 	/**

@@ -1,10 +1,10 @@
 package io.github.mdsimmo.bomberman;
 
 import io.github.mdsimmo.bomberman.Bomb.DeathBlock;
+import io.github.mdsimmo.bomberman.save.GameSaver;
 
 import java.io.File;
 import java.io.FilenameFilter;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -13,9 +13,7 @@ import java.util.Map;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
-import org.bukkit.World;
 import org.bukkit.block.Block;
-import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.event.HandlerList;
 import org.bukkit.event.Listener;
@@ -104,28 +102,6 @@ public class Game implements Listener {
 		return gameRegistry.get(name.toLowerCase());
 	}
 
-	public static File getSaveFile(String name) {
-		return new File(plugin.getDataFolder(), name.toLowerCase() + ".game");
-	}
-
-	public static void loadGame(String name) {
-		YamlConfiguration save = YamlConfiguration
-				.loadConfiguration(getSaveFile(name));
-		name = save.getString("name");
-		int x = save.getInt("location.x");
-		int y = save.getInt("location.y");
-		int z = save.getInt("location.z");
-		World w = plugin.getServer().getWorld(save.getString("location.world"));
-		Game game = new Game(name, new Location(w, x, y, z));
-		game.save = save;
-		game.board = BoardGenerator.loadBoard(save.getString("arena.current"));
-		game.oldBoard = BoardGenerator.loadBoard(save.getString("arena.old"));
-
-		game.initVars();
-
-		register(game);
-	}
-
 	public static void loadGames() {
 		File data = plugin.getDataFolder();
 		if (!data.exists())
@@ -138,7 +114,7 @@ public class Game implements Listener {
 			}
 		});
 		for (File f : files) {
-			loadGame(f.getName().split(".game")[0]);
+			GameSaver.loadGame(f);
 		}
 	}
 
@@ -181,7 +157,7 @@ public class Game implements Listener {
 	private boolean protectDamage;
 	private boolean protectPVP;
 	private GameProtection protector;
-	private YamlConfiguration save = new YamlConfiguration();
+	private GameSaver save;
 	private int suddenDeath;
 	private boolean suddenDeathStarted = false;
 	private int timeout;
@@ -421,8 +397,8 @@ public class Game implements Listener {
 	}
 
 	public void initVars() {
-		YamlConfiguration config = YamlConfiguration
-				.loadConfiguration(getSaveFile(name));
+		GameSaver config = new GameSaver(this);
+		this.save = config;
 		prize = Config.PRIZE.getValue(config);
 		pot = Config.POT.getValue(config);
 		fare = Config.FARE.getValue(config);
@@ -448,24 +424,6 @@ public class Game implements Listener {
 
 	public boolean isSuddenDeath() {
 		return suddenDeathStarted;
-	}
-
-	public void saveGame() {
-		try {
-			save.set("name", name);
-			save.set("location.world", loc.getWorld().getName());
-			save.set("location.x", loc.getBlockX());
-			save.set("location.y", loc.getBlockY());
-			save.set("location.z", loc.getBlockZ());
-			save.set("arena.current", board.name);
-			save.set("arena.old", oldBoard.name);
-
-			save.save(getSaveFile(name));
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-
-		BoardGenerator.saveBoard(oldBoard);
 	}
 
 	public String scoreDisplay(ArrayList<PlayerRep> winners) {
@@ -723,5 +681,9 @@ public class Game implements Listener {
 
 	public void setHandicap(PlayerRep rep, int handicap) {
 		Stats.get(rep).hadicapLevel = handicap;
+	}
+
+	public void saveGame() {
+		save.save();
 	}
 }

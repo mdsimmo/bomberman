@@ -3,6 +3,7 @@ package io.github.mdsimmo.bomberman.commands.game;
 import io.github.mdsimmo.bomberman.Board;
 import io.github.mdsimmo.bomberman.BoardGenerator;
 import io.github.mdsimmo.bomberman.Bomberman;
+import io.github.mdsimmo.bomberman.Config;
 import io.github.mdsimmo.bomberman.Game;
 import io.github.mdsimmo.bomberman.PlayerRep;
 import io.github.mdsimmo.bomberman.commands.Command;
@@ -46,7 +47,7 @@ public class Create extends Command {
 				if (args.size() == 2) {
 					arena = BoardGenerator.loadBoard(args.get(1));
 				} else {
-					arena = BoardGenerator.loadDefault();
+					arena = BoardGenerator.loadBoard((String)Config.DEFAULT_ARENA.getValue());
 				}
 				if (arena == null) {
 					Bomberman.sendMessage(sender, "Arena not found");
