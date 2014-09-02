@@ -66,6 +66,8 @@ public class BoardSaver extends Save{
 	
 	@SuppressWarnings("unchecked")
 	public static Board loadBoard(File file) throws IOException {
+		if (!file.exists())
+			return null;
 		BoardSaver save = new BoardSaver(file);
 		save.convert(save.getVersion("version"));
 		int x = save.getInt("size.x");

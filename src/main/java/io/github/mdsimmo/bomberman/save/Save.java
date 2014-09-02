@@ -9,6 +9,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
+import org.apache.commons.lang.NullArgumentException;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.plugin.Plugin;
 
@@ -162,6 +163,8 @@ public abstract class Save extends YamlConfiguration {
 		}
 		
 		public void setValue(String value) {
+			if (value == null)
+				throw new NullArgumentException("value cannot be null");
 			this.value = value;
 		}
 		
