@@ -38,7 +38,7 @@ public class SuddenDeathCounter {
 							"Sudden death in %d seconds!", suddenDeath);
 				else if (0 < suddenDeath && suddenDeath <= 5) {
 					Bomberman.sendMessage(game.players, "%d", suddenDeath);
-				} else {
+				} else if (suddenDeath == 0) {
 					Bomberman.sendMessage(game.observers,
 							ChatColor.RED + "Sudden death!");
 					game.setSuddenDeath(true);
