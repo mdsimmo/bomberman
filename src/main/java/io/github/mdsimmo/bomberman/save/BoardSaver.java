@@ -117,6 +117,7 @@ public class BoardSaver extends Save{
 		case FUTURE:
 			plugin.getLogger().info("Unkowen verion " + version + " in " + file.getName());
 			break;
+		case V0_0_3a:
 		case V0_0_3:
 			break;
 		case PAST:
@@ -135,6 +136,7 @@ public class BoardSaver extends Save{
 		for (File file : files) {
 			plugin.getLogger().info("converting " + file.getName());
 			try {
+				// the actual conversion bit
 				Board board = loadOldArena(file);
 				BoardGenerator.saveBoard(board);
 				if (!file.delete())

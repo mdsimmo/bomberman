@@ -53,17 +53,7 @@ public class BoardGenerator {
 			}
 		}
 	}
-	
-	/**
-	 * deletes the given board
-	 * @return false if the board never existed
-	 */
-	public static boolean deleteArena(String name) {
-		if (loadedBoards.containsKey(name))
-			loadedBoards.remove(name);
-		return toFile(name).delete();
-	}
-	
+		
 	/**
 	 * destroys the current board and replaces it with the next board. <br>
 	 * Use this method to destroy and create board;<br>
@@ -97,8 +87,12 @@ public class BoardGenerator {
 		}
 	}
 	
+	public static Board remove(String name) {
+		return loadedBoards.remove(name);
+	}
+	
 	public static File toFile(String name) {
-		return new File(plugin.getDataFolder(), name + ".arena");
+		return new File(plugin.getDataFolder(), name.toLowerCase() + ".arena");
 	}
 	
 	public static List<String> allBoards() {

@@ -62,6 +62,7 @@ public class GameSaver extends Save {
 			plugin.getLogger().info("Unkowen verion " + version + " in " + file.getName());
 			break;
 		case V0_0_3:
+		case V0_0_3a:
 			break;
 		default:
 			convertFromOld();
