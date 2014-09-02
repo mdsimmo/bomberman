@@ -69,6 +69,8 @@ public class Info extends GameCommand {
 				list.put("Prize", game.getPrize().getAmount() + " "
 						+ game.getPrize().getType());
 		}
+		list.put("Sudden death", game.getSuddenDeath() == -1 ? "off" : game.getSuddenDeath() + " seconds");
+		list.put("Game over", game.getTimeout() == -1 ? "off" : game.getTimeout() + " seconds");
 		list.put("Arena", game.board.name);
 		Bomberman.sendMessage(sender, list);
 		return true;
