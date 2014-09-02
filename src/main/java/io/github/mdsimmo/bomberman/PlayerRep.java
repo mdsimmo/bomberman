@@ -16,6 +16,7 @@ import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
+import org.bukkit.event.HandlerList;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
@@ -24,6 +25,7 @@ import org.bukkit.event.entity.EntityRegainHealthEvent.RegainReason;
 import org.bukkit.event.player.PlayerItemConsumeEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
+import org.bukkit.event.player.PlayerTeleportEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.potion.Potion;
@@ -65,7 +67,6 @@ public class PlayerRep implements Listener {
 	public PlayerRep(Player player) {
 		this.player = player;
 		lookup.put(player, this);
-		plugin.getServer().getPluginManager().registerEvents(this, plugin);
 	}
 	
 	/**
@@ -128,20 +129,21 @@ public class PlayerRep implements Listener {
 				return false;
 			}
 		}
-		gamePlaying = game;
-		Bomberman.sendMessage(gamePlaying.observers, "%p joined game %g", this, gamePlaying);
-		player.teleport(gamePlaying.loc.clone().add(gameSpawn));
+		Bomberman.sendMessage(game.observers, "%p joined game %g", this, game);
+		player.teleport(game.loc.clone().add(gameSpawn));
 		player.setGameMode(GameMode.SURVIVAL);
-		player.setHealth(gamePlaying.getLives());
-		player.setMaxHealth(gamePlaying.getLives());
-		player.setHealthScale(gamePlaying.getLives() * 2);
+		player.setHealth(game.getLives());
+		player.setMaxHealth(game.getLives());
+		player.setHealthScale(game.getLives() * 2);
 		player.setExhaustion(0);
 		spawnHunger = player.getFoodLevel();
 		player.setFoodLevel(10000); // just a big number
 		removeEffects();
 		spawnInventory = player.getInventory().getContents();
-		gamePlaying.initialise(this); 
-		gamePlaying.addPlayer(this);
+		game.initialise(this); 
+		game.addPlayer(this);
+		gamePlaying = game;
+		plugin.getServer().getPluginManager().registerEvents(this, plugin);
 		return true;
 	}
 
@@ -152,16 +154,16 @@ public class PlayerRep implements Listener {
 	public boolean kill() {
 		if (gamePlaying == null)
 			return false;
-	
+		gamePlaying.alertRemoval(this);
+		gamePlaying = null;
 		player.getInventory().setContents(spawnInventory);
 		player.setMaxHealth(20);
 		player.setHealth(20);
 		player.setHealthScale(20);
 		player.setFoodLevel(spawnHunger);
 		player.teleport(spawn);
-		removeEffects();	
-		gamePlaying.alertRemoval(this);
-		gamePlaying = null;
+		removeEffects();
+		HandlerList.unregisterAll(this);
 		return true;
 	}
 	
@@ -204,7 +206,7 @@ public class PlayerRep implements Listener {
 	}
 
 	@EventHandler
-	public void playerMove(PlayerMoveEvent e) {
+	public void onPlayerMove(PlayerMoveEvent e) {
 		Player p = e.getPlayer();
 		if (p == this.player && gamePlaying != null && !gamePlaying.isPlaying) {
 			// stop the player from moving
@@ -218,6 +220,15 @@ public class PlayerRep implements Listener {
 			if (!(xfrom == xto && yfrom == yto && zfrom == zto)) {
 				p.teleport(from);
 			}
+		}
+	}
+	
+	@EventHandler
+	public void onPlayerTelepot(PlayerTeleportEvent e) {
+		Player p = e.getPlayer();
+		if (p == this.player && gamePlaying != null  && !gamePlaying.containsLocation(e.getTo())) {
+			e.setCancelled(true);
+			Bomberman.sendMessage(p, ChatColor.RED + "Cannot teleport while part of a game");
 		}
 	}
 
@@ -400,16 +411,16 @@ public class PlayerRep implements Listener {
 		return editGame;
 	}
 	private void removeEffects() {
-		for (PotionEffect effect : player.getActivePotionEffects()) {
-		    plugin.getLogger().info(effect.getType().toString());
-			player.removePotionEffect(effect.getType());
-		}
 		if (plugin.isEnabled())
 			plugin.getServer().getScheduler()
 					.scheduleSyncDelayedTask(plugin, new Runnable() {
 						@Override
 						public void run() {
 							player.setFireTicks(0);
+							for (PotionEffect effect : player.getActivePotionEffects()) {
+							    plugin.getLogger().info(effect.getType().toString());
+								player.removePotionEffect(effect.getType());
+							}
 						}
 					});
 	}
