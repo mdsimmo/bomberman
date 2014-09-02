@@ -26,7 +26,9 @@ public class Set extends CommandGroup {
 				new Lives(this),
 				new MinPlayers(this),
 				new Power(this),
-				new Prize(this)
+				new Prize(this),
+				new SuddenDeath(this),
+				new Timeout(this)
 			);
 	}
 

@@ -71,8 +71,7 @@ public class Game implements Listener {
 				Bomberman.sendMessage(observers, ChatColor.YELLOW
 						+ "Game started!");
 				isPlaying = true;
-				if (suddenDeath >= 0 || timeout >= 0)
-					new SuddenDeathCounter(Game.this);
+				new SuddenDeathCounter(Game.this);
 				// Cleanup and destroy the countdown timer
 				destroy();
 			}
@@ -611,6 +610,7 @@ public class Game implements Listener {
 		for (Stats stat : stats.values()) {
 			stat.reset();
 		}
+		suddenDeathStarted = false;
 	}
 
 	private HashMap<PlayerRep, Stats> stats = new HashMap<>();
