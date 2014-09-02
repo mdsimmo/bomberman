@@ -36,6 +36,7 @@ public class BoardGenerator {
 				continue;
 			}
 			try {
+				file.createNewFile();
 				InputStream inputStream = plugin.getResource(name + ".arena");
 				FileOutputStream fos = new FileOutputStream(file);
 				int read = 0;

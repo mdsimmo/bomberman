@@ -157,6 +157,7 @@ public class Bomberman extends JavaPlugin {
 	@Override
 	public void onEnable() {
 		instance = this;
+		getDataFolder().mkdirs();
 		BoardGenerator.copyDefaults();
 		BoardSaver.convertArenas();
 		new CommandHandler();
