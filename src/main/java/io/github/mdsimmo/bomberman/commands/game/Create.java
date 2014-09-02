@@ -41,7 +41,7 @@ public class Create extends Command {
 			return false;
 		if (sender instanceof Player) {
 			if (Game.findGame(args.get(0)) != null) {
-				Bomberman.sendMessage(sender, "Game already exists");
+				Bomberman.sendMessage(sender, "Game %g already exists", args.get(0));
 			} else {
 				Board arena;
 				if (args.size() == 2) {
@@ -50,7 +50,7 @@ public class Create extends Command {
 					arena = BoardGenerator.loadBoard((String)Config.DEFAULT_ARENA.getValue());
 				}
 				if (arena == null) {
-					Bomberman.sendMessage(sender, "Arena not found");
+					Bomberman.sendMessage(sender, "Arena %b not found", args.get(1));
 					return true;
 				}
 				// long location getting line to round to integers...

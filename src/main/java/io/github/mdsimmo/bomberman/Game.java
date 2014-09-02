@@ -275,9 +275,9 @@ public class Game implements Listener {
 	public void destroy() {
 		gameRegistry.remove(name.toLowerCase());
 		stop();
+		BoardGenerator.switchBoard(board, oldBoard, loc);
 		HandlerList.unregisterAll(protector);
 		HandlerList.unregisterAll(this);
-		Bomberman.sendMessage(observers, "Game %g destroyed", this);
 		File f = new File(plugin.getDataFolder() + "/" + name + ".game");
 		f.delete();
 		f = new File(plugin.getDataFolder() + "/" + name + ".old.board");

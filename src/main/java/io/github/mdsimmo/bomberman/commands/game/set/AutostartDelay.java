@@ -32,9 +32,9 @@ public class AutostartDelay extends GameCommand {
 		        
         try {
             game.setAutostartDelay(Integer.parseInt(args.get(0)));
-            Bomberman.sendMessage(sender, "Autostart delay set to %d", game.getAutostartDelay());
+            Bomberman.sendMessage(sender, "Autostart delay set to %d seconds", game.getAutostartDelay());
         } catch (NumberFormatException e) {
-            Bomberman.sendMessage(sender, "Delay entered is not a valid number");
+            Bomberman.sendMessage(sender, "Delay %s is not a valid number", args.get(0));
         }
         return true;
 	}

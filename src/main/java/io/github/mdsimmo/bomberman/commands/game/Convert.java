@@ -38,7 +38,7 @@ public class Convert extends Command {
 			return false;
 		if (sender instanceof Player) {
 			if (Game.findGame(args.get(0)) != null) {
-				Bomberman.sendMessage(sender, "Game already exists");
+				Bomberman.sendMessage(sender, "Game %g already exists", args.get(0));
 			} else {
 				Location[] locations = BoardGenerator.getBoundingStructure(
 						(Player) sender, args.get(0));
@@ -50,7 +50,7 @@ public class Convert extends Command {
 				game.oldBoard = board;
 				Game.register(game);
 				PlayerRep.getPlayerRep((Player)sender).setGameActive(game);
-				Bomberman.sendMessage(sender, "Game created");
+				Bomberman.sendMessage(sender, "Game %g created", game);
 			}
 		} else {
 			Bomberman.sendMessage(sender, "You must be a player");
@@ -60,7 +60,7 @@ public class Convert extends Command {
 
 	@Override
 	public String description() {
-		return "Converts the structure under the cursor into a BomberMan game";
+		return "Converts the structure under the cursor into a Bomberman game";
 	}
 
 	@Override
