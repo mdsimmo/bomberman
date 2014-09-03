@@ -63,6 +63,7 @@ public class GameSaver extends Save {
 			break;
 		case V0_0_3:
 		case V0_0_3a:
+		case V0_0_3b:
 			break;
 		default:
 			convertFromOld();
