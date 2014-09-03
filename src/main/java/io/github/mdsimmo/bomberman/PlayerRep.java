@@ -154,14 +154,14 @@ public class PlayerRep implements Listener {
 		if (gamePlaying == null)
 			return false;
 		player.getInventory().setContents(spawnInventory);
+		gamePlaying.alertRemoval(this);
+		gamePlaying = null;
 		player.setMaxHealth(20);
 		player.setHealth(20);
 		player.setHealthScale(20);
 		player.setFoodLevel(spawnHunger);
 		player.teleport(spawn);
 		removeEffects();
-		gamePlaying.alertRemoval(this);
-		gamePlaying = null;
 		return true;
 	}
 	

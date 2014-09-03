@@ -36,7 +36,7 @@ public class Delete extends Command {
 		String arena = args.get(0);
 		File f = BoardGenerator.toFile(arena);
 		if (!f.exists()) {
-			Bomberman.sendMessage(sender, "Arena %b does not exist %g", arena);
+			Bomberman.sendMessage(sender, "Arena %b does not exist", arena);
 			return true;
 		}
 		for (String name : Game.allGames()) {
