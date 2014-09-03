@@ -184,6 +184,7 @@ public class Game implements Listener {
 	}
 
 	private void addWinner(PlayerRep rep) {
+		winners.remove(rep);
 		winners.add(0, rep);
 	}
 
