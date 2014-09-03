@@ -16,7 +16,6 @@ import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
-import org.bukkit.event.HandlerList;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
@@ -67,6 +66,7 @@ public class PlayerRep implements Listener {
 	public PlayerRep(Player player) {
 		this.player = player;
 		lookup.put(player, this);
+		plugin.getServer().getPluginManager().registerEvents(this, plugin);
 	}
 	
 	/**
@@ -143,7 +143,6 @@ public class PlayerRep implements Listener {
 		game.initialise(this); 
 		game.addPlayer(this);
 		gamePlaying = game;
-		plugin.getServer().getPluginManager().registerEvents(this, plugin);
 		return true;
 	}
 
@@ -154,8 +153,6 @@ public class PlayerRep implements Listener {
 	public boolean kill() {
 		if (gamePlaying == null)
 			return false;
-		gamePlaying.alertRemoval(this);
-		gamePlaying = null;
 		player.getInventory().setContents(spawnInventory);
 		player.setMaxHealth(20);
 		player.setHealth(20);
@@ -163,7 +160,8 @@ public class PlayerRep implements Listener {
 		player.setFoodLevel(spawnHunger);
 		player.teleport(spawn);
 		removeEffects();
-		HandlerList.unregisterAll(this);
+		gamePlaying.alertRemoval(this);
+		gamePlaying = null;
 		return true;
 	}
 	
