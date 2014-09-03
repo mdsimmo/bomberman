@@ -17,13 +17,14 @@ public class Game extends CommandGroup {
 				new Set(this),
 				new Force(this),
 				new Create(this),
-				new Destroy(this),
 				new Convert(this),
+				new Destroy(this),
+				new GameList(this),
+				new Ignore(this),
+				new Info(this),
 				new Join(this),
 				new Leave(this),
-				new Protect(this),
-				new GameList(this),
-				new Info(this)
+				new Protect(this)
 			);
 	}
 
