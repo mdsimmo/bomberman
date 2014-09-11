@@ -265,12 +265,15 @@ public class Game implements Listener {
 	}
 
 	public boolean containsLocation(Location l) {
-		return (l.getBlockX() >= loc.getX() && l.getBlockX() < loc.getBlockX()
-				+ board.xSize)
-				&& (l.getBlockY() >= loc.getY() && l.getBlockY() < loc
-						.getBlockY() + board.ySize)
-				&& (l.getBlockZ() >= loc.getZ() && l.getBlockZ() < loc
-						.getBlockZ() + board.zSize);
+		if (l.getWorld().equals(loc.getWorld()))
+			return (l.getBlockX() >= loc.getX() && l.getBlockX() < loc.getBlockX()
+					+ board.xSize)
+					&& (l.getBlockY() >= loc.getY() && l.getBlockY() < loc
+							.getBlockY() + board.ySize)
+					&& (l.getBlockZ() >= loc.getZ() && l.getBlockZ() < loc
+							.getBlockZ() + board.zSize);
+		else
+			return false;
 	}
 
 	public void destroy() {
