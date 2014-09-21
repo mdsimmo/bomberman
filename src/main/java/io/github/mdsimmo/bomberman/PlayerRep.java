@@ -33,7 +33,7 @@ import org.bukkit.potion.PotionType;
 import org.bukkit.util.Vector;
 
 /**
- * This is a class that holds all the extra data needed for a bomberman player <br>
+ * This is a class that holds all the extra data needed for a Bomberman player <br>
  * When initialised, the player will automatically be made to join the game
  */
 public class PlayerRep implements Listener {
@@ -181,7 +181,7 @@ public class PlayerRep implements Listener {
 			// track edit mode changes
 			if (editGame != null) {
 				if (editGame.containsLocation(e.getBlock().getLocation()))
-					changes.put(e.getBlock(), new BlockRep(e.getBlockReplacedState()));
+					changes.put(e.getBlock(), BlockRep.createBlock(e.getBlockReplacedState()));
 				else {
 					e.setCancelled(true);
 					Bomberman.sendMessage(this, "Cannot build outside while in editmode");
@@ -195,7 +195,7 @@ public class PlayerRep implements Listener {
 		if (e.getPlayer() == player && editGame != null) {
 			Block b = e.getBlock();
 			if (editGame.containsLocation(b.getLocation()))
-				changes.put(e.getBlock(), new BlockRep(e.getBlock()));
+				changes.put(e.getBlock(), BlockRep.createBlock(e.getBlock()));
 			else {
 				e.setCancelled(true);
 				Bomberman.sendMessage(this, "Cannot destroy blocks outside while in editmode");
@@ -372,7 +372,7 @@ public class PlayerRep implements Listener {
 		for (Block b : changes.keySet()) {
 			Vector v = b.getLocation().subtract(editGame.loc).toVector();
 			if (editGame.containsLocation(b.getLocation()))
-				editGame.board.addBlock(new BlockRep(b), v);
+				editGame.board.addBlock(BlockRep.createBlock(b), v);
 		}
 		BoardGenerator.saveBoard(editGame.board);
 		editGame = null;

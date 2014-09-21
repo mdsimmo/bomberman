@@ -34,17 +34,17 @@ public class Board {
 	 * @param place the position to add it at
 	 */
 	public void addBlock(BlockRep block, Vector place) {
-		if (block.material.isSolid() || block.material == Material.AIR) {
+		if (block.getMaterial().isSolid() || block.getMaterial() == Material.AIR) {
 			int x = place.getBlockX();
 			int y = place.getBlockY();
 			int z = place.getBlockZ();
 			blocks[x][y][z] = block;
 			delayed.remove(place);
 		} else {
-			blocks[place.getBlockX()][place.getBlockY()][place.getBlockZ()] = new BlockRep();
+			blocks[place.getBlockX()][place.getBlockY()][place.getBlockZ()] = BlockRep.createBlank();
 			delayed.put(place, block);
 		}
-		if (block.material == Material.WOOL) {
+		if (block.getMaterial() == Material.WOOL) {
 			spawnPoints.add(place.add(new Vector(0.5, 1, 0.5)));
 		}
 	}

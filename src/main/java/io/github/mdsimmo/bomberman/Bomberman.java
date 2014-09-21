@@ -159,7 +159,7 @@ public class Bomberman extends JavaPlugin {
 		instance = this;
 		getDataFolder().mkdirs();
 		BoardGenerator.copyDefaults();
-		BoardSaver.convertArenas();
+		BoardSaver.convertOldArenas();
 		new CommandHandler();
 		Game.loadGames();
 	}

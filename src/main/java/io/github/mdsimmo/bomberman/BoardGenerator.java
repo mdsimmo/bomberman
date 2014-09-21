@@ -65,7 +65,7 @@ public class BoardGenerator {
 	public static void switchBoard(Board current, Board next, Location location) {
 		// destroy delayed blocks first
 		for (Vector v : current.delayed.keySet()) {
-			new BlockRep().setBlock(location.clone().add(v).getBlock());
+			BlockRep.createBlank().setBlock(location.clone().add(v).getBlock());
 		}
 		// build other blocks
 		new BoardBuilder(next, location);
@@ -215,7 +215,7 @@ public class BoardGenerator {
 			for (int j = 0; j < ySize; j++) {
 				for (int k = 0; k < zSize; k++) {
 					Vector v = new Vector(i, j, k);
-					BlockRep block = new BlockRep(loc.clone().add(v).getBlock());
+					BlockRep block = BlockRep.createBlock(loc.clone().add(v).getBlock());
 					board.addBlock(block, v);
 				}
 			}

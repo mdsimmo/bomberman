@@ -27,6 +27,8 @@ public abstract class Save extends YamlConfiguration {
 		V0_0_3("0.0.3"),
 		V0_0_3a("0.0.3a"),
 		V0_0_3b("0.0.3b"),
+		V0_0_3c("0.0.3c"),
+		V0_1_0("0.1.0"),
 		PAST("past"),
 		FUTURE("future");
 		
@@ -46,7 +48,6 @@ public abstract class Save extends YamlConfiguration {
 	
 	public Save (String name) {
 		this(toFile(name));
-		
 	}
 	
 	public Save(File file) {
@@ -78,6 +79,7 @@ public abstract class Save extends YamlConfiguration {
 	 * @param version the verion that the save is at
 	 */
 	public abstract void convert(Version version);
+		
 	
 	/**
 	 * @deprecated use save()
@@ -113,14 +115,20 @@ public abstract class Save extends YamlConfiguration {
 		return section;
 	}
 	
+	
 	/**
 	 * Gets a Version from this YAML file
-	 * @param path the path to read from
 	 * @return the version
 	 */
-	public Version getVersion(String path) {
-		String v = getString(path);
-		return Version.from(v);
+	public Version getVersion() {
+		return Version.from(getVersionRaw());
+	}
+	
+	/**
+	 * Gets the version String that is in the YAML file 
+	 */
+	public String getVersionRaw() {
+		return getString("version");
 	}
 	
 	public static class CompressedSection {
