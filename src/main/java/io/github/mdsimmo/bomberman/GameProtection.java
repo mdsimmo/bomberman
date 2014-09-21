@@ -85,10 +85,11 @@ public class GameProtection implements Listener {
 	}
 	
 	@EventHandler
-	public void onEntityDamage(EntityDamageEvent e) {
+	public void onPlayerDamage(EntityDamageEvent e) {
 		Entity entity = e.getEntity();
 		if (entity instanceof Player) {
 			Player player = (Player)entity;
+			//TODO change this to not create unneeded PlayerReps
 			PlayerRep rep = PlayerRep.getPlayerRep(player);
 			if (rep.getGamePlaying() == game) {
 				player.setFireTicks(0);

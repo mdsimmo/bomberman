@@ -16,14 +16,13 @@ import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 import org.bukkit.event.HandlerList;
-import org.bukkit.event.Listener;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.util.Vector;
 
-public class Game implements Listener {
+public class Game {
 
 	class GameStarter implements Runnable {
 		int count = 3;
@@ -166,7 +165,6 @@ public class Game implements Listener {
 		this.loc = loc;
 		initVars();
 		protector = new GameProtection(this);
-		plugin.getServer().getPluginManager().registerEvents(this, plugin);
 	}
 
 	public void addPlayer(PlayerRep rep) {
@@ -278,7 +276,6 @@ public class Game implements Listener {
 		stop();
 		BoardGenerator.switchBoard(board, oldBoard, loc);
 		HandlerList.unregisterAll(protector);
-		HandlerList.unregisterAll(this);
 		File f = new File(plugin.getDataFolder() + "/" + name + ".game");
 		f.delete();
 		f = new File(plugin.getDataFolder() + "/" + name + ".old.board");
