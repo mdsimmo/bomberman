@@ -106,7 +106,7 @@ public class GameProtection implements Listener {
 	public void onPVP(EntityDamageByEntityEvent e) {
 		if (e.getDamager() instanceof Player) {
 			Player player = (Player) e.getDamager();
-			if (game.getProtected(Config.PROTECT_DAMAGE)
+			if (game.getProtected(Config.PROTECT_PVP)
 					&& game.containsLocation(e.getDamager().getLocation())
 					&& !Permission.PROTECTION_VOID.isAllowedBy(player))
 				e.setCancelled(true);
