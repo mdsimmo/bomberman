@@ -117,7 +117,7 @@ public class GameProtection implements Listener {
 	@EventHandler
 	public void onExplosion(EntityExplodeEvent e) {
 		if (game.getProtected(Config.PROTECT_EXPLOSIONS)) {
-			if (game.containsLocation(e.getEntity().getLocation())) {
+			if (game.containsLocation(e.getLocation())) {
 				e.setCancelled(true);
 			}
 		}
