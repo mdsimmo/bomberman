@@ -1,19 +1,31 @@
 package io.github.mdsimmo.bomberman.commands.game;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import org.bukkit.command.CommandSender;
-
 import io.github.mdsimmo.bomberman.Bomberman;
 import io.github.mdsimmo.bomberman.Config;
 import io.github.mdsimmo.bomberman.Game;
 import io.github.mdsimmo.bomberman.commands.Command;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import org.bukkit.command.CommandSender;
+
+import com.google.common.collect.BiMap;
+import com.google.common.collect.HashBiMap;
+
 public class Protect extends GameCommand {
 
+	private static BiMap<Config, String> options = HashBiMap.create();
+	
 	public Protect(Command parent) {
 		super(parent);
+		options.put(Config.PROTECT, "enabled");
+		options.put(Config.PROTECT_PLACING, "placing");
+		options.put(Config.PROTECT_PVP, "pvp");
+		options.put(Config.PROTECT_DESTROYING, "destroy");
+		options.put(Config.PROTECT_DAMAGE, "damage");
+		options.put(Config.PROTECT_FIRE, "fire");
+		options.put(Config.PROTECT_EXPLOSIONS, "explosion");
 	}
 
 	@Override
@@ -27,13 +39,7 @@ public class Protect extends GameCommand {
 		if (args.size() == 1) {
 			list.add("true");
 			list.add("false");
-			list.add("placing");
-			list.add("enabled");
-			list.add("pvp");
-			list.add("destroy");
-			list.add("damage");
-			list.add("fire");
-			list.add("explosion");
+			list.addAll(options.values());
 			return list;
 		} else if (args.size() == 2) {
 			list.add("true");
@@ -48,54 +54,57 @@ public class Protect extends GameCommand {
 		if (args.size() < 1 || args.size() > 2)
 			return false;
 		
-		boolean enable;
-		try {
+		String first = args.get(0).toLowerCase();
+		String second = args.size() == 2 ? args.get(1).toLowerCase() : null;
+		
+		String protectionString = null;
+		String enableString = null;
+		
+		if (options.values().contains(first)) {
+			protectionString = first;
+			enableString = second;
+		} else {
 			if (args.size() == 2)
-				enable = Boolean.parseBoolean(args.get(1));
-			else
-				enable = Boolean.parseBoolean(args.get(0));
-		} catch (NumberFormatException e) {
-			return false;
-		}
-		
-		if (args.size() == 1)
-			game.setProteced(Config.PROTECT, enable);
-		else {		
-			switch (args.get(0).toLowerCase()) {
-			case "enabled":
-				game.setProteced(Config.PROTECT, enable); break;
-			case "pvp":
-				game.setProteced(Config.PROTECT_PVP, enable); break;
-			case "placing":
-				game.setProteced(Config.PROTECT_PLACING, enable); break;
-			case "destoy":
-				game.setProteced(Config.PROTECT_DESTROYING, enable); break;
-			case "damage":
-				game.setProteced(Config.PROTECT_DAMAGE, enable); break;
-			case "fire":
-				game.setProteced(Config.PROTECT_FIRE, enable); break;
-			case "explosion":
-				game.setProteced(Config.PROTECT_EXPLOSIONS, enable); break;
-			default:
 				return false;
-			}
+			enableString = first;
 		}
 		
-		if (enable)
-			Bomberman.sendMessage(sender, "Game protected");
+		Config protection;
+		boolean enable;
+		
+		if (protectionString == null)
+			protection = Config.PROTECT;
+		else {		
+			protection = options.inverse().get(protectionString);
+			if (protection == null)
+				return false;
+		}
+		
+		if (enableString == null)
+			enable = !game.getProtected(protection);
+		else if (enableString.equals("true"))
+			enable = true;
+		else if (enableString.equals("false"))
+			enable = false;
 		else
-			Bomberman.sendMessage(sender, "Game un-protected");
+			return false;
+		
+		game.setProteced(protection, enable);
+		if (enable)
+			game.setProteced(Config.PROTECT, true);
+		
+		String returnString = protection == Config.PROTECT ? "" : options.get(protection) + " ";
+				
+		if (enable)
+			Bomberman.sendMessage(sender, "Game %g enabled " + returnString + "protection", game);
+		else
+			Bomberman.sendMessage(sender, "Game %g removed " + returnString + "protection", game);
 		return true;
 	}
 	
 	@Override
 	public boolean firstIsGame(List<String> args) {
-		if (args.size() == 3)
-			return true;
-		else if (args.size() == 2) {
-			return Game.allGames().contains(args.get(0)); 
-		} else
-			return false;
+		return args.size() > 0 && Game.allGames().contains(args.get(0)); 
 	}
 
 	@Override
@@ -105,7 +114,7 @@ public class Protect extends GameCommand {
 
 	@Override
 	public String usage(CommandSender sender) {
-		return "/n" + path() + "<game> <true/false>";
+		return "/" + path() + "<game> [protection-option] <true/false>";
 	}
 
 	@Override

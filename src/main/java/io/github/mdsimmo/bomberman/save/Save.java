@@ -27,6 +27,8 @@ public abstract class Save extends YamlConfiguration {
 		V0_0_3("0.0.3"),
 		V0_0_3a("0.0.3a"),
 		V0_0_3b("0.0.3b"),
+		V0_0_3c("0.0.3c"),
+		V0_0_3d("0.0.3d"),
 		PAST("past"),
 		FUTURE("future");
 		
