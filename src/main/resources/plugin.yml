@@ -1,6 +1,6 @@
 name: Bomberman
 main: io.github.mdsimmo.bomberman.Bomberman
-version: 0.0.3b
+version: 0.0.3c
 
 commands:
   bm:
@@ -10,6 +10,8 @@ commands:
     - /<command> game [...]
     - /<command> arena [...]
     permission: bomberman.observer
+  
+softdepend: [Multiverse-Core]
   
 permissions:
   bomberman.*:

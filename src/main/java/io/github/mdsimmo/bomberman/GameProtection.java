@@ -85,10 +85,11 @@ public class GameProtection implements Listener {
 	}
 	
 	@EventHandler
-	public void onEntityDamage(EntityDamageEvent e) {
+	public void onPlayerDamage(EntityDamageEvent e) {
 		Entity entity = e.getEntity();
 		if (entity instanceof Player) {
 			Player player = (Player)entity;
+			//TODO change this to not create unneeded PlayerReps
 			PlayerRep rep = PlayerRep.getPlayerRep(player);
 			if (rep.getGamePlaying() == game) {
 				player.setFireTicks(0);
@@ -106,7 +107,7 @@ public class GameProtection implements Listener {
 	public void onPVP(EntityDamageByEntityEvent e) {
 		if (e.getDamager() instanceof Player) {
 			Player player = (Player) e.getDamager();
-			if (game.getProtected(Config.PROTECT_DAMAGE)
+			if (game.getProtected(Config.PROTECT_PVP)
 					&& game.containsLocation(e.getDamager().getLocation())
 					&& !Permission.PROTECTION_VOID.isAllowedBy(player))
 				e.setCancelled(true);
@@ -116,7 +117,7 @@ public class GameProtection implements Listener {
 	@EventHandler
 	public void onExplosion(EntityExplodeEvent e) {
 		if (game.getProtected(Config.PROTECT_EXPLOSIONS)) {
-			if (game.containsLocation(e.getEntity().getLocation())) {
+			if (game.containsLocation(e.getLocation())) {
 				e.setCancelled(true);
 			}
 		}
