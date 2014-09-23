@@ -68,6 +68,7 @@ public class BoardSaver extends Save{
 	public static Board loadBoard(File file) throws IOException {
 		if (!file.exists())
 			return null;
+		plugin.getLogger().info("Loading arena '" + file + "'");
 		BoardSaver save = new BoardSaver(file);
 		save.convert();
 		int x = save.getInt("size.x");
@@ -108,6 +109,7 @@ public class BoardSaver extends Save{
 		
 		board.setDestructables((List<Material>) Config.BLOCKS_DESTRUCTABLE.getValue(save));
 		board.setDropping((List<Material>) Config.BLOCKS_DROPPING.getValue(save));
+		plugin.getLogger().info("Arena loaded");
 		return board;
 	}
 	
