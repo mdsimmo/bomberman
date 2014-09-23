@@ -37,9 +37,8 @@ public class GameSaver extends Save {
 	}
 	
 	public static void loadGame(File file) {
-		GameSaver save = new GameSaver(file);;
-		save.convert(save.getVersion("version"));
-		save.set("version", plugin.getDescription().getVersion());
+		GameSaver save = new GameSaver(file);
+		save.convert();
 	
 		String name = save.getString("name");
 		int x = save.getInt("location.x");
@@ -53,20 +52,25 @@ public class GameSaver extends Save {
 	}
 	
 	@Override
-	public void convert(Version version) {
+	public void convert(Version version, String raw) {
 		switch (version) {
 		case PAST:
+		case V0_0_1:
+		case V0_0_2:
+		case V0_0_2a:
+		case V0_0_3_SNAPSHOT:
 			convertFromOld();
-			break;
-		case FUTURE:
-			plugin.getLogger().info("Unkowen verion " + version + " in " + file.getName());
 			break;
 		case V0_0_3:
 		case V0_0_3a:
 		case V0_0_3b:
+		case V0_0_3c:
+		case V0_0_3d:
 			break;
-		default:
-			convertFromOld();
+		case V0_1_0:
+			break;
+		case FUTURE:
+			plugin.getLogger().info("Unkowen version '" + raw + "' in " + file.getName());
 			break;
 		}
 	}
