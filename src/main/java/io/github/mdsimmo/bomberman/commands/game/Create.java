@@ -51,7 +51,10 @@ public class Create extends Command {
 					arena = BoardGenerator.loadBoard((String)Config.DEFAULT_ARENA.getValue());
 				}
 				if (arena == null) {
-					Bomberman.sendMessage(sender, "Arena %b not found", args.get(1));
+					if (args.size() == 1)
+						Bomberman.sendMessage(sender, "The default arena %b is missing!", (String)Config.DEFAULT_ARENA.getValue());
+					else
+						Bomberman.sendMessage(sender, "Arena %b not found", args.get(1));
 					return true;
 				}
 				// long location getting line to round to integers...
