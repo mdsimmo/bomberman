@@ -42,7 +42,7 @@ public class Convert extends Command {
 			} else {
 				Location[] locations = BoardGenerator.getBoundingStructure(
 						(Player) sender, args.get(0));
-				Board board = BoardGenerator.createArena(args.get(0),
+				Board board = BoardGenerator.createArena(args.get(0) + ".old",
 						locations[0], locations[1]);
 				BoardGenerator.saveBoard(board);
 				Game game = new Game(args.get(0), locations[0]);

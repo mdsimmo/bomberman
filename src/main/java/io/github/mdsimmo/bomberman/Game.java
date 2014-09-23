@@ -280,8 +280,10 @@ public class Game {
 		BoardGenerator.switchBoard(board, oldBoard, loc);
 		HandlerList.unregisterAll(protector);
 		File f = new File(plugin.getDataFolder() + "/" + name + ".game");
+		BoardGenerator.remove(board.name);
+		BoardGenerator.remove(oldBoard.name);
 		f.delete();
-		f = new File(plugin.getDataFolder() + "/" + name + ".old.board");
+		f = new File(plugin.getDataFolder() + "/" + name + ".old.arena");
 		f.delete();
 		for (PlayerRep rep : PlayerRep.allPlayers()) {
 			if (rep.getGameActive() == this)
