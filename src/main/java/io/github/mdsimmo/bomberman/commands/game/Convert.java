@@ -77,5 +77,10 @@ public class Convert extends Command {
 	public String example(CommandSender sender, List<String> args) {
 		return "/" + path() + "banana";
 	}
+	
+	@Override
+	public String extra(CommandSender sender, List<String> args) {
+		return "Natural blocks are ignored when detecting structures";
+	}
 
 }

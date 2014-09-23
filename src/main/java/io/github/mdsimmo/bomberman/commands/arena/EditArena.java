@@ -9,6 +9,7 @@ import io.github.mdsimmo.bomberman.commands.Command;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.bukkit.ChatColor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
@@ -100,7 +101,12 @@ public class EditArena extends Command {
 
 	@Override
 	public String description() {
-		return "Edit a game's arena. This will effect all games using the same arena.";
+		return "Edit a game's arena";
+	}
+	
+	@Override
+	public String extra(CommandSender sender, List<String> args) {
+		return "Editting a game's arena effects " + ChatColor.BOLD + "all" + ChatColor.RESET + " games using the same arena.";
 	}
 
 	@Override
