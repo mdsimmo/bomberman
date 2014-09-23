@@ -58,4 +58,9 @@ public class Leave extends Command {
 		return Permission.PLAYER;
 	}
 
+	@Override
+	public String example(CommandSender sender, List<String> args) {
+		return "/" + path();
+	}
+
 }

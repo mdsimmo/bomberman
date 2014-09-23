@@ -3,6 +3,7 @@ package io.github.mdsimmo.bomberman.commands.arena;
 import io.github.mdsimmo.bomberman.Bomberman;
 import io.github.mdsimmo.bomberman.Game;
 import io.github.mdsimmo.bomberman.PlayerRep;
+import io.github.mdsimmo.bomberman.Utils;
 import io.github.mdsimmo.bomberman.commands.Command;
 
 import java.util.ArrayList;
@@ -114,6 +115,19 @@ public class EditArena extends Command {
 	@Override
 	public Permission permission() {
 		return Permission.ARENA_EDITING;
+	}
+
+	@Override
+	public String example(CommandSender sender, List<String> args) {
+		if (sender instanceof Player) {
+			PlayerRep rep = PlayerRep.getPlayerRep((Player)sender);
+			if (rep.getEditting() != null)
+				return "/" + path() + rep.getEditting().name + " save";
+		}
+		String game = Utils.random(Game.allGames());
+		if (game == null)
+			game = "myarena";
+		return "/" + path() + game;
 	}
 
 }

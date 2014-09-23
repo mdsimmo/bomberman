@@ -2,6 +2,7 @@ package io.github.mdsimmo.bomberman.commands.game.set;
 
 import io.github.mdsimmo.bomberman.Bomberman;
 import io.github.mdsimmo.bomberman.Game;
+import io.github.mdsimmo.bomberman.Utils;
 import io.github.mdsimmo.bomberman.commands.Command;
 import io.github.mdsimmo.bomberman.commands.GameCommand;
 
@@ -49,7 +50,7 @@ public class Fare extends GameCommand {
 				Material m = Material.getMaterial(args.get(0).toUpperCase());
 				if (m == null) {
 					Bomberman.sendMessage(sender, "Unknown material %i", args.get(0));
-					displayHelp(sender, args);
+					shortHelp(sender, args);
 					return true;
 				}
 				int amount = Integer.parseInt(args.get(1));
@@ -63,7 +64,7 @@ public class Fare extends GameCommand {
 			return false;
 		}
 	}
-	
+
 	@Override
 	public String description() {
 		return "Change a game's fare";
@@ -80,6 +81,14 @@ public class Fare extends GameCommand {
 	@Override
 	public Permission permission() {
 		return Permission.GAME_DICTATE;
+	}
+
+	@Override
+	public String example(CommandSender sender, List<String> args) {
+		String game = Utils.random(Game.allGames());
+		if (game == null)
+			game = "mygame";
+		return "/" + path() + game + " gold_ingot 5";
 	}
 
 }

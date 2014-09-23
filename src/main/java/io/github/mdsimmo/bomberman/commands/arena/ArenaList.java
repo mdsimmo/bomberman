@@ -58,4 +58,9 @@ public class ArenaList extends Command {
 	public Permission permission() {
 		return Permission.OBSERVER;
 	}
+
+	@Override
+	public String example(CommandSender sender, List<String> args) {		
+		return "/" + path();
+	}
 }

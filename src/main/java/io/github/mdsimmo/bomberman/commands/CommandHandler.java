@@ -31,7 +31,7 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
 		io.github.mdsimmo.bomberman.commands.Command c = handler.getCommand(sender, arguments);
 		if (!c.execute(sender, arguments)) {
 			c.incorrectUsage(sender);
-			c.displayHelp(sender, arguments);
+			c.shortHelp(sender, arguments);
 		}
 		return true;
 	}

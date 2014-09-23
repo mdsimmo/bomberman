@@ -1,17 +1,17 @@
 package io.github.mdsimmo.bomberman.commands.game;
 
-import java.util.List;
-
-import org.bukkit.Location;
-import org.bukkit.command.CommandSender;
-import org.bukkit.entity.Player;
-
 import io.github.mdsimmo.bomberman.Board;
 import io.github.mdsimmo.bomberman.BoardGenerator;
 import io.github.mdsimmo.bomberman.Bomberman;
 import io.github.mdsimmo.bomberman.Game;
 import io.github.mdsimmo.bomberman.PlayerRep;
 import io.github.mdsimmo.bomberman.commands.Command;
+
+import java.util.List;
+
+import org.bukkit.Location;
+import org.bukkit.command.CommandSender;
+import org.bukkit.entity.Player;
 
 public class Convert extends Command {
 
@@ -71,6 +71,11 @@ public class Convert extends Command {
 	@Override
 	public Permission permission() {
 		return Permission.GAME_DICTATE;
+	}
+
+	@Override
+	public String example(CommandSender sender, List<String> args) {
+		return "/" + path() + "banana";
 	}
 
 }

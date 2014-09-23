@@ -18,7 +18,8 @@ public class Bm extends CommandGroup {
 	public void setChildren() {
 		addChildren(
 				new Game(this),
-				new Arena(this)
+				new Arena(this),
+				new Help(this)
 			);
 	}
 

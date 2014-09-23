@@ -6,6 +6,7 @@ import io.github.mdsimmo.bomberman.Bomberman;
 import io.github.mdsimmo.bomberman.Config;
 import io.github.mdsimmo.bomberman.Game;
 import io.github.mdsimmo.bomberman.PlayerRep;
+import io.github.mdsimmo.bomberman.Utils;
 import io.github.mdsimmo.bomberman.commands.Command;
 
 import java.util.List;
@@ -88,6 +89,14 @@ public class Create extends Command {
 	@Override
 	public Permission permission() {
 		return Permission.GAME_DICTATE;
+	}
+
+	@Override
+	public String example(CommandSender sender, List<String> args) {
+		String arena = Utils.random(BoardGenerator.allBoards());
+		if (arena == null)
+			arena = "myarena";
+		return "/" + path() + "donut " + arena;
 	}
 
 }

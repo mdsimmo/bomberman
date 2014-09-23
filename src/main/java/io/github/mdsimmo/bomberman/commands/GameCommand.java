@@ -37,6 +37,7 @@ public abstract class GameCommand extends Command {
 	public final boolean run(CommandSender sender, List<String> args) {
 		Game game = null;
 		if (args.size() >= 1 && Game.allGames().contains(args.get(0))) {
+			game = Game.findGame(args.get(0));
 			if (sender instanceof Player)
 				PlayerRep.getPlayerRep((Player) sender).setGameActive(game);
 			args.remove(0);
