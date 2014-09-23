@@ -4,6 +4,7 @@ import io.github.mdsimmo.bomberman.Bomberman;
 import io.github.mdsimmo.bomberman.Config;
 import io.github.mdsimmo.bomberman.Game;
 import io.github.mdsimmo.bomberman.commands.Command;
+import io.github.mdsimmo.bomberman.commands.GameCommand;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -102,11 +103,6 @@ public class Protect extends GameCommand {
 		return true;
 	}
 	
-	@Override
-	public boolean firstIsGame(List<String> args) {
-		return args.size() > 0 && Game.allGames().contains(args.get(0)); 
-	}
-
 	@Override
 	public String description() {
 		return "protects the arena from griefing";

@@ -3,7 +3,7 @@ package io.github.mdsimmo.bomberman.commands.game.force;
 import io.github.mdsimmo.bomberman.Bomberman;
 import io.github.mdsimmo.bomberman.Game;
 import io.github.mdsimmo.bomberman.commands.Command;
-import io.github.mdsimmo.bomberman.commands.game.GameCommand;
+import io.github.mdsimmo.bomberman.commands.GameCommand;
 
 import java.util.List;
 
@@ -55,10 +55,4 @@ public class Start extends GameCommand {
 	public Permission permission() {
 		return Permission.GAME_OPERATE;
 	}
-
-	@Override
-	public boolean firstIsGame(List<String> args) {
-		return args.size() == 1;
-	}
-
 }

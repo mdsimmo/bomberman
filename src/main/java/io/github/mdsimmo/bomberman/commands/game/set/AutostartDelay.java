@@ -3,7 +3,7 @@ package io.github.mdsimmo.bomberman.commands.game.set;
 import io.github.mdsimmo.bomberman.Bomberman;
 import io.github.mdsimmo.bomberman.Game;
 import io.github.mdsimmo.bomberman.commands.Command;
-import io.github.mdsimmo.bomberman.commands.game.GameCommand;
+import io.github.mdsimmo.bomberman.commands.GameCommand;
 
 import java.util.List;
 
@@ -39,11 +39,6 @@ public class AutostartDelay extends GameCommand {
         return true;
 	}
 
-	@Override
-	public boolean firstIsGame(List<String> args) {
-		return args.size() == 2;
-	}
-	
 	@Override
 	public String description() {
 		return "Change the delay on a game's automated start";

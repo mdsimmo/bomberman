@@ -5,7 +5,7 @@ import io.github.mdsimmo.bomberman.BoardGenerator;
 import io.github.mdsimmo.bomberman.Bomberman;
 import io.github.mdsimmo.bomberman.Game;
 import io.github.mdsimmo.bomberman.commands.Command;
-import io.github.mdsimmo.bomberman.commands.game.GameCommand;
+import io.github.mdsimmo.bomberman.commands.GameCommand;
 
 import java.util.List;
 
@@ -67,11 +67,6 @@ public class Arena extends GameCommand {
 	@Override
 	public Permission permission() {
 		return Permission.GAME_DICTATE;
-	}
-
-	@Override
-	public boolean firstIsGame(List<String> args) {
-		return args.size() == 2;
 	}
 
 }

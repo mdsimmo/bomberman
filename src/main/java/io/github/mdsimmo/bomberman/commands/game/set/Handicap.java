@@ -4,7 +4,7 @@ import io.github.mdsimmo.bomberman.Bomberman;
 import io.github.mdsimmo.bomberman.Game;
 import io.github.mdsimmo.bomberman.PlayerRep;
 import io.github.mdsimmo.bomberman.commands.Command;
-import io.github.mdsimmo.bomberman.commands.game.GameCommand;
+import io.github.mdsimmo.bomberman.commands.GameCommand;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -67,11 +67,6 @@ public class Handicap extends GameCommand {
 		return true;
 	}
 	
-	@Override
-	public boolean firstIsGame(List<String> args) {
-		return args.size() == 3;
-	}
-
 	@Override
 	public String description() {
 		return "Gives a hanicap/advantage to a player";

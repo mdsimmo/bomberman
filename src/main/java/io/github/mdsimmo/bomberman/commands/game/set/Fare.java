@@ -3,7 +3,7 @@ package io.github.mdsimmo.bomberman.commands.game.set;
 import io.github.mdsimmo.bomberman.Bomberman;
 import io.github.mdsimmo.bomberman.Game;
 import io.github.mdsimmo.bomberman.commands.Command;
-import io.github.mdsimmo.bomberman.commands.game.GameCommand;
+import io.github.mdsimmo.bomberman.commands.GameCommand;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -64,13 +64,6 @@ public class Fare extends GameCommand {
 		}
 	}
 	
-	@Override
-	public boolean firstIsGame(List<String> args) {
-		if (args.size() == 3)
-			return true;
-		else return (args.size() == 2 && args.get(1).equalsIgnoreCase("none"));
-	}
-
 	@Override
 	public String description() {
 		return "Change a game's fare";
