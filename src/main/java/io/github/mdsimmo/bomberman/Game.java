@@ -70,7 +70,7 @@ public class Game {
 				Bomberman.sendMessage(observers, ChatColor.YELLOW
 						+ "Game started!");
 				isPlaying = true;
-				new SuddenDeathCounter(Game.this);
+				deathCounter = new SuddenDeathCounter(Game.this);
 				// Cleanup and destroy the countdown timer
 				destroy();
 			}
@@ -155,6 +155,7 @@ public class Game {
 	private GameProtection protector;
 	private GameSaver save;
 	private int suddenDeath;
+	private SuddenDeathCounter deathCounter;
 	private boolean suddenDeathStarted = false;
 	private int timeout;
 	private List<ItemStack> initialitems;
@@ -190,18 +191,16 @@ public class Game {
 	 * call when a player dies
 	 */
 	public void alertRemoval(PlayerRep rep) {
-		addWinner(rep);
-		players.remove(rep);
-		if (!checkFinish()) {
-			Bomberman.sendMessage(observers, "%p is out!", rep.getName());
+		if (isPlaying) {
+			addWinner(rep);
+			if (!checkFinish())
+				Bomberman.sendMessage(observers, "%p is out!", rep.getName());
 		}
+		players.remove(rep);
 		if (players.size() <= minPlayers && getCountdownTimer() != null) {
 			getCountdownTimer().destroy();
-			for (PlayerRep p : players) {
-				Bomberman
-						.sendMessage(p.player,
+			Bomberman.sendMessage(players,
 								"Not enough players remaining. The countdown timer has been stopped.");
-			}
 		}
 	}
 
@@ -251,7 +250,7 @@ public class Game {
 			// display the scores
 			Bomberman.sendMessage(observers, ChatColor.YELLOW
 					+ "The game is over!");
-			Bomberman.sendMessage(observers, scoreDisplay(winners));
+			Bomberman.sendMessage(observers, winnersDisplay());
 
 			// reset the game
 			BoardGenerator.switchBoard(this.board, this.board, loc);
@@ -416,8 +415,8 @@ public class Game {
 		return suddenDeathStarted;
 	}
 
-	public String scoreDisplay(ArrayList<PlayerRep> winners) {
-		String display = "The scores are:\n";
+	private String winnersDisplay() {
+		String display = ChatColor.GOLD + "The winners are:\n" + ChatColor.RESET;
 		int i = 0;
 		while (i < winners.size() && i < 8) {
 			PlayerRep rep = winners.get(i);
@@ -436,10 +435,57 @@ public class Game {
 			default:
 				place = i + "th";
 			}
-			display += " " + place + ": " + rep.player.getName() + " ("
-					+ getStats(rep).kills + " kills)\n";
+			display += " " + place + ": " + rep.player.getName() + "\n";
 		}
+		display += "Type " + ChatColor.AQUA + "/bm game scores" + name + ChatColor.RESET + " to see scores";
 		return display;
+	}
+	
+	public String scoreDisplay() {
+		StringBuffer display = new StringBuffer();
+		if (isPlaying) {
+			display.append("Time remaining: " + (timeout < 0 ? "never" : deathCounter.getTimeOut() + " seconds"));
+			display.append("Time 'till suddendeath: " + (suddenDeath < 0 ? "never" : (suddenDeathStarted ? "started" : deathCounter.getSuddenDeath() + " seconds")));
+		}
+		display.append(
+				  " Pos |    Player    | Hits given | Hits taken | Kills | Suicides \n"
+				+ "-----+--------------+------------+------------+-------+----------\n");
+		for (PlayerRep rep : players) {
+			Stats stats = this.getStats(rep);
+			display.append("  " + (int)(rep.getPlayer().getHealth()) + "L ");
+			String pname = rep.getName();
+			display.append(String.format(" %12s |", pname));
+			display.append(String.format("  %8d  |", stats.hitsGiven));
+			display.append(String.format("  %8d  |", stats.hitsTaken));
+			display.append(String.format(" %5d |", stats.kills));
+			display.append(String.format(" %8d \n", stats.suicides));
+		}
+		for (int i = 0; i < winners.size() && i < 8; i++) {
+			PlayerRep rep = winners.get(i);
+			Stats stats = this.getStats(rep);
+			String place;
+			switch (i+1) {
+			case 1:
+				place = "1st";
+				break;
+			case 2:
+				place = "2nd";
+				break;
+			case 3:
+				place = "3rd";
+				break;
+			default:
+				place = i + "th";
+			}
+			display.append(" ").append(place).append(" |");
+			String pname = rep.getName();
+			display.append(String.format(" %12s |", pname));
+			display.append(String.format("  %8d  |", stats.hitsGiven));
+			display.append(String.format("  %8d  |", stats.hitsTaken));
+			display.append(String.format(" %5d |", stats.kills));
+			display.append(String.format(" %8d \n", stats.suicides));
+		}
+		return display.toString();		
 	}
 
 	public void setAutostart(boolean autostart) {

@@ -8,15 +8,17 @@ public class SuddenDeathCounter {
 	private static Plugin plugin = Bomberman.instance;
 	private Game game;
 	int sdID, toID;
+	SuddenDeath sd = new SuddenDeath();
+	Timeout to = new Timeout();
 
 	public SuddenDeathCounter(Game game) {
 		this.game = game;
 		if (game.getSuddenDeath() >= 0)
 			sdID = plugin.getServer().getScheduler()
-					.scheduleSyncRepeatingTask(plugin, new SuddenDeath(), 0, 20);
+					.scheduleSyncRepeatingTask(plugin, sd, 0, 20);
 		if (game.getTimeout() >= 0)
 			toID = plugin.getServer().getScheduler()
-					.scheduleSyncRepeatingTask(plugin, new Timeout(), 0, 20);
+					.scheduleSyncRepeatingTask(plugin, to, 0, 20);
 	}
 
 	private class SuddenDeath implements Runnable {
@@ -74,6 +76,13 @@ public class SuddenDeathCounter {
 				plugin.getServer().getScheduler().cancelTask(toID);
 			}
 		}
-		
+	}
+	
+	public int getSuddenDeath() {
+		return sd.suddenDeath;
+	}
+	
+	public int getTimeOut() {
+		return to.timeout;
 	}
 }
