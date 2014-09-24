@@ -2,7 +2,9 @@ package io.github.mdsimmo.bomberman.commands.game;
 
 import io.github.mdsimmo.bomberman.Bomberman;
 import io.github.mdsimmo.bomberman.Game;
+import io.github.mdsimmo.bomberman.Utils;
 import io.github.mdsimmo.bomberman.commands.Command;
+import io.github.mdsimmo.bomberman.commands.GameCommand;
 
 import java.util.List;
 
@@ -26,33 +28,31 @@ public class Scores extends GameCommand {
 	}
 
 	@Override
-	public boolean firstIsGame(List<String> args) {
-		// TODO Auto-generated method stub
-		return false;
-	}
-
-	@Override
 	public String name() {
-		// TODO Auto-generated method stub
-		return null;
+		return "scores";
 	}
 
 	@Override
 	public String description() {
-		// TODO Auto-generated method stub
-		return null;
+		return "displays the games scores";
 	}
 
 	@Override
 	public String usage(CommandSender sender) {
-		// TODO Auto-generated method stub
-		return null;
+		return "/" + path() + "<game>";
 	}
 
 	@Override
 	public Permission permission() {
-		// TODO Auto-generated method stub
-		return null;
+		return Permission.OBSERVER;
+	}
+
+	@Override
+	public String example(CommandSender sender, List<String> args) {
+		String game = Utils.random(Game.allGames());
+		if (game == null)
+			return "mygame";
+		return "/" + path() + game;
 	}
 
 }
