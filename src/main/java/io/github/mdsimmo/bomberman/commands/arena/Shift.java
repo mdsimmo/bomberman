@@ -3,6 +3,7 @@ package io.github.mdsimmo.bomberman.commands.arena;
 import io.github.mdsimmo.bomberman.Board;
 import io.github.mdsimmo.bomberman.BoardGenerator;
 import io.github.mdsimmo.bomberman.Bomberman;
+import io.github.mdsimmo.bomberman.Utils;
 import io.github.mdsimmo.bomberman.commands.Command;
 
 import java.util.ArrayList;
@@ -80,6 +81,14 @@ public class Shift extends Command {
 	@Override
 	public Permission permission() {
 		return Permission.ARENA_EDITING;
+	}
+
+	@Override
+	public String example(CommandSender sender, List<String> args) {
+		String arena = Utils.random(BoardGenerator.allBoards());
+		if (arena == null)
+			arena = "myarena";
+		return "/" + path() + arena + " 0 10 0 (will shift upwards by 10 blocks)";
 	}
 
 }

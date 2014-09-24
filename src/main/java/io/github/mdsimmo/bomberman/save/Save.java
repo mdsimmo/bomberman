@@ -16,6 +16,7 @@ import org.bukkit.plugin.Plugin;
 public abstract class Save extends YamlConfiguration {
 
 	protected static final Plugin plugin = Bomberman.instance;
+	protected static final String VERSION_PATH = "version";
 	protected final File file;
 	private static HashMap<String, Version> versions = new HashMap<>();
 	
@@ -27,6 +28,9 @@ public abstract class Save extends YamlConfiguration {
 		V0_0_3("0.0.3"),
 		V0_0_3a("0.0.3a"),
 		V0_0_3b("0.0.3b"),
+		V0_0_3c("0.0.3c"),
+		V0_0_3d("0.0.3d"),
+		V0_1_0("0.1.0"),
 		PAST("past"),
 		FUTURE("future");
 		
@@ -65,7 +69,7 @@ public abstract class Save extends YamlConfiguration {
 	}
 	
 	public void save() {
-		set("version", plugin.getDescription().getVersion());
+		set(VERSION_PATH, plugin.getDescription().getVersion());
 		try {
 			super.save(file);
 		} catch (IOException e) {
@@ -77,7 +81,12 @@ public abstract class Save extends YamlConfiguration {
 	 * converts the save from the specified version to the current version
 	 * @param version the verion that the save is at
 	 */
-	public abstract void convert(Version version);
+	public abstract void convert(Version version, String raw);
+	
+	public void convert() {
+		String raw = getString(VERSION_PATH);
+		convert(Version.from(raw), raw);
+	}
 	
 	/**
 	 * @deprecated use save()
@@ -118,8 +127,8 @@ public abstract class Save extends YamlConfiguration {
 	 * @param path the path to read from
 	 * @return the version
 	 */
-	public Version getVersion(String path) {
-		String v = getString(path);
+	public Version getVersion() {
+		String v = getString(VERSION_PATH);
 		return Version.from(v);
 	}
 	

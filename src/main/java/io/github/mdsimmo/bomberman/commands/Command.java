@@ -29,7 +29,7 @@ public abstract class Command {
 		}
 	}
 	
-	private Command parent;
+	protected Command parent;
 	
 	public Command(Command parent) {
 		this.parent = parent;
@@ -68,7 +68,7 @@ public abstract class Command {
 			else {
 				if (args.size() == 0) {
 					// assume asking for help
-					displayHelp(sender, args);
+					shortHelp(sender, args);
 					return true;
 				} else
 					return false;
@@ -88,10 +88,27 @@ public abstract class Command {
 	 * displays the help
 	 * @param sender person to send to
 	 */
-	public void displayHelp(CommandSender sender, List<String> args) {
+	public void shortHelp(CommandSender sender, List<String> args) {
 		Bomberman.sendHeading(sender, "Help: /" + name());
 		sender.sendMessage(info(sender));
 	}
+	
+	public void longHelp(CommandSender sender, List<String> args) {
+		Bomberman.sendHeading(sender, "Help: /" + name());
+		sender.sendMessage(info(sender));
+		String temp = extra(sender, args);
+		if (temp != null)
+			sender.sendMessage(ChatColor.GOLD + "Extra info: " + ChatColor.RESET + temp);
+		temp = example(sender, args);
+		if (temp != null)
+			sender.sendMessage(ChatColor.GOLD + "Example: " + ChatColor.RESET + temp);
+	}
+	
+	public String extra(CommandSender sender, List<String> args) {
+		return null;
+	}
+	
+	public abstract String example(CommandSender sender, List<String> args);
 	
 	/**
 	 * Some info about the command
@@ -108,7 +125,8 @@ public abstract class Command {
 	public abstract String description();
 	
 	/**
-	 * @param sender TODO
+	 * The commands syntax
+	 * @param sender the sender
 	 * @return How to use the command
 	 */
 	public abstract String usage(CommandSender sender);

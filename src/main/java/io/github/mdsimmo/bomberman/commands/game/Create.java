@@ -6,6 +6,7 @@ import io.github.mdsimmo.bomberman.Bomberman;
 import io.github.mdsimmo.bomberman.Config;
 import io.github.mdsimmo.bomberman.Game;
 import io.github.mdsimmo.bomberman.PlayerRep;
+import io.github.mdsimmo.bomberman.Utils;
 import io.github.mdsimmo.bomberman.commands.Command;
 
 import java.util.List;
@@ -50,7 +51,10 @@ public class Create extends Command {
 					arena = BoardGenerator.loadBoard((String)Config.DEFAULT_ARENA.getValue());
 				}
 				if (arena == null) {
-					Bomberman.sendMessage(sender, "Arena %b not found", args.get(1));
+					if (args.size() == 1)
+						Bomberman.sendMessage(sender, "The default arena %b is missing!", (String)Config.DEFAULT_ARENA.getValue());
+					else
+						Bomberman.sendMessage(sender, "Arena %b not found", args.get(1));
 					return true;
 				}
 				// long location getting line to round to integers...
@@ -88,6 +92,14 @@ public class Create extends Command {
 	@Override
 	public Permission permission() {
 		return Permission.GAME_DICTATE;
+	}
+
+	@Override
+	public String example(CommandSender sender, List<String> args) {
+		String arena = Utils.random(BoardGenerator.allBoards());
+		if (arena == null)
+			arena = "myarena";
+		return "/" + path() + "donut " + arena;
 	}
 
 }

@@ -58,4 +58,14 @@ public class Create extends Command {
 		return Permission.ARENA_EDITING;
 	}
 
+	@Override
+	public String example(CommandSender sender, List<String> args) {
+		return "/" + path() + "redPuddingArena";
+	}
+	
+	@Override
+	public String extra(CommandSender sender, List<String> args) {
+		return "Natural blocks are ignored when detecting structures";
+	}
+
 }

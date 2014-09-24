@@ -3,7 +3,9 @@ package io.github.mdsimmo.bomberman.commands.game;
 import io.github.mdsimmo.bomberman.Bomberman;
 import io.github.mdsimmo.bomberman.Game;
 import io.github.mdsimmo.bomberman.PlayerRep;
+import io.github.mdsimmo.bomberman.Utils;
 import io.github.mdsimmo.bomberman.commands.Command;
+import io.github.mdsimmo.bomberman.commands.GameCommand;
 
 import java.util.List;
 
@@ -41,11 +43,6 @@ public class Ignore extends GameCommand {
 	}
 
 	@Override
-	public boolean firstIsGame(List<String> args) {
-		return args.size() == 1;
-	}
-
-	@Override
 	public String name() {
 		return "ignore";
 	}
@@ -63,6 +60,14 @@ public class Ignore extends GameCommand {
 	@Override
 	public Permission permission() {
 		return Permission.OBSERVER;
+	}
+
+	@Override
+	public String example(CommandSender sender, List<String> args) {
+		String game = Utils.random(Game.allGames());
+		if (game == null)
+			game = "mygame";
+		return "/" + path() + game;
 	}
 
 }

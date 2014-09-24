@@ -68,8 +68,9 @@ public class BoardSaver extends Save{
 	public static Board loadBoard(File file) throws IOException {
 		if (!file.exists())
 			return null;
+		plugin.getLogger().info("Loading arena '" + file + "'");
 		BoardSaver save = new BoardSaver(file);
-		save.convert(save.getVersion("version"));
+		save.convert();
 		int x = save.getInt("size.x");
 		int y = save.getInt("size.y");
 		int z = save.getInt("size.z");
@@ -108,20 +109,16 @@ public class BoardSaver extends Save{
 		
 		board.setDestructables((List<Material>) Config.BLOCKS_DESTRUCTABLE.getValue(save));
 		board.setDropping((List<Material>) Config.BLOCKS_DROPPING.getValue(save));
+		plugin.getLogger().info("Arena loaded");
 		return board;
 	}
 	
 	@Override
-	public void convert(Version version) {
+	public void convert(Version version, String raw) {
 		switch (version) {
 		case FUTURE:
-			plugin.getLogger().info("Unkowen verion " + version + " in " + file.getName());
+			plugin.getLogger().info("Unkowen version '" + raw + "' in " + file.getName());
 			break;
-		case V0_0_3:
-		case V0_0_3a:
-		case V0_0_3b:
-			break;
-		case PAST:
 		default:
 			break;
 		}

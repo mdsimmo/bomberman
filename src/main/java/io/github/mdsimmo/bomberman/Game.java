@@ -262,12 +262,15 @@ public class Game {
 	}
 
 	public boolean containsLocation(Location l) {
-		return (l.getBlockX() >= loc.getX() && l.getBlockX() < loc.getBlockX()
-				+ board.xSize)
-				&& (l.getBlockY() >= loc.getY() && l.getBlockY() < loc
-						.getBlockY() + board.ySize)
-				&& (l.getBlockZ() >= loc.getZ() && l.getBlockZ() < loc
-						.getBlockZ() + board.zSize);
+		if (l.getWorld().equals(loc.getWorld()))
+			return (l.getBlockX() >= loc.getX() && l.getBlockX() < loc.getBlockX()
+					+ board.xSize)
+					&& (l.getBlockY() >= loc.getY() && l.getBlockY() < loc
+							.getBlockY() + board.ySize)
+					&& (l.getBlockZ() >= loc.getZ() && l.getBlockZ() < loc
+							.getBlockZ() + board.zSize);
+		else
+			return false;
 	}
 
 	public void destroy() {
@@ -276,8 +279,10 @@ public class Game {
 		BoardGenerator.switchBoard(board, oldBoard, loc);
 		HandlerList.unregisterAll(protector);
 		File f = new File(plugin.getDataFolder() + "/" + name + ".game");
+		BoardGenerator.remove(board.name);
+		BoardGenerator.remove(oldBoard.name);
 		f.delete();
-		f = new File(plugin.getDataFolder() + "/" + name + ".old.board");
+		f = new File(plugin.getDataFolder() + "/" + name + ".old.arena");
 		f.delete();
 		for (PlayerRep rep : PlayerRep.allPlayers()) {
 			if (rep.getGameActive() == this)
