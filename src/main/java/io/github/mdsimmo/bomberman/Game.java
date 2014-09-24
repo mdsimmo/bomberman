@@ -192,13 +192,13 @@ public class Game {
 	 * call when a player dies
 	 */
 	public void alertRemoval(PlayerRep rep) {
+		players.remove(rep);
 		if (isPlaying) {
 			addWinner(rep);
 			if (!checkFinish())
 				Bomberman.sendMessage(observers, "%p is out!", rep.getName());
 		}
-		players.remove(rep);
-		if (players.size() <= minPlayers && getCountdownTimer() != null) {
+		if (players.size() < minPlayers && getCountdownTimer() != null) {
 			getCountdownTimer().destroy();
 			Bomberman.sendMessage(players,
 								"Not enough players remaining. The countdown timer has been stopped.");
@@ -267,11 +267,11 @@ public class Game {
 		stop();
 		BoardGenerator.switchBoard(board, oldBoard, box);
 		HandlerList.unregisterAll(protector);
-		File f = new File(plugin.getDataFolder() + "/" + name + ".game");
+		File f = new File(plugin.getDataFolder(), name + ".game");
 		BoardGenerator.remove(board.name);
 		BoardGenerator.remove(oldBoard.name);
 		f.delete();
-		f = new File(plugin.getDataFolder() + "/" + name + ".old.arena");
+		f = new File(plugin.getDataFolder(), name + ".old.arena");
 		f.delete();
 		for (PlayerRep rep : PlayerRep.allPlayers()) {
 			if (rep.getGameActive() == this)
