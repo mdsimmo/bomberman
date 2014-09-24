@@ -21,6 +21,7 @@ import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.entity.EntityRegainHealthEvent;
 import org.bukkit.event.entity.EntityRegainHealthEvent.RegainReason;
+import org.bukkit.event.player.PlayerDropItemEvent;
 import org.bukkit.event.player.PlayerItemConsumeEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
@@ -219,6 +220,12 @@ public class PlayerRep implements Listener {
 				p.teleport(from);
 			}
 		}
+	}
+	
+	@EventHandler
+	public void onPlayerDropItem(PlayerDropItemEvent e) {
+		if (player == e.getPlayer() && gamePlaying != null && !gamePlaying.isPlaying)
+			e.setCancelled(true);
 	}
 	
 	@EventHandler
