@@ -1,4 +1,4 @@
-package io.github.mdsimmo.bomberman;
+package io.github.mdsimmo.bomberman.utils;
 
 import java.util.Collection;
 import java.util.Iterator;

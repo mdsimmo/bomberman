@@ -6,8 +6,8 @@ import io.github.mdsimmo.bomberman.Bomberman;
 import io.github.mdsimmo.bomberman.Config;
 import io.github.mdsimmo.bomberman.Game;
 import io.github.mdsimmo.bomberman.PlayerRep;
-import io.github.mdsimmo.bomberman.Utils;
 import io.github.mdsimmo.bomberman.commands.Command;
+import io.github.mdsimmo.bomberman.utils.Utils;
 
 import java.util.List;
 
@@ -72,9 +72,8 @@ public class Create extends Command {
 	private Game createGame(String name, Location l, Board arena) {
 		Game game = new Game(name, l);
 		game.board = arena;
-		game.oldBoard = BoardGenerator.createArena(name + ".old", game.loc,
-				game.board.xSize, game.board.ySize, game.board.zSize);
-		BoardGenerator.switchBoard(game.oldBoard, game.board, game.loc);
+		game.oldBoard = BoardGenerator.createArena(name + ".old", game.box);
+		BoardGenerator.switchBoard(game.oldBoard, game.board, game.box);
 		Game.register(game);
 		return game;
 	}

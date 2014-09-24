@@ -4,9 +4,9 @@ import io.github.mdsimmo.bomberman.Board;
 import io.github.mdsimmo.bomberman.BoardGenerator;
 import io.github.mdsimmo.bomberman.Bomberman;
 import io.github.mdsimmo.bomberman.Game;
-import io.github.mdsimmo.bomberman.Utils;
 import io.github.mdsimmo.bomberman.commands.Command;
 import io.github.mdsimmo.bomberman.commands.GameCommand;
+import io.github.mdsimmo.bomberman.utils.Utils;
 
 import java.util.List;
 
@@ -46,11 +46,10 @@ public class Arena extends GameCommand {
 			Bomberman.sendMessage(sender, "Arena %b not found", board);
 			return true;
 		}
-		BoardGenerator.switchBoard(game.board, game.oldBoard, game.loc);
+		BoardGenerator.switchBoard(game.board, game.oldBoard, game.box);
 		game.board = board;
-		game.oldBoard = BoardGenerator.createArena(game.name + ".old",
-				game.loc, board.xSize, board.ySize, board.zSize);
-		BoardGenerator.switchBoard(game.oldBoard, board, game.loc);
+		game.oldBoard = BoardGenerator.createArena(game.name + ".old", game.box);
+		BoardGenerator.switchBoard(game.oldBoard, board, game.box);
 		Bomberman.sendMessage(sender, "Game %g arena's changed", game);
 		return true;
 	}

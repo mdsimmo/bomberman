@@ -3,8 +3,8 @@ package io.github.mdsimmo.bomberman.commands.arena;
 import io.github.mdsimmo.bomberman.Board;
 import io.github.mdsimmo.bomberman.BoardGenerator;
 import io.github.mdsimmo.bomberman.Bomberman;
-import io.github.mdsimmo.bomberman.Utils;
 import io.github.mdsimmo.bomberman.commands.Command;
+import io.github.mdsimmo.bomberman.utils.Utils;
 
 import java.util.ArrayList;
 import java.util.List;

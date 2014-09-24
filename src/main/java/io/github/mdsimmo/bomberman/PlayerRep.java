@@ -130,7 +130,7 @@ public class PlayerRep implements Listener {
 			}
 		}
 		Bomberman.sendMessage(game.observers, "%p joined game %g", this, game);
-		player.teleport(game.loc.clone().add(gameSpawn));
+		player.teleport(game.box.corner().add(gameSpawn));
 		player.setGameMode(GameMode.SURVIVAL);
 		player.setHealth(game.getLives());
 		player.setMaxHealth(game.getLives());
@@ -180,7 +180,7 @@ public class PlayerRep implements Listener {
 			}
 			// track edit mode changes
 			if (editGame != null) {
-				if (editGame.containsLocation(e.getBlock().getLocation()))
+				if (editGame.box.contains(e.getBlock().getLocation()))
 					changes.put(e.getBlock(), new BlockRep(e.getBlockReplacedState()));
 				else {
 					e.setCancelled(true);
@@ -194,7 +194,7 @@ public class PlayerRep implements Listener {
 	public void onBlockBreak(BlockBreakEvent e) {
 		if (e.getPlayer() == player && editGame != null) {
 			Block b = e.getBlock();
-			if (editGame.containsLocation(b.getLocation()))
+			if (editGame.box.contains(b.getLocation()))
 				changes.put(e.getBlock(), new BlockRep(e.getBlock()));
 			else {
 				e.setCancelled(true);
@@ -224,7 +224,7 @@ public class PlayerRep implements Listener {
 	@EventHandler
 	public void onPlayerTelepot(PlayerTeleportEvent e) {
 		Player p = e.getPlayer();
-		if (p == this.player && gamePlaying != null  && !gamePlaying.containsLocation(e.getTo())) {
+		if (p == this.player && gamePlaying != null  && !gamePlaying.box.contains(e.getTo())) {
 			e.setCancelled(true);
 			Bomberman.sendMessage(p, ChatColor.RED + "Cannot teleport while part of a game");
 		}
@@ -370,8 +370,8 @@ public class PlayerRep implements Listener {
 		if (editGame == null)
 			return false;
 		for (Block b : changes.keySet()) {
-			Vector v = b.getLocation().subtract(editGame.loc).toVector();
-			if (editGame.containsLocation(b.getLocation()))
+			Vector v = b.getLocation().subtract(editGame.box.x, editGame.box.y, editGame.box.z).toVector();
+			if (editGame.box.contains(b.getLocation()))
 				editGame.board.addBlock(new BlockRep(b), v);
 		}
 		BoardGenerator.saveBoard(editGame.board);

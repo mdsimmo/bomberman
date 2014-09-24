@@ -33,13 +33,13 @@ public class GameProtection implements Listener {
 	public void onBlockBreak(BlockBreakEvent e) {
 		PlayerRep rep = PlayerRep.getPlayerRep(e.getPlayer());
 		if (rep.getGamePlaying() == game) {
-			if (game.containsLocation(e.getBlock().getLocation())) {
+			if (game.box.contains(e.getBlock().getLocation())) {
 				e.setCancelled(true);
 				return;
 			}
 		}
 		if (game.getProtected(Config.PROTECT_DESTROYING)
-				&& game.containsLocation(e.getBlock().getLocation())
+				&& game.box.contains(e.getBlock().getLocation())
 				&& !Permission.PROTECTION_VOID.isAllowedBy(e.getPlayer()))
 			e.setCancelled(true);
 	}
@@ -55,14 +55,14 @@ public class GameProtection implements Listener {
 			}
 		}
 		if (game.getProtected(Config.PROTECT_PLACING)
-				&& game.containsLocation(e.getBlock().getLocation())
+				&& game.box.contains(e.getBlock().getLocation())
 				&& !Permission.PROTECTION_VOID.isAllowedBy(e.getPlayer()))
 			e.setCancelled(true);
 	}
 	
 	@EventHandler
 	public void onBlockCobust(BlockBurnEvent e) {
-		if (game.containsLocation(e.getBlock().getLocation())) {
+		if (game.box.contains(e.getBlock().getLocation())) {
 			if (game.isPlaying)
 				e.setCancelled(true);
 			if (game.getProtected(Config.PROTECT_FIRE)) {
@@ -73,7 +73,7 @@ public class GameProtection implements Listener {
 	
 	@EventHandler
 	public void onBlockIgnite(BlockIgniteEvent e) {
-		if (game.containsLocation(e.getBlock().getLocation())) {
+		if (game.box.contains(e.getBlock().getLocation())) {
 			if (game.isPlaying)
 				e.setCancelled(true);
 			if (game.getProtected(Config.PROTECT_FIRE)) {
@@ -97,7 +97,7 @@ public class GameProtection implements Listener {
 				return;
 			}
 			if (game.getProtected(Config.PROTECT_DAMAGE)) {
-				if (game.containsLocation(e.getEntity().getLocation())) {
+				if (game.box.contains(e.getEntity().getLocation())) {
 					e.setCancelled(true);
 				}
 			}
@@ -108,7 +108,7 @@ public class GameProtection implements Listener {
 		if (e.getDamager() instanceof Player) {
 			Player player = (Player) e.getDamager();
 			if (game.getProtected(Config.PROTECT_PVP)
-					&& game.containsLocation(e.getDamager().getLocation())
+					&& game.box.contains(e.getDamager().getLocation())
 					&& !Permission.PROTECTION_VOID.isAllowedBy(player))
 				e.setCancelled(true);
 		}
@@ -117,7 +117,7 @@ public class GameProtection implements Listener {
 	@EventHandler
 	public void onExplosion(EntityExplodeEvent e) {
 		if (game.getProtected(Config.PROTECT_EXPLOSIONS)) {
-			if (game.containsLocation(e.getLocation())) {
+			if (game.box.contains(e.getLocation())) {
 				e.setCancelled(true);
 			}
 		}

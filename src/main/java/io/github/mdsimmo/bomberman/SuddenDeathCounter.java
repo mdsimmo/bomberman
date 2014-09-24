@@ -72,7 +72,7 @@ public class SuddenDeathCounter {
 			else if (timeout == 0) {
 				Bomberman.sendMessage(game.observers, ChatColor.RED + "Game timed out!");
 				game.stop();
-				BoardGenerator.switchBoard(game.board, game.board, game.loc);
+				BoardGenerator.switchBoard(game.board, game.board, game.box);
 				plugin.getServer().getScheduler().cancelTask(toID);
 			}
 		}

@@ -1,6 +1,7 @@
 package io.github.mdsimmo.bomberman;
 
 import io.github.mdsimmo.bomberman.save.BoardSaver;
+import io.github.mdsimmo.bomberman.utils.Box;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -15,6 +16,8 @@ import java.util.List;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
+import org.bukkit.entity.Entity;
+import org.bukkit.entity.Item;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.util.Vector;
@@ -60,15 +63,24 @@ public class BoardGenerator {
 	 * Note: this method should be used twice, once to the original board, then to the new board.
 	 * @param current the board currently in the world
 	 * @param next the board that you want
-	 * @param location the location of the boards
+	 * @param box the box bounding the current board
 	 */
-	public static void switchBoard(Board current, Board next, Location location) {
+	public static void switchBoard(Board current, Board next, Box box) {
+		for (Entity entity : box.getEntities()) {
+			if (entity instanceof Item)
+				entity.remove();
+		}
 		// destroy delayed blocks first
 		for (Vector v : current.delayed.keySet()) {
-			new BlockRep().setBlock(location.clone().add(v).getBlock());
+			new BlockRep().setBlock(box.fromCorner(v).getBlock());
 		}
 		// build other blocks
-		new BoardBuilder(next, location);
+		new BoardBuilder(next, box.corner());
+		
+		// set the box to be the correct size
+		box.xSize = next.xSize;
+		box.ySize = next.ySize;
+		box.zSize = next.zSize;
 	}
 	
 	
@@ -157,7 +169,7 @@ public class BoardGenerator {
 	 * @return an array with the minimum and maximm points. 
 	 */
 	@SuppressWarnings("unchecked")
-	public static Location[] getBoundingStructure(Player p, String arena) {
+	public static Box getBoundingStructure(Player p, String arena) {
 		@SuppressWarnings("deprecation")
 		Block target = p.getTargetBlock(null, 100);
 		
@@ -189,33 +201,19 @@ public class BoardGenerator {
 		checked.clear();
 		toCheck.clear();
 		
-		return new Location[] {
-				new Location(target.getWorld(), minx, miny, minz),
-				new Location(target.getWorld(), maxx, maxy, maxz)
-		};
+		return new Box(target.getWorld(), minx, miny, minz, maxx, maxy, maxz);
 	}
 	
 	/**
 	 * Creates a board arena 
 	 */
-	public static Board createArena(String arena, Location min, Location max) {
-		int xSize = max.getBlockX() - min.getBlockX()+1;
-		int ySize = max.getBlockY() - min.getBlockY()+1;
-		int zSize = max.getBlockZ() - min.getBlockZ()+1;
-		return createArena(arena, min, xSize, ySize, zSize);
-	}
-
-	/**
-	 * Creates a board arena 
-	 */
-	public static Board createArena(String arena, Location loc, int xSize, int ySize
-			, int zSize) {
-		Board board = new Board(arena, xSize, ySize, zSize);
-		for (int i = 0; i < xSize; i++) {
-			for (int j = 0; j < ySize; j++) {
-				for (int k = 0; k < zSize; k++) {
+	public static Board createArena(String arena, Box box) {
+		Board board = new Board(arena, (int)box.xSize, (int)box.ySize, (int)box.zSize);
+		for (int i = 0; i < box.xSize; i++) {
+			for (int j = 0; j < box.ySize; j++) {
+				for (int k = 0; k < box.zSize; k++) {
 					Vector v = new Vector(i, j, k);
-					BlockRep block = new BlockRep(loc.clone().add(v).getBlock());
+					BlockRep block = new BlockRep(box.corner().add(v).getBlock());
 					board.addBlock(block, v);
 				}
 			}

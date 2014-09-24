@@ -25,10 +25,10 @@ public class GameSaver extends Save {
 	@Override
 	public void save() {
 		set("name", game.name);
-		set("location.world", game.loc.getWorld().getName());
-		set("location.x", game.loc.getBlockX());
-		set("location.y", game.loc.getBlockY());
-		set("location.z", game.loc.getBlockZ());
+		set("location.world", game.box.world.getName());
+		set("location.x", (int)game.box.x);
+		set("location.y", (int)game.box.y);
+		set("location.z", (int)game.box.z);
 		set("arena.current", game.board.name);
 		set("arena.old", game.oldBoard.name);
 		BoardGenerator.saveBoard(game.oldBoard);

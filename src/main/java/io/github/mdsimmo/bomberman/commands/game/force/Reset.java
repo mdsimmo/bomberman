@@ -3,9 +3,9 @@ package io.github.mdsimmo.bomberman.commands.game.force;
 import io.github.mdsimmo.bomberman.BoardGenerator;
 import io.github.mdsimmo.bomberman.Bomberman;
 import io.github.mdsimmo.bomberman.Game;
-import io.github.mdsimmo.bomberman.Utils;
 import io.github.mdsimmo.bomberman.commands.Command;
 import io.github.mdsimmo.bomberman.commands.GameCommand;
+import io.github.mdsimmo.bomberman.utils.Utils;
 
 import java.util.List;
 
@@ -33,7 +33,7 @@ public class Reset extends GameCommand {
 			return false;
 		Bomberman.sendMessage(game.players, "Game %g resetting", game);
 		game.stop();
-		BoardGenerator.switchBoard(game.board, game.board, game.loc);
+		BoardGenerator.switchBoard(game.board, game.board, game.box);
 		Bomberman.sendMessage(sender, "Game %g reset", game);
 		return true;
 	}

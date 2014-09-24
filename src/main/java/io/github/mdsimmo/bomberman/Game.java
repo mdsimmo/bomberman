@@ -2,6 +2,7 @@ package io.github.mdsimmo.bomberman;
 
 import io.github.mdsimmo.bomberman.Bomb.DeathBlock;
 import io.github.mdsimmo.bomberman.save.GameSaver;
+import io.github.mdsimmo.bomberman.utils.Box;
 
 import java.io.File;
 import java.io.FilenameFilter;
@@ -136,7 +137,7 @@ public class Game {
 	private ItemStack fare;
 	public boolean isPlaying;
 	private int lives;
-	public Location loc;
+	public Box box;
 	private int minPlayers;
 	public String name;
 	public ArrayList<PlayerRep> observers = new ArrayList<>();
@@ -163,7 +164,7 @@ public class Game {
 
 	public Game(String name, Location loc) {
 		this.name = name;
-		this.loc = loc;
+		this.box = new Box(loc, 0, 0, 0);
 		initVars();
 		protector = new GameProtection(this);
 	}
@@ -213,7 +214,7 @@ public class Game {
 	private boolean blockEmpty(Vector v) {
 		for (PlayerRep rep : players) {
 			Block under = rep.player.getLocation().getBlock();
-			Block block = loc.clone().add(v).getBlock();
+			Block block = box.corner().add(v).getBlock();
 			if (block.equals(under))
 				return false;
 		}
@@ -253,7 +254,7 @@ public class Game {
 			Bomberman.sendMessage(observers, winnersDisplay());
 
 			// reset the game
-			BoardGenerator.switchBoard(this.board, this.board, loc);
+			BoardGenerator.switchBoard(this.board, this.board, box);
 			stop();
 
 			return true;
@@ -261,22 +262,10 @@ public class Game {
 		return !isPlaying;
 	}
 
-	public boolean containsLocation(Location l) {
-		if (l.getWorld().equals(loc.getWorld()))
-			return (l.getBlockX() >= loc.getX() && l.getBlockX() < loc.getBlockX()
-					+ board.xSize)
-					&& (l.getBlockY() >= loc.getY() && l.getBlockY() < loc
-							.getBlockY() + board.ySize)
-					&& (l.getBlockZ() >= loc.getZ() && l.getBlockZ() < loc
-							.getBlockZ() + board.zSize);
-		else
-			return false;
-	}
-
 	public void destroy() {
 		gameRegistry.remove(name.toLowerCase());
 		stop();
-		BoardGenerator.switchBoard(board, oldBoard, loc);
+		BoardGenerator.switchBoard(board, oldBoard, box);
 		HandlerList.unregisterAll(protector);
 		File f = new File(plugin.getDataFolder() + "/" + name + ".game");
 		BoardGenerator.remove(board.name);
