@@ -44,7 +44,7 @@ public class Convert extends Command {
 						(Player) sender, args.get(0));
 				Board board = BoardGenerator.createArena(args.get(0) + ".old", box);
 				BoardGenerator.saveBoard(board);
-				Game game = new Game(args.get(0), box.corner());
+				Game game = new Game(args.get(0), box);
 				game.board = board;
 				game.oldBoard = board;
 				Game.register(game);

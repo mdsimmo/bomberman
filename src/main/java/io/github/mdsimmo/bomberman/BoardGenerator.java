@@ -60,7 +60,7 @@ public class BoardGenerator {
 	/**
 	 * destroys the current board and replaces it with the next board. <br>
 	 * Use this method to destroy and create board;<br>
-	 * Note: this method should be used twice, once to the original board, then to the new board.
+	 * Note: when changing boards, this method should be used twice; once to the original board, then to the new board.
 	 * @param current the board currently in the world
 	 * @param next the board that you want
 	 * @param box the box bounding the current board
@@ -201,7 +201,7 @@ public class BoardGenerator {
 		checked.clear();
 		toCheck.clear();
 		
-		return new Box(target.getWorld(), minx, miny, minz, maxx, maxy, maxz);
+		return new Box(target.getWorld(), minx, miny, minz, maxx-minx+1, maxy-miny+1, maxz-minz+1);
 	}
 	
 	/**

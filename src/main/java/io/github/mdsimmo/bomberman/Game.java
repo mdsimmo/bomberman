@@ -162,9 +162,9 @@ public class Game {
 	private List<ItemStack> initialitems;
 	private ArrayList<PlayerRep> winners = new ArrayList<>();
 
-	public Game(String name, Location loc) {
+	public Game(String name, Box box) {
 		this.name = name;
-		this.box = new Box(loc, 0, 0, 0);
+		this.box = box;
 		initVars();
 		protector = new GameProtection(this);
 	}
@@ -431,7 +431,7 @@ public class Game {
 			}
 			display += " " + place + ": " + rep.player.getName() + "\n";
 		}
-		display += "Type " + ChatColor.AQUA + "/bm game scores" + name + ChatColor.RESET + " to see scores";
+		display += "Type " + ChatColor.AQUA + "/bm game scores " + name + ChatColor.RESET + " to see scores";
 		return display;
 	}
 	

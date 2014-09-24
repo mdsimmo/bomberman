@@ -1,11 +1,12 @@
 package io.github.mdsimmo.bomberman.save;
 
+import io.github.mdsimmo.bomberman.Board;
 import io.github.mdsimmo.bomberman.BoardGenerator;
 import io.github.mdsimmo.bomberman.Game;
+import io.github.mdsimmo.bomberman.utils.Box;
 
 import java.io.File;
 
-import org.bukkit.Location;
 import org.bukkit.World;
 
 
@@ -46,8 +47,9 @@ public class GameSaver extends Save {
 		int y = save.getInt("location.y");
 		int z = save.getInt("location.z");
 		World w = plugin.getServer().getWorld(save.getString("location.world"));
-		Game game = new Game(name, new Location(w, x, y, z));
-		game.board = BoardGenerator.loadBoard(save.getString("arena.current"));
+		Board gameBoard = BoardGenerator.loadBoard(save.getString("arena.current"));
+		Game game = new Game(name, new Box(w, x, y, z, gameBoard.xSize, gameBoard.ySize, gameBoard.zSize));
+		game.board = gameBoard;
 		game.oldBoard = BoardGenerator.loadBoard(save.getString("arena.old"));
 		Game.register(game);
 	}

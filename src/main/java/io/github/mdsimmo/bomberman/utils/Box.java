@@ -74,9 +74,9 @@ public class Box {
 	public List<Entity> getEntities() {
 		List<Entity> entities = new ArrayList<>();
 		// the "+ 16" is to make sure the chunks at the edge are also included
-		for (int xx = (int) x; xx < x + xSize + 16; xx += 16) {
-			for (int zz = (int) z; zz < z + zSize + 16; zz += 16) {
-				Chunk chunk = world.getChunkAt((int) x, (int) z);
+		for (int i = (int) x; i < (x + xSize + 16); i += 16) {
+			for (int k = (int) z; k < (z + zSize + 16); k += 16) {
+				Chunk chunk = world.getBlockAt(i, 1, k).getChunk();
 				for (Entity entity : chunk.getEntities()) {
 					if (contains(entity.getLocation()))
 						entities.add(entity);
