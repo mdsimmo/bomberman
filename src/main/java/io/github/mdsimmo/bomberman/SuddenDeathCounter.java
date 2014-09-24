@@ -12,18 +12,24 @@ public class SuddenDeathCounter {
 	Timeout to = new Timeout();
 
 	public SuddenDeathCounter(Game game) {
+		if (game == null)
+			throw new NullPointerException("Game cannot be null");
 		this.game = game;
-		if (game.getSuddenDeath() >= 0)
-			sdID = plugin.getServer().getScheduler()
-					.scheduleSyncRepeatingTask(plugin, sd, 0, 20);
-		if (game.getTimeout() >= 0)
-			toID = plugin.getServer().getScheduler()
-					.scheduleSyncRepeatingTask(plugin, to, 0, 20);
+		sd.start();
+		to.start();
 	}
 
 	private class SuddenDeath implements Runnable {
-		int suddenDeath = game.getSuddenDeath();
-				
+		int suddenDeath;
+			
+		public void start() {
+			if (game.getSuddenDeath() >= 0) {
+				suddenDeath = game.getSuddenDeath();
+				sdID = plugin.getServer().getScheduler()
+						.scheduleSyncRepeatingTask(plugin, this, 0, 20);
+			}
+		}
+		
 		@Override
 		public void run() {
 			if (!game.isPlaying)
@@ -52,8 +58,16 @@ public class SuddenDeathCounter {
 	}
 	
 	private class Timeout implements Runnable {
-		int timeout = game.getTimeout();
-				
+		int timeout;
+		
+		public void start() {
+			if (game.getTimeout() >= 0) {
+				timeout = game.getTimeout();
+				toID = plugin.getServer().getScheduler()
+						.scheduleSyncRepeatingTask(plugin, to, 0, 20);
+			}
+		}
+		
 		@Override
 		public void run() {
 			if (!game.isPlaying)
