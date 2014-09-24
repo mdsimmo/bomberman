@@ -268,8 +268,8 @@ public class PlayerRep implements Listener {
 				Bomberman.sendMessage(player, "You hit yourself!");
 			} else {
 				Bomberman.sendMessage(player,
-						"You were hit by " + attacker.getName());
-				Bomberman.sendMessage(attacker, "You hit " + player.getName());
+						"You were hit by %p", attacker);
+				Bomberman.sendMessage(attacker, "You hit %p", player);
 			}
 		} else {
 			playerStats.deaths++;
@@ -279,10 +279,8 @@ public class PlayerRep implements Listener {
 						+ "You killed yourself!");
 				playerStats.suicides++;
 			} else {
-				Bomberman.sendMessage(player, ChatColor.RED + "Killed by "
-						+ attacker.getName());
-				Bomberman.sendMessage(attacker, ChatColor.GREEN + "You killed "
-						+ player.getName());
+				Bomberman.sendMessage(player, ChatColor.RED + "Killed by %p", attacker);
+				Bomberman.sendMessage(attacker, ChatColor.YELLOW + "You killed %p", player);
 			}
 		}
 		
