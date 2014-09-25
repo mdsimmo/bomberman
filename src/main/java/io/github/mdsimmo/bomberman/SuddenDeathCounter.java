@@ -8,20 +8,28 @@ public class SuddenDeathCounter {
 	private static Plugin plugin = Bomberman.instance;
 	private Game game;
 	int sdID, toID;
+	SuddenDeath sd = new SuddenDeath();
+	Timeout to = new Timeout();
 
 	public SuddenDeathCounter(Game game) {
+		if (game == null)
+			throw new NullPointerException("Game cannot be null");
 		this.game = game;
-		if (game.getSuddenDeath() >= 0)
-			sdID = plugin.getServer().getScheduler()
-					.scheduleSyncRepeatingTask(plugin, new SuddenDeath(), 0, 20);
-		if (game.getTimeout() >= 0)
-			toID = plugin.getServer().getScheduler()
-					.scheduleSyncRepeatingTask(plugin, new Timeout(), 0, 20);
+		sd.start();
+		to.start();
 	}
 
 	private class SuddenDeath implements Runnable {
-		int suddenDeath = game.getSuddenDeath();
-				
+		int suddenDeath;
+			
+		public void start() {
+			if (game.getSuddenDeath() >= 0) {
+				suddenDeath = game.getSuddenDeath();
+				sdID = plugin.getServer().getScheduler()
+						.scheduleSyncRepeatingTask(plugin, this, 0, 20);
+			}
+		}
+		
 		@Override
 		public void run() {
 			if (!game.isPlaying)
@@ -50,8 +58,16 @@ public class SuddenDeathCounter {
 	}
 	
 	private class Timeout implements Runnable {
-		int timeout = game.getTimeout();
-				
+		int timeout;
+		
+		public void start() {
+			if (game.getTimeout() >= 0) {
+				timeout = game.getTimeout();
+				toID = plugin.getServer().getScheduler()
+						.scheduleSyncRepeatingTask(plugin, to, 0, 20);
+			}
+		}
+		
 		@Override
 		public void run() {
 			if (!game.isPlaying)
@@ -70,10 +86,17 @@ public class SuddenDeathCounter {
 			else if (timeout == 0) {
 				Bomberman.sendMessage(game.observers, ChatColor.RED + "Game timed out!");
 				game.stop();
-				BoardGenerator.switchBoard(game.board, game.board, game.loc);
+				BoardGenerator.switchBoard(game.board, game.board, game.box);
 				plugin.getServer().getScheduler().cancelTask(toID);
 			}
 		}
-		
+	}
+	
+	public int getSuddenDeath() {
+		return sd.suddenDeath;
+	}
+	
+	public int getTimeOut() {
+		return to.timeout;
 	}
 }

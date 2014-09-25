@@ -16,6 +16,7 @@ import org.bukkit.plugin.Plugin;
 public abstract class Save extends YamlConfiguration {
 
 	protected static final Plugin plugin = Bomberman.instance;
+	protected static final String VERSION_PATH = "version";
 	protected final File file;
 	private static HashMap<String, Version> versions = new HashMap<>();
 	
@@ -28,6 +29,7 @@ public abstract class Save extends YamlConfiguration {
 		V0_0_3a("0.0.3a"),
 		V0_0_3b("0.0.3b"),
 		V0_0_3c("0.0.3c"),
+		V0_0_3d("0.0.3d"),
 		V0_1_0("0.1.0"),
 		PAST("past"),
 		FUTURE("future");
@@ -66,7 +68,7 @@ public abstract class Save extends YamlConfiguration {
 	}
 	
 	public void save() {
-		set("version", plugin.getDescription().getVersion());
+		set(VERSION_PATH, plugin.getDescription().getVersion());
 		try {
 			super.save(file);
 		} catch (IOException e) {
@@ -76,10 +78,15 @@ public abstract class Save extends YamlConfiguration {
 	
 	/**
 	 * converts the save from the specified version to the current version
-	 * @param version the verion that the save is at
+	 * @param version the version that the save is at
+	 * @param raw the String of what was given in the save file
 	 */
-	public abstract void convert(Version version);
-		
+	public abstract void convert(Version version, String raw);
+	
+	public void convert() {
+		String raw = getString(VERSION_PATH);
+		convert(Version.from(raw), raw);
+	}
 	
 	/**
 	 * @deprecated use save()
@@ -128,7 +135,7 @@ public abstract class Save extends YamlConfiguration {
 	 * Gets the version String that is in the YAML file 
 	 */
 	public String getVersionRaw() {
-		return getString("version");
+		return getString(VERSION_PATH);
 	}
 	
 	public static class CompressedSection {

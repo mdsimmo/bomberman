@@ -1,15 +1,13 @@
-package io.github.mdsimmo.bomberman.commands.game;
+package io.github.mdsimmo.bomberman.commands;
+
+import io.github.mdsimmo.bomberman.Game;
+import io.github.mdsimmo.bomberman.PlayerRep;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
-
-import io.github.mdsimmo.bomberman.Bomberman;
-import io.github.mdsimmo.bomberman.Game;
-import io.github.mdsimmo.bomberman.PlayerRep;
-import io.github.mdsimmo.bomberman.commands.Command;
 
 public abstract class GameCommand extends Command {
 
@@ -38,15 +36,10 @@ public abstract class GameCommand extends Command {
 	@Override
 	public final boolean run(CommandSender sender, List<String> args) {
 		Game game = null;
-		if (firstIsGame(args)) {
+		if (args.size() >= 1 && Game.allGames().contains(args.get(0))) {
 			game = Game.findGame(args.get(0));
-			if (game == null) {
-				Bomberman.sendMessage(sender, "Game %g not found", args.get(0));
-				return true;
-			} else {
-				if (sender instanceof Player)
-					PlayerRep.getPlayerRep((Player) sender).setGameActive(game);
-			}
+			if (sender instanceof Player)
+				PlayerRep.getPlayerRep((Player) sender).setGameActive(game);
 			args.remove(0);
 		} else {
 			if (sender instanceof Player)
@@ -58,6 +51,5 @@ public abstract class GameCommand extends Command {
 	}
 	
 	public abstract boolean runShort(CommandSender sender, List<String> args, Game game);
-		
-	public abstract boolean firstIsGame(List<String> args);
+	
 }

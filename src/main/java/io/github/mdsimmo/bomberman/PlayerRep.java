@@ -21,6 +21,7 @@ import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.entity.EntityRegainHealthEvent;
 import org.bukkit.event.entity.EntityRegainHealthEvent.RegainReason;
+import org.bukkit.event.player.PlayerDropItemEvent;
 import org.bukkit.event.player.PlayerItemConsumeEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
@@ -130,7 +131,7 @@ public class PlayerRep implements Listener {
 			}
 		}
 		Bomberman.sendMessage(game.observers, "%p joined game %g", this, game);
-		player.teleport(game.loc.clone().add(gameSpawn));
+		player.teleport(game.box.corner().add(gameSpawn));
 		player.setGameMode(GameMode.SURVIVAL);
 		player.setHealth(game.getLives());
 		player.setMaxHealth(game.getLives());
@@ -173,14 +174,14 @@ public class PlayerRep implements Listener {
 			Block b = e.getBlock();
 			// create a bomb when placing tnt
 			if (gamePlaying != null) {
-				if (b.getType() == Material.TNT && gamePlaying.isPlaying) {
+				if (b.getType() == gamePlaying.getBombMaterial() && gamePlaying.isPlaying) {
 					new Bomb(gamePlaying, this, e.getBlock());
 					return;
 				}
 			}
 			// track edit mode changes
 			if (editGame != null) {
-				if (editGame.containsLocation(e.getBlock().getLocation()))
+				if (editGame.box.contains(e.getBlock().getLocation()))
 					changes.put(e.getBlock(), BlockRep.createBlock(e.getBlockReplacedState()));
 				else {
 					e.setCancelled(true);
@@ -194,7 +195,7 @@ public class PlayerRep implements Listener {
 	public void onBlockBreak(BlockBreakEvent e) {
 		if (e.getPlayer() == player && editGame != null) {
 			Block b = e.getBlock();
-			if (editGame.containsLocation(b.getLocation()))
+			if (editGame.box.contains(b.getLocation()))
 				changes.put(e.getBlock(), BlockRep.createBlock(e.getBlock()));
 			else {
 				e.setCancelled(true);
@@ -222,9 +223,15 @@ public class PlayerRep implements Listener {
 	}
 	
 	@EventHandler
+	public void onPlayerDropItem(PlayerDropItemEvent e) {
+		if (player == e.getPlayer() && gamePlaying != null && !gamePlaying.isPlaying)
+			e.setCancelled(true);
+	}
+	
+	@EventHandler
 	public void onPlayerTelepot(PlayerTeleportEvent e) {
 		Player p = e.getPlayer();
-		if (p == this.player && gamePlaying != null  && !gamePlaying.containsLocation(e.getTo())) {
+		if (p == this.player && gamePlaying != null  && !gamePlaying.box.contains(e.getTo())) {
 			e.setCancelled(true);
 			Bomberman.sendMessage(p, ChatColor.RED + "Cannot teleport while part of a game");
 		}
@@ -232,12 +239,14 @@ public class PlayerRep implements Listener {
 
 	public int bombStrength() {
 		int strength = 0;
+		if (gamePlaying == null)
+			return 0;
 		for (ItemStack stack : player.getInventory().getContents()) {
-			if (stack != null && stack.getType() == Material.BLAZE_POWDER) {
+			if (stack != null && stack.getType() == gamePlaying.getPowerMaterial()) {
 				strength += stack.getAmount();
 			}
 		}
-		return strength;
+		return Math.max(strength, 1);
 	}
 
 	public void damage(PlayerRep attacker) {
@@ -261,8 +270,8 @@ public class PlayerRep implements Listener {
 				Bomberman.sendMessage(player, "You hit yourself!");
 			} else {
 				Bomberman.sendMessage(player,
-						"You were hit by " + attacker.getName());
-				Bomberman.sendMessage(attacker, "You hit " + player.getName());
+						"You were hit by %p", attacker);
+				Bomberman.sendMessage(attacker, "You hit %p", player);
 			}
 		} else {
 			playerStats.deaths++;
@@ -272,10 +281,8 @@ public class PlayerRep implements Listener {
 						+ "You killed yourself!");
 				playerStats.suicides++;
 			} else {
-				Bomberman.sendMessage(player, ChatColor.RED + "Killed by "
-						+ attacker.getName());
-				Bomberman.sendMessage(attacker, ChatColor.GREEN + "You killed "
-						+ player.getName());
+				Bomberman.sendMessage(player, ChatColor.RED + "Killed by %p", attacker);
+				Bomberman.sendMessage(attacker, ChatColor.YELLOW + "You killed %p", player);
 			}
 		}
 		
@@ -339,7 +346,7 @@ public class PlayerRep implements Listener {
 						}
 					});
 					
-					player.addPotionEffect(new PotionEffect(potion.getType().getEffectType(), 200, 1), true);
+					player.addPotionEffect(new PotionEffect(potion.getType().getEffectType(), 20*game.getPotionDuration(), 1), true);
 				}
 				
 				// remove the bottle
@@ -370,8 +377,8 @@ public class PlayerRep implements Listener {
 		if (editGame == null)
 			return false;
 		for (Block b : changes.keySet()) {
-			Vector v = b.getLocation().subtract(editGame.loc).toVector();
-			if (editGame.containsLocation(b.getLocation()))
+			Vector v = b.getLocation().subtract(editGame.box.x, editGame.box.y, editGame.box.z).toVector();
+			if (editGame.box.contains(b.getLocation()))
 				editGame.board.addBlock(BlockRep.createBlock(b), v);
 		}
 		BoardGenerator.saveBoard(editGame.board);

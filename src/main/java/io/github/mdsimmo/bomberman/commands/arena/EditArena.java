@@ -4,10 +4,12 @@ import io.github.mdsimmo.bomberman.Bomberman;
 import io.github.mdsimmo.bomberman.Game;
 import io.github.mdsimmo.bomberman.PlayerRep;
 import io.github.mdsimmo.bomberman.commands.Command;
+import io.github.mdsimmo.bomberman.utils.Utils;
 
 import java.util.ArrayList;
 import java.util.List;
 
+import org.bukkit.ChatColor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
@@ -99,7 +101,12 @@ public class EditArena extends Command {
 
 	@Override
 	public String description() {
-		return "Edit a game's arena. This will effect all games using the same arena.";
+		return "Edit a game's arena";
+	}
+	
+	@Override
+	public String extra(CommandSender sender, List<String> args) {
+		return "Editting a game's arena effects " + ChatColor.BOLD + "all" + ChatColor.RESET + " games using the same arena.";
 	}
 
 	@Override
@@ -114,6 +121,19 @@ public class EditArena extends Command {
 	@Override
 	public Permission permission() {
 		return Permission.ARENA_EDITING;
+	}
+
+	@Override
+	public String example(CommandSender sender, List<String> args) {
+		if (sender instanceof Player) {
+			PlayerRep rep = PlayerRep.getPlayerRep((Player)sender);
+			if (rep.getEditting() != null)
+				return "/" + path() + rep.getEditting().name + " save";
+		}
+		String game = Utils.random(Game.allGames());
+		if (game == null)
+			game = "myarena";
+		return "/" + path() + game;
 	}
 
 }

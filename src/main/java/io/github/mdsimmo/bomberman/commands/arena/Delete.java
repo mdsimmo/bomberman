@@ -4,6 +4,7 @@ import io.github.mdsimmo.bomberman.BoardGenerator;
 import io.github.mdsimmo.bomberman.Bomberman;
 import io.github.mdsimmo.bomberman.Game;
 import io.github.mdsimmo.bomberman.commands.Command;
+import io.github.mdsimmo.bomberman.utils.Utils;
 
 import java.io.File;
 import java.util.List;
@@ -67,6 +68,14 @@ public class Delete extends Command {
 	@Override
 	public Permission permission() {
 		return Permission.ARENA_EDITING;
+	}
+
+	@Override
+	public String example(CommandSender sender, List<String> args) {
+		String arena = Utils.random(BoardGenerator.allBoards());
+		if (arena == null)
+			arena = "myarena";
+		return "/" + path() + arena;
 	}
 
 	

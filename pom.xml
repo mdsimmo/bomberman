@@ -4,7 +4,7 @@
 	<groupId>io.github.mdsimmo</groupId>
 	<artifactId>Bomberman</artifactId>
 	<version>0.1.0</version>
-	<name>Bomber man</name>
+	<name>Bomberman</name>
 	<build>
 		<plugins>
 			<plugin>

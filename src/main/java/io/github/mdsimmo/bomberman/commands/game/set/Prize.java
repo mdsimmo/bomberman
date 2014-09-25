@@ -3,7 +3,8 @@ package io.github.mdsimmo.bomberman.commands.game.set;
 import io.github.mdsimmo.bomberman.Bomberman;
 import io.github.mdsimmo.bomberman.Game;
 import io.github.mdsimmo.bomberman.commands.Command;
-import io.github.mdsimmo.bomberman.commands.game.GameCommand;
+import io.github.mdsimmo.bomberman.commands.GameCommand;
+import io.github.mdsimmo.bomberman.utils.Utils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -70,17 +71,6 @@ public class Prize extends GameCommand {
 	}
 	
 	@Override
-	public boolean firstIsGame(List<String> args) {
-		if (args.size() == 3)
-			return true;
-		else if (args.size() == 2) {
-			return args.get(1).equalsIgnoreCase("none")
-					|| args.get(1).equalsIgnoreCase("pot");
-		} else
-			return false;
-	}
-
-	@Override
 	public String description() {
 		return "Change a game's prize";
 	}
@@ -97,6 +87,14 @@ public class Prize extends GameCommand {
 	@Override
 	public Permission permission() {
 		return Permission.GAME_DICTATE;
+	}
+
+	@Override
+	public String example(CommandSender sender, List<String> args) {
+		String game = Utils.random(Game.allGames());
+		if (game == null)
+			game = "mygame";
+		return "/" + path() + game + "pot";
 	}
 
 }

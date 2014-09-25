@@ -1,11 +1,12 @@
 package io.github.mdsimmo.bomberman.save;
 
+import io.github.mdsimmo.bomberman.Board;
 import io.github.mdsimmo.bomberman.BoardGenerator;
 import io.github.mdsimmo.bomberman.Game;
+import io.github.mdsimmo.bomberman.utils.Box;
 
 import java.io.File;
 
-import org.bukkit.Location;
 import org.bukkit.World;
 
 
@@ -25,10 +26,10 @@ public class GameSaver extends Save {
 	@Override
 	public void save() {
 		set("name", game.name);
-		set("location.world", game.loc.getWorld().getName());
-		set("location.x", game.loc.getBlockX());
-		set("location.y", game.loc.getBlockY());
-		set("location.z", game.loc.getBlockZ());
+		set("location.world", game.box.world.getName());
+		set("location.x", (int)game.box.x);
+		set("location.y", (int)game.box.y);
+		set("location.z", (int)game.box.z);
 		set("arena.current", game.board.name);
 		set("arena.old", game.oldBoard.name);
 		BoardGenerator.saveBoard(game.oldBoard);
@@ -37,39 +38,41 @@ public class GameSaver extends Save {
 	}
 	
 	public static void loadGame(File file) {
-		GameSaver save = new GameSaver(file);;
-		save.convert(save.getVersion());
-		save.set("version", plugin.getDescription().getVersion());
-	
+		plugin.getLogger().info("Loading game '" + file + "'");
+		GameSaver save = new GameSaver(file);
+		save.convert();
 		String name = save.getString("name");
 		int x = save.getInt("location.x");
 		int y = save.getInt("location.y");
 		int z = save.getInt("location.z");
 		World w = plugin.getServer().getWorld(save.getString("location.world"));
-		Game game = new Game(name, new Location(w, x, y, z));
-		game.board = BoardGenerator.loadBoard(save.getString("arena.current"));
+		Board gameBoard = BoardGenerator.loadBoard(save.getString("arena.current"));
+		Game game = new Game(name, new Box(w, x, y, z, gameBoard.xSize, gameBoard.ySize, gameBoard.zSize));
+		game.board = gameBoard;
 		game.oldBoard = BoardGenerator.loadBoard(save.getString("arena.old"));
 		Game.register(game);
 	}
 	
 	@Override
-	public void convert(Version version) {
+	public void convert(Version version, String raw) {
 		switch (version) {
-		case FUTURE:
-			plugin.getLogger().info("Unkowen version " + getVersionRaw() + " in " + file.getName());
+		case PAST:
+		case V0_0_1:
+		case V0_0_2:
+		case V0_0_2a:
+		case V0_0_3_SNAPSHOT:
+			convertFromOld();
 			break;
 		case V0_0_3:
 		case V0_0_3a:
 		case V0_0_3b:
 		case V0_0_3c:
+		case V0_0_3d:
+			break;
 		case V0_1_0:
 			break;
-		case V0_0_1:
-		case V0_0_2:
-		case V0_0_2a:
-		case V0_0_3_SNAPSHOT:
-		case PAST:
-			convertFromOld();
+		case FUTURE:
+			plugin.getLogger().info("Unkowen version '" + raw + "' in " + file.getName());
 			break;
 		}
 	}

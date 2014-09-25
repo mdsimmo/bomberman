@@ -2,6 +2,7 @@ package io.github.mdsimmo.bomberman;
 
 import io.github.mdsimmo.bomberman.Bomb.DeathBlock;
 import io.github.mdsimmo.bomberman.save.GameSaver;
+import io.github.mdsimmo.bomberman.utils.Box;
 
 import java.io.File;
 import java.io.FilenameFilter;
@@ -16,14 +17,13 @@ import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 import org.bukkit.event.HandlerList;
-import org.bukkit.event.Listener;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.util.Vector;
 
-public class Game implements Listener {
+public class Game {
 
 	class GameStarter implements Runnable {
 		int count = 3;
@@ -71,7 +71,7 @@ public class Game implements Listener {
 				Bomberman.sendMessage(observers, ChatColor.YELLOW
 						+ "Game started!");
 				isPlaying = true;
-				new SuddenDeathCounter(Game.this);
+				deathCounter = new SuddenDeathCounter(Game.this);
 				// Cleanup and destroy the countdown timer
 				destroy();
 			}
@@ -128,6 +128,7 @@ public class Game implements Listener {
 	private boolean autostart;
 	private int autostartDelay;
 	public Board board;
+	private Material bombMaterial;
 	private int bombs;
 	private GameStarter countdownTimer = null;
 	public List<DeathBlock> deathBlocks = new ArrayList<>();
@@ -137,7 +138,7 @@ public class Game implements Listener {
 	private ItemStack fare;
 	public boolean isPlaying;
 	private int lives;
-	public Location loc;
+	public Box box;
 	private int minPlayers;
 	public String name;
 	public ArrayList<PlayerRep> observers = new ArrayList<>();
@@ -145,6 +146,7 @@ public class Game implements Listener {
 	public ArrayList<PlayerRep> players = new ArrayList<>();
 	private boolean pot;
 	private int power;
+	private Material powerMaterial;
 	private ItemStack prize;
 	private boolean protection;
 	private boolean protectFire;
@@ -154,19 +156,20 @@ public class Game implements Listener {
 	private boolean protectDamage;
 	private boolean protectPVP;
 	private GameProtection protector;
+	private int potionDuration;
 	private GameSaver save;
 	private int suddenDeath;
+	private SuddenDeathCounter deathCounter;
 	private boolean suddenDeathStarted = false;
 	private int timeout;
 	private List<ItemStack> initialitems;
 	private ArrayList<PlayerRep> winners = new ArrayList<>();
 
-	public Game(String name, Location loc) {
+	public Game(String name, Box box) {
 		this.name = name;
-		this.loc = loc;
+		this.box = box;
 		initVars();
 		protector = new GameProtection(this);
-		plugin.getServer().getPluginManager().registerEvents(this, plugin);
 	}
 
 	public void addPlayer(PlayerRep rep) {
@@ -192,18 +195,16 @@ public class Game implements Listener {
 	 * call when a player dies
 	 */
 	public void alertRemoval(PlayerRep rep) {
-		addWinner(rep);
 		players.remove(rep);
-		if (!checkFinish()) {
-			Bomberman.sendMessage(observers, "%p is out!", rep.getName());
+		if (isPlaying) {
+			addWinner(rep);
+			if (!checkFinish())
+				Bomberman.sendMessage(observers, "%p is out!", rep.getName());
 		}
-		if (players.size() <= minPlayers && getCountdownTimer() != null) {
+		if (players.size() < minPlayers && getCountdownTimer() != null) {
 			getCountdownTimer().destroy();
-			for (PlayerRep p : players) {
-				Bomberman
-						.sendMessage(p.player,
+			Bomberman.sendMessage(players,
 								"Not enough players remaining. The countdown timer has been stopped.");
-			}
 		}
 	}
 
@@ -216,7 +217,7 @@ public class Game implements Listener {
 	private boolean blockEmpty(Vector v) {
 		for (PlayerRep rep : players) {
 			Block under = rep.player.getLocation().getBlock();
-			Block block = loc.clone().add(v).getBlock();
+			Block block = box.corner().add(v).getBlock();
 			if (block.equals(under))
 				return false;
 		}
@@ -253,10 +254,10 @@ public class Game implements Listener {
 			// display the scores
 			Bomberman.sendMessage(observers, ChatColor.YELLOW
 					+ "The game is over!");
-			Bomberman.sendMessage(observers, scoreDisplay(winners));
+			Bomberman.sendMessage(observers, winnersDisplay());
 
 			// reset the game
-			BoardGenerator.switchBoard(this.board, this.board, loc);
+			BoardGenerator.switchBoard(this.board, this.board, box);
 			stop();
 
 			return true;
@@ -264,24 +265,16 @@ public class Game implements Listener {
 		return !isPlaying;
 	}
 
-	public boolean containsLocation(Location l) {
-		return (l.getBlockX() >= loc.getX() && l.getBlockX() < loc.getBlockX()
-				+ board.xSize)
-				&& (l.getBlockY() >= loc.getY() && l.getBlockY() < loc
-						.getBlockY() + board.ySize)
-				&& (l.getBlockZ() >= loc.getZ() && l.getBlockZ() < loc
-						.getBlockZ() + board.zSize);
-	}
-
 	public void destroy() {
 		gameRegistry.remove(name.toLowerCase());
 		stop();
-		BoardGenerator.switchBoard(board, oldBoard, loc);
+		BoardGenerator.switchBoard(board, oldBoard, box);
 		HandlerList.unregisterAll(protector);
-		HandlerList.unregisterAll(this);
-		File f = new File(plugin.getDataFolder() + "/" + name + ".game");
+		File f = new File(plugin.getDataFolder(), name + ".game");
+		BoardGenerator.remove(board.name);
+		BoardGenerator.remove(oldBoard.name);
 		f.delete();
-		f = new File(plugin.getDataFolder() + "/" + name + ".old.board");
+		f = new File(plugin.getDataFolder(), name + ".old.arena");
 		f.delete();
 		for (PlayerRep rep : PlayerRep.allPlayers()) {
 			if (rep.getGameActive() == this)
@@ -366,7 +359,7 @@ public class Game implements Listener {
 	}
 
 	/**
-	 * initialises the players inventory for a game handelling player's handycas
+	 * Initialises the players inventory for a game handling player's handicaps
 	 * and things <br>
 	 * make sure the player's inventory is cleared before calling this.
 	 * 
@@ -413,14 +406,17 @@ public class Game implements Listener {
 		suddenDeath = Config.SUDDEN_DEATH.getValue(config);
 		timeout = Config.TIME_OUT.getValue(config);
 		initialitems = Config.INITIAL_ITEMS.getValue(config);
+		potionDuration = Config.POTION_DURATION.getValue(config);
+		bombMaterial = Material.getMaterial((String)Config.BOMB_MATERIAL.getValue(config));
+		powerMaterial = Material.getMaterial((String)Config.POWER_MATERIAL.getValue(config));
 	}
 
 	public boolean isSuddenDeath() {
 		return suddenDeathStarted;
 	}
 
-	public String scoreDisplay(ArrayList<PlayerRep> winners) {
-		String display = "The scores are:\n";
+	private String winnersDisplay() {
+		String display = ChatColor.GOLD + "The winners are:\n" + ChatColor.RESET;
 		int i = 0;
 		while (i < winners.size() && i < 8) {
 			PlayerRep rep = winners.get(i);
@@ -439,10 +435,57 @@ public class Game implements Listener {
 			default:
 				place = i + "th";
 			}
-			display += " " + place + ": " + rep.player.getName() + " ("
-					+ getStats(rep).kills + " kills)\n";
+			display += " " + place + ": " + rep.player.getName() + "\n";
 		}
+		display += "Type " + ChatColor.AQUA + "/bm game scores " + name + ChatColor.RESET + " to see scores";
 		return display;
+	}
+	
+	public String scoreDisplay() {
+		StringBuffer display = new StringBuffer();
+		if (isPlaying) {
+			display.append("Time remaining: " + (timeout < 0 ? "never" : deathCounter.getTimeOut() + " seconds"));
+			display.append("Time 'till suddendeath: " + (suddenDeath < 0 ? "never" : (suddenDeathStarted ? "started" : deathCounter.getSuddenDeath() + " seconds")));
+		}
+		display.append(
+				  " Pos |    Player    | Hits given | Hits taken | Kills | Suicides \n"
+				+ "-----+--------------+------------+------------+-------+----------\n");
+		for (PlayerRep rep : players) {
+			Stats stats = this.getStats(rep);
+			display.append("  " + (int)(rep.getPlayer().getHealth()) + "L ");
+			String pname = rep.getName();
+			display.append(String.format(" %12s |", pname));
+			display.append(String.format("  %8d  |", stats.hitsGiven));
+			display.append(String.format("  %8d  |", stats.hitsTaken));
+			display.append(String.format(" %5d |", stats.kills));
+			display.append(String.format(" %8d \n", stats.suicides));
+		}
+		for (int i = 0; i < winners.size() && i < 8; i++) {
+			PlayerRep rep = winners.get(i);
+			Stats stats = this.getStats(rep);
+			String place;
+			switch (i+1) {
+			case 1:
+				place = "1st";
+				break;
+			case 2:
+				place = "2nd";
+				break;
+			case 3:
+				place = "3rd";
+				break;
+			default:
+				place = i + "th";
+			}
+			display.append(" ").append(place).append(" |");
+			String pname = rep.getName();
+			display.append(String.format(" %12s |", pname));
+			display.append(String.format("  %8d  |", stats.hitsGiven));
+			display.append(String.format("  %8d  |", stats.hitsTaken));
+			display.append(String.format(" %5d |", stats.kills));
+			display.append(String.format(" %8d \n", stats.suicides));
+		}
+		return display.toString();		
 	}
 
 	public void setAutostart(boolean autostart) {
@@ -650,5 +693,17 @@ public class Game implements Listener {
 
 	public void saveGame() {
 		save.save();
+	}
+	
+	public Material getBombMaterial() {
+		return bombMaterial;
+	}
+	
+	public Material getPowerMaterial() {
+		return powerMaterial;
+	}
+	
+	public int getPotionDuration() {
+		return potionDuration;
 	}
 }

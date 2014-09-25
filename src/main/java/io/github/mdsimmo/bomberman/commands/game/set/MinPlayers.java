@@ -7,7 +7,8 @@ import org.bukkit.command.CommandSender;
 import io.github.mdsimmo.bomberman.Bomberman;
 import io.github.mdsimmo.bomberman.Game;
 import io.github.mdsimmo.bomberman.commands.Command;
-import io.github.mdsimmo.bomberman.commands.game.GameCommand;
+import io.github.mdsimmo.bomberman.commands.GameCommand;
+import io.github.mdsimmo.bomberman.utils.Utils;
 
 public class MinPlayers extends GameCommand {
 
@@ -42,11 +43,6 @@ public class MinPlayers extends GameCommand {
 	}
 
 	@Override
-	public boolean firstIsGame(List<String> args) {
-		return args.size() == 2;
-	}
-	
-	@Override
 	public String description() {
 		return "Sets the min players before game can start";
 	}
@@ -59,6 +55,14 @@ public class MinPlayers extends GameCommand {
 	@Override
 	public Permission permission() {
 		return Permission.GAME_DICTATE;
+	}
+
+	@Override
+	public String example(CommandSender sender, List<String> args) {
+		String game = Utils.random(Game.allGames());
+		if (game == null)
+			game = "mygame";
+		return "/" + path() + game + "3";
 	}
 
 }

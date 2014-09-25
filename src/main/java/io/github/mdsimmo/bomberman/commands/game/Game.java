@@ -24,7 +24,8 @@ public class Game extends CommandGroup {
 				new Info(this),
 				new Join(this),
 				new Leave(this),
-				new Protect(this)
+				new Protect(this),
+				new Scores(this)
 			);
 	}
 

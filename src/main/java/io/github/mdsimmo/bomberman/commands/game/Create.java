@@ -7,6 +7,8 @@ import io.github.mdsimmo.bomberman.Config;
 import io.github.mdsimmo.bomberman.Game;
 import io.github.mdsimmo.bomberman.PlayerRep;
 import io.github.mdsimmo.bomberman.commands.Command;
+import io.github.mdsimmo.bomberman.utils.Box;
+import io.github.mdsimmo.bomberman.utils.Utils;
 
 import java.util.List;
 
@@ -50,7 +52,10 @@ public class Create extends Command {
 					arena = BoardGenerator.loadBoard((String)Config.DEFAULT_ARENA.getValue());
 				}
 				if (arena == null) {
-					Bomberman.sendMessage(sender, "Arena %b not found", args.get(1));
+					if (args.size() == 1)
+						Bomberman.sendMessage(sender, "The default arena %b is missing!", (String)Config.DEFAULT_ARENA.getValue());
+					else
+						Bomberman.sendMessage(sender, "Arena %b not found", args.get(1));
 					return true;
 				}
 				// long location getting line to round to integers...
@@ -66,11 +71,10 @@ public class Create extends Command {
 	}
 
 	private Game createGame(String name, Location l, Board arena) {
-		Game game = new Game(name, l);
+		Game game = new Game(name, new Box(l, arena.xSize, arena.ySize, arena.zSize));
 		game.board = arena;
-		game.oldBoard = BoardGenerator.createArena(name + ".old", game.loc,
-				game.board.xSize, game.board.ySize, game.board.zSize);
-		BoardGenerator.switchBoard(game.oldBoard, game.board, game.loc);
+		game.oldBoard = BoardGenerator.createArena(name + ".old", game.box);
+		BoardGenerator.switchBoard(game.oldBoard, game.board, game.box);
 		Game.register(game);
 		return game;
 	}
@@ -88,6 +92,14 @@ public class Create extends Command {
 	@Override
 	public Permission permission() {
 		return Permission.GAME_DICTATE;
+	}
+
+	@Override
+	public String example(CommandSender sender, List<String> args) {
+		String arena = Utils.random(BoardGenerator.allBoards());
+		if (arena == null)
+			arena = "myarena";
+		return "/" + path() + "donut " + arena;
 	}
 
 }

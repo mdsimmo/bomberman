@@ -66,4 +66,9 @@ public class GameList extends Command {
 		return Permission.OBSERVER;
 	}
 
+	@Override
+	public String example(CommandSender sender, List<String> args) {
+		return "/" + path();
+	}
+
 }

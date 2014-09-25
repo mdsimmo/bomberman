@@ -4,7 +4,8 @@ import io.github.mdsimmo.bomberman.BoardGenerator;
 import io.github.mdsimmo.bomberman.Bomberman;
 import io.github.mdsimmo.bomberman.Game;
 import io.github.mdsimmo.bomberman.commands.Command;
-import io.github.mdsimmo.bomberman.commands.game.GameCommand;
+import io.github.mdsimmo.bomberman.commands.GameCommand;
+import io.github.mdsimmo.bomberman.utils.Utils;
 
 import java.util.List;
 
@@ -32,14 +33,9 @@ public class Reset extends GameCommand {
 			return false;
 		Bomberman.sendMessage(game.players, "Game %g resetting", game);
 		game.stop();
-		BoardGenerator.switchBoard(game.board, game.board, game.loc);
-		Bomberman.sendMessage(sender, "Game reset", game);
+		BoardGenerator.switchBoard(game.board, game.board, game.box);
+		Bomberman.sendMessage(sender, "Game %g reset", game);
 		return true;
-	}
-
-	@Override
-	public boolean firstIsGame(List<String> args) {
-		return args.size() == 1;
 	}
 
 	@Override
@@ -55,5 +51,13 @@ public class Reset extends GameCommand {
 	@Override
 	public Permission permission() {
 		return Permission.GAME_OPERATE;
+	}
+
+	@Override
+	public String example(CommandSender sender, List<String> args) {
+		String game = Utils.random(Game.allGames());
+		if (game == null)
+			game = "mygame";
+		return "/" + path() + game;
 	}
 }

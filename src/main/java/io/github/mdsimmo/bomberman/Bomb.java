@@ -112,7 +112,7 @@ public class Bomb implements Runnable {
 			@Override
 			public void run() {
 				if (rep.getGamePlaying() == game)
-					rep.player.getInventory().addItem(new ItemStack(Material.TNT));
+					rep.player.getInventory().addItem(new ItemStack(game.getBombMaterial()));
 			}
 			
 		}
@@ -152,7 +152,7 @@ public class Bomb implements Runnable {
 				if (--duration <= 0) {
 					if (block.getType() == Material.FIRE)
 						block.setType(Material.AIR);
-						game.drop(block.getLocation(), original);
+						game.drop(block.getLocation().add(0.5, 0.5, 0.5), original);
 					plugin.getServer().getScheduler().cancelTask(dbTaskId);
 					game.deathBlocks.remove(this);
 				}
