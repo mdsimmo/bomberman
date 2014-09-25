@@ -2,7 +2,6 @@ package io.github.mdsimmo.bomberman;
 
 import io.github.mdsimmo.bomberman.commands.Command.Permission;
 
-import org.bukkit.Material;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -46,7 +45,8 @@ public class GameProtection implements Listener {
 	
 	@EventHandler
 	public void onPlaceBlock(BlockPlaceEvent e) {
-		if (e.getBlock().getType() == Material.TNT) {
+		// stop players from placing bombs before game starts
+		if (e.getBlock().getType() == game.getBombMaterial()) {
 			PlayerRep rep = PlayerRep.getPlayerRep(e.getPlayer());
 			if (rep.getGamePlaying() == game) {
 				if (!game.isPlaying)
@@ -54,6 +54,7 @@ public class GameProtection implements Listener {
 				return;
 			}
 		}
+		// protect from players placing blocks
 		if (game.getProtected(Config.PROTECT_PLACING)
 				&& game.box.contains(e.getBlock().getLocation())
 				&& !Permission.PROTECTION_VOID.isAllowedBy(e.getPlayer()))

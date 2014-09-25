@@ -174,7 +174,7 @@ public class PlayerRep implements Listener {
 			Block b = e.getBlock();
 			// create a bomb when placing tnt
 			if (gamePlaying != null) {
-				if (b.getType() == Material.TNT && gamePlaying.isPlaying) {
+				if (b.getType() == gamePlaying.getBombMaterial() && gamePlaying.isPlaying) {
 					new Bomb(gamePlaying, this, e.getBlock());
 					return;
 				}
@@ -239,12 +239,14 @@ public class PlayerRep implements Listener {
 
 	public int bombStrength() {
 		int strength = 0;
+		if (gamePlaying == null)
+			return 0;
 		for (ItemStack stack : player.getInventory().getContents()) {
-			if (stack != null && stack.getType() == Material.BLAZE_POWDER) {
+			if (stack != null && stack.getType() == gamePlaying.getPowerMaterial()) {
 				strength += stack.getAmount();
 			}
 		}
-		return Math.min(strength, 1);
+		return Math.max(strength, 1);
 	}
 
 	public void damage(PlayerRep attacker) {
@@ -344,7 +346,7 @@ public class PlayerRep implements Listener {
 						}
 					});
 					
-					player.addPotionEffect(new PotionEffect(potion.getType().getEffectType(), 200, 1), true);
+					player.addPotionEffect(new PotionEffect(potion.getType().getEffectType(), 20*game.getPotionDuration(), 1), true);
 				}
 				
 				// remove the bottle

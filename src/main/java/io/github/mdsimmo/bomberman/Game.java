@@ -128,6 +128,7 @@ public class Game {
 	private boolean autostart;
 	private int autostartDelay;
 	public Board board;
+	private Material bombMaterial;
 	private int bombs;
 	private GameStarter countdownTimer = null;
 	public List<DeathBlock> deathBlocks = new ArrayList<>();
@@ -145,6 +146,7 @@ public class Game {
 	public ArrayList<PlayerRep> players = new ArrayList<>();
 	private boolean pot;
 	private int power;
+	private Material powerMaterial;
 	private ItemStack prize;
 	private boolean protection;
 	private boolean protectFire;
@@ -154,6 +156,7 @@ public class Game {
 	private boolean protectDamage;
 	private boolean protectPVP;
 	private GameProtection protector;
+	private int potionDuration;
 	private GameSaver save;
 	private int suddenDeath;
 	private SuddenDeathCounter deathCounter;
@@ -356,7 +359,7 @@ public class Game {
 	}
 
 	/**
-	 * initialises the players inventory for a game handelling player's handycas
+	 * Initialises the players inventory for a game handling player's handicaps
 	 * and things <br>
 	 * make sure the player's inventory is cleared before calling this.
 	 * 
@@ -403,6 +406,9 @@ public class Game {
 		suddenDeath = Config.SUDDEN_DEATH.getValue(config);
 		timeout = Config.TIME_OUT.getValue(config);
 		initialitems = Config.INITIAL_ITEMS.getValue(config);
+		potionDuration = Config.POTION_DURATION.getValue(config);
+		bombMaterial = Material.getMaterial((String)Config.BOMB_MATERIAL.getValue(config));
+		powerMaterial = Material.getMaterial((String)Config.POWER_MATERIAL.getValue(config));
 	}
 
 	public boolean isSuddenDeath() {
@@ -687,5 +693,17 @@ public class Game {
 
 	public void saveGame() {
 		save.save();
+	}
+	
+	public Material getBombMaterial() {
+		return bombMaterial;
+	}
+	
+	public Material getPowerMaterial() {
+		return powerMaterial;
+	}
+	
+	public int getPotionDuration() {
+		return potionDuration;
 	}
 }
