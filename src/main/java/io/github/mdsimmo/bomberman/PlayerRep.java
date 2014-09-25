@@ -244,7 +244,7 @@ public class PlayerRep implements Listener {
 				strength += stack.getAmount();
 			}
 		}
-		return strength;
+		return Math.min(strength, 1);
 	}
 
 	public void damage(PlayerRep attacker) {
