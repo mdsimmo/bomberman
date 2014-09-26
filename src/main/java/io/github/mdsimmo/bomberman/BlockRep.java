@@ -33,7 +33,9 @@ public class BlockRep {
 			if (data.size() >= 3) {
 				expandedSection = data.get(2);
 				plugin.getLogger().info(expandedSection);
-				contents = (ItemStack[]) save.getList(expandedSection).toArray();
+				@SuppressWarnings("unchecked")
+				List<ItemStack> contents = (List<ItemStack>) save.getList(expandedSection);
+				this.contents = contents.toArray(new ItemStack[0]);
 			} else {
 				contents = new ItemStack[]{};
 				expandedSection = "extra.inventory" + id++;
@@ -42,7 +44,7 @@ public class BlockRep {
 
 		@Override
 		public String save(Save save) {
-			super.toString();
+			super.save(save);
 			sub.addParts(expandedSection);
 			save.set(expandedSection, Arrays.asList(contents));
 			return sub.toString();
@@ -86,7 +88,7 @@ public class BlockRep {
 		@Override
 		public String save(Save save) {
 			super.save(save);
-			plugin.getLogger().info("Saving a sign with text: " + text[0]);
+			plugin.getLogger().info("Saving a sign with text: " + (text.length > 0 ? text[0] : "nothing"));
 			sub.addParts(expandedSection);
 			save.set(expandedSection, Arrays.asList(text));
 			return sub.toString();
@@ -95,7 +97,7 @@ public class BlockRep {
 		@Override
 		public void setBlock(Block b) {
 			super.setBlock(b);
-			plugin.getLogger().info("Setting a sign with text: " + text[0]);
+			plugin.getLogger().info("Setting a sign with text: " + (text.length > 0 ? text[0] : "nothing"));
 			Sign sign = (Sign)b.getState();
 			for (int i = 0; i < text.length; i++)
 				sign.setLine(i, text[i]);
@@ -152,7 +154,6 @@ public class BlockRep {
 	public void setBlock(Block b) {
 		b.setType(material);
 		b.setData(data);
-		b.getState().update();
 	}
 
 	public String save(Save save) {

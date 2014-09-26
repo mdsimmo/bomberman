@@ -152,8 +152,11 @@ public abstract class Save extends YamlConfiguration {
 		}
 		
 		public void addParts(Object... parts) {
-			for (Object part : parts)
-				value += part.toString() + seperator;
+			for (Object part : parts) {
+				if (!value.isEmpty())
+					value += seperator;
+				value += part.toString();
+			}
 		}
 
 		/**
@@ -172,6 +175,8 @@ public abstract class Save extends YamlConfiguration {
 					part += c;
 				}
 			}
+			if (part != "")
+				parts.add(part);
 			return parts;
 		}
 
