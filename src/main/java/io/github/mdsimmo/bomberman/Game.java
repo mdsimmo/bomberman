@@ -271,7 +271,6 @@ public class Game {
 		BoardGenerator.switchBoard(board, oldBoard, box);
 		HandlerList.unregisterAll(protector);
 		File f = new File(plugin.getDataFolder(), name + ".game");
-		BoardGenerator.remove(board.name);
 		BoardGenerator.remove(oldBoard.name);
 		f.delete();
 		f = new File(plugin.getDataFolder(), name + ".old.arena");
