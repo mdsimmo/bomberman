@@ -4,6 +4,7 @@ import io.github.mdsimmo.bomberman.save.Save;
 import io.github.mdsimmo.bomberman.save.Save.CompressedSection;
 
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 
 import org.bukkit.Material;
@@ -12,39 +13,35 @@ import org.bukkit.block.BlockState;
 import org.bukkit.block.Sign;
 import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.plugin.Plugin;
 
 public class BlockRep {
 
 	private static class InventoryRep extends BlockRep {
 
 		private ItemStack[] contents;
-		private static int id = 0;
-		private final String expandedSection;
 
 		public InventoryRep(BlockState state) {
 			super(state);
-			expandedSection = "extra.inventory" + id++;
 			contents = ((InventoryHolder)state).getInventory().getContents();
 		}
 
 		public InventoryRep(List<String> data, Save save) {
 			super(data, save);
+			
 			if (data.size() >= 3) {
-				expandedSection = data.get(2);
-				plugin.getLogger().info(expandedSection);
+				String expandedSection = data.get(2);
 				@SuppressWarnings("unchecked")
 				List<ItemStack> contents = (List<ItemStack>) save.getList(expandedSection);
 				this.contents = contents.toArray(new ItemStack[0]);
 			} else {
 				contents = new ItemStack[]{};
-				expandedSection = "extra.inventory" + id++;
 			}
 		}
 
 		@Override
 		public String save(Save save) {
 			super.save(save);
+			String expandedSection = getExpandedSection(save);
 			sub.addParts(expandedSection);
 			save.set(expandedSection, Arrays.asList(contents));
 			return sub.toString();
@@ -61,13 +58,9 @@ public class BlockRep {
 
 	private static class SignRep extends BlockRep {
 		private String[] text;
-		private static int id = 0;
-		private final String expandedSection;
 
 		public SignRep(BlockState state) {
 			super(state);
-			plugin.getLogger().info("Found a sign!");
-			expandedSection = "extra.sign" + id++;
 			text = ((Sign) state).getLines();
 		}
 
@@ -75,12 +68,10 @@ public class BlockRep {
 			super(data, save);
 
 			if (data.size() >= 3) {
-				expandedSection = data.get(2);
-				plugin.getLogger().info(expandedSection);
+				String expandedSection = data.get(2);
 				List<String> list = (List<String>) save.getStringList(expandedSection);
 				text = list.toArray(new String[0]);
 			} else {
-				expandedSection = "extra.sign" + id++;
 				text = new String[]{};
 			}
 		}
@@ -88,7 +79,7 @@ public class BlockRep {
 		@Override
 		public String save(Save save) {
 			super.save(save);
-			plugin.getLogger().info("Saving a sign with text: " + (text.length > 0 ? text[0] : "nothing"));
+			String expandedSection = getExpandedSection(save);
 			sub.addParts(expandedSection);
 			save.set(expandedSection, Arrays.asList(text));
 			return sub.toString();
@@ -97,7 +88,6 @@ public class BlockRep {
 		@Override
 		public void setBlock(Block b) {
 			super.setBlock(b);
-			plugin.getLogger().info("Setting a sign with text: " + (text.length > 0 ? text[0] : "nothing"));
 			Sign sign = (Sign)b.getState();
 			for (int i = 0; i < text.length; i++)
 				sign.setLine(i, text[i]);
@@ -105,9 +95,10 @@ public class BlockRep {
 		}
 	}
 	
+	private static HashMap<Save, Integer> ids = new HashMap<>();
+	public static final String EXTRA_PATH = "blocks.extra";
 	private static BlockRep blank = new BlockRep(null);
 	private static CompressedSection sub = new CompressedSection(',');
-	private static Plugin plugin = Bomberman.instance;
 	
 	public static BlockRep createBlock(BlockState state) {
 		if (state instanceof InventoryHolder)
@@ -203,5 +194,14 @@ public class BlockRep {
 
 	public Material getMaterial() {
 		return material;
+	}
+	
+	private static String getExpandedSection(Save save) {
+		if (!ids.containsKey(save))
+			ids.put(save, 0);
+		Integer id = ids.get(save);
+		String section = EXTRA_PATH + ".data-" + id;
+		id++;
+		return section;
 	}
 }
