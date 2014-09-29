@@ -1,6 +1,9 @@
 package io.github.mdsimmo.bomberman;
 
 import io.github.mdsimmo.bomberman.Game.Stats;
+import io.github.mdsimmo.bomberman.messaging.Chat;
+import io.github.mdsimmo.bomberman.messaging.Language;
+import io.github.mdsimmo.bomberman.messaging.Text;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -8,7 +11,6 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.bukkit.ChatColor;
 import org.bukkit.GameMode;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -63,6 +65,7 @@ public class PlayerRep implements Listener {
 	private int immunity = 0;
 	private Game editGame = null;
 	private LinkedHashMap<Block, BlockRep> changes;
+	private Language lang = null;
 	
 	public PlayerRep(Player player) {
 		this.player = player;
@@ -108,17 +111,17 @@ public class PlayerRep implements Listener {
 	 */
 	public boolean joinGame() {
 		if (game == null) {
-			Bomberman.sendMessage(this, "You must specify a game to join");
+			Chat.sendMessage(this, Text.SPECIFY_GAME);
 			return false;
 		}
 		if (gamePlaying != null) {
-			Bomberman.sendMessage(this, "You're already part of %g", gamePlaying);
+			Chat.sendMessage(this, Text.ALREADY_PLAYING, gamePlaying);
 			return false;
 		}
 		this.spawn = player.getLocation();
 		Vector gameSpawn = game.findSpareSpawn();
 		if (gameSpawn == null) {
-			Bomberman.sendMessage(this, "Game %g is full.", game);
+			Chat.sendMessage(this, Text.GAME_FULL, game);
 			return false;
 		}
 		if (game.getFare() != null) {
@@ -126,11 +129,11 @@ public class PlayerRep implements Listener {
 					|| player.getGameMode() == GameMode.CREATIVE)
 				player.getInventory().removeItem(game.getFare());
 			else {
-				Bomberman.sendMessage(this, "You need %i to join", game.getFare());
+				Chat.sendMessage(this, Text.TOO_POOR, game, game.getFare());
 				return false;
 			}
 		}
-		Bomberman.sendMessage(game.observers, "%p joined game %g", this, game);
+		Chat.sendMessage(game.observers, Text.PLAYER_JOINED, game, this);
 		player.teleport(game.box.corner().add(gameSpawn));
 		player.setGameMode(GameMode.SURVIVAL);
 		player.setHealth(game.getLives());
@@ -185,7 +188,7 @@ public class PlayerRep implements Listener {
 					changes.put(e.getBlock(), BlockRep.createBlock(e.getBlockReplacedState()));
 				else {
 					e.setCancelled(true);
-					Bomberman.sendMessage(this, "Cannot build outside while in editmode");
+					Chat.sendMessage(this, Text.EDIT_BUILD_DENIED, editGame);
 				}
 			}
 		}
@@ -199,7 +202,7 @@ public class PlayerRep implements Listener {
 				changes.put(e.getBlock(), BlockRep.createBlock(e.getBlock()));
 			else {
 				e.setCancelled(true);
-				Bomberman.sendMessage(this, "Cannot destroy blocks outside while in editmode");
+				Chat.sendMessage(this, Text.EDIT_DESTROY_DENIED, editGame);
 			}
 		}
 	}
@@ -233,7 +236,7 @@ public class PlayerRep implements Listener {
 		Player p = e.getPlayer();
 		if (p == this.player && gamePlaying != null  && !gamePlaying.box.contains(e.getTo())) {
 			e.setCancelled(true);
-			Bomberman.sendMessage(p, ChatColor.RED + "Cannot teleport while part of a game");
+			Chat.sendMessage(this, Text.TELEPORT_DENIED, gamePlaying);
 		}
 	}
 
@@ -267,22 +270,20 @@ public class PlayerRep implements Listener {
 
 		if (!dead) {
 			if (attacker == this) {
-				Bomberman.sendMessage(player, "You hit yourself!");
+				Chat.sendMessage(this, Text.HIT_SUICIDE, gamePlaying);
 			} else {
-				Bomberman.sendMessage(player,
-						"You were hit by %p", attacker);
-				Bomberman.sendMessage(attacker, "You hit %p", player);
+				Chat.sendMessage(this, Text.HIT_BY, gamePlaying, attacker);
+				Chat.sendMessage(attacker, Text.HIT_OPPONENT, gamePlaying, this);
 			}
 		} else {
 			playerStats.deaths++;
 			attackerStats.kills++;
 			if (attacker == this) {
-				Bomberman.sendMessage(player, ChatColor.RED
-						+ "You killed yourself!");
+				Chat.sendMessage(this, Text.KILL_SUICIDE, gamePlaying);
 				playerStats.suicides++;
 			} else {
-				Bomberman.sendMessage(player, ChatColor.RED + "Killed by %p", attacker);
-				Bomberman.sendMessage(attacker, ChatColor.YELLOW + "You killed %p", player);
+				Chat.sendMessage(this, Text.KILLED_BY, gamePlaying, attacker);
+				Chat.sendMessage(attacker, Text.KILL_OPPONENT, gamePlaying, player);
 			}
 		}
 		
@@ -309,7 +310,7 @@ public class PlayerRep implements Listener {
 		if (e.getEntity() == player && gamePlaying != null) {
 			if (e.getRegainReason() == RegainReason.MAGIC)
 				if (gamePlaying.isSuddenDeath())
-					Bomberman.sendMessage(this, "No regen in sudden death!");
+					Chat.sendMessage(this, Text.NO_REGEN, gamePlaying);
 				else
 					player.setHealth(Math.min(player.getHealth() + 1,
 							player.getMaxHealth()));
@@ -404,10 +405,6 @@ public class PlayerRep implements Listener {
 		return gamePlaying != null;
 	}
 	
-	public String getName() {
-		return player.getName();
-	}
-	
 	public boolean isEditting() {
 		return editGame != null;
 	}
@@ -428,5 +425,9 @@ public class PlayerRep implements Listener {
 							}
 						}
 					});
+	}
+	
+	public Language getLanguage() {
+		return lang;
 	}
 }
