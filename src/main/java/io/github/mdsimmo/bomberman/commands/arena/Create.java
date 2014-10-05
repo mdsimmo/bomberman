@@ -3,6 +3,7 @@ package io.github.mdsimmo.bomberman.commands.arena;
 import io.github.mdsimmo.bomberman.Board;
 import io.github.mdsimmo.bomberman.BoardGenerator;
 import io.github.mdsimmo.bomberman.Bomberman;
+import io.github.mdsimmo.bomberman.Config;
 import io.github.mdsimmo.bomberman.commands.Command;
 import io.github.mdsimmo.bomberman.utils.Box;
 
@@ -35,7 +36,14 @@ public class Create extends Command {
 		if (args.size() != 1)
             return false;
         if (sender instanceof Player) {
-            Box box = BoardGenerator.getBoundingStructure((Player)sender, args.get(0));
+            Box box = BoardGenerator.getBoundingStructure((Player)sender);
+            if (box == null) {
+            	Bomberman.sendMessage(sender, "Max build size exceeded! %d blocks maximum", Config.MAX_STRUCTURE.getValue());
+            	return true;
+            }
+            if (box.xSize < 2 && box.ySize < 2 && box.zSize < 2) {
+            	Bomberman.sendMessage(sender, "Structure is only a single block! Were you looking at a natural block?");
+            }
             Board board2 = BoardGenerator.createArena(args.get(0), box);
             BoardGenerator.saveBoard(board2);
             Bomberman.sendMessage(sender, "Arena created");

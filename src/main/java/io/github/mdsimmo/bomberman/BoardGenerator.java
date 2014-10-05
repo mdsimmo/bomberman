@@ -38,6 +38,7 @@ public class BoardGenerator {
 				// already copied
 				continue;
 			}
+			plugin.getLogger().info("Copying the default arena '" + name + "'");
 			try {
 				file.createNewFile();
 				InputStream inputStream = plugin.getResource(name + ".arena");
@@ -166,15 +167,17 @@ public class BoardGenerator {
 	
 	/**
 	 * Gets the bounds of the structure.
-	 * @return an array with the minimum and maximm points. 
+	 * @return a box around the structure 
 	 */
 	@SuppressWarnings("unchecked")
-	public static Box getBoundingStructure(Player p, String arena) {
+	public static Box getBoundingStructure(Player p) {
 		@SuppressWarnings("deprecation")
 		Block target = p.getTargetBlock(null, 100);
 		
 		getConnected(target);
 		while (toCheck.size() > 0) {
+			if (checked.size() > (int)Config.MAX_STRUCTURE.getValue())
+				return null;
 			ArrayList<Block> toCheckClone = (ArrayList<Block>)toCheck.clone();
 			checked.addAll(toCheck);
 			toCheck.clear();

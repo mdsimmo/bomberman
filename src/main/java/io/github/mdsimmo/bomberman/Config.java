@@ -48,7 +48,10 @@ public enum Config {
 	PROTECT_DAMAGE ("protection.damage", true),
 	INITIAL_ITEMS("initialitems", Arrays.asList(
 			new ItemStack(Material.TNT, 3),
-			new ItemStack(Material.BLAZE_POWDER, 3)));
+			new ItemStack(Material.BLAZE_POWDER, 3))),
+	MAX_STRUCTURE("max-structue", 400000),
+	BUILD_RATE("build-rate", 500);
+	
 	
 	private static Plugin plugin = Bomberman.instance;
 	private static FileConfiguration c = plugin.getConfig();

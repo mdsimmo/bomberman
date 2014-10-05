@@ -40,8 +40,7 @@ public class Convert extends Command {
 			if (Game.findGame(args.get(0)) != null) {
 				Bomberman.sendMessage(sender, "Game %g already exists", args.get(0));
 			} else {
-				Box box = BoardGenerator.getBoundingStructure(
-						(Player) sender, args.get(0));
+				Box box = BoardGenerator.getBoundingStructure((Player) sender);
 				Board board = BoardGenerator.createArena(args.get(0) + ".old", box);
 				BoardGenerator.saveBoard(board);
 				Game game = new Game(args.get(0), box);

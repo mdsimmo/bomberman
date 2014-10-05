@@ -65,7 +65,7 @@ public class BoardSaver extends Save{
 	public static Board loadBoard(File file) throws IOException {
 		if (!file.exists())
 			return null;
-		plugin.getLogger().info("Loading arena '" + file + "'");
+		plugin.getLogger().info("Loading arena '" + file.getName() + "'");
 		BoardSaver save = new BoardSaver(file);
 		save.convert();
 		int x = save.getInt("size.x");

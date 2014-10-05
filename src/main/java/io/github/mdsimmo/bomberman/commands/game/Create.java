@@ -62,7 +62,7 @@ public class Create extends Command {
 				Location l = ((Player) sender).getLocation().getBlock().getLocation();
 				Game game = createGame(args.get(0), l, arena);
 				PlayerRep.getPlayerRep((Player)sender).setGameActive(game);
-				Bomberman.sendMessage(sender, "Game created");
+				Bomberman.sendMessage(sender, "Game beign constructed");
 			}
 		} else {
 			Bomberman.sendMessage(sender, "You must be a player");

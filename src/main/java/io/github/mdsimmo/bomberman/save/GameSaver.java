@@ -38,7 +38,7 @@ public class GameSaver extends Save {
 	}
 	
 	public static void loadGame(File file) {
-		plugin.getLogger().info("Loading game '" + file + "'");
+		plugin.getLogger().info("Loading game '" + file.getName() + "'");
 		GameSaver save = new GameSaver(file);
 		save.convert();
 		String name = save.getString("name");

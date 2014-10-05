@@ -22,7 +22,7 @@ public class BoardBuilder implements Runnable {
 	public void run() {
 		ticks++;
 		while (true) {
-			if (count > ticks*500)
+			if (count > ticks * (int)Config.BUILD_RATE.getValue())
 				return;
 			Location l = location.clone().add(board.countToVector(count));
 			board.getBlock(count).setBlock(l.getBlock());
