@@ -147,6 +147,7 @@ public class BoardGenerator {
 	private static List<Material> banned = Arrays.asList(bannedArray);
 	private static ArrayList<Block> checked = new ArrayList<>();
 	private static ArrayList<Block> toCheck = new ArrayList<>();
+	private static int maxBuildSize = Config.MAX_STRUCTURE.getValue();
 	
 	/** 
 	 * Gets the blocks surrounding the given block
@@ -176,7 +177,7 @@ public class BoardGenerator {
 		
 		getConnected(target);
 		while (toCheck.size() > 0) {
-			if (checked.size() > (int)Config.MAX_STRUCTURE.getValue())
+			if (checked.size() > maxBuildSize && maxBuildSize > 0)
 				return null;
 			ArrayList<Block> toCheckClone = (ArrayList<Block>)toCheck.clone();
 			checked.addAll(toCheck);

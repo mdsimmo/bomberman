@@ -6,6 +6,7 @@ import org.bukkit.util.Vector;
 
 public class BoardBuilder implements Runnable {
 	private static Plugin plugin = Bomberman.instance;
+	private static int buildRate = Config.BUILD_RATE.getValue();
 	private Board board;
 	private Location location;
 	private int ticks = 0, count = 0;
@@ -22,7 +23,7 @@ public class BoardBuilder implements Runnable {
 	public void run() {
 		ticks++;
 		while (true) {
-			if (count > ticks * (int)Config.BUILD_RATE.getValue())
+			if (buildRate > 0 && count > ticks * buildRate)
 				return;
 			Location l = location.clone().add(board.countToVector(count));
 			board.getBlock(count).setBlock(l.getBlock());
