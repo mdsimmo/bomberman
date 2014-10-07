@@ -45,5 +45,10 @@ public class Help extends Command {
 	public String example(CommandSender sender, List<String> args) {
 		return "/" + path() + "game create";
 	}
+	
+	@Override
+	public String extra(CommandSender sender, List<String> args) {
+		return "Shortcut is to put '?' after a command";
+	}
 
 }
