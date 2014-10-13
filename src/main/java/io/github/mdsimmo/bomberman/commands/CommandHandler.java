@@ -17,18 +17,18 @@ import org.bukkit.util.StringUtil;
 public class CommandHandler implements CommandExecutor, TabCompleter {
 	
 	private JavaPlugin plugin = Bomberman.instance;
-	private Bm handler = new Bm();
+	private Bm bmCommand = new Bm();
 	
 	public CommandHandler() {
-		plugin.getCommand("bm").setExecutor(this);
-		plugin.getCommand("bm").setTabCompleter(this);
+		plugin.getCommand("bomberman").setExecutor(this);
+		plugin.getCommand("bomberman").setTabCompleter(this);
 	}
 	
 	@Override
 	public boolean onCommand(CommandSender sender, Command command,
 			String s, String[] args) {
 		List<String> arguments = new ArrayList<String>(Arrays.asList(args));
-		io.github.mdsimmo.bomberman.commands.Command c = handler.getCommand(sender, arguments);
+		io.github.mdsimmo.bomberman.commands.Command c = bmCommand.getCommand(sender, arguments);
 		if (!c.execute(sender, arguments)) {
 			c.incorrectUsage(sender);
 			c.shortHelp(sender, arguments);
@@ -40,7 +40,7 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
 	public List<String> onTabComplete(CommandSender sender,
 			Command command, String s, String[] args) {
 		List<String> arguments = new ArrayList<String>(Arrays.asList(args));
-		io.github.mdsimmo.bomberman.commands.Command c = handler.getCommand(sender, arguments);
+		io.github.mdsimmo.bomberman.commands.Command c = bmCommand.getCommand(sender, arguments);
 		List<String> options = new ArrayList<>();
 		List<String> all = c.options(sender, arguments);
 		if (all == null)
