@@ -2,11 +2,13 @@ package io.github.mdsimmo.bomberman.commands.game;
 
 import io.github.mdsimmo.bomberman.Board;
 import io.github.mdsimmo.bomberman.BoardGenerator;
-import io.github.mdsimmo.bomberman.Bomberman;
 import io.github.mdsimmo.bomberman.Config;
 import io.github.mdsimmo.bomberman.Game;
 import io.github.mdsimmo.bomberman.PlayerRep;
 import io.github.mdsimmo.bomberman.commands.Command;
+import io.github.mdsimmo.bomberman.messaging.Chat;
+import io.github.mdsimmo.bomberman.messaging.Message;
+import io.github.mdsimmo.bomberman.messaging.Text;
 import io.github.mdsimmo.bomberman.utils.Box;
 import io.github.mdsimmo.bomberman.utils.Utils;
 
@@ -23,8 +25,8 @@ public class Create extends Command {
 	}
 
 	@Override
-	public String name() {
-		return "create";
+	public Text name() {
+		return Text.CREATE_NAME;
 	}
 
 	@Override
@@ -43,7 +45,7 @@ public class Create extends Command {
 			return false;
 		if (sender instanceof Player) {
 			if (Game.findGame(args.get(0)) != null) {
-				Bomberman.sendMessage(sender, "Game %g already exists", args.get(0));
+				Chat.sendMessage(sender, getMessage(Text.CREATE_GAME_EXISTS, sender, args.get(0)));
 			} else {
 				Board arena;
 				if (args.size() == 2) {
@@ -53,19 +55,19 @@ public class Create extends Command {
 				}
 				if (arena == null) {
 					if (args.size() == 1)
-						Bomberman.sendMessage(sender, "The default arena %b is missing!", (String)Config.DEFAULT_ARENA.getValue());
+						Chat.sendMessage(sender, getMessage(Text.CREATE_DEFAULTMISSING, sender, (String)Config.DEFAULT_ARENA.getValue()));
 					else
-						Bomberman.sendMessage(sender, "Arena %b not found", args.get(1));
+						Chat.sendMessage(sender, getMessage(Text.INVALID_ARENA, sender, args.get(1)));
 					return true;
 				}
 				// long location getting line to round to integers...
 				Location l = ((Player) sender).getLocation().getBlock().getLocation();
 				Game game = createGame(args.get(0), l, arena);
 				PlayerRep.getPlayerRep((Player)sender).setGameActive(game);
-				Bomberman.sendMessage(sender, "Game created");
+				Chat.sendMessage(sender, getMessage(Text.CREATE_SUCCESS, sender, game));
 			}
 		} else {
-			Bomberman.sendMessage(sender, "You must be a player");
+			Chat.sendMessage(sender, getMessage(Text.MUST_BE_PLAYER, sender));
 		}
 		return true;
 	}
@@ -80,26 +82,30 @@ public class Create extends Command {
 	}
 
 	@Override
-	public String description() {
-		return "Generate a BomberMan game.";
-	}
-
-	@Override
-	public String usage(CommandSender sender) {
-		return "/" + path() + "<game> [arena]";
-	}
-
-	@Override
 	public Permission permission() {
 		return Permission.GAME_DICTATE;
 	}
 
 	@Override
-	public String example(CommandSender sender, List<String> args) {
+	public Message example(CommandSender sender, List<String> args) {
 		String arena = Utils.random(BoardGenerator.allBoards());
-		if (arena == null)
-			arena = "myarena";
-		return "/" + path() + "donut " + arena;
+		arena = arena == null ? "myarena" : arena;
+		return getMessage(Text.CONVERT_EXAMPLE, sender, arena);
+	}
+
+	@Override
+	public Message extra(CommandSender sender, List<String> args) {
+		return getMessage(Text.CREATE_EXTRA, sender);
+	}
+
+	@Override
+	public Message description(CommandSender sender, List<String> args) {
+		return getMessage(Text.CREATE_DESCRIPTION, sender);
+	}
+
+	@Override
+	public Message usage(CommandSender sender, List<String> args) {
+		return getMessage(Text.CREATE_USAGE, sender);
 	}
 
 }

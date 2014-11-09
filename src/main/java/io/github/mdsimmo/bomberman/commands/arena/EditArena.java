@@ -1,15 +1,17 @@
 package io.github.mdsimmo.bomberman.commands.arena;
 
-import io.github.mdsimmo.bomberman.Bomberman;
+import io.github.mdsimmo.bomberman.Board;
 import io.github.mdsimmo.bomberman.Game;
 import io.github.mdsimmo.bomberman.PlayerRep;
 import io.github.mdsimmo.bomberman.commands.Command;
+import io.github.mdsimmo.bomberman.messaging.Chat;
+import io.github.mdsimmo.bomberman.messaging.Message;
+import io.github.mdsimmo.bomberman.messaging.Text;
 import io.github.mdsimmo.bomberman.utils.Utils;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import org.bukkit.ChatColor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
@@ -20,8 +22,8 @@ public class EditArena extends Command {
 	}
 
 	@Override
-	public String name() {
-		return "edit";
+	public Text name() {
+		return Text.EDIT_NAME;
 	}
 
 	@Override
@@ -32,9 +34,9 @@ public class EditArena extends Command {
 		if (args.size() == 1) {
 			if (rep.isEditting()) {
 				List<String> list = new ArrayList<>();
-				list.add("save");
-				list.add("discard");
-				list.add("ignore");
+				list.add(getMessage(Text.EDIT_SAVE, sender).toString());
+				list.add(getMessage(Text.EDIT_DISCARD, sender).toString());
+				list.add(getMessage(Text.EDIT_IGNORE, sender).toString());
 				return list;
 			} else {
 				return Game.allGames();
@@ -49,48 +51,53 @@ public class EditArena extends Command {
 			return false;
 		
 		if (sender instanceof Player == false) {
-			Bomberman.sendMessage(sender, "You must be a player");
+			Chat.sendMessage(sender, getMessage(Text.MUST_BE_PLAYER, sender));
 			return true;
 		}
 		Player player = (Player)sender;
 		PlayerRep rep = PlayerRep.getPlayerRep(player);
+		Game game = rep.getEditting();
+		Board board = null;
+		if (game != null)
+			board = game.board;
+			
 		if (args.size() == 0) {
 			if (rep.startEditMode()) {
-				Bomberman.sendMessage(sender, "Edit mode started in game %g", rep.getEditting());
+				Chat.sendMessage(sender, getMessage(Text.EDIT_STARTED, sender, game, board));
 			} else {
 				if (rep.isEditting())
-					Bomberman.sendMessage(sender, "You're already editting %g", rep.getEditting());
+					Chat.sendMessage(sender, getMessage(Text.EDIT_ALREADY_STARTED, sender, game, board));
 				else
-					Bomberman.sendMessage(sender, "Couldn't start edit mode in game %g", rep.getEditting());
+					Chat.sendMessage(sender, getMessage(Text.EDIT_CANT_START, sender, game, board));
 			}
 		} else {
-			switch (args.get(0).toLowerCase()) {
-			case "save":
+			String arg = args.get(0);
+			String save = getMessage(Text.EDIT_SAVE, sender).toString();
+			String discard = getMessage(Text.EDIT_DISCARD, sender).toString();
+			String ignore = getMessage(Text.EDIT_IGNORE, sender).toString();
+			if (save.equalsIgnoreCase(arg)) {
 				if (rep.saveChanges())
-					Bomberman.sendMessage(sender, "Changes saved");
+					Chat.sendMessage(sender, getMessage(Text.EDIT_CHANGES_SAVED, sender, game, board));
 				else
-					Bomberman.sendMessage(sender, "Edit mode needs to be started first");
-				break;
-			case "discard":
+					Chat.sendMessage(sender, getMessage(Text.EDIT_PROMPT_START, sender, game, board));
+			} else if (discard.equalsIgnoreCase(arg)) {
 				if (rep.discardChanges(true))
-					Bomberman.sendMessage(sender, "Changes removed");
+					Chat.sendMessage(sender, getMessage(Text.EDIT_CANGES_REMOVED, sender, game, board));
 				else {
-					Bomberman.sendMessage(sender, "Edit mode needs to be started first");
+					Chat.sendMessage(sender, getMessage(Text.EDIT_PROMPT_START, sender, game, board));
 				}
-				break;
-			case "ignore":
-				if (rep.discardChanges(true))
-					Bomberman.sendMessage(sender, "Edit mode quit");
+			} else if (ignore.equalsIgnoreCase(arg)) {
+				if (rep.discardChanges(false))
+					Chat.sendMessage(sender, getMessage(Text.EDIT_MODE_QUIT, sender, game, board));
 				else {
-					Bomberman.sendMessage(sender, "Edit mode needs to be started first");
+					Chat.sendMessage(sender, getMessage(Text.EDIT_PROMPT_START, sender, game, board));
 				}
-				break;
-			default:
-				Game game = Game.findGame(args.get(0));
-				if (game == null)
+			} else {
+				Game game2 = Game.findGame(args.get(0));
+				if (game2 == null)
 					return false;
 				else {
-					rep.setGameActive(game);
+					rep.setGameActive(game2);
 					args.remove(0);
 					return run(sender, args);
 				}
@@ -100,22 +107,13 @@ public class EditArena extends Command {
 	}
 
 	@Override
-	public String description() {
-		return "Edit a game's arena";
-	}
-	
-	@Override
-	public String extra(CommandSender sender, List<String> args) {
-		return "Editting a game's arena effects " + ChatColor.BOLD + "all" + ChatColor.RESET + " games using the same arena.";
+	public Message extra(CommandSender sender, List<String> args) {
+		return getMessage(Text.EDIT_EXTRA, sender);
 	}
 
 	@Override
-	public String usage(CommandSender sender) {
-		return "\n"
-				+ "/" + path() + "- start edit mode\n"
-				+ "/" + path() + "save - save changes"
-				+ "/" + path() + "discard - remove changes"
-				+ "/" + path() + "ignore - keep changes but don't save them";
+	public Message usage(CommandSender sender, List<String> args) {
+		return getMessage(Text.EDIT_USAGE, sender);
 	}
 
 	@Override
@@ -124,16 +122,16 @@ public class EditArena extends Command {
 	}
 
 	@Override
-	public String example(CommandSender sender, List<String> args) {
-		if (sender instanceof Player) {
-			PlayerRep rep = PlayerRep.getPlayerRep((Player)sender);
-			if (rep.getEditting() != null)
-				return "/" + path() + rep.getEditting().name + " save";
-		}
+	public Message example(CommandSender sender, List<String> args) {
 		String game = Utils.random(Game.allGames());
 		if (game == null)
-			game = "myarena";
-		return "/" + path() + game;
+			game = "mygame";
+		return getMessage(Text.EDIT_EXAMPLE, sender, game);
+	}
+
+	@Override
+	public Message description(CommandSender sender, List<String> args) {
+		return getMessage(Text.EDIT_DESCRIPTION, sender);
 	}
 
 }

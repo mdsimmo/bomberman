@@ -1,11 +1,11 @@
 package io.github.mdsimmo.bomberman.commands.game;
 
-import io.github.mdsimmo.bomberman.Bomberman;
 import io.github.mdsimmo.bomberman.Game;
 import io.github.mdsimmo.bomberman.PlayerRep;
 import io.github.mdsimmo.bomberman.commands.Command;
 import io.github.mdsimmo.bomberman.commands.GameCommand;
-import io.github.mdsimmo.bomberman.utils.Utils;
+import io.github.mdsimmo.bomberman.messaging.Chat;
+import io.github.mdsimmo.bomberman.messaging.Text;
 
 import java.util.List;
 
@@ -19,8 +19,8 @@ public class Join extends GameCommand {
 	}
 
 	@Override
-	public String name() {
-		return "join";
+	public Text name() {
+		return Text.JOIN_NAME;
 	}
 
 	@Override
@@ -33,11 +33,11 @@ public class Join extends GameCommand {
 		if (args.size() != 0)
 			return false;
 		if (sender instanceof Player == false) {
-			Bomberman.sendMessage(sender, "You must be a player to join");
+			Chat.sendMessage(sender, getMessage(Text.MUST_BE_PLAYER, sender));
 			return true;
 		}	
 		if (game.isPlaying) {
-			Bomberman.sendMessage(sender, "Game has already started");
+			Chat.sendMessage(sender, getMessage(Text.JOIN_GAME_STARTED, sender, game));
 			return true;
 		}
 		PlayerRep rep = PlayerRep.getPlayerRep((Player) sender);
@@ -47,26 +47,28 @@ public class Join extends GameCommand {
 	}
 	
 	@Override
-	public String description() {
-		return "join a game";
-	}
-
-	@Override
-	public String usage(CommandSender sender) {
-		return "/" + path() + "<game>";
-	}
-
-	@Override
 	public Permission permission() {
 		return Permission.PLAYER;
 	}
 
 	@Override
-	public String example(CommandSender sender, List<String> args) {
-		String game = Utils.random(Game.allGames());
-		if (game == null)
-			game = "mygame";
-		return "/" + path() + game;
+	public Text extraShort() {
+		return Text.JOIN_EXTRA;
+	}
+
+	@Override
+	public Text exampleShort() {
+		return Text.JOIN_EXAMPLE;
+	}
+
+	@Override
+	public Text descriptionShort() {
+		return Text.JOIN_DESCRIPTION;
+	}
+
+	@Override
+	public Text usageShort() {
+		return Text.JOIN_USAGE;
 	}
 
 }

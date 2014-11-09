@@ -3,7 +3,6 @@ package io.github.mdsimmo.bomberman.messaging;
 import io.github.mdsimmo.bomberman.PlayerRep;
 import io.github.mdsimmo.bomberman.commands.Command.Permission;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -12,42 +11,46 @@ import org.bukkit.command.CommandSender;
 
 public abstract class Chat {
 
-	public static void sendMessage(PlayerRep rep, Text text, Object... objs) {
-		sendMessage(rep.player, text, rep.getLanguage(), objs);
+	public static void sendText(PlayerRep rep, Text text, Object... objs) {
+		sendText(rep.player, rep.getLanguage(), text, objs);
 	}
 	
-	public static void sendMessage(List<PlayerRep> playerList, Text text, Object ... objs) {
+	public static void sendText(List<PlayerRep> playerList, Text text, Object ... objs) {
 		for (PlayerRep rep : playerList)
-			sendMessage(rep, text, objs);
+			sendText(rep, text, objs);
 	}
 	
-	public static void sendMessage(CommandSender sender, Text text, Language lang, Object ... objs) {
-		sendMessage(sender, text.getMessage(sender, lang, objs));
+	public static void sendText(CommandSender sender, Language lang, Text text, Object ... objs) {
+		sendMessage(sender, text.getMessage(lang, sender, objs));
 	}
 	
-	public static void sendMessage(ArrayList<PlayerRep> playerList, Message message) {
-		for (PlayerRep rep : playerList) {
-			sendMessage(rep, message);
-		}
+	public static void sendText(CommandSender sender, Text text, Object ... objs) {
+		sendText(sender, PlayerRep.getLanguage(sender), text, objs);
 	}
-
+	
 	public static void sendMessage(PlayerRep rep, Message message) {
 		sendMessage(rep.player, message);
 	}
 	
 	public static void sendMessage(CommandSender sender, Message message) {
-		messageRaw(sender, ChatColor.GREEN + "[BomberMan] " + ChatColor.RESET + message);
+		if (message.isBlank())
+			return;
+		messageRaw(sender, ChatColor.GREEN + "[BomberMan] " + ChatColor.RESET + message.toString());
 	}
 
-	public static void sendMessage(CommandSender sender, Map<Message, Message> points) {
+	public static void sendMap(CommandSender sender, Map<Message, Message> points) {
 		for (Map.Entry<Message, Message> point : points.entrySet()) {
+			if (point.getValue().isBlank() || point.getKey().isBlank())
+				continue;
 			messageRaw(sender, "   " + ChatColor.GOLD + point.getKey() + ": "
 					+ ChatColor.RESET + point.getValue());
 		}
 	}
 
-	public static void sendMessage(CommandSender sender, List<Message> list) {
+	public static void sendList(CommandSender sender, List<Message> list) {
 		for (Message line : list) {
+			if (line.isBlank())
+				continue;
 			messageRaw(sender, "   " + line);
 		}
 	}
@@ -58,6 +61,8 @@ public abstract class Chat {
 	}
 
 	public static void sendHeading(CommandSender sender, Message message) {
+		if (message.isBlank())
+			return;
 		sender.sendMessage(heading(message.toString()));
 	}
 	

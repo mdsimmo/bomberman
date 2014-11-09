@@ -1,10 +1,12 @@
 package io.github.mdsimmo.bomberman.messaging;
 
+import io.github.mdsimmo.bomberman.Board;
+import io.github.mdsimmo.bomberman.Game;
 import io.github.mdsimmo.bomberman.PlayerRep;
 
+import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.command.CommandSender;
-import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
 
@@ -14,17 +16,18 @@ public class Message {
 		private static final long serialVersionUID = 1L;
 
 		public InvalidMessageException(String reason, int location) {
-			this(reason + " in message '" + text + "' at position " + location);
+			super(reason + " in message '" + text + "' at position " + location);
 		}
 
 		public InvalidMessageException(String reason) {
-			super(reason);
+			super(reason + " in message '" + text + "'");
 		}
 
 	}
 
 	private final String text;
 	private final Object[] objects;
+	private ChatColor normal = null;
 
 	public Message(CommandSender sender, String text, Object... objects) {
 		this.text = text;
@@ -34,7 +37,7 @@ public class Message {
 			objs[i+1] = objects[i];
 		this.objects = objs;
 	}
-
+	
 	@Override
 	public String toString() {
 		StringBuffer formated = new StringBuffer();
@@ -42,6 +45,11 @@ public class Message {
 		for (int i = 0; i < length; i++) {
 			char c = text.charAt(i);
 			if (c != '{') {
+				if (c == '}' && normal != null) {
+					normal = null;
+					formated.append(ChatColor.RESET);
+					continue;
+				}
 				formated.append(c);
 			} else {
 				// Get data stuff
@@ -50,26 +58,32 @@ public class Message {
 					c = text.charAt(i);
 				} while (c == ' ');
 
-				// get the reference
-				if (!Character.isDigit(c))
-					throw new InvalidMessageException("Expected digit", i);
-				String ref = "";
+				// get the value
+				String val = "";
 				do {
-					ref += c;
+					val += c;
 					i++;
 					c = text.charAt(i);
-				} while (Character.isDigit(c));
-				int reference;
-				try {
-					reference = Integer.parseInt(ref);
-				} catch (NumberFormatException e) {
-					throw new InvalidMessageException("Funny looking numbers",
-							i);
-				}
-
+				} while (Character.isJavaIdentifierPart(c));
+				
 				while (c == ' ') {
 					i++;
 					c = text.charAt(i);
+				}
+				
+				int reference = 0;
+				try {
+					reference = Integer.parseInt(val);
+				} catch (NumberFormatException e) {
+					try {
+						normal = ChatColor.valueOf(val);
+						formated.append(normal);
+						if (c != '|')
+							throw new InvalidMessageException("Expected '|'", i);
+						continue;
+					} catch (IllegalArgumentException e2) {
+						throw new InvalidMessageException("Expected number or ChatColor", i);
+					}
 				}
 
 				if (c != '}') {
@@ -91,10 +105,14 @@ public class Message {
 	private String format(Object obj) {
 		if (obj instanceof Message)
 			return obj.toString();
+		if (obj instanceof Game)
+			return ((Game)obj).name;
+		if (obj instanceof Board)
+			return ((Board)obj).name;
 		if (obj instanceof PlayerRep)
 			return ((PlayerRep)obj).player.getName();
-		if (obj instanceof Player)
-			return ((Player)obj).getName();
+		if (obj instanceof CommandSender)
+			return ((CommandSender)obj).getName();
 		if (obj instanceof ItemStack) {
 			ItemStack stack = (ItemStack)obj;
 			int amount = stack.getAmount();
@@ -102,5 +120,9 @@ public class Message {
 			return amount + " " + type.toString().replace('_', ' ').toLowerCase();
 		}
 		return obj.toString();
+	}
+	
+	public boolean isBlank() {
+		return text.isEmpty();
 	}
 }

@@ -1,11 +1,12 @@
 package io.github.mdsimmo.bomberman.commands.game.force;
 
 import io.github.mdsimmo.bomberman.BoardGenerator;
-import io.github.mdsimmo.bomberman.Bomberman;
 import io.github.mdsimmo.bomberman.Game;
+import io.github.mdsimmo.bomberman.PlayerRep;
 import io.github.mdsimmo.bomberman.commands.Command;
 import io.github.mdsimmo.bomberman.commands.GameCommand;
-import io.github.mdsimmo.bomberman.utils.Utils;
+import io.github.mdsimmo.bomberman.messaging.Chat;
+import io.github.mdsimmo.bomberman.messaging.Text;
 
 import java.util.List;
 
@@ -18,8 +19,8 @@ public class Reset extends GameCommand {
 	}
 
 	@Override
-	public String name() {
-		return "reset";
+	public Text name() {
+		return Text.RESET_NAME;
 	}
 	
 	@Override
@@ -31,21 +32,13 @@ public class Reset extends GameCommand {
 	public boolean runShort(CommandSender sender, List<String> args, Game game) {
 		if (args.size() != 0)
 			return false;
-		Bomberman.sendMessage(game.players, "Game %g resetting", game);
+		
+		for (PlayerRep rep : game.players)
+			Chat.sendMessage(rep.getPlayer(), getMessage(Text.RESET_SUCCESS_P, rep.getPlayer(), game));
 		game.stop();
 		BoardGenerator.switchBoard(game.board, game.board, game.box);
-		Bomberman.sendMessage(sender, "Game %g reset", game);
+		Chat.sendMessage(sender, getMessage(Text.RESET_SUCCESS, sender, game));
 		return true;
-	}
-
-	@Override
-	public String description() {
-		return "Forcibly reset a game to its starting point";
-	}
-
-	@Override
-	public String usage(CommandSender sender) {
-		return "/" + path() + "<game>";
 	}
 
 	@Override
@@ -54,10 +47,22 @@ public class Reset extends GameCommand {
 	}
 
 	@Override
-	public String example(CommandSender sender, List<String> args) {
-		String game = Utils.random(Game.allGames());
-		if (game == null)
-			game = "mygame";
-		return "/" + path() + game;
+	public Text extraShort() {
+		return Text.RESET_EXTRA;
+	}
+
+	@Override
+	public Text exampleShort() {
+		return Text.RESET_EXAMPLE;
+	}
+
+	@Override
+	public Text descriptionShort() {
+		return Text.RESET_DESCRIPTION;
+	}
+
+	@Override
+	public Text usageShort() {
+		return Text.RESET_USAGE;
 	}
 }

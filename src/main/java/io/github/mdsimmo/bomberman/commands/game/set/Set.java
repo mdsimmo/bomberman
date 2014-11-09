@@ -1,17 +1,18 @@
 package io.github.mdsimmo.bomberman.commands.game.set;
 
+import java.util.List;
+
+import org.bukkit.command.CommandSender;
+
 import io.github.mdsimmo.bomberman.commands.Command;
 import io.github.mdsimmo.bomberman.commands.CommandGroup;
+import io.github.mdsimmo.bomberman.messaging.Message;
+import io.github.mdsimmo.bomberman.messaging.Text;
 
 public class Set extends CommandGroup {
 
 	public Set(Command parent) {
 		super(parent);
-	}
-
-	@Override
-	public String description() {
-		return "Change a game's settings";
 	}
 
 	@Override
@@ -33,13 +34,18 @@ public class Set extends CommandGroup {
 	}
 
 	@Override
-	public String name() {
-		return "set";
+	public Text name() {
+		return Text.SET_NAME;
 	}
 
 	@Override
 	public Permission permission() {
 		return Permission.GAME_DICTATE;
+	}
+
+	@Override
+	public Message description(CommandSender sender, List<String> args) {
+		return Text.SET_DESCRIPTION.getMessage(sender);
 	}
 
 }

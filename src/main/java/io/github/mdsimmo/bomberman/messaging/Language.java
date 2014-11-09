@@ -32,9 +32,9 @@ public class Language {
 	}
 	
 	public String translate(Text text) {
-		String t = save.getString(text.path);
+		String t = save.getString(text.getPath());
 		if (t == null)
-			return text.message;
+			return text.getDefault();
 		else
 			return t;
 	}

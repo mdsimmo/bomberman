@@ -1,9 +1,11 @@
 package io.github.mdsimmo.bomberman.commands.arena;
 
 import io.github.mdsimmo.bomberman.BoardGenerator;
-import io.github.mdsimmo.bomberman.Bomberman;
 import io.github.mdsimmo.bomberman.Game;
 import io.github.mdsimmo.bomberman.commands.Command;
+import io.github.mdsimmo.bomberman.messaging.Chat;
+import io.github.mdsimmo.bomberman.messaging.Message;
+import io.github.mdsimmo.bomberman.messaging.Text;
 import io.github.mdsimmo.bomberman.utils.Utils;
 
 import java.io.File;
@@ -18,8 +20,8 @@ public class Delete extends Command {
 	}
 
 	@Override
-	public String name() {
-		return "delete";
+	public Text name() {
+		return Text.DELETE_NAME;
 	}
 
 	@Override
@@ -37,45 +39,50 @@ public class Delete extends Command {
 		String arena = args.get(0);
 		File f = BoardGenerator.toFile(arena);
 		if (!f.exists()) {
-			Bomberman.sendMessage(sender, "Arena %b does not exist", arena);
+			Chat.sendMessage(sender, getMessage(Text.INVALID_ARENA, sender, arena));
 			return true;
 		}
 		for (String name : Game.allGames()) {
 			Game game = Game.findGame(name);
 			if (game.board.name.equalsIgnoreCase(args.get(0)) || game.oldBoard.name.equalsIgnoreCase(args.get(0))) {
-				Bomberman.sendMessage(sender, "Cannot delete arena since it is being used by %g", game);
+				Chat.sendMessage(sender, getMessage(Text.DELETE_ARENA_USED, sender, arena, game));
 				return true;
 			}
 		}
 		BoardGenerator.remove(arena);
 		if (f.delete())
-			Bomberman.sendMessage(sender, "Arena %b successfully deleted", arena);
+			Chat.sendMessage(sender, getMessage(Text.DELETE_SUCCESSFUL, sender, arena));
 		else
-			Bomberman.sendMessage(sender, "Trouble deleting file: " + f);
+			Chat.sendMessage(sender, getMessage(Text.DELETE_TROUBLE, sender, f));
 		return true;
 	}
 	
-	@Override
-	public String description() {
-		return "Deletes an arena permanently. No games must be using the arena for this to work";
-	}
-
-	@Override
-	public String usage(CommandSender sender) {
-		return "/" + path() + "<arena>";
-	}
-
 	@Override
 	public Permission permission() {
 		return Permission.ARENA_EDITING;
 	}
 
 	@Override
-	public String example(CommandSender sender, List<String> args) {
+	public Message example(CommandSender sender, List<String> args) {
 		String arena = Utils.random(BoardGenerator.allBoards());
 		if (arena == null)
 			arena = "myarena";
-		return "/" + path() + arena;
+		return getMessage(Text.DELETE_EXAMPLE, sender, arena);
+	}
+
+	@Override
+	public Message extra(CommandSender sender, List<String> args) {
+		return getMessage(Text.DELETE_EXTRA, sender);
+	}
+
+	@Override
+	public Message description(CommandSender sender, List<String> args) {
+		return getMessage(Text.DELETE_DESCRIPTION, sender);
+	}
+
+	@Override
+	public Message usage(CommandSender sender, List<String> args) {
+		return getMessage(Text.DELETE_USAGE, sender);
 	}
 
 	

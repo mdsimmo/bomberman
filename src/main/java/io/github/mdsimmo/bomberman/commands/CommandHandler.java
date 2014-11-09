@@ -30,8 +30,8 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
 		List<String> arguments = new ArrayList<String>(Arrays.asList(args));
 		io.github.mdsimmo.bomberman.commands.Command c = handler.getCommand(sender, arguments);
 		if (!c.execute(sender, arguments)) {
-			c.incorrectUsage(sender);
-			c.shortHelp(sender, arguments);
+			c.incorrectUsage(sender, arguments);
+			c.help(sender, arguments);
 		}
 		return true;
 	}

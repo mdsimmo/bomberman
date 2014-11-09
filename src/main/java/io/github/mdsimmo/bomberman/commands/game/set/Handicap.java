@@ -1,11 +1,11 @@
 package io.github.mdsimmo.bomberman.commands.game.set;
 
-import io.github.mdsimmo.bomberman.Bomberman;
 import io.github.mdsimmo.bomberman.Game;
 import io.github.mdsimmo.bomberman.PlayerRep;
 import io.github.mdsimmo.bomberman.commands.Command;
 import io.github.mdsimmo.bomberman.commands.GameCommand;
-import io.github.mdsimmo.bomberman.utils.Utils;
+import io.github.mdsimmo.bomberman.messaging.Chat;
+import io.github.mdsimmo.bomberman.messaging.Text;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -21,8 +21,8 @@ public class Handicap extends GameCommand {
 	}
 
 	@Override
-	public String name() {
-		return "handicap";
+	public Text name() {
+		return Text.HANDICAP_NAME;
 	}
 
 	@Override
@@ -46,22 +46,22 @@ public class Handicap extends GameCommand {
 		@SuppressWarnings("deprecation")
 		PlayerRep rep = PlayerRep.getPlayerRep(Bukkit.getPlayer(args.get(0)));
 		if (rep == null) {
-			Bomberman.sendMessage(sender, "Cannot find the player");
+			Chat.sendMessage(sender, getMessage(Text.INVALID_PLAYER, sender, args.get(0)));
 			return true;
 		}
 		int handicap = 0;
 		try {
 			handicap = Integer.parseInt(args.get(1));
 		} catch (NumberFormatException e) {
-			Bomberman.sendMessage(sender, "Invalid number");
+			Chat.sendMessage(sender, getMessage(Text.INVALID_NUMBER, sender, args.get(1)));
 		}
 		game.setHandicap(rep, handicap);
 		if (handicap > 0)
-			Bomberman.sendMessage(sender, "Handicap set");
+			Chat.sendMessage(sender, getMessage(Text.HANDICAP_HANDYCAPPED, sender, game, rep, handicap));
 		else if (handicap == 0)
-			Bomberman.sendMessage(sender, "Handicap removed");
+			Chat.sendMessage(sender, getMessage(Text.HANDICAP_REMOVED, sender, game, rep, handicap));
 		else
-			Bomberman.sendMessage(sender, "Advantage added");
+			Chat.sendMessage(sender, getMessage(Text.HANDICAP_ADVANTAGED, sender, game, rep, handicap));
 		
 		if (rep.isPlaying() && !rep.getGamePlaying().isPlaying)
 			game.initialise(rep);
@@ -69,26 +69,28 @@ public class Handicap extends GameCommand {
 	}
 	
 	@Override
-	public String description() {
-		return "Gives a hanicap/advantage to a player";
-	}
-
-	@Override
-	public String usage(CommandSender sender) {
-		return "/" + path() + "<game> <player> <level> (neg values for advantage)";
-	}
-
-	@Override
 	public Permission permission() {
 		return Permission.GAME_DICTATE;
 	}
 
 	@Override
-	public String example(CommandSender sender, List<String> args) {
-		String game = Utils.random(Game.allGames());
-		if (game == null)
-			game = "mygame";
-		return "/" + path() + game + "mdsimmo -3";
+	public Text extraShort() {
+		return Text.HANDICAP_EXTRA;
+	}
+
+	@Override
+	public Text exampleShort() {
+		return Text.HANDICAP_EXAMPLE;
+	}
+
+	@Override
+	public Text descriptionShort() {
+		return Text.HANDICAP_DESCRIPTION;
+	}
+
+	@Override
+	public Text usageShort() {
+		return Text.HANDICAP_USAGE;
 	}
 
 }

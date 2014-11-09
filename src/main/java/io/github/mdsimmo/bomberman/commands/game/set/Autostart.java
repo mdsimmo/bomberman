@@ -1,10 +1,10 @@
 package io.github.mdsimmo.bomberman.commands.game.set;
 
-import io.github.mdsimmo.bomberman.Bomberman;
 import io.github.mdsimmo.bomberman.Game;
 import io.github.mdsimmo.bomberman.commands.Command;
 import io.github.mdsimmo.bomberman.commands.GameCommand;
-import io.github.mdsimmo.bomberman.utils.Utils;
+import io.github.mdsimmo.bomberman.messaging.Chat;
+import io.github.mdsimmo.bomberman.messaging.Text;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -18,16 +18,16 @@ public class Autostart extends GameCommand {
 	}
 
 	@Override
-	public String name() {
-		return "autostart";
+	public Text name() {
+		return Text.AUTOSTART_NAME;
 	}
 
 	@Override
 	public List<String> shortOptions(CommandSender sender, List<String> args) {
 		if (args.size() == 1) {
 			List<String> options = new ArrayList<String>();
-			options.add("false");
-			options.add("true");
+			options.add(Text.TRUE.getMessage(sender).toString());
+			options.add(Text.FALSE.getMessage(sender).toString());
 			return options;
 		} else {
 			return null;
@@ -39,12 +39,12 @@ public class Autostart extends GameCommand {
 		if (args.size() != 1)
 			return false;
 		
-		if (args.get(0).equalsIgnoreCase("false")) {
+		if (args.get(0).equalsIgnoreCase(Text.FALSE.getMessage(sender).toString())) {
 			game.setAutostart(false);
-			Bomberman.sendMessage(sender, "Autostart disabled in game %g", game);
-		} else if (args.get(0).equalsIgnoreCase("true")) {
+			Chat.sendMessage(sender, getMessage(Text.AUTOSTART_DISABLED, sender, game));
+		} else if (args.get(0).equalsIgnoreCase(Text.TRUE.getMessage(sender).toString())) {
 			game.setAutostart(true);
-			Bomberman.sendMessage(sender, "Autostart enabled in game %g", game);
+			Chat.sendMessage(sender, getMessage(Text.AUTOSTART_ENABLED, sender, game));
 		} else {
 			return false;
 		}
@@ -52,26 +52,28 @@ public class Autostart extends GameCommand {
 	}
 	
 	@Override
-	public String description() {
-		return "Set if the game should autostart";
-	}
-
-	@Override
-	public String usage(CommandSender sender) {
-		return "/" + path() + "<game> <true/false>";
-	}
-
-	@Override
 	public Permission permission() {
 		return Permission.GAME_DICTATE;
 	}
 
 	@Override
-	public String example(CommandSender sender, List<String> args) {
-		String game = Utils.random(Game.allGames());
-		if (game == null)
-			game = "mygame";
-		return "/" + path() + game + " true";
+	public Text extraShort() {
+		return Text.AUTOSTART_EXTRA;
+	}
+
+	@Override
+	public Text exampleShort() {
+		return Text.AUTOSTART_EXAMPLE;
+	}
+
+	@Override
+	public Text descriptionShort() {
+		return Text.AUTOSTART_DESCRIPTION;
+	}
+
+	@Override
+	public Text usageShort() {
+		return Text.AUTOSTART_USAGE;
 	}
 
 }

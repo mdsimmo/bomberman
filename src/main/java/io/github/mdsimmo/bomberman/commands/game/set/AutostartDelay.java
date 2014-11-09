@@ -1,10 +1,10 @@
 package io.github.mdsimmo.bomberman.commands.game.set;
 
-import io.github.mdsimmo.bomberman.Bomberman;
 import io.github.mdsimmo.bomberman.Game;
 import io.github.mdsimmo.bomberman.commands.Command;
 import io.github.mdsimmo.bomberman.commands.GameCommand;
-import io.github.mdsimmo.bomberman.utils.Utils;
+import io.github.mdsimmo.bomberman.messaging.Chat;
+import io.github.mdsimmo.bomberman.messaging.Text;
 
 import java.util.List;
 
@@ -17,8 +17,8 @@ public class AutostartDelay extends GameCommand {
 	}
 
 	@Override
-	public String name() {
-		return "autostartdelay";
+	public Text name() {
+		return Text.STARTDELAY_NAME;
 	}
 
 	@Override
@@ -33,21 +33,11 @@ public class AutostartDelay extends GameCommand {
 		        
         try {
             game.setAutostartDelay(Integer.parseInt(args.get(0)));
-            Bomberman.sendMessage(sender, "Autostart delay set to %d seconds", game.getAutostartDelay());
+            Chat.sendMessage(sender, getMessage(Text.STARTDELAY_SET, sender, game, game.getAutostartDelay()));
         } catch (NumberFormatException e) {
-            Bomberman.sendMessage(sender, "Delay %s is not a valid number", args.get(0));
+            Chat.sendMessage(sender, getMessage(Text.INVALID_NUMBER, sender, args.get(0)));
         }
         return true;
-	}
-
-	@Override
-	public String description() {
-		return "Change the delay on a game's automated start";
-	}
-
-	@Override
-	public String usage(CommandSender sender) {
-		return "/" + path() + "<game> <amount>";
 	}
 
 	@Override
@@ -56,11 +46,23 @@ public class AutostartDelay extends GameCommand {
 	}
 
 	@Override
-	public String example(CommandSender sender, List<String> args) {
-		String game = Utils.random(Game.allGames());
-		if (game == null)
-			game = "mygame";
-		return "/" + path() + game + " 30";
+	public Text extraShort() {
+		return Text.STARTDELAY_EXTRA;
+	}
+
+	@Override
+	public Text exampleShort() {
+		return Text.STARTDELAY_EXAMPLE;
+	}
+
+	@Override
+	public Text descriptionShort() {
+		return Text.STARTDELAY_DESCRIPTION;
+	}
+
+	@Override
+	public Text usageShort() {
+		return Text.STARTDELAY_USAGE;
 	}
 
 }

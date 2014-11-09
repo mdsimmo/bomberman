@@ -18,7 +18,6 @@ import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Item;
-import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.util.Vector;
 
@@ -169,9 +168,7 @@ public class BoardGenerator {
 	 * @return an array with the minimum and maximm points. 
 	 */
 	@SuppressWarnings("unchecked")
-	public static Box getBoundingStructure(Player p, String arena) {
-		@SuppressWarnings("deprecation")
-		Block target = p.getTargetBlock(null, 100);
+	public static Box getBoundingStructure(Block target) {
 		
 		getConnected(target);
 		while (toCheck.size() > 0) {
