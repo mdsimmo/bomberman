@@ -44,7 +44,7 @@ public class Convert extends Command {
 				Chat.sendMessage(sender, getMessage(Text.CONVERT_GAME_EXISTS, sender, args.get(0)));
 			} else {
 				Box box = BoardGenerator.getBoundingStructure(
-						((Player)sender).getTargetBlock(null, 100));
+						Utils.getTarget((Player)sender, 100));
 				Board board = BoardGenerator.createArena(args.get(0) + ".old", box);
 				BoardGenerator.saveBoard(board);
 				Game game = new Game(args.get(0), box);

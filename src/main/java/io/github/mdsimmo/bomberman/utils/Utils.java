@@ -4,6 +4,11 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 
+import org.bukkit.Material;
+import org.bukkit.block.Block;
+import org.bukkit.entity.Player;
+import org.bukkit.util.BlockIterator;
+
 public class Utils {
 
 	private static StringBuffer buffer = new StringBuffer(); 
@@ -44,5 +49,17 @@ public class Utils {
 		for (int i = 0; i < initial.length; i++)
 			fin[inserts.length + i] = initial[i];
 		return fin;
+	}
+	
+	public static final Block getTarget(Player player, Integer range) {
+		BlockIterator iter = new BlockIterator(player, range);
+		Block lastBlock = iter.next();
+		while (iter.hasNext()) {
+			lastBlock = iter.next();
+			if (lastBlock.getType() == Material.AIR)
+				continue;
+			break;
+		}
+		return lastBlock;
 	}
 }

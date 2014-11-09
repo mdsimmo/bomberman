@@ -8,6 +8,7 @@ import io.github.mdsimmo.bomberman.messaging.Chat;
 import io.github.mdsimmo.bomberman.messaging.Message;
 import io.github.mdsimmo.bomberman.messaging.Text;
 import io.github.mdsimmo.bomberman.utils.Box;
+import io.github.mdsimmo.bomberman.utils.Utils;
 
 import java.util.List;
 
@@ -37,7 +38,8 @@ public class Create extends Command {
 		if (args.size() != 1)
             return false;
         if (sender instanceof Player) {
-			Box box = BoardGenerator.getBoundingStructure(((Player)sender).getTargetBlock(null, 100));
+			Box box = BoardGenerator.getBoundingStructure(
+					Utils.getTarget((Player)sender, 100));
             if (box == null) {
             	Chat.sendMessage(sender, getMessage(Text.ARENA_CREATE_TOO_BIG, sender, Config.MAX_STRUCTURE.getValue()));
             	return true;
