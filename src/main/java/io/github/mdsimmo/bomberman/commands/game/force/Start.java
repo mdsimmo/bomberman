@@ -1,10 +1,10 @@
 package io.github.mdsimmo.bomberman.commands.game.force;
 
-import io.github.mdsimmo.bomberman.Bomberman;
 import io.github.mdsimmo.bomberman.Game;
 import io.github.mdsimmo.bomberman.commands.Command;
 import io.github.mdsimmo.bomberman.commands.GameCommand;
-import io.github.mdsimmo.bomberman.utils.Utils;
+import io.github.mdsimmo.bomberman.messaging.Chat;
+import io.github.mdsimmo.bomberman.messaging.Text;
 
 import java.util.List;
 
@@ -17,8 +17,8 @@ public class Start extends GameCommand {
 	}
 
 	@Override
-	public String name() {
-		return "start";
+	public Text name() {
+		return Text.START_NAME;
 	}
 
 	@Override
@@ -32,24 +32,14 @@ public class Start extends GameCommand {
 			return false;
 		
 		if (game.isPlaying)
-			Bomberman.sendMessage(sender, "Game %g already started", game);
+			Chat.sendMessage(sender, getMessage(Text.GAME_ALREADY_STARTED, sender, game));
 		else {
 			if (game.startGame())
-				Bomberman.sendMessage(sender, "Game %g starting...", game);
+				Chat.sendMessage(sender, getMessage(Text.GAME_START_SUCCESS, sender, game));
 			else
-				Bomberman.sendMessage(sender, "There needs to be %d players", game.getMinPlayers());
+				Chat.sendMessage(sender, getMessage(Text.GAME_MORE_PLAYERS, sender, game, game.getMinPlayers()));
 		}
 		return true;
-	}
-
-	@Override
-	public String description() {
-		return "Forcibly start a game";
-	}
-
-	@Override
-	public String usage(CommandSender sender) {
-		return "/" + path() + "<game>";
 	}
 
 	@Override
@@ -58,10 +48,22 @@ public class Start extends GameCommand {
 	}
 
 	@Override
-	public String example(CommandSender sender, List<String> args) {
-		String game = Utils.random(Game.allGames());
-		if (game == null)
-			game = "mygame";
-		return "/" + path() + game;
+	public Text extraShort() {
+		return Text.START_EXTRA;
+	}
+
+	@Override
+	public Text exampleShort() {
+		return Text.START_EXAMPLE;		
+	}
+
+	@Override
+	public Text descriptionShort() {
+		return Text.START_DESCRIPTION;
+	}
+
+	@Override
+	public Text usageShort() {
+		return Text.START_USAGE;
 	}
 }

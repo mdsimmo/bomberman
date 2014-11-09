@@ -1,16 +1,18 @@
 package io.github.mdsimmo.bomberman.commands.game;
 
-import io.github.mdsimmo.bomberman.Bomberman;
 import io.github.mdsimmo.bomberman.Game;
 import io.github.mdsimmo.bomberman.commands.Command;
 import io.github.mdsimmo.bomberman.commands.GameCommand;
-import io.github.mdsimmo.bomberman.utils.Utils;
+import io.github.mdsimmo.bomberman.messaging.Chat;
+import io.github.mdsimmo.bomberman.messaging.Message;
+import io.github.mdsimmo.bomberman.messaging.Text;
 
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
 import org.bukkit.command.CommandSender;
+import org.bukkit.inventory.ItemStack;
 
 public class Info extends GameCommand {
 
@@ -18,14 +20,8 @@ public class Info extends GameCommand {
 		super(parent);
 	}
 
-	@Override
-	public String description() {
-		return "Show information about a game";
-	}
-
-	@Override
-	public String name() {
-		return "info";
+	public Text name() {
+		return Text.INFO_NAME;
 	}
 
 	@Override
@@ -43,52 +39,79 @@ public class Info extends GameCommand {
 		if (args.size() != 0)
 			return false;
 
-		Bomberman.sendHeading(sender, "Info: " + game.name);
-		Map<String, String> list = new LinkedHashMap<>();
+		Chat.sendHeading(sender, Text.INFO.getMessage(sender, game));
+		Map<Message, Message> list = new LinkedHashMap<>();
 		if (game.isPlaying)
-			list.put("Status", "In progress");
+			list.put(getMessage(Text.INFO_STATUS, sender), getMessage(Text.INFO_IN_PROGRESS, sender));
 		else
-			list.put("Status", "Waiting");
-		list.put("Players ", "" + game.players.size());
-		list.put("Min players", "" + game.getMinPlayers());
-		list.put("Max players", "" + game.board.spawnPoints.size());
-		list.put("Init bombs", "" + game.getBombs());
-		list.put("Init lives", "" + game.getLives());
-		list.put("Init power", "" + game.getPower());
-		list.put("Autostart", "" + game.getAutostart());
+			list.put(getMessage(Text.INFO_STATUS, sender), getMessage(Text.INFO_WAITING, sender));
+		list.put(
+				getMessage(Text.INFO_PLAYERS, sender),
+				new Message(sender, ""+game.players.size()));
+		list.put(
+				getMessage(Text.INFO_MIN_PLAYERS, sender),
+				new Message(sender, ""+game.getMinPlayers()));
+		list.put(
+				getMessage(Text.INFO_MAX_PLAYERS, sender),
+				new Message(sender, ""+game.board.spawnPoints.size()));
+		list.put(
+				getMessage(Text.INFO_INIT_BOMBS, sender),
+				new Message(sender, ""+game.getBombs()));
+		list.put(
+				getMessage(Text.INFO_INIT_LIVES, sender),
+				new Message(sender, ""+game.getLives()));
+		list.put(
+				getMessage(Text.INFO_INIT_POWER, sender),
+				new Message(sender, ""+game.getPower()));
+		Message fare = getMessage(Text.INFO_FARE, sender);
 		if (game.getFare() == null)
-			list.put("Entry fare", "no fee");
+			list.put(fare, getMessage(Text.INFO_NO_FARE, sender));
 		else
-			list.put("Entry fare", game.getFare().getType() + " x"
-					+ game.getFare().getAmount());
+			list.put(fare, new Message(sender, "{1}", game.getFare()));
+		
+		Message prize = getMessage(Text.INFO_PRIZE, sender);
 		if (game.getPot() == true && game.getFare() != null)
-			list.put("Prize", "Pot currently at " + game.getFare().getAmount()
-					* game.players.size() + " " + game.getFare().getType());
+			list.put(prize,
+					getMessage(Text.INFO_POT_AT, sender, 
+							new ItemStack(
+									game.getFare().getType(),
+									game.getFare().getAmount()*game.players.size()
+							)
+					)
+			);
 		else {
 			if (game.getPrize() == null)
-				list.put("Prize", "No prize");
+				list.put(prize, getMessage(Text.INFO_NO_PRIZE, sender));
 			else
-				list.put("Prize", game.getPrize().getAmount() + " "
-						+ game.getPrize().getType());
+				list.put(prize, new Message(sender, "{1}", game.getPrize()));
 		}
-		list.put("Sudden death", game.getSuddenDeath() == -1 ? "off" : game.getSuddenDeath() + " seconds");
-		list.put("Game over", game.getTimeout() == -1 ? "off" : game.getTimeout() + " seconds");
-		list.put("Arena", game.board.name);
-		Bomberman.sendMessage(sender, list);
+		Message sd = game.getSuddenDeath() == -1 ? Text.INFO_OFF.getMessage(sender)	: Text.INFO_TIME.getMessage(sender, game.getSuddenDeath());
+		list.put(getMessage(Text.INFO_SUDDENDEATH, sender), sd);
+		Message to = game.getTimeout() == -1 ? Text.INFO_OFF.getMessage(sender)	: Text.INFO_TIME.getMessage(sender, game.getTimeout());
+		list.put(getMessage(Text.INFO_TIMEOUT, sender), to);
+		list.put(Text.ARENA.getMessage(sender), new Message(sender, "{1}", game.board));
+		Chat.sendMap(sender, list);
 		return true;
 	}
 	
 	@Override
-	public String usage(CommandSender sender) {
-		return "/" + path() + "<game>";
+	public Text extraShort() {
+		return Text.INFO_EXTRA;
 	}
 
 	@Override
-	public String example(CommandSender sender, List<String> args) {
-		String game = Utils.random(Game.allGames());
-		if (game == null)
-			game = "mygame";
-		return "/" + path() + game;
+	public Text exampleShort() {
+		return Text.INFO_EXAMPLE;
+	}
+
+	@Override
+	public Text descriptionShort() {
+		return Text.INFO_DESCRIPTION;
+	}
+
+	@Override
+	public Text usageShort() {
+		return Text.INFO_USAGE;
 	}
 
 }

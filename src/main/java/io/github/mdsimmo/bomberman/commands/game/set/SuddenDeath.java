@@ -1,15 +1,15 @@
 package io.github.mdsimmo.bomberman.commands.game.set;
 
+import io.github.mdsimmo.bomberman.Game;
+import io.github.mdsimmo.bomberman.commands.Command;
+import io.github.mdsimmo.bomberman.commands.GameCommand;
+import io.github.mdsimmo.bomberman.messaging.Chat;
+import io.github.mdsimmo.bomberman.messaging.Text;
+
 import java.util.ArrayList;
 import java.util.List;
 
 import org.bukkit.command.CommandSender;
-
-import io.github.mdsimmo.bomberman.Bomberman;
-import io.github.mdsimmo.bomberman.Game;
-import io.github.mdsimmo.bomberman.commands.Command;
-import io.github.mdsimmo.bomberman.commands.GameCommand;
-import io.github.mdsimmo.bomberman.utils.Utils;
 
 public class SuddenDeath extends GameCommand {
 
@@ -21,7 +21,7 @@ public class SuddenDeath extends GameCommand {
 	public List<String> shortOptions(CommandSender sender, List<String> args) {
 		if (args.size() == 1) {
 			List<String> options = new ArrayList<>();
-			options.add("off");
+			options.add(getMessage(Text.SUDDENDEATH_OFF, sender).toString());
 			return options;
 		} else
 			return null;
@@ -34,14 +34,14 @@ public class SuddenDeath extends GameCommand {
 		
 		String value = args.get(0).toLowerCase();
 		
-		if (value.equals("off")) {
+		if (value.equals(getMessage(Text.SUDDENDEATH_OFF, sender).toString())) {
 			game.setSuddenDeath(-1);
-			Bomberman.sendMessage(sender, "Sudden death removed for game %g", game);
+			Chat.sendMessage(sender, getMessage(Text.SUDDENDEATH_REMOVED, sender, game));
 		} else {
 			try {
 				int time = (int)Double.parseDouble(value);
 				game.setSuddenDeath(time);
-				Bomberman.sendMessage(sender, "Sudden death set to %d seconds", time);
+				Chat.sendMessage(sender, getMessage(Text.SUDDENDEATH_SET, sender, game, time));
 			} catch (Exception e) {
 				return false;
 			}
@@ -50,18 +50,8 @@ public class SuddenDeath extends GameCommand {
 	}
 
 	@Override
-	public String name() {
-		return "suddendeath";
-	}
-
-	@Override
-	public String description() {
-		return "Sets when sudden death should happen";
-	}
-
-	@Override
-	public String usage(CommandSender sender) {
-		return "/" + path() + "<game> <value>";
+	public Text name() {
+		return Text.SUDDENDEATH_NAME;
 	}
 
 	@Override
@@ -70,11 +60,23 @@ public class SuddenDeath extends GameCommand {
 	}
 
 	@Override
-	public String example(CommandSender sender, List<String> args) {
-		String game = Utils.random(Game.allGames());
-		if (game == null)
-			game = "mygame";
-		return "/" + path() + game + "60";
+	public Text extraShort() {
+		return Text.SUDDENDEATH_EXTRA;
+	}
+
+	@Override
+	public Text exampleShort() {
+		return Text.SUDDENDEATH_EXAMPLE;
+	}
+
+	@Override
+	public Text descriptionShort() {
+		return Text.SUDDENDEATH_DESCRIPTION;
+	}
+
+	@Override
+	public Text usageShort() {
+		return Text.SUDDENDEATH_USAGE;
 	}
 
 }

@@ -1,6 +1,9 @@
 package io.github.mdsimmo.bomberman;
 
 import io.github.mdsimmo.bomberman.Bomb.DeathBlock;
+import io.github.mdsimmo.bomberman.messaging.Chat;
+import io.github.mdsimmo.bomberman.messaging.Message;
+import io.github.mdsimmo.bomberman.messaging.Text;
 import io.github.mdsimmo.bomberman.save.GameSaver;
 import io.github.mdsimmo.bomberman.utils.Box;
 
@@ -8,10 +11,10 @@ import java.io.File;
 import java.io.FilenameFilter;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
@@ -52,8 +55,11 @@ public class Game {
 		public void run() {
 			// Let online players know about the fun :)
 			if (count == autostartDelay) {
-				Bomberman.sendMessage(plugin.getServer().getOnlinePlayers(),
-						"Game %g is starting soon. Type %c to play!", Game.this, "/bm game join " + name);
+				sendMessages(
+						Text.GAME_STARTING_PLAYERS,
+						Text.GAME_STARTING_OBSERVERS,
+						Text.GAME_STARTING_ALL,
+						Game.this, count);
 			}
 
 			if (count > 0) {
@@ -65,13 +71,23 @@ public class Game {
 				// notify every 5 until count <= 3,
 				// notify every second last 3 seconds
 				if (count % 15 == 0 || (count < 15 && count % 5 == 0)
-						|| count <= 3)
-					Bomberman.sendMessage(observers, "Game starting in %d...", count);
+						|| count <= 3) {
+					sendMessages(
+							Text.GAME_COUNT_PLAYERS,
+							Text.GAME_COUNT_OBSERVERS,
+							Text.GAME_COUNT_ALL,
+							Game.this, count);
+				}
 			} else {
-				Bomberman.sendMessage(observers, ChatColor.YELLOW
-						+ "Game started!");
+				sendMessages(
+						Text.GAME_STARTED_PLAYERS,
+						Text.GAME_STARTED_OBSERVERS,
+						Text.GAME_STARTED_ALL,
+						Game.this, count);
+							
 				isPlaying = true;
 				deathCounter = new SuddenDeathCounter(Game.this);
+				deathCounter.start();
 				// Cleanup and destroy the countdown timer
 				destroy();
 			}
@@ -199,12 +215,13 @@ public class Game {
 		if (isPlaying) {
 			addWinner(rep);
 			if (!checkFinish())
-				Bomberman.sendMessage(observers, "%p is out!", rep.getName());
+				sendMessages(Text.PLAYER_KILLED_PLAYERS, Text.PLAYER_KILLED_OBSERVERS, Text.PLAYER_KILLED_ALL, this, rep);
+		} else {
+			sendMessages(Text.PLAYER_LEFT_PLAYERS, Text.PLAYER_LEFT_OBSERVERS, Text.PLAYER_LEFT_ALL, this, rep);
 		}
 		if (players.size() < minPlayers && getCountdownTimer() != null) {
 			getCountdownTimer().destroy();
-			Bomberman.sendMessage(players,
-								"Not enough players remaining. The countdown timer has been stopped.");
+			sendMessages(Text.COUNT_STOPPED_PLAYERS, Text.COUNT_STOPPED_OBSERVERS, Text.COUNT_STOPPED_ALL, Game.this);
 		}
 	}
 
@@ -252,9 +269,8 @@ public class Game {
 			}
 
 			// display the scores
-			Bomberman.sendMessage(observers, ChatColor.YELLOW
-					+ "The game is over!");
-			Bomberman.sendMessage(observers, winnersDisplay());
+			sendMessages(Text.GAME_OVER_PLAYERS, Text.GAME_OVER_OBSERVERS, Text.GAME_COUNT_ALL, this);
+			winnersDisplay();
 
 			// reset the game
 			BoardGenerator.switchBoard(this.board, this.board, box);
@@ -414,8 +430,10 @@ public class Game {
 		return suddenDeathStarted;
 	}
 
-	private String winnersDisplay() {
-		String display = ChatColor.GOLD + "The winners are:\n" + ChatColor.RESET;
+	// anounce scores
+	private void winnersDisplay() {
+		Chat.sendText(observers, Text.SCORE_ANNOUNCE, this);
+		Map<Message, Message> map = new LinkedHashMap<Message, Message>();
 		int i = 0;
 		while (i < winners.size() && i < 8) {
 			PlayerRep rep = winners.get(i);
@@ -434,57 +452,21 @@ public class Game {
 			default:
 				place = i + "th";
 			}
-			display += " " + place + ": " + rep.player.getName() + "\n";
+			map.put(new Message(null, place), new Message(rep.player, "{0}"));
 		}
-		display += "Type " + ChatColor.AQUA + "/bm game scores " + name + ChatColor.RESET + " to see scores";
-		return display;
+		for (PlayerRep rep : observers) {
+			Chat.sendMap(rep.player, map);
+		}
+		Chat.sendText(observers, Text.SCORE_SEE_SCORES, this);
 	}
 	
-	public String scoreDisplay() {
-		StringBuffer display = new StringBuffer();
-		if (isPlaying) {
-			display.append("Time remaining: " + (timeout < 0 ? "never" : deathCounter.getTimeOut() + " seconds"));
-			display.append("Time 'till suddendeath: " + (suddenDeath < 0 ? "never" : (suddenDeathStarted ? "started" : deathCounter.getSuddenDeath() + " seconds")));
-		}
-		display.append(
-				  " Pos |    Player    | Hits given | Hits taken | Kills | Suicides \n"
-				+ "-----+--------------+------------+------------+-------+----------\n");
+	public List<Message> scoreDisplay() {
+		List<Message> list = new ArrayList<Message>(players.size());
 		for (PlayerRep rep : players) {
 			Stats stats = this.getStats(rep);
-			display.append("  " + (int)(rep.getPlayer().getHealth()) + "L ");
-			String pname = rep.getName();
-			display.append(String.format(" %12s |", pname));
-			display.append(String.format("  %8d  |", stats.hitsGiven));
-			display.append(String.format("  %8d  |", stats.hitsTaken));
-			display.append(String.format(" %5d |", stats.kills));
-			display.append(String.format(" %8d \n", stats.suicides));
+			list.add(Text.SCORE_DISPLAY.getMessage(rep.getLanguage(), rep.player, this, rep, (int)rep.player.getHealth(), stats.kills, stats.deaths, stats.hitsTaken, stats.hitsGiven, stats.suicides, stats.hadicapLevel));
 		}
-		for (int i = 0; i < winners.size() && i < 8; i++) {
-			PlayerRep rep = winners.get(i);
-			Stats stats = this.getStats(rep);
-			String place;
-			switch (i+1) {
-			case 1:
-				place = "1st";
-				break;
-			case 2:
-				place = "2nd";
-				break;
-			case 3:
-				place = "3rd";
-				break;
-			default:
-				place = i + "th";
-			}
-			display.append(" ").append(place).append(" |");
-			String pname = rep.getName();
-			display.append(String.format(" %12s |", pname));
-			display.append(String.format("  %8d  |", stats.hitsGiven));
-			display.append(String.format("  %8d  |", stats.hitsTaken));
-			display.append(String.format(" %5d |", stats.kills));
-			display.append(String.format(" %8d \n", stats.suicides));
-		}
-		return display.toString();		
+		return list;
 	}
 
 	public void setAutostart(boolean autostart) {
@@ -704,5 +686,18 @@ public class Game {
 	
 	public int getPotionDuration() {
 		return potionDuration;
+	}
+	
+	public void sendMessages(Text pText, Text oText, Text aText, Object ... objs) {
+		for (Player player : plugin.getServer().getOnlinePlayers()) { 
+			PlayerRep rep = PlayerRep.getPlayerRepSoft(player);
+			if (!observers.contains(rep) && !players.contains(rep))
+				Chat.sendText(player, aText, objs);
+		}
+		for (PlayerRep rep : observers) {
+			if (!players.contains(rep))
+				Chat.sendText(rep, oText, objs);
+		}
+		Chat.sendText(players, pText, objs);
 	}
 }

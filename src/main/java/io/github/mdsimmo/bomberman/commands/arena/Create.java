@@ -2,9 +2,11 @@ package io.github.mdsimmo.bomberman.commands.arena;
 
 import io.github.mdsimmo.bomberman.Board;
 import io.github.mdsimmo.bomberman.BoardGenerator;
-import io.github.mdsimmo.bomberman.Bomberman;
 import io.github.mdsimmo.bomberman.Config;
 import io.github.mdsimmo.bomberman.commands.Command;
+import io.github.mdsimmo.bomberman.messaging.Chat;
+import io.github.mdsimmo.bomberman.messaging.Message;
+import io.github.mdsimmo.bomberman.messaging.Text;
 import io.github.mdsimmo.bomberman.utils.Box;
 
 import java.util.List;
@@ -18,9 +20,8 @@ public class Create extends Command {
 		super(parent);
 	}
 
-	@Override
-	public String name() {
-		return "create";
+	public Text name() {
+		return Text.ARENA_CREATE_NAME;
 	}
 
 	@Override
@@ -36,29 +37,19 @@ public class Create extends Command {
 		if (args.size() != 1)
             return false;
         if (sender instanceof Player) {
-            Box box = BoardGenerator.getBoundingStructure((Player)sender);
+			Box box = BoardGenerator.getBoundingStructure(((Player)sender).getTargetBlock(null, 100));
             if (box == null) {
-            	Bomberman.sendMessage(sender, "Max build size exceeded! %d blocks maximum", Config.MAX_STRUCTURE.getValue());
+            	Chat.sendMessage(sender, getMessage(Text.ARENA_CREATE_TOO_BIG, sender, Config.MAX_STRUCTURE.getValue()));
             	return true;
             }
             if (box.xSize < 2 && box.ySize < 2 && box.zSize < 2) {
-            	Bomberman.sendMessage(sender, "Structure is only a single block! Were you looking at a natural block?");
+            	Chat.sendMessage(sender, getMessage(Text.ARENA_CREATE_TOO_SMALL, sender));
             }
-            Board board2 = BoardGenerator.createArena(args.get(0), box);
-            BoardGenerator.saveBoard(board2);
-            Bomberman.sendMessage(sender, "Arena created");
+            Board board = BoardGenerator.createArena(args.get(0), box);
+            BoardGenerator.saveBoard(board);
+            Chat.sendMessage(sender, getMessage(Text.ARENA_CREATED, sender, board));
         }
         return true;
-	}
-
-	@Override
-	public String description() {
-		return "Create a new arena type for games to use";
-	}
-
-	@Override
-	public String usage(CommandSender sender) {
-		return "/" + path() + "<arena> (look at the arena when using)" ;
 	}
 
 	@Override
@@ -67,13 +58,23 @@ public class Create extends Command {
 	}
 
 	@Override
-	public String example(CommandSender sender, List<String> args) {
-		return "/" + path() + "redPuddingArena";
+	public Message description(CommandSender sender, List<String> args) {
+		return getMessage(Text.ARENA_CREATE_DESCRIPTION, sender);
 	}
-	
+
 	@Override
-	public String extra(CommandSender sender, List<String> args) {
-		return "Natural blocks are ignored when detecting structures";
+	public Message usage(CommandSender sender, List<String> args) {
+		return getMessage(Text.ARENA_CREATE_USAGE, sender);
+	}
+
+	@Override
+	public Message extra(CommandSender sender, List<String> args) {
+		return getMessage(Text.ARENA_CREATE_EXTRA, sender);
+	}
+
+	@Override
+	public Message example(CommandSender sender, List<String> args) {
+		return getMessage(Text.ARENA_CREATE_EXAMPLE, sender);
 	}
 
 }

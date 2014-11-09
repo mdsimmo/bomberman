@@ -1,8 +1,10 @@
 package io.github.mdsimmo.bomberman.commands.game;
 
-import io.github.mdsimmo.bomberman.Bomberman;
 import io.github.mdsimmo.bomberman.Game;
 import io.github.mdsimmo.bomberman.commands.Command;
+import io.github.mdsimmo.bomberman.messaging.Chat;
+import io.github.mdsimmo.bomberman.messaging.Message;
+import io.github.mdsimmo.bomberman.messaging.Text;
 import io.github.mdsimmo.bomberman.utils.Utils;
 
 import java.util.List;
@@ -16,8 +18,8 @@ public class Destroy extends Command {
 	}
 
 	@Override
-	public String name() {
-		return "destroy";
+	public Text name() {
+		return Text.DESTROY_NAME;
 	}
 
 	@Override
@@ -35,20 +37,10 @@ public class Destroy extends Command {
 		Game game = Game.findGame(args.get(0));
 		if (game != null) {
 			game.destroy();
-			Bomberman.sendMessage(game.observers, "Game %g destroyed", game);
+			Chat.sendMessage(sender, getMessage(Text.DESTROY_SUCCESS, sender, game));
 		} else
-			Bomberman.sendMessage(sender, "Game %g not found", args.get(0));
+			Chat.sendMessage(sender, getMessage(Text.INVALID_GAME, sender, args.get(0)));
 		return true;
-	}
-
-	@Override
-	public String description() {
-		return "Destroy a game and revert the land to its previous state.";
-	}
-
-	@Override
-	public String usage(CommandSender sender) {
-		return "/" + path() + "<game>";
 	}
 
 	@Override
@@ -57,11 +49,26 @@ public class Destroy extends Command {
 	}
 
 	@Override
-	public String example(CommandSender sender, List<String> args) {
+	public Message example(CommandSender sender, List<String> args) {
 		String game = Utils.random(Game.allGames());
 		if (game == null)
 			game = "mygame";
-		return "/" + path() + game;
+		return getMessage(Text.DESTROY_EXAMPLE, sender, game);
+	}
+
+	@Override
+	public Message extra(CommandSender sender, List<String> args) {
+		return getMessage(Text.DESTROY_EXTRA, sender);
+	}
+
+	@Override
+	public Message description(CommandSender sender, List<String> args) {
+		return getMessage(Text.DESTROY_DESCRIPTION, sender);
+	}
+
+	@Override
+	public Message usage(CommandSender sender, List<String> args) {
+		return getMessage(Text.DESTROY_USAGE, sender);
 	}
 
 }

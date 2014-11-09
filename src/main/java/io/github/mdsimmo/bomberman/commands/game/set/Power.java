@@ -1,14 +1,14 @@
 package io.github.mdsimmo.bomberman.commands.game.set;
 
-import java.util.List;
-
-import org.bukkit.command.CommandSender;
-
-import io.github.mdsimmo.bomberman.Bomberman;
 import io.github.mdsimmo.bomberman.Game;
 import io.github.mdsimmo.bomberman.commands.Command;
 import io.github.mdsimmo.bomberman.commands.GameCommand;
-import io.github.mdsimmo.bomberman.utils.Utils;
+import io.github.mdsimmo.bomberman.messaging.Chat;
+import io.github.mdsimmo.bomberman.messaging.Text;
+
+import java.util.List;
+
+import org.bukkit.command.CommandSender;
 
 public class Power extends GameCommand {
 
@@ -17,8 +17,8 @@ public class Power extends GameCommand {
 	}
 
 	@Override
-	public String name() {
-		return "power";
+	public Text name() {
+		return Text.POWER_NAME;
 	}
 
 	@Override
@@ -34,35 +34,41 @@ public class Power extends GameCommand {
 		int amount;
 		try {
 			amount = Integer.parseInt(args.get(0));
+			if (amount < 0) {
+				throw new Exception();
+			}
 		} catch (Exception e) {
-			return false;
+			Chat.sendMessage(sender, getMessage(Text.INVALID_NUMBER, sender, args.get(0)));
+			return true;
 		}
 		game.setPower(amount);	
-		Bomberman.sendMessage(sender, "Power set");
+		Chat.sendMessage(sender, getMessage(Text.POWER_SET, sender, game, amount));
 		return true;
 	}
 	
-	@Override
-	public String description() {
-		return "Sets players' initial power";
-	}
-
-	@Override
-	public String usage(CommandSender sender) {
-		return "/" + path() + "<game> <amount>";
-	}
-
 	@Override
 	public Permission permission() {
 		return Permission.GAME_DICTATE;
 	}
 
 	@Override
-	public String example(CommandSender sender, List<String> args) {
-		String game = Utils.random(Game.allGames());
-		if (game == null)
-			game = "mygame";
-		return "/" + path() + game + "3";
+	public Text extraShort() {
+		return Text.POWER_EXTRA;
+	}
+
+	@Override
+	public Text exampleShort() {
+		return Text.POWER_EXAMPLE;
+	}
+
+	@Override
+	public Text descriptionShort() {
+		return Text.POWER_DESCRIPTION;
+	}
+
+	@Override
+	public Text usageShort() {
+		return Text.POWERS_USAGE;
 	}
 
 }

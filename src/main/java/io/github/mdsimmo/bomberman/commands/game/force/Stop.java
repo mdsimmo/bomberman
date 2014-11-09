@@ -1,24 +1,25 @@
 package io.github.mdsimmo.bomberman.commands.game.force;
 
-import io.github.mdsimmo.bomberman.Bomberman;
 import io.github.mdsimmo.bomberman.Game;
+import io.github.mdsimmo.bomberman.PlayerRep;
 import io.github.mdsimmo.bomberman.commands.Command;
 import io.github.mdsimmo.bomberman.commands.GameCommand;
-import io.github.mdsimmo.bomberman.utils.Utils;
+import io.github.mdsimmo.bomberman.messaging.Chat;
+import io.github.mdsimmo.bomberman.messaging.Text;
 
 import java.util.List;
 
 import org.bukkit.command.CommandSender;
 
-public class Stop extends GameCommand{
+public class Stop extends GameCommand {
 
 	public Stop(Command parent) {
 		super(parent);
 	}
 
 	@Override
-	public String name() {
-		return "stop";
+	public Text name() {
+		return Text.STOP_NAME;
 	}
 
 	@Override
@@ -27,24 +28,17 @@ public class Stop extends GameCommand{
             return false;
 		
         if (!game.isPlaying)
-            Bomberman.sendMessage(sender, "Game %g hasn't started", game);
-        else {
+            Chat.sendMessage(sender, getMessage(Text.STOP_NOT_STARTED, sender, game));
+	else {
         	game.stop();
             if (!game.players.contains(sender))
-            	Bomberman.sendMessage(sender, "Game %g stopped", game);
-            Bomberman.sendMessage(game.players, "Game %g stopped", game);
+            	Chat.sendMessage(sender, getMessage(Text.STOP_SUCCESS, sender, game));
+            for (PlayerRep rep : game.players) {
+            	Chat.sendMessage(rep, getMessage(Text.STOP_SUCCESS, rep.getPlayer(), game));
+            }
+            
         }
         return true;
-	}
-
-	@Override
-	public String description() {
-		return "Forcibly stop a game";
-	}
-
-	@Override
-	public String usage(CommandSender sender) {
-		return "/" + path() + "<game>";
 	}
 
 	@Override
@@ -58,11 +52,23 @@ public class Stop extends GameCommand{
 	}
 
 	@Override
-	public String example(CommandSender sender, List<String> args) {
-		String game = Utils.random(Game.allGames());
-		if (game == null)
-			game = "mygame";
-		return "/" + path() + game;
+	public Text extraShort() {
+		return Text.STOP_EXTRA;
+	}
+
+	@Override
+	public Text exampleShort() {
+		return Text.STOP_EXAMPLE;
+	}
+
+	@Override
+	public Text descriptionShort() {
+		return Text.STOP_DESCRIPTION;
+	}
+
+	@Override
+	public Text usageShort() {
+		return Text.STOP_USAGE;
 	}
 
 }

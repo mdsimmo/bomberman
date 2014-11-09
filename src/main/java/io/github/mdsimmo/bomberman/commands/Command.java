@@ -1,10 +1,16 @@
 package io.github.mdsimmo.bomberman.commands;
 
-import io.github.mdsimmo.bomberman.Bomberman;
+import io.github.mdsimmo.bomberman.messaging.Chat;
+import io.github.mdsimmo.bomberman.messaging.Message;
+import io.github.mdsimmo.bomberman.messaging.Text;
+import io.github.mdsimmo.bomberman.utils.Utils;
 
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
-import org.bukkit.ChatColor;
+import javax.annotation.Nonnull;
+
 import org.bukkit.command.CommandSender;
 
 public abstract class Command {
@@ -41,7 +47,8 @@ public abstract class Command {
 	 *  
 	 * @return the name
 	 */
-	public abstract String name();
+	@Nonnull
+	public abstract Text name();
 	
 	/**
 	 * Gets a list of values to return. <br>
@@ -68,7 +75,7 @@ public abstract class Command {
 			else {
 				if (args.size() == 0) {
 					// assume asking for help
-					shortHelp(sender, args);
+					help(sender, args);
 					return true;
 				} else
 					return false;
@@ -81,55 +88,55 @@ public abstract class Command {
 	}
 	
 	public void denyPermission(CommandSender sender) {
-		sender.sendMessage(ChatColor.RED + "You do not have permission!");
+		Chat.sendMessage(sender, getMessage(Text.DENY_PERMISSION, sender));
 	}
 	
 	/**
-	 * displays the help
-	 * @param sender person to send to
+	 * Sends help to the sender
+	 * @param sender the player to help
+	 * @param args the arguments the player typed
 	 */
-	public void shortHelp(CommandSender sender, List<String> args) {
-		Bomberman.sendHeading(sender, "Help: /" + name());
-		sender.sendMessage(info(sender));
-	}
-	
-	public void longHelp(CommandSender sender, List<String> args) {
-		Bomberman.sendHeading(sender, "Help: /" + name());
-		sender.sendMessage(info(sender));
-		String temp = extra(sender, args);
+	public void help(CommandSender sender, List<String> args) {
+		Chat.sendHeading(sender, getMessage(Text.HELP, sender));
+		Map<Message, Message> help = info(sender, args);
+		Message temp = extra(sender, args);
 		if (temp != null)
-			sender.sendMessage(ChatColor.GOLD + "Extra info: " + ChatColor.RESET + temp);
+			help.put(getMessage(Text.EXTRA, sender), temp);
 		temp = example(sender, args);
 		if (temp != null)
-			sender.sendMessage(ChatColor.GOLD + "Example: " + ChatColor.RESET + temp);
+			help.put(getMessage(Text.EXAMPLE, sender), temp);
+		Chat.sendMap(sender, help);
 	}
 	
-	public String extra(CommandSender sender, List<String> args) {
-		return null;
-	}
+	public abstract Message extra(CommandSender sender, List<String> args);
 	
-	public abstract String example(CommandSender sender, List<String> args);
+	public abstract Message example(CommandSender sender, List<String> args);
 	
 	/**
 	 * Some info about the command
 	 * @param sender the sender
 	 * @return the (coloured) info
 	 */
-	public String info(CommandSender sender) {
-		return ChatColor.GOLD + "Description: " + ChatColor.WHITE + description() + " \n"
-				+ ChatColor.GOLD + "Usage: " + ChatColor.WHITE + usage(sender) + "\n";
+	public Map<Message, Message> info(CommandSender sender, List<String> args) {
+		Map<Message, Message> info = new LinkedHashMap<Message, Message>();
+		info.put(getMessage(Text.DESCTIPTION, sender), description(sender, args));
+		info.put(getMessage(Text.USAGE, sender), usage(sender, args));
+		return info;
 	}
 	/**
+	 * @param sender the player asking for the description
+	 * @param args the arguments the player typed
 	 * @return A sentence describing the command
 	 */
-	public abstract String description();
+	public abstract Message description(CommandSender sender, List<String> args);
 	
 	/**
-	 * The commands syntax
+	 * The command's syntax
 	 * @param sender the sender
+	 * @param args the args the sender used
 	 * @return How to use the command
 	 */
-	public abstract String usage(CommandSender sender);
+	public abstract Message usage(CommandSender sender, List<String> args);
 	
 	/**
 	 * @return the permission needed to run this command
@@ -160,11 +167,21 @@ public abstract class Command {
 	public String path(String seperator) {
 		String path = "";
 		if (parent != null)
-			path += parent.path(seperator);
-		path += name() + seperator;
+			path += parent.path(seperator) + seperator;
+		path += name().getMessage(null).toString();
 		return path;
 	}
-	public void incorrectUsage(CommandSender sender) {
-		sender.sendMessage(ChatColor.RED + "Incorrect usage!");
+	public void incorrectUsage(CommandSender sender, List<String> args) {
+		Chat.sendMessage(sender, getMessage(Text.INCORRECT_USAGE, sender, path(), Utils.listToString(args)));
+	}
+	
+	public Message getMessage(Text text, CommandSender sender, Object ... objects) {
+		Object objs[] = new Object[objects.length+2];
+		objs[0] = name().getMessage(sender).toString();
+		objs[1] = path();
+		for (int i = 0; i < objects.length; i++) {
+			objs[i+2] = objects[i];
+		}
+		return text.getMessage(sender, objs);
 	}
 }

@@ -1,10 +1,10 @@
 package io.github.mdsimmo.bomberman.commands.game.set;
 
-import io.github.mdsimmo.bomberman.Bomberman;
 import io.github.mdsimmo.bomberman.Game;
 import io.github.mdsimmo.bomberman.commands.Command;
 import io.github.mdsimmo.bomberman.commands.GameCommand;
-import io.github.mdsimmo.bomberman.utils.Utils;
+import io.github.mdsimmo.bomberman.messaging.Chat;
+import io.github.mdsimmo.bomberman.messaging.Text;
 
 import java.util.List;
 
@@ -17,8 +17,8 @@ public class Bombs extends GameCommand {
 	}
 
 	@Override
-	public String name() {
-		return "bombs";
+	public Text name() {
+		return Text.BOMBS_NAME;
 	}
 
 	@Override
@@ -35,21 +35,12 @@ public class Bombs extends GameCommand {
 		try {
 			amount = Integer.parseInt(args.get(0));
 		} catch (Exception e) {
-			return false;
+			Chat.sendMessage(sender, getMessage(Text.INVALID_NUMBER, sender, args.get(0)));
+			return true;
 		}
 		game.setBombs(amount);	
-		Bomberman.sendMessage(sender, "Bombs set to " + amount);
+		Chat.sendMessage(sender, getMessage(Text.BOMBS_SET, sender, game, amount));
 		return true;
-	}
-
-	@Override
-	public String description() {
-		return "Sets players' initial bombs";
-	}
-
-	@Override
-	public String usage(CommandSender sender) {
-		return "/" + path() + "<game> <amount>";
 	}
 
 	@Override
@@ -58,11 +49,23 @@ public class Bombs extends GameCommand {
 	}
 
 	@Override
-	public String example(CommandSender sender, List<String> args) {
-		String game = Utils.random(Game.allGames());
-		if (game == null)
-			game = "mygame";
-		return "/" + path() + game + " 3";
+	public Text extraShort() {
+		return Text.BOMBS_EXTRA;
+	}
+
+	@Override
+	public Text exampleShort() {
+		return Text.BOMBS_EXAMPLE;
+	}
+
+	@Override
+	public Text descriptionShort() {
+		return Text.BOMBS_DESCRIPTION;
+	}
+
+	@Override
+	public Text usageShort() {
+		return Text.BOMBS_USAGE;
 	}
 
 }

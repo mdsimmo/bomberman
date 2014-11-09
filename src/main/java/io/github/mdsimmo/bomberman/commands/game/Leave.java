@@ -1,8 +1,10 @@
 package io.github.mdsimmo.bomberman.commands.game;
 
-import io.github.mdsimmo.bomberman.Bomberman;
 import io.github.mdsimmo.bomberman.PlayerRep;
 import io.github.mdsimmo.bomberman.commands.Command;
+import io.github.mdsimmo.bomberman.messaging.Chat;
+import io.github.mdsimmo.bomberman.messaging.Message;
+import io.github.mdsimmo.bomberman.messaging.Text;
 
 import java.util.List;
 
@@ -16,8 +18,8 @@ public class Leave extends Command {
 	}
 
 	@Override
-	public String name() {
-		return "leave";
+	public Text name() {
+		return Text.LEAVE_NAME;
 	}
 
 	@Override
@@ -33,24 +35,14 @@ public class Leave extends Command {
 			PlayerRep rep = PlayerRep.getPlayerRep((Player) sender);
 			if (!rep.kill()) {
 				if (rep.getGamePlaying() == null)
-					Bomberman.sendMessage(sender, "You're not part of a game");
+					Chat.sendMessage(sender, getMessage(Text.LEAVE_NOT_JOINED, sender));
 				else
-					Bomberman.sendMessage(sender, "Couldn't remove you");
+					Chat.sendMessage(sender, getMessage(Text.LEAVE_FAILED, sender));
 			}
 		} else {
-			Bomberman.sendMessage(sender, "You must be a player");
+			Chat.sendMessage(sender, getMessage(Text.MUST_BE_PLAYER, sender));
 		}
 		return true;
-	}
-
-	@Override
-	public String description() {
-		return "Leave the game";
-	}
-
-	@Override
-	public String usage(CommandSender sender) {
-		return "/" + path();
 	}
 
 	@Override
@@ -59,8 +51,23 @@ public class Leave extends Command {
 	}
 
 	@Override
-	public String example(CommandSender sender, List<String> args) {
-		return "/" + path();
+	public Message extra(CommandSender sender, List<String> args) {
+		return getMessage(Text.JOIN_EXTRA, sender);
+	}
+
+	@Override
+	public Message description(CommandSender sender, List<String> args) {
+		return getMessage(Text.JOIN_DESCRIPTION, sender);
+	}
+
+	@Override
+	public Message usage(CommandSender sender, List<String> args) {
+		return getMessage(Text.JOIN_USAGE, sender);
+	}
+
+	@Override
+	public Message example(CommandSender sender, List<String> args) {
+		return getMessage(Text.JOIN_EXAMPLE, sender);
 	}
 
 }
