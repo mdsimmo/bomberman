@@ -93,7 +93,7 @@ public enum Text {
 	HELP_DESCRIPTION(		"command.help.descripion",			"Help for the selected command"),
 	HELP_USAGE(				"command.help.usage",				"/{2}<command>"),
 	HELP_EXAMPLE(			"command.help.example",				"/{2} game set fare"),
-	HELP_EXTRA(				"command.help.extra",				""),
+	HELP_EXTRA(				"command.help.extra",				"Shortcut is to put '?' after a command"),
 	
 	ARENA_NAME(				"command.arena.name",				"arena"),
 	ARENA_DESCRIPTION(		"command.arena.description",		"Arena management commands"),

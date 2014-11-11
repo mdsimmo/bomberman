@@ -62,10 +62,10 @@ public abstract class Command implements Formattable {
 	public abstract List<String> options (CommandSender sender, List<String> args);
 	
 	/**
-	 * Excecute the command
+	 * Execute the command
 	 * @param sender the sender
 	 * @param args the arguments
-	 * @return true if corectly typed. False will display info
+	 * @return true if correctly typed. False will display info
 	 */
 	public abstract boolean run (CommandSender sender, List<String> args);
 	
@@ -155,7 +155,7 @@ public abstract class Command implements Formattable {
 	
 	/**
 	 * short for path(" ");
-	 * @param sender TODO
+	 * @param sender who is being messaged
 	 */
 	public String path(CommandSender sender) {
 		return path(" ", sender);
@@ -163,7 +163,7 @@ public abstract class Command implements Formattable {
 	
 	/**
 	 * gets the path to the command
-	 * @param seperator what to seperate parent/child commands by
+	 * @param seperator what to separate parent/child commands by
 	 * @return the path
 	 */
 	private String path(String seperator, CommandSender sender) {

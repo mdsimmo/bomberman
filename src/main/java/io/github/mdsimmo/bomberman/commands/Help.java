@@ -54,9 +54,4 @@ public class Help extends Command {
 		return getMessage(Text.HELP_EXTRA, sender);
 	}
 	
-	@Override
-	public String extra(CommandSender sender, List<String> args) {
-		return "Shortcut is to put '?' after a command";
-	}
-
 }

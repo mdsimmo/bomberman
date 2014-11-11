@@ -51,7 +51,7 @@ public enum Config {
 			new ItemStack(Material.BLAZE_POWDER, 3))),
 	MAX_STRUCTURE("max-structue", 400000),
 	BUILD_RATE("build-rate", 500),
-	ALIASES("alliases", Arrays.asList("bm"));
+	ALIASES("alliases", Arrays.asList("bm")),
 	LANGUAGE("language-default", "");
 	
 	
