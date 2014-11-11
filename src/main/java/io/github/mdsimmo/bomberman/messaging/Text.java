@@ -103,6 +103,7 @@ public enum Text {
 	ARENA_LIST_USAGE(		"command.arenalist.usage",			"/{2}"),
 	ARENA_LIST_EXAMPLE(		"command.arenalist.example",		""),
 	ARENA_LIST_EXTRA(		"command.arenalist.extra",			""),
+	ARENA_LIST_NO_ARENA(	"command.arenalist.no-arena",		"No arenas"),
 	
 	ARENA_CREATE_NAME(		"command.arenacreate.name",			"create"),
 	ARENA_CREATE_DESCRIPTION("command.arenacreate.description",	"Create a new arena type for games to use"),
@@ -374,7 +375,13 @@ public enum Text {
 	SCORES_EXAMPLE(			"command.scores.example",			"/{2} {3}"),
 	SCORES_EXTRA(			"command.scores.extra",				""),
 	
-	END("","");
+	LANGUAGE_NAME(			"command.language.name",			"language"),
+	LANGUAGE_DESCRIPTION(	"command.language.description",		"Sets what language to use"),
+	LANGUAGE_USAGE(			"command.language.usage",			"/{2} <lang>"),
+	LANGUAGE_EXAMPLE(		"command.language.example",			"/{2} {3}"),
+	LANGUAGE_EXTRA(			"command.language.extra",			""),
+	LANGUAGE_UNKNOWN(		"command.language.invalid",			"Unknown language {3}"),
+	LANGUAGE_SUCCESS(		"command.language.success",			"Language set to {3}");
 	
 	private final String path;
 	private final String message;

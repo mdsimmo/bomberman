@@ -117,7 +117,7 @@ public class BoardGenerator {
 			}
 		});
 		for (File f : files) {
-			boards.add(f.getName().split(".arena")[0]);
+			boards.add(f.getName().split("\\.arena")[0]);
 		}
 		return boards;
 	}

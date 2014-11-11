@@ -1,6 +1,7 @@
 package io.github.mdsimmo.bomberman.commands;
 
 import io.github.mdsimmo.bomberman.messaging.Chat;
+import io.github.mdsimmo.bomberman.messaging.Formattable;
 import io.github.mdsimmo.bomberman.messaging.Message;
 import io.github.mdsimmo.bomberman.messaging.Text;
 import io.github.mdsimmo.bomberman.utils.Utils;
@@ -13,7 +14,7 @@ import javax.annotation.Nonnull;
 
 import org.bukkit.command.CommandSender;
 
-public abstract class Command {
+public abstract class Command implements Formattable {
 
 	public enum Permission {
 		
@@ -154,9 +155,10 @@ public abstract class Command {
 	
 	/**
 	 * short for path(" ");
+	 * @param sender TODO
 	 */
-	public String path() {
-		return path(" ");
+	public String path(CommandSender sender) {
+		return path(" ", sender);
 	}
 	
 	/**
@@ -164,24 +166,29 @@ public abstract class Command {
 	 * @param seperator what to seperate parent/child commands by
 	 * @return the path
 	 */
-	public String path(String seperator) {
+	private String path(String seperator, CommandSender sender) {
 		String path = "";
 		if (parent != null)
-			path += parent.path(seperator) + seperator;
-		path += name().getMessage(null).toString();
+			path += parent.path(seperator, sender) + seperator;
+		path += name().getMessage(sender).toString();
 		return path;
 	}
 	public void incorrectUsage(CommandSender sender, List<String> args) {
-		Chat.sendMessage(sender, getMessage(Text.INCORRECT_USAGE, sender, path(), Utils.listToString(args)));
+		Chat.sendMessage(sender, getMessage(Text.INCORRECT_USAGE, sender, path(sender), Utils.listToString(args)));
 	}
 	
 	public Message getMessage(Text text, CommandSender sender, Object ... objects) {
 		Object objs[] = new Object[objects.length+2];
 		objs[0] = name().getMessage(sender).toString();
-		objs[1] = path();
+		objs[1] = path(sender);
 		for (int i = 0; i < objects.length; i++) {
 			objs[i+2] = objects[i];
 		}
 		return text.getMessage(sender, objs);
+	}
+	
+	@Override
+	public String format(CommandSender sender) {
+		return path(sender);
 	}
 }

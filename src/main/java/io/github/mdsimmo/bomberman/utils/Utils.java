@@ -1,5 +1,6 @@
 package io.github.mdsimmo.bomberman.utils;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
@@ -61,5 +62,26 @@ public class Utils {
 			break;
 		}
 		return lastBlock;
+	}
+	
+	public static <T> ArrayList<T> asList(T[] array) {
+		ArrayList<T> list = new ArrayList<T>(array.length);
+		for (T element : array) {
+			list.add(element);
+		}
+		return list;
+	}
+	
+	/**
+	 * Gets the title of the file. Eg, "readme.txt" will return "readme"
+	 * @param file the file's name
+	 * @return the files title
+	 */
+	public static String getFileTitle(String file) {
+		String[] parts = file.split("\\.");
+		if (parts.length == 0)
+			return file;
+		else
+			return parts[0];
 	}
 }

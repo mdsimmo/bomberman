@@ -50,7 +50,8 @@ public enum Config {
 			new ItemStack(Material.TNT, 3),
 			new ItemStack(Material.BLAZE_POWDER, 3))),
 	MAX_STRUCTURE("max-structue", 400000),
-	BUILD_RATE("build-rate", 500);
+	BUILD_RATE("build-rate", 500),
+	LANGUAGE("language-default", "");
 	
 	
 	private static Plugin plugin = Bomberman.instance;

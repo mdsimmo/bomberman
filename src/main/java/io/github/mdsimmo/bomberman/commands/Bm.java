@@ -20,6 +20,7 @@ public class Bm extends CommandGroup {
 		addChildren(
 				new Game(this),
 				new Arena(this),
+				new LanguageCmd(this),
 				new Help(this)
 			);
 	}

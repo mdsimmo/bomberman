@@ -2,6 +2,7 @@ package io.github.mdsimmo.bomberman;
 
 import io.github.mdsimmo.bomberman.Game.Stats;
 import io.github.mdsimmo.bomberman.messaging.Chat;
+import io.github.mdsimmo.bomberman.messaging.Formattable;
 import io.github.mdsimmo.bomberman.messaging.Language;
 import io.github.mdsimmo.bomberman.messaging.Text;
 
@@ -35,11 +36,7 @@ import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionType;
 import org.bukkit.util.Vector;
 
-/**
- * This is a class that holds all the extra data needed for a Bomberman player <br>
- * When initialised, the player will automatically be made to join the game
- */
-public class PlayerRep implements Listener {
+public class PlayerRep implements Listener, Formattable {
 
 	private static JavaPlugin plugin = Bomberman.instance;
 	private static HashMap<Player, PlayerRep> lookup = new HashMap<>();
@@ -76,7 +73,7 @@ public class PlayerRep implements Listener {
 	private int immunity = 0;
 	private Game editGame = null;
 	private LinkedHashMap<Block, BlockRep> changes;
-	private Language lang = null;
+	private Language lang = Language.getLanguage((String)Config.LANGUAGE.getValue());
 	
 	public PlayerRep(Player player) {
 		this.player = player;
@@ -440,5 +437,14 @@ public class PlayerRep implements Listener {
 	
 	public Language getLanguage() {
 		return lang;
+	}
+
+	public void setLanguage(Language lang) {
+		this.lang = lang;
+	}
+
+	@Override
+	public String format(CommandSender sender) {
+		return player.getName();
 	}
 }

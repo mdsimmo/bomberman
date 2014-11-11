@@ -1,8 +1,12 @@
 package io.github.mdsimmo.bomberman;
 
 import io.github.mdsimmo.bomberman.commands.CommandHandler;
+import io.github.mdsimmo.bomberman.messaging.Text;
 import io.github.mdsimmo.bomberman.save.BoardSaver;
 
+import java.io.File;
+
+import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.plugin.java.JavaPlugin;
 
 public class Bomberman extends JavaPlugin {
@@ -25,5 +29,13 @@ public class Bomberman extends JavaPlugin {
 			Game.findGame(game).stop();
 			Game.findGame(game).saveGame();
 		}
+	}
+	
+	public static void main(String[] args) throws Exception {
+		YamlConfiguration config = new YamlConfiguration();
+		for (Text text : Text.values()) {
+			config.set(text.getPath(), text.getDefault());
+		}
+		config.save(new File("src/main/resources/lang.lang"));
 	}
 }

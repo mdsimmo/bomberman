@@ -1,16 +1,12 @@
 package io.github.mdsimmo.bomberman.messaging;
 
-import io.github.mdsimmo.bomberman.Board;
-import io.github.mdsimmo.bomberman.Game;
-import io.github.mdsimmo.bomberman.PlayerRep;
-
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.command.CommandSender;
 import org.bukkit.inventory.ItemStack;
 
 
-public class Message {
+public class Message implements Formattable {
 
 	private class InvalidMessageException extends RuntimeException {
 		private static final long serialVersionUID = 1L;
@@ -28,9 +24,11 @@ public class Message {
 	private final String text;
 	private final Object[] objects;
 	private ChatColor normal = null;
+	private final CommandSender sender;
 
 	public Message(CommandSender sender, String text, Object... objects) {
 		this.text = text;
+		this.sender = sender;
 		Object[] objs = new Object[objects.length+1];
 		objs[0] = sender;
 		for (int i = 0; i < objects.length; i++)
@@ -92,7 +90,7 @@ public class Message {
 
 				// append the formatted object
 				try {
-					formated.append(format(objects[reference]));
+					formated.append(format(objects[reference], sender));
 				} catch (IndexOutOfBoundsException e) {
 					throw new InvalidMessageException("Index out of bounds");
 				}
@@ -102,15 +100,10 @@ public class Message {
 		return formated.toString();
 	}
 	
-	private String format(Object obj) {
-		if (obj instanceof Message)
-			return obj.toString();
-		if (obj instanceof Game)
-			return ((Game)obj).name;
-		if (obj instanceof Board)
-			return ((Board)obj).name;
-		if (obj instanceof PlayerRep)
-			return ((PlayerRep)obj).player.getName();
+	private String format(Object obj, CommandSender sender) {
+		System.out.println("Formatting " + obj);
+		if (obj instanceof Formattable)
+			return ((Formattable)obj).format(sender);
 		if (obj instanceof CommandSender)
 			return ((CommandSender)obj).getName();
 		if (obj instanceof ItemStack) {
@@ -124,5 +117,10 @@ public class Message {
 	
 	public boolean isBlank() {
 		return text.isEmpty();
+	}
+
+	@Override
+	public String format(CommandSender sender) {
+		return toString();
 	}
 }

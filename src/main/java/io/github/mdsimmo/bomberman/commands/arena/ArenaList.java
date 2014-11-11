@@ -33,7 +33,7 @@ public class ArenaList extends Command {
 			return false;
 		List<String> arenas = BoardGenerator.allBoards();
 		if (arenas.size() == 0) {
-			Chat.sendText(sender, Text.COUNT_STOPPED_ALL);
+			Chat.sendMessage(sender, getMessage(Text.ARENA_LIST_NO_ARENA, sender));
 		} else {
 			Chat.sendHeading(sender, getMessage(Text.LIST, sender, Text.ARENA.getMessage(sender)));
 			List<Message> list = new ArrayList<>();
