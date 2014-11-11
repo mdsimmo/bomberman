@@ -70,6 +70,10 @@ public abstract class Command implements Formattable {
 	public abstract boolean run (CommandSender sender, List<String> args);
 	
 	public boolean execute(CommandSender sender, List<String> args) {
+		if (args.size() != 0 && args.get(args.size()-1).equalsIgnoreCase("?")) {
+			help(sender, args);
+			return true;
+		}
 		if (isAllowedBy(sender)) {
 			if (run(sender, args))
 				return true;

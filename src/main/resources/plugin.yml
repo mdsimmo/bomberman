@@ -3,12 +3,13 @@ main: io.github.mdsimmo.bomberman.Bomberman
 version: 0.1.0
 
 commands:
-  bm:
+  bomberman:
     description: Main command for BomberMan - contains all sub-commands.
     usage:
     - /<command>
     - /<command> game [...]
     - /<command> arena [...]
+    aliases: bm
     permission: bomberman.observer
   
 softdepend: [Multiverse-Core]

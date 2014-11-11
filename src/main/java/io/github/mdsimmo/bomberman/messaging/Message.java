@@ -101,7 +101,6 @@ public class Message implements Formattable {
 	}
 	
 	private String format(Object obj, CommandSender sender) {
-		System.out.println("Formatting " + obj);
 		if (obj instanceof Formattable)
 			return ((Formattable)obj).format(sender);
 		if (obj instanceof CommandSender)
