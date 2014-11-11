@@ -1,5 +1,8 @@
 package io.github.mdsimmo.bomberman.commands;
 
+import io.github.mdsimmo.bomberman.messaging.Message;
+import io.github.mdsimmo.bomberman.messaging.Text;
+
 import java.util.List;
 
 import org.bukkit.command.CommandSender;
@@ -11,8 +14,8 @@ public class Help extends Command {
 	}
 
 	@Override
-	public String name() {
-		return "help";
+	public Text name() {
+		return Text.HELP_NAME;
 	}
 
 	@Override
@@ -22,18 +25,18 @@ public class Help extends Command {
 
 	@Override
 	public boolean run(CommandSender sender, List<String> args) {
-		parent.longHelp(sender, args);
+		parent.help(sender, args);
 		return true;
 	}
 
 	@Override
-	public String description() {
-		return "Help for the selected command";
+	public Message description(CommandSender sender, List<String> args) {
+		return getMessage(Text.HELP_DESCRIPTION, sender);
 	}
 
 	@Override
-	public String usage(CommandSender sender) {
-		return "/" + path() + "<command path>"; 
+	public Message usage(CommandSender sender, List<String> args) {
+		return getMessage(Text.HELP_USAGE, sender, args); 
 	}
 
 	@Override
@@ -42,8 +45,13 @@ public class Help extends Command {
 	}
 
 	@Override
-	public String example(CommandSender sender, List<String> args) {
-		return "/" + path() + "game create";
+	public Message example(CommandSender sender, List<String> args) {
+		return getMessage(Text.HELP_EXAMPLE, sender);
+	}
+
+	@Override
+	public Message extra(CommandSender sender, List<String> args) {
+		return getMessage(Text.HELP_EXTRA, sender);
 	}
 	
 	@Override

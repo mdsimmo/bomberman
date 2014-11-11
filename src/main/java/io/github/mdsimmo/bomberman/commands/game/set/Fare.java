@@ -1,10 +1,10 @@
 package io.github.mdsimmo.bomberman.commands.game.set;
 
-import io.github.mdsimmo.bomberman.Bomberman;
 import io.github.mdsimmo.bomberman.Game;
 import io.github.mdsimmo.bomberman.commands.Command;
 import io.github.mdsimmo.bomberman.commands.GameCommand;
-import io.github.mdsimmo.bomberman.utils.Utils;
+import io.github.mdsimmo.bomberman.messaging.Chat;
+import io.github.mdsimmo.bomberman.messaging.Text;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -20,8 +20,8 @@ public class Fare extends GameCommand {
 	}
 
 	@Override
-	public String name() {
-		return "fare";
+	public Text name() {
+		return Text.FARE_NAME;
 	}
 
 	@Override
@@ -41,41 +41,29 @@ public class Fare extends GameCommand {
 		if (args.size() < 1 || args.size() > 2)
 			return false;
 		
-		if (args.size() == 1 && args.get(0).equalsIgnoreCase("none")) {
+		String none = Text.FARE_NONE.getMessage(sender).toString();
+		if (args.size() == 1 && args.get(0).equalsIgnoreCase(none)) {
 			game.setFare(null);
-			Bomberman.sendMessage(sender, "Fare removed");
-			return false;
+			Chat.sendMessage(sender, getMessage(Text.FARE_REMOVED, sender, game));
+			return true;
 		} else if (args.size() == 2) {
+			Material m = Material.getMaterial(args.get(0).toUpperCase());
+			if (m == null) {
+				Chat.sendMessage(sender, getMessage(Text.INVALID_MATERIAL, sender, args.get(0)));
+				return true;
+			}
 			try {
-				Material m = Material.getMaterial(args.get(0).toUpperCase());
-				if (m == null) {
-					Bomberman.sendMessage(sender, "Unknown material %i", args.get(0));
-					shortHelp(sender, args);
-					return true;
-				}
 				int amount = Integer.parseInt(args.get(1));
 				game.setFare(new ItemStack(m, amount));
-				Bomberman.sendMessage(sender, "Fare set to %i", game.getFare());
+				Chat.sendMessage(sender, getMessage(Text.FARE_SET, sender, game, game.getFare()));
 				return true;
 			} catch (Exception e) {
-				return false;
+				Chat.sendMessage(sender, getMessage(Text.INVALID_NUMBER, sender, args.get(1)));
+				return true;
 			}
 		} else {
 			return false;
 		}
-	}
-
-	@Override
-	public String description() {
-		return "Change a game's fare";
-	}
-
-	@Override
-	public String usage(CommandSender sender) {
-		 String usage = "\n";
-         usage += "   /" + path() + "<game> <material> <amount> \n";
-         usage += "   /" + path() + "<game> none \n";
-		return usage;
 	}
 
 	@Override
@@ -84,11 +72,23 @@ public class Fare extends GameCommand {
 	}
 
 	@Override
-	public String example(CommandSender sender, List<String> args) {
-		String game = Utils.random(Game.allGames());
-		if (game == null)
-			game = "mygame";
-		return "/" + path() + game + " gold_ingot 5";
+	public Text extraShort() {
+		return Text.FARE_EXTRA;
+	}
+
+	@Override
+	public Text exampleShort() {
+		return Text.FARE_EXAMPLE;
+	}
+
+	@Override
+	public Text descriptionShort() {
+		return Text.FARE_DESCRIPTION;
+	}
+
+	@Override
+	public Text usageShort() {
+		return Text.FARE_USAGE;
 	}
 
 }

@@ -2,6 +2,9 @@ package io.github.mdsimmo.bomberman.commands;
 
 import io.github.mdsimmo.bomberman.Game;
 import io.github.mdsimmo.bomberman.PlayerRep;
+import io.github.mdsimmo.bomberman.messaging.Message;
+import io.github.mdsimmo.bomberman.messaging.Text;
+import io.github.mdsimmo.bomberman.utils.Utils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -51,5 +54,36 @@ public abstract class GameCommand extends Command {
 	}
 	
 	public abstract boolean runShort(CommandSender sender, List<String> args, Game game);
+
+	@Override
+	public Message extra(CommandSender sender, List<String> args) {
+		return getMessage(extraShort(), sender);
+	}
 	
+	public abstract Text extraShort();
+
+	@Override
+	public Message example(CommandSender sender, List<String> args) {
+		String game = Utils.random(Game.allGames());
+		if (game == null)
+			game = "mygame";
+		return getMessage(exampleShort(), sender, game);
+	}
+	
+	public abstract Text exampleShort();
+	
+	@Override
+	public Message description(CommandSender sender, List<String> args) {
+		return getMessage(descriptionShort(), sender);
+	}
+	
+	public abstract Text descriptionShort();
+
+	@Override
+	public Message usage(CommandSender sender, List<String> args) {
+		return getMessage(usageShort(), sender);
+	}
+	
+	public abstract Text usageShort();
+
 }

@@ -18,7 +18,6 @@ import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Item;
-import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.util.Vector;
 
@@ -118,7 +117,7 @@ public class BoardGenerator {
 			}
 		});
 		for (File f : files) {
-			boards.add(f.getName().split(".arena")[0]);
+			boards.add(f.getName().split("\\.arena")[0]);
 		}
 		return boards;
 	}
@@ -171,9 +170,7 @@ public class BoardGenerator {
 	 * @return a box around the structure 
 	 */
 	@SuppressWarnings("unchecked")
-	public static Box getBoundingStructure(Player p) {
-		@SuppressWarnings("deprecation")
-		Block target = p.getTargetBlock(null, 100);
+	public static Box getBoundingStructure(Block target) {
 		
 		getConnected(target);
 		while (toCheck.size() > 0) {

@@ -1,12 +1,14 @@
 package io.github.mdsimmo.bomberman.commands.game;
 
-import io.github.mdsimmo.bomberman.Bomberman;
 import io.github.mdsimmo.bomberman.Game;
 import io.github.mdsimmo.bomberman.commands.Command;
+import io.github.mdsimmo.bomberman.messaging.Chat;
+import io.github.mdsimmo.bomberman.messaging.Message;
+import io.github.mdsimmo.bomberman.messaging.Text;
 
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.TreeMap;
 
 import org.bukkit.command.CommandSender;
 
@@ -17,8 +19,8 @@ public class GameList extends Command {
 	}
 
 	@Override
-	public String name() {
-		return "list";
+	public Text name() {
+		return Text.GAMELIST_NAME;
 	}
 
 	@Override
@@ -32,33 +34,24 @@ public class GameList extends Command {
 			return false;
 		List<String> games = Game.allGames();
 		if (games.size() == 0) {
-			Bomberman.sendMessage(sender, "No games");
+			Chat.sendMessage(sender, getMessage(Text.GAMELIST_NO_GAMES, sender));
 		} else {
-			Bomberman.sendHeading(sender, "List: Games");
-			Map<String, String> list = new TreeMap<>();
+			Chat.sendHeading(sender, Text.LIST.getMessage(sender, Text.GAME.getMessage(sender)));
+			Map<Message, Message> list = new LinkedHashMap<>();
 			for (String name : games) {
 				Game game = Game.findGame(name);
-				String status = game.players.size() + "/"
-						+ game.board.spawnPoints.size() + " : ";
+				Message status;
 				if (game.isPlaying)
-					status += "playing";
+					status = getMessage(Text.GAMELIST_PLAYING, sender, game);
 				else
-					status += "waiting  ";
-				list.put(game.name, status);
+					status = getMessage(Text.GAMELIST_WAITING, sender, game);
+				Message key = new Message(sender, game.name);
+				Message value = new Message(sender, status.toString());
+				list.put(key, value);				
 			}
-			Bomberman.sendMessage(sender, list);
+			Chat.sendMap(sender, list);
 		}
 		return true;
-	}
-
-	@Override
-	public String description() {
-		return "Show all existing games";
-	}
-
-	@Override
-	public String usage(CommandSender sender) {
-		return "/" + path();
 	}
 
 	@Override
@@ -67,8 +60,23 @@ public class GameList extends Command {
 	}
 
 	@Override
-	public String example(CommandSender sender, List<String> args) {
-		return "/" + path();
+	public Message example(CommandSender sender, List<String> args) {
+		return getMessage(Text.GAMELIST_EXAMPLE, sender);
+	}
+
+	@Override
+	public Message extra(CommandSender sender, List<String> args) {
+		return getMessage(Text.GAMELIST_EXTRA, sender);
+	}
+
+	@Override
+	public Message description(CommandSender sender, List<String> args) {
+		return getMessage(Text.GAMELIST_DESCRIPTION, sender);
+	}
+
+	@Override
+	public Message usage(CommandSender sender, List<String> args) {
+		return getMessage(Text.GAMELIST_USAGE, sender);
 	}
 
 }

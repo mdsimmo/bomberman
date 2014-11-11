@@ -1,8 +1,10 @@
 package io.github.mdsimmo.bomberman.commands.arena;
 
 import io.github.mdsimmo.bomberman.BoardGenerator;
-import io.github.mdsimmo.bomberman.Bomberman;
 import io.github.mdsimmo.bomberman.commands.Command;
+import io.github.mdsimmo.bomberman.messaging.Chat;
+import io.github.mdsimmo.bomberman.messaging.Message;
+import io.github.mdsimmo.bomberman.messaging.Text;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -16,8 +18,8 @@ public class ArenaList extends Command {
 	}
 
 	@Override
-	public String name() {
-		return "list";
+	public Text name() {
+		return Text.ARENA_LIST_NAME;
 	}
 
 	@Override
@@ -31,27 +33,17 @@ public class ArenaList extends Command {
 			return false;
 		List<String> arenas = BoardGenerator.allBoards();
 		if (arenas.size() == 0) {
-			Bomberman.sendMessage(sender, "No arenas");
+			Chat.sendMessage(sender, getMessage(Text.ARENA_LIST_NO_ARENA, sender));
 		} else {
-			Bomberman.sendHeading(sender, "List: Arenas");
-			List<String> list = new ArrayList<>();
+			Chat.sendHeading(sender, getMessage(Text.LIST, sender, Text.ARENA.getMessage(sender)));
+			List<Message> list = new ArrayList<>();
 			for (String name : arenas) {
 				if (!name.endsWith(".old"))
-					list.add(name);
+					list.add(new Message(sender, name));
 			}
-			Bomberman.sendMessage(sender, list);
+			Chat.sendList(sender, list);
 		}
 		return true;
-	}
-
-	@Override
-	public String description() {
-		return "List available arena types";
-	}
-
-	@Override
-	public String usage(CommandSender sender) {
-		return "/" + path();
 	}
 
 	@Override
@@ -60,7 +52,22 @@ public class ArenaList extends Command {
 	}
 
 	@Override
-	public String example(CommandSender sender, List<String> args) {		
-		return "/" + path();
+	public Message example(CommandSender sender, List<String> args) {		
+		return getMessage(Text.ARENA_LIST_EXAMPLE, sender);
+	}
+
+	@Override
+	public Message extra(CommandSender sender, List<String> args) {
+		return getMessage(Text.ARENA_LIST_EXTRA, sender);
+	}
+
+	@Override
+	public Message description(CommandSender sender, List<String> args) {
+		return getMessage(Text.ARENA_LIST_DESCRIPTION, sender);
+	}
+
+	@Override
+	public Message usage(CommandSender sender, List<String> args) {
+		return getMessage(Text.ARENA_LIST_USAGE, sender);
 	}
 }

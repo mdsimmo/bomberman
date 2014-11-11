@@ -4,6 +4,12 @@ import io.github.mdsimmo.bomberman.commands.Command;
 import io.github.mdsimmo.bomberman.commands.CommandGroup;
 import io.github.mdsimmo.bomberman.commands.game.force.Force;
 import io.github.mdsimmo.bomberman.commands.game.set.Set;
+import io.github.mdsimmo.bomberman.messaging.Message;
+import io.github.mdsimmo.bomberman.messaging.Text;
+
+import java.util.List;
+
+import org.bukkit.command.CommandSender;
 
 public class Game extends CommandGroup {
 
@@ -30,8 +36,8 @@ public class Game extends CommandGroup {
 	}
 
 	@Override
-	public String name() {
-		return "game";
+	public Text name() {
+		return Text.GAME_NAME;
 	}
 
 	@Override
@@ -40,8 +46,8 @@ public class Game extends CommandGroup {
 	}
 
 	@Override
-	public String description() {
-		return "All commands related to game configuation";
+	public Message description(CommandSender sender, List<String> args) {
+		return getMessage(Text.GAME_DESCRIPTION, sender);
 	}
 	
 }

@@ -4,6 +4,8 @@ import io.github.mdsimmo.bomberman.Bomberman;
 import io.github.mdsimmo.bomberman.Config;
 import io.github.mdsimmo.bomberman.commands.arena.Arena;
 import io.github.mdsimmo.bomberman.commands.game.Game;
+import io.github.mdsimmo.bomberman.messaging.Message;
+import io.github.mdsimmo.bomberman.messaging.Text;
 
 import java.util.List;
 
@@ -25,14 +27,9 @@ public class Bm extends CommandGroup {
 	}
 
 	@Override
-	public String description() {
-		return "Commands for Bomberman";
-	}
-	
-	@Override
 	public boolean run(CommandSender sender, List<String> args) {
 		if (args.get(args.size()-1).equalsIgnoreCase("?")) {
-			longHelp(sender, args);
+			help(sender, args);
 			return true;
 		}
 		return super.run(sender, args);
@@ -43,16 +40,13 @@ public class Bm extends CommandGroup {
 		addChildren(
 				new Game(this),
 				new Arena(this),
+				new LanguageCmd(this),
 				new Help(this)
 			);
 	}
 
-	@Override
-	public String name() {
-		if (aliases.isEmpty())
-			return "bomberman";
-		else
-			return aliases.get(0);
+	public Text name() {
+		return Text.BOMBERMAN_NAME;
 	}
 
 	@Override
@@ -61,11 +55,7 @@ public class Bm extends CommandGroup {
 	}
 	
 	@Override
-	public Command getCommand(CommandSender sender, List<String> args) {
-		// handle if an alias is used
-		if (args.size() > 0)
-			if (aliases.contains(args.get(0).toLowerCase()))
-					args.set(0, name());
-		return super.getCommand(sender, args);
+	public Message description(CommandSender sender, List<String> args) {
+		return Text.BOMBERMAN_DESCRIPTION.getMessage(sender);
 	}
 }

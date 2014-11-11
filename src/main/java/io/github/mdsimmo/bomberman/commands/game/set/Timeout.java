@@ -1,15 +1,15 @@
 package io.github.mdsimmo.bomberman.commands.game.set;
 
+import io.github.mdsimmo.bomberman.Game;
+import io.github.mdsimmo.bomberman.commands.Command;
+import io.github.mdsimmo.bomberman.commands.GameCommand;
+import io.github.mdsimmo.bomberman.messaging.Chat;
+import io.github.mdsimmo.bomberman.messaging.Text;
+
 import java.util.ArrayList;
 import java.util.List;
 
 import org.bukkit.command.CommandSender;
-
-import io.github.mdsimmo.bomberman.Bomberman;
-import io.github.mdsimmo.bomberman.Game;
-import io.github.mdsimmo.bomberman.commands.Command;
-import io.github.mdsimmo.bomberman.commands.GameCommand;
-import io.github.mdsimmo.bomberman.utils.Utils;
 
 public class Timeout extends GameCommand {
 
@@ -21,7 +21,7 @@ public class Timeout extends GameCommand {
 	public List<String> shortOptions(CommandSender sender, List<String> args) {
 		if (args.size() == 1) {
 			List<String> options = new ArrayList<>();
-			options.add("off");
+			options.add(Text.TIMEOUT_OFF.getMessage(sender).toString());
 			return options;
 		} else
 			return null;
@@ -34,34 +34,24 @@ public class Timeout extends GameCommand {
 		
 		String value = args.get(0).toLowerCase();
 		
-		if (value.equals("off")) {
+		if (value.equals(Text.TIMEOUT_OFF.getMessage(sender).toString())) {
 			game.setTimeout(-1);
-			Bomberman.sendMessage(sender, "Time out removed for game %g", game);
+			Chat.sendMessage(sender, getMessage(Text.TIMEOUT_REMOVED, sender, game));
 		} else {
 			try {
 				int time = (int)Double.parseDouble(value);
 				game.setTimeout(time);
-				Bomberman.sendMessage(sender, "Time out set to %d seconds", time);
+				Chat.sendMessage(sender, getMessage(Text.TIMEOUT_SET, sender, time));
 			} catch (Exception e) {
-				return false;
+				Chat.sendMessage(sender, getMessage(Text.INVALID_NUMBER, sender, value));
 			}
 		}
 		return true;
 	}
 
 	@Override
-	public String name() {
-		return "gameover";
-	}
-
-	@Override
-	public String description() {
-		return "Sets a maximum game time";
-	}
-
-	@Override
-	public String usage(CommandSender sender) {
-		return "/" + path() + "<game> <value>";
+	public Text name() {
+		return Text.TIMEOUT_NAME;
 	}
 
 	@Override
@@ -70,11 +60,23 @@ public class Timeout extends GameCommand {
 	}
 
 	@Override
-	public String example(CommandSender sender, List<String> args) {
-		String game = Utils.random(Game.allGames());
-		if (game == null)
-			game = "mygame";
-		return "/" + path() + game + "120";
+	public Text extraShort() {
+		return Text.TIMEOUT_EXTRA;
+	}
+
+	@Override
+	public Text exampleShort() {
+		return Text.TIMEOUT_EXAMPLE;
+	}
+
+	@Override
+	public Text descriptionShort() {
+		return Text.TIMEOUT_DESCRIPTION;
+	}
+
+	@Override
+	public Text usageShort() {
+		return Text.TIMEOUT_USAGE;
 	}
 
 }

@@ -1,6 +1,7 @@
 package io.github.mdsimmo.bomberman;
 
-import org.bukkit.ChatColor;
+import io.github.mdsimmo.bomberman.messaging.Text;
+
 import org.bukkit.plugin.Plugin;
 
 public class SuddenDeathCounter {
@@ -15,6 +16,9 @@ public class SuddenDeathCounter {
 		if (game == null)
 			throw new NullPointerException("Game cannot be null");
 		this.game = game;
+	}
+	
+	public void start() {
 		sd.start();
 		to.start();
 	}
@@ -37,21 +41,22 @@ public class SuddenDeathCounter {
 			
 			suddenDeath--;
 			
-			if (suddenDeath == 30)
-				Bomberman.sendMessage(game.players,
-						"Sudden death in %d seconds!", suddenDeath);
-			if (suddenDeath <= 10) {
-				if (suddenDeath == 10)
-					Bomberman.sendMessage(game.observers,
-							"Sudden death in %d seconds!", suddenDeath);
-				else if (0 < suddenDeath && suddenDeath <= 5) {
-					Bomberman.sendMessage(game.players, "%d", suddenDeath);
-				} else if (suddenDeath == 0) {
-					Bomberman.sendMessage(game.observers,
-							ChatColor.RED + "Sudden death!");
-					game.setSuddenDeath(true);
-					plugin.getServer().getScheduler().cancelTask(sdID);
-				}
+			if (suddenDeath == 30
+					|| suddenDeath == 10
+					|| (suddenDeath <= 5 && suddenDeath > 0))
+				game.sendMessages(
+						Text.SUDDENDEATH_COUNT_P,
+						Text.SUDDENDEATH_COUNT_O,
+						Text.SUDDENDEATH_COUNT_A,
+						game, suddenDeath);
+			else if (suddenDeath == 0) {
+				game.sendMessages(
+						Text.SUDDENDEATH_P,
+						Text.SUDDENDEATH_O,
+						Text.SUDDENDEATH_A,
+						game, suddenDeath);
+				game.setSuddenDeath(true);
+				plugin.getServer().getScheduler().cancelTask(sdID);
 			}
 		}
 		
@@ -75,18 +80,21 @@ public class SuddenDeathCounter {
 			
 			timeout--;
 			
-			if (timeout == 30)
-				Bomberman.sendMessage(game.players,
-						"Game over in %d seconds!",	timeout);
-			if (timeout == 10)
-				Bomberman.sendMessage(game.observers,
-						"Game over in %d seconds!",	timeout);
-			else if (0 < timeout && timeout <= 5)
-				Bomberman.sendMessage(game.players, "%d", timeout);
+			if (timeout == 30
+					|| timeout == 10
+					|| (timeout <= 5 && timeout > 0))
+				game.sendMessages(
+						Text.TIMEOUT_COUNT_P,
+						Text.TIMEOUT_COUNT_O,
+						Text.TIMEOUT_COUNT_A,
+						game, timeout);
 			else if (timeout == 0) {
-				Bomberman.sendMessage(game.observers, ChatColor.RED + "Game timed out!");
-				game.stop();
-				BoardGenerator.switchBoard(game.board, game.board, game.box);
+				game.sendMessages(
+						Text.TIMEOUT_P,
+						Text.TIMEOUT_O,
+						Text.TIMEOUT_A,
+						game, timeout);
+				game.setSuddenDeath(true);
 				plugin.getServer().getScheduler().cancelTask(toID);
 			}
 		}

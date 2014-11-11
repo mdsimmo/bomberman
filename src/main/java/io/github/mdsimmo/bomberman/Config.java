@@ -52,6 +52,7 @@ public enum Config {
 	MAX_STRUCTURE("max-structue", 400000),
 	BUILD_RATE("build-rate", 500),
 	ALIASES("alliases", Arrays.asList("bm"));
+	LANGUAGE("language-default", "");
 	
 	
 	private static Plugin plugin = Bomberman.instance;

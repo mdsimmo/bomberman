@@ -2,11 +2,14 @@ package io.github.mdsimmo.bomberman.commands.game;
 
 import io.github.mdsimmo.bomberman.Board;
 import io.github.mdsimmo.bomberman.BoardGenerator;
-import io.github.mdsimmo.bomberman.Bomberman;
 import io.github.mdsimmo.bomberman.Game;
 import io.github.mdsimmo.bomberman.PlayerRep;
 import io.github.mdsimmo.bomberman.commands.Command;
+import io.github.mdsimmo.bomberman.messaging.Chat;
+import io.github.mdsimmo.bomberman.messaging.Message;
+import io.github.mdsimmo.bomberman.messaging.Text;
 import io.github.mdsimmo.bomberman.utils.Box;
+import io.github.mdsimmo.bomberman.utils.Utils;
 
 import java.util.List;
 
@@ -20,8 +23,8 @@ public class Convert extends Command {
 	}
 
 	@Override
-	public String name() {
-		return "convert";
+	public Text name() {
+		return Text.CONVERT_NAME;
 	}
 
 	@Override
@@ -38,9 +41,10 @@ public class Convert extends Command {
 			return false;
 		if (sender instanceof Player) {
 			if (Game.findGame(args.get(0)) != null) {
-				Bomberman.sendMessage(sender, "Game %g already exists", args.get(0));
+				Chat.sendMessage(sender, getMessage(Text.CONVERT_GAME_EXISTS, sender, args.get(0)));
 			} else {
-				Box box = BoardGenerator.getBoundingStructure((Player) sender);
+				Box box = BoardGenerator.getBoundingStructure(
+						Utils.getTarget((Player)sender, 100));
 				Board board = BoardGenerator.createArena(args.get(0) + ".old", box);
 				BoardGenerator.saveBoard(board);
 				Game game = new Game(args.get(0), box);
@@ -48,22 +52,12 @@ public class Convert extends Command {
 				game.oldBoard = board;
 				Game.register(game);
 				PlayerRep.getPlayerRep((Player)sender).setGameActive(game);
-				Bomberman.sendMessage(sender, "Game %g created", game);
+				Chat.sendMessage(sender, getMessage(Text.CONVERT_SUCCESS, sender, game));
 			}
 		} else {
-			Bomberman.sendMessage(sender, "You must be a player");
+			Chat.sendMessage(sender, getMessage(Text.MUST_BE_PLAYER, sender));
 		}
 		return true;
-	}
-
-	@Override
-	public String description() {
-		return "Converts the structure under the cursor into a Bomberman game";
-	}
-
-	@Override
-	public String usage(CommandSender sender) {
-		return "/" + path() + "<game>";
 	}
 
 	@Override
@@ -72,13 +66,25 @@ public class Convert extends Command {
 	}
 
 	@Override
-	public String example(CommandSender sender, List<String> args) {
-		return "/" + path() + "banana";
+	public Message example(CommandSender sender, List<String> args) {
+		String game = Utils.random(Game.allGames());
+		game = game == null ? "mygame" : game;
+		return getMessage(Text.CONVERT_EXAMPLE, sender, game);
 	}
 	
 	@Override
-	public String extra(CommandSender sender, List<String> args) {
-		return "Natural blocks are ignored when detecting structures";
+	public Message extra(CommandSender sender, List<String> args) {
+		return getMessage(Text.CONVERT_EXTRA, sender);
+	}
+
+	@Override
+	public Message description(CommandSender sender, List<String> args) {
+		return getMessage(Text.CONVERT_DESCRIPTION, sender);
+	}
+
+	@Override
+	public Message usage(CommandSender sender, List<String> args) {
+		return getMessage(Text.CONVERT_USAGE, sender);
 	}
 
 }

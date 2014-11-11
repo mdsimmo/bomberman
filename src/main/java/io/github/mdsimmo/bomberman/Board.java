@@ -1,13 +1,16 @@
 package io.github.mdsimmo.bomberman;
 
+import io.github.mdsimmo.bomberman.messaging.Formattable;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
 import org.bukkit.Material;
+import org.bukkit.command.CommandSender;
 import org.bukkit.util.Vector;
 
-public class Board {
+public class Board implements Formattable {
 
 	public final String name;
 	public final int xSize;
@@ -95,5 +98,10 @@ public class Board {
 	
 	public void setDropping(List<Material> list) {
 		this.droppingBlocks = list;
+	}
+
+	@Override
+	public String format(CommandSender sender) {
+		return name;
 	}
 }

@@ -1,18 +1,21 @@
 package io.github.mdsimmo.bomberman;
 
 import io.github.mdsimmo.bomberman.Game.Stats;
+import io.github.mdsimmo.bomberman.messaging.Chat;
+import io.github.mdsimmo.bomberman.messaging.Formattable;
+import io.github.mdsimmo.bomberman.messaging.Language;
+import io.github.mdsimmo.bomberman.messaging.Text;
 
-import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
-import java.util.List;
 import java.util.Map;
 
-import org.bukkit.ChatColor;
 import org.bukkit.GameMode;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
+import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -33,11 +36,7 @@ import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionType;
 import org.bukkit.util.Vector;
 
-/**
- * This is a class that holds all the extra data needed for a Bomberman player <br>
- * When initialised, the player will automatically be made to join the game
- */
-public class PlayerRep implements Listener {
+public class PlayerRep implements Listener, Formattable {
 
 	private static JavaPlugin plugin = Bomberman.instance;
 	private static HashMap<Player, PlayerRep> lookup = new HashMap<>();
@@ -50,8 +49,19 @@ public class PlayerRep implements Listener {
 			return rep;
 	}
 	
-	public static List<PlayerRep> allPlayers() {
-		return new ArrayList<>(lookup.values());
+	public static PlayerRep getPlayerRepSoft(CommandSender sender) {
+		return lookup.get(sender); 
+	}
+	
+	public static Collection<PlayerRep> allPlayers() {
+		return lookup.values();
+	}
+	
+	public static Language getLanguage(CommandSender sender) {
+		if (sender instanceof Player == false)
+			return null;
+		PlayerRep rep = lookup.get(sender);
+		return rep == null ? null : rep.getLanguage();
 	}
 	
 	public final Player player;
@@ -63,6 +73,7 @@ public class PlayerRep implements Listener {
 	private int immunity = 0;
 	private Game editGame = null;
 	private LinkedHashMap<Block, BlockRep> changes;
+	private Language lang = Language.getLanguage((String)Config.LANGUAGE.getValue());
 	
 	public PlayerRep(Player player) {
 		this.player = player;
@@ -108,17 +119,17 @@ public class PlayerRep implements Listener {
 	 */
 	public boolean joinGame() {
 		if (game == null) {
-			Bomberman.sendMessage(this, "You must specify a game to join");
+			Chat.sendText(this, Text.SPECIFY_GAME);
 			return false;
 		}
 		if (gamePlaying != null) {
-			Bomberman.sendMessage(this, "You're already part of %g", gamePlaying);
+			Chat.sendText(this, Text.ALREADY_PLAYING, gamePlaying);
 			return false;
 		}
 		this.spawn = player.getLocation();
 		Vector gameSpawn = game.findSpareSpawn();
 		if (gameSpawn == null) {
-			Bomberman.sendMessage(this, "Game %g is full.", game);
+			Chat.sendText(this, Text.GAME_FULL, game);
 			return false;
 		}
 		if (game.getFare() != null) {
@@ -126,11 +137,11 @@ public class PlayerRep implements Listener {
 					|| player.getGameMode() == GameMode.CREATIVE)
 				player.getInventory().removeItem(game.getFare());
 			else {
-				Bomberman.sendMessage(this, "You need %i to join", game.getFare());
+				Chat.sendText(this, Text.TOO_POOR, game, game.getFare());
 				return false;
 			}
 		}
-		Bomberman.sendMessage(game.observers, "%p joined game %g", this, game);
+		Chat.sendText(game.observers, Text.PLAYER_JOINED, game, this);
 		player.teleport(game.box.corner().add(gameSpawn));
 		player.setGameMode(GameMode.SURVIVAL);
 		player.setHealth(game.getLives());
@@ -185,7 +196,7 @@ public class PlayerRep implements Listener {
 					changes.put(e.getBlock(), BlockRep.createBlock(e.getBlockReplacedState()));
 				else {
 					e.setCancelled(true);
-					Bomberman.sendMessage(this, "Cannot build outside while in editmode");
+					Chat.sendText(this, Text.EDIT_BUILD_DENIED, editGame);
 				}
 			}
 		}
@@ -199,7 +210,7 @@ public class PlayerRep implements Listener {
 				changes.put(e.getBlock(), BlockRep.createBlock(e.getBlock()));
 			else {
 				e.setCancelled(true);
-				Bomberman.sendMessage(this, "Cannot destroy blocks outside while in editmode");
+				Chat.sendText(this, Text.EDIT_DESTROY_DENIED, editGame);
 			}
 		}
 	}
@@ -233,7 +244,7 @@ public class PlayerRep implements Listener {
 		Player p = e.getPlayer();
 		if (p == this.player && gamePlaying != null  && !gamePlaying.box.contains(e.getTo())) {
 			e.setCancelled(true);
-			Bomberman.sendMessage(p, ChatColor.RED + "Cannot teleport while part of a game");
+			Chat.sendText(this, Text.TELEPORT_DENIED, gamePlaying);
 		}
 	}
 
@@ -267,22 +278,20 @@ public class PlayerRep implements Listener {
 
 		if (!dead) {
 			if (attacker == this) {
-				Bomberman.sendMessage(player, "You hit yourself!");
+				Chat.sendText(this, Text.HIT_SUICIDE, gamePlaying);
 			} else {
-				Bomberman.sendMessage(player,
-						"You were hit by %p", attacker);
-				Bomberman.sendMessage(attacker, "You hit %p", player);
+				Chat.sendText(this, Text.HIT_BY, gamePlaying, attacker);
+				Chat.sendText(attacker, Text.HIT_OPPONENT, gamePlaying, this);
 			}
 		} else {
 			playerStats.deaths++;
 			attackerStats.kills++;
 			if (attacker == this) {
-				Bomberman.sendMessage(player, ChatColor.RED
-						+ "You killed yourself!");
+				Chat.sendText(this, Text.KILL_SUICIDE, gamePlaying);
 				playerStats.suicides++;
 			} else {
-				Bomberman.sendMessage(player, ChatColor.RED + "Killed by %p", attacker);
-				Bomberman.sendMessage(attacker, ChatColor.YELLOW + "You killed %p", player);
+				Chat.sendText(this, Text.KILLED_BY, gamePlaying, attacker);
+				Chat.sendText(attacker, Text.KILL_OPPONENT, gamePlaying, player);
 			}
 		}
 		
@@ -309,7 +318,7 @@ public class PlayerRep implements Listener {
 		if (e.getEntity() == player && gamePlaying != null) {
 			if (e.getRegainReason() == RegainReason.MAGIC)
 				if (gamePlaying.isSuddenDeath())
-					Bomberman.sendMessage(this, "No regen in sudden death!");
+					Chat.sendText(this, Text.NO_REGEN, gamePlaying);
 				else
 					player.setHealth(Math.min(player.getHealth() + 1,
 							player.getMaxHealth()));
@@ -404,10 +413,6 @@ public class PlayerRep implements Listener {
 		return gamePlaying != null;
 	}
 	
-	public String getName() {
-		return player.getName();
-	}
-	
 	public boolean isEditting() {
 		return editGame != null;
 	}
@@ -428,5 +433,18 @@ public class PlayerRep implements Listener {
 							}
 						}
 					});
+	}
+	
+	public Language getLanguage() {
+		return lang;
+	}
+
+	public void setLanguage(Language lang) {
+		this.lang = lang;
+	}
+
+	@Override
+	public String format(CommandSender sender) {
+		return player.getName();
 	}
 }

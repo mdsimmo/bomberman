@@ -1,11 +1,11 @@
 package io.github.mdsimmo.bomberman.commands.game;
 
-import io.github.mdsimmo.bomberman.Bomberman;
 import io.github.mdsimmo.bomberman.Game;
 import io.github.mdsimmo.bomberman.PlayerRep;
 import io.github.mdsimmo.bomberman.commands.Command;
 import io.github.mdsimmo.bomberman.commands.GameCommand;
-import io.github.mdsimmo.bomberman.utils.Utils;
+import io.github.mdsimmo.bomberman.messaging.Chat;
+import io.github.mdsimmo.bomberman.messaging.Text;
 
 import java.util.List;
 
@@ -29,32 +29,22 @@ public class Ignore extends GameCommand {
 			return false;
 		
 		if (sender instanceof Player == false) {
-			Bomberman.sendMessage(sender, "You must be  player");
+			Chat.sendMessage(sender, getMessage(Text.MUST_BE_PLAYER, sender));
 			return true;
 		}
 		
 		if (game.observers.remove(PlayerRep.getPlayerRep((Player)sender))) {
-			Bomberman.sendMessage(sender, "Game %g ignored", game);
+			Chat.sendMessage(sender, getMessage(Text.IGNORE_SUCCESS, sender, game));
 		} else {
-			Bomberman.sendMessage(sender, "You where not observing %g", game);
+			Chat.sendMessage(sender, getMessage(Text.IGNORE_NOT_WATCHED, sender, game));
 		}
 		
 		return true;
 	}
 
 	@Override
-	public String name() {
-		return "ignore";
-	}
-
-	@Override
-	public String description() {
-		return "ignore all further messages from a game";
-	}
-
-	@Override
-	public String usage(CommandSender sender) {
-		return "/" + path() + "<game>";
+	public Text name() {
+		return Text.IGNORE_NAME;
 	}
 
 	@Override
@@ -63,11 +53,23 @@ public class Ignore extends GameCommand {
 	}
 
 	@Override
-	public String example(CommandSender sender, List<String> args) {
-		String game = Utils.random(Game.allGames());
-		if (game == null)
-			game = "mygame";
-		return "/" + path() + game;
+	public Text extraShort() {
+		return Text.IGNORE_EXTRA;
+	}
+
+	@Override
+	public Text exampleShort() {
+		return Text.IGNORE_EXAMPLE;
+	}
+
+	@Override
+	public Text descriptionShort() {
+		return Text.IGNORE_DESCRIPTION;
+	}
+
+	@Override
+	public Text usageShort() {
+		return Text.IGNORE_USAGE;
 	}
 
 }

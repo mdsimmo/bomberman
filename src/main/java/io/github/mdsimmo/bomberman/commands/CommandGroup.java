@@ -1,10 +1,16 @@
 package io.github.mdsimmo.bomberman.commands;
 
+import io.github.mdsimmo.bomberman.messaging.Chat;
+import io.github.mdsimmo.bomberman.messaging.Message;
+import io.github.mdsimmo.bomberman.messaging.Text;
+import io.github.mdsimmo.bomberman.utils.Utils;
+
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
-import org.bukkit.ChatColor;
 import org.bukkit.command.CommandSender;
 
 public abstract class CommandGroup extends Command {
@@ -29,62 +35,51 @@ public abstract class CommandGroup extends Command {
 		List<String> options = new ArrayList<>();
 		for (Command c : children) {
 			if (c.isAllowedBy(sender))
-				options.add(c.name());
+				options.add(c.name().getMessage(sender).toString());
 		}
 		return options;
 	}
 	
-	public abstract String description();
-	
 	@Override
-	public void shortHelp(CommandSender sender, List<String> args) {
+	public void help(CommandSender sender, List<String> args) {
 		Command c = getCommand(sender, args);
 		if (c == this)
-			super.shortHelp(sender, args);
+			super.help(sender, args);
 		else
-			c.shortHelp(sender, args);
+			c.help(sender, args);
 	}
 	
 	@Override
-	public void longHelp(CommandSender sender, List<String> args) {
-		Command c = getCommand(sender, args);
-		if (c == this)
-			super.longHelp(sender, args);
-		else
-			c.longHelp(sender, args);
-	}
-	
-	@Override
-	public String extra(CommandSender sender, List<String> args) {
+	public Message extra(CommandSender sender, List<String> args) {
 		return null;
 	}
 	
 	@Override
-	public String example(CommandSender sender, List<String> args) {
+	public Message example(CommandSender sender, List<String> args) {
 		return null;
 	}
 	
 	@Override
-	public String info(CommandSender sender) {
-		String info = ChatColor.GOLD + "Description: " + ChatColor.WHITE + description() + " \n";
-		info += ChatColor.GOLD + "Commands: \n" + ChatColor.WHITE;
-		info += usage(sender);
+	public Map<Message, Message> info(CommandSender sender, List<String> args) {
+		Map<Message, Message> info = new LinkedHashMap<Message, Message>();
+		info.put(getMessage(Text.DESCTIPTION, sender), description(sender, args));
+		info.put(getMessage(Text.COMMANDS, sender), usage(sender, args));
 		return info;
 	}
 	
 	@Override
-	public String usage(CommandSender sender) {
-		String usage = "";
+	public Message usage(CommandSender sender, List<String> args) {
+		String usage = "\n";
 		for (Command c : children) {
 			if (!c.isAllowedBy(sender))
 				continue;
 			
 			if (c instanceof CommandGroup)
-				usage += "    " + c.name() + " [...]\n";
+				usage += "    " + c.name().getMessage(sender) + " [...]\n";
 			else
-				usage += "    " + c.name() + "\n";
+				usage += "    " + c.name().getMessage(sender) + "\n";
 		}
-		return usage;
+		return new Message(sender, usage);
 	}
 	
 	/**
@@ -95,17 +90,17 @@ public abstract class CommandGroup extends Command {
 	@Override
 	public boolean run(CommandSender sender, List<String> args) {
 		if (args.size() == 0) {
-			shortHelp(sender, args);
+			help(sender, args);
 			return true;
 		} else {
 			for (Command c : children) {
-				if (c.name().equalsIgnoreCase(args.get(0))) {
+				if (c.name().getMessage(sender).toString().equalsIgnoreCase(args.get(0))) {
 					args.remove(0);
 					return c.execute(sender, args);
 				}				
 			}
-			sender.sendMessage(ChatColor.RED + "You entered an unknown command!");
-			shortHelp(sender, args);
+			Chat.sendMessage(sender, getMessage(Text.UNKNOWN_COMMAND, sender, Utils.listToString(args)));
+			help(sender, args);
 			return true;
 		}
 	}
@@ -114,7 +109,7 @@ public abstract class CommandGroup extends Command {
 		if (args.size() == 0)
 			return this;
 		for (Command c : children) {
-			if (c.name().equalsIgnoreCase(args.get(0))) {
+			if (c.name().getMessage(sender).toString().equalsIgnoreCase(args.get(0))) {
 				args.remove(0);
 				if (c instanceof CommandGroup)
 					return ((CommandGroup)c).getCommand(sender, args);

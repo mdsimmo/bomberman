@@ -2,10 +2,12 @@ package io.github.mdsimmo.bomberman.commands.game.set;
 
 import io.github.mdsimmo.bomberman.Board;
 import io.github.mdsimmo.bomberman.BoardGenerator;
-import io.github.mdsimmo.bomberman.Bomberman;
 import io.github.mdsimmo.bomberman.Game;
 import io.github.mdsimmo.bomberman.commands.Command;
 import io.github.mdsimmo.bomberman.commands.GameCommand;
+import io.github.mdsimmo.bomberman.messaging.Chat;
+import io.github.mdsimmo.bomberman.messaging.Message;
+import io.github.mdsimmo.bomberman.messaging.Text;
 import io.github.mdsimmo.bomberman.utils.Utils;
 
 import java.util.List;
@@ -19,8 +21,8 @@ public class Arena extends GameCommand {
 	}
 
 	@Override
-	public String name() {
-		return "arena";
+	public Text name() {
+		return Text.SETARENA_NAME;
 	}
 
 	@Override
@@ -37,31 +39,21 @@ public class Arena extends GameCommand {
 			return false;
 		
 		if (game.isPlaying) {
-			Bomberman.sendMessage(sender, "Game %g in progress. Cannot change arena", game);
+			Chat.sendMessage(sender, getMessage(Text.SETARENA_GIP, sender, game));
 			return true;
 		}
 
 		Board board = BoardGenerator.loadBoard(args.get(0));
 		if (board == null) {
-			Bomberman.sendMessage(sender, "Arena %b not found", board);
+			Chat.sendMessage(sender, getMessage(Text.INVALID_ARENA, sender, args.get(0)));
 			return true;
 		}
 		BoardGenerator.switchBoard(game.board, game.oldBoard, game.box);
 		game.board = board;
 		game.oldBoard = BoardGenerator.createArena(game.name + ".old", game.box);
 		BoardGenerator.switchBoard(game.oldBoard, board, game.box);
-		Bomberman.sendMessage(sender, "Game %g arena's changed", game);
+		Chat.sendMessage(sender, getMessage(Text.SETARENA_SUCCESS, sender, game, board));
 		return true;
-	}
-
-	@Override
-	public String description() {
-		return "Change a game's arena";
-	}
-
-	@Override
-	public String usage(CommandSender sender) {
-		return "/" + path() + "<game> <arena>";
 	}
 
 	@Override
@@ -70,14 +62,32 @@ public class Arena extends GameCommand {
 	}
 
 	@Override
-	public String example(CommandSender sender, List<String> args) {
+	public Text extraShort() {
+		return Text.SETARENA_EXTRA;
+	}
+
+	@Override
+	public Text exampleShort() {
+		throw new RuntimeException("This method is invalid");
+	}
+	
+	@Override
+	public Message example(CommandSender sender, List<String> args) {
 		String game = Utils.random(Game.allGames());
-		if (game == null)
-			game = "mygame";
+		game = game == null ? "mygame" : game;
 		String arena = Utils.random(BoardGenerator.allBoards());
-		if (arena == null)
-			arena = "myarena";
-		return "/" + path() + game + ' ' + arena;
+		arena = arena == null ? "myarena" : game;
+		return getMessage(Text.SETARENA_EXAMPLE, sender, game, arena);
+	}
+
+	@Override
+	public Text descriptionShort() {
+		return Text.SETARENA_DESCRIPTION;
+	}
+
+	@Override
+	public Text usageShort() {
+		return Text.SETARENA_USAGE;
 	}
 
 }

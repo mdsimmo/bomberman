@@ -1,14 +1,14 @@
 package io.github.mdsimmo.bomberman.commands.game.set;
 
-import java.util.List;
-
-import org.bukkit.command.CommandSender;
-
-import io.github.mdsimmo.bomberman.Bomberman;
 import io.github.mdsimmo.bomberman.Game;
 import io.github.mdsimmo.bomberman.commands.Command;
 import io.github.mdsimmo.bomberman.commands.GameCommand;
-import io.github.mdsimmo.bomberman.utils.Utils;
+import io.github.mdsimmo.bomberman.messaging.Chat;
+import io.github.mdsimmo.bomberman.messaging.Text;
+
+import java.util.List;
+
+import org.bukkit.command.CommandSender;
 
 public class MinPlayers extends GameCommand {
 
@@ -17,8 +17,8 @@ public class MinPlayers extends GameCommand {
 	}
 
 	@Override
-	public String name() {
-		return "minplayers";
+	public Text name() {
+		return Text.MINPLAYERS_NAME;
 	}
 
 	@Override
@@ -38,18 +38,8 @@ public class MinPlayers extends GameCommand {
 			return false;
 		}
 		game.setMinPlayers(amount);	
-		Bomberman.sendMessage(sender, "Min players set");
+		Chat.sendMessage(sender, getMessage(Text.MINPLAYERS_SET, sender, game, amount));
 		return true;
-	}
-
-	@Override
-	public String description() {
-		return "Sets the min players before game can start";
-	}
-
-	@Override
-	public String usage(CommandSender sender) {
-		return "/" + path() + "<game> <amount>";
 	}
 
 	@Override
@@ -58,11 +48,22 @@ public class MinPlayers extends GameCommand {
 	}
 
 	@Override
-	public String example(CommandSender sender, List<String> args) {
-		String game = Utils.random(Game.allGames());
-		if (game == null)
-			game = "mygame";
-		return "/" + path() + game + "3";
+	public Text extraShort() {
+		return Text.MINPLAYERS_EXTRA;
 	}
 
+	@Override
+	public Text exampleShort() {
+		return Text.MINPLAYERS_EXAMPLE;
+	}
+
+	@Override
+	public Text descriptionShort() {
+		return Text.MINPLAYERS_DESCRIPTION;
+	}
+
+	@Override
+	public Text usageShort() {
+		return Text.MINPLAYERS_USAGE;
+	}
 }
