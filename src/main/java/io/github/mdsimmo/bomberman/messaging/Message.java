@@ -1,125 +1,171 @@
 package io.github.mdsimmo.bomberman.messaging;
 
+import io.github.mdsimmo.bomberman.Bomberman;
+
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Stack;
+
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.command.CommandSender;
 import org.bukkit.inventory.ItemStack;
 
-
 public class Message implements Formattable {
 
-	private class InvalidMessageException extends RuntimeException {
-		private static final long serialVersionUID = 1L;
-
-		public InvalidMessageException(String reason, int location) {
-			super(reason + " in message '" + text + "' at position " + location);
-		}
-
-		public InvalidMessageException(String reason) {
-			super(reason + " in message '" + text + "'");
-		}
-
-	}
-
 	private final String text;
-	private final Object[] objects;
-	private ChatColor normal = null;
-	private final CommandSender sender;
+	private Stack<ChatColor> colors = new Stack<>();
+	private HashMap<String, Object> values = new HashMap<>();
 
-	public Message(CommandSender sender, String text, Object... objects) {
+	public Message( CommandSender sender, String text ) {
 		this.text = text;
-		this.sender = sender;
-		Object[] objs = new Object[objects.length+1];
-		objs[0] = sender;
-		for (int i = 0; i < objects.length; i++)
-			objs[i+1] = objects[i];
-		this.objects = objs;
+		values.put( "sender", sender );
+		colors.push( ChatColor.RESET );
 	}
-	
+
+	public Object get( String key ) {
+		Object val = values.get( key );
+		if ( val == null )
+			try {
+				val = ChatColor.valueOf( key.toUpperCase() );
+			} catch ( IllegalArgumentException e ) {
+				Bomberman.instance.getLogger().info( "Key " + key + " has no associated value" );
+			}
+		return val;
+	}
+
+	public CommandSender getSender() {
+		return (CommandSender)values.get( "sender" );
+	}
+
+	public Message put( Map<String, Object> values ) {
+		for ( Entry<String, Object> entry : values.entrySet() ) {
+			put( entry.getKey(), entry.getValue() );
+		}
+		return this;
+	}
+
+	public Message put( String key, Object value ) {
+		values.put( key, value );
+		return this;
+	}
+
+	public boolean containsKey( String key ) {
+		return get( key ) != null;
+	}
+
 	@Override
 	public String toString() {
-		StringBuffer formated = new StringBuffer();
-		int length = text.length();
-		for (int i = 0; i < length; i++) {
-			char c = text.charAt(i);
-			if (c != '{') {
-				if (c == '}' && normal != null) {
-					normal = null;
-					formated.append(ChatColor.RESET);
-					continue;
+		try { 
+			return expand( text );
+		} catch ( Exception e ) {
+			e.printStackTrace();
+			Bomberman.instance.getLogger().warning( "Faulty message: " + text );
+			return ChatColor.RED + "Internal format error";
+		}
+	}
+
+	private String expand( String text ) {
+		StringBuffer expanded = new StringBuffer();
+		for ( int i = 0; i < text.length(); i++ ) {
+			char c = text.charAt( i );
+			if ( c == '{' ) {
+				StringBuffer subText = new StringBuffer();
+				int openBracesFound = 0;
+				while ( c != '}' || openBracesFound != 0 ) {
+					if ( c == '}' )
+						openBracesFound--;
+					subText.append( c );
+					i++;
+					c = text.charAt( i );
+					if ( c == '{' )
+						openBracesFound++;
 				}
-				formated.append(c);
+				subText.append( c );
+				expanded.append( expandBrace( subText.toString() ) );
 			} else {
-				// Get data stuff
-				do {
-					i++;
-					c = text.charAt(i);
-				} while (c == ' ');
-
-				// get the value
-				String val = "";
-				do {
-					val += c;
-					i++;
-					c = text.charAt(i);
-				} while (Character.isJavaIdentifierPart(c));
-				
-				while (c == ' ') {
-					i++;
-					c = text.charAt(i);
-				}
-				
-				int reference = 0;
-				try {
-					reference = Integer.parseInt(val);
-				} catch (NumberFormatException e) {
-					try {
-						normal = ChatColor.valueOf(val);
-						formated.append(normal);
-						if (c != '|')
-							throw new InvalidMessageException("Expected '|'", i);
-						continue;
-					} catch (IllegalArgumentException e2) {
-						throw new InvalidMessageException("Expected number or ChatColor", i);
-					}
-				}
-
-				if (c != '}') {
-					throw new InvalidMessageException("Expected '}'", i);
-				}
-
-				// append the formatted object
-				try {
-					formated.append(format(objects[reference], sender));
-				} catch (IndexOutOfBoundsException e) {
-					throw new InvalidMessageException("Index out of bounds");
-				}
+				expanded.append( c );
 			}
 		}
-
-		return formated.toString();
+		return expanded.toString();
 	}
-	
-	private String format(Object obj, CommandSender sender) {
-		if (obj instanceof Formattable)
-			return ((Formattable)obj).format(sender);
-		if (obj instanceof CommandSender)
-			return ((CommandSender)obj).getName();
-		if (obj instanceof ItemStack) {
+
+	private String expandBrace( String text ) {
+		if ( text.charAt( 0 ) != '{' || text.charAt( text.length() - 1 ) != '}' )
+			throw new RuntimeException(
+					"expandBrace() must start and end with a brace" );
+		StringBuffer buffer = new StringBuffer();
+		int i = 1;
+		char c = text.charAt( i );
+		// skip whitespace
+		while ( Character.isWhitespace( c ) ) {
+			i++;
+			c = text.charAt( i );
+		}
+		// get reference
+		while ( Character.isJavaIdentifierPart( c ) ) {
+			buffer.append( c );
+			i++;
+			c = text.charAt( i );
+		}
+		// remove whitespace
+		while ( Character.isWhitespace( c ) ) {
+			i++;
+			c = text.charAt( i );
+		}
+		String key = buffer.toString();
+		buffer.delete( 0, buffer.length() );
+		Object value = get( key );
+		if ( value instanceof ChatColor )
+			colors.push( (ChatColor)value );
+
+		if ( c == '}' ) {
+			if ( i == text.length()-1 ) {
+				buffer.append( format( value, null ) );
+				return buffer.toString();
+			} else
+				throw new RuntimeException( "Expected ending brace" );
+		} else if ( c == '|' ) {
+			String subarg = expand( text.substring( i+1, text.length() - 1 ) );
+			buffer.append( format( value, subarg ) );
+			if ( value instanceof ChatColor ) {
+				buffer.append( subarg.trim() );
+				colors.pop();
+				buffer.append( colors.peek().toString() );
+			}
+		} else {
+			throw new RuntimeException( "Expected '|' or '}' " );
+		}
+
+		return buffer.toString();
+
+	}
+
+	private String format( Object obj, String value ) {
+		if ( value != null )
+			value = value.trim();
+		if ( obj instanceof Formattable )
+			return ( (Formattable)obj ).format( this, value );
+		if ( obj instanceof CommandSender )
+			return ( (CommandSender)obj ).getName();
+		if ( obj instanceof ItemStack ) {
 			ItemStack stack = (ItemStack)obj;
 			int amount = stack.getAmount();
 			Material type = stack.getType();
-			return amount + " " + type.toString().replace('_', ' ').toLowerCase();
+			return amount + " "
+					+ type.toString().replace( '_', ' ' ).toLowerCase();
 		}
-		return obj.toString();
+		return String.valueOf( obj );
 	}
-	
+
 	public boolean isBlank() {
 		return text.isEmpty();
 	}
-
+	
 	@Override
-	public String format(CommandSender sender) {
-		return toString();
+	public String format( Message message, String value ) {
+		colors.push( message.colors.peek() );
+		return this.toString();
 	}
 }

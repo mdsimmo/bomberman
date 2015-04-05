@@ -3,7 +3,7 @@ package io.github.mdsimmo.bomberman.commands.game.force;
 import io.github.mdsimmo.bomberman.BoardGenerator;
 import io.github.mdsimmo.bomberman.Game;
 import io.github.mdsimmo.bomberman.PlayerRep;
-import io.github.mdsimmo.bomberman.commands.Command;
+import io.github.mdsimmo.bomberman.commands.Cmd;
 import io.github.mdsimmo.bomberman.commands.GameCommand;
 import io.github.mdsimmo.bomberman.messaging.Chat;
 import io.github.mdsimmo.bomberman.messaging.Text;
@@ -14,12 +14,12 @@ import org.bukkit.command.CommandSender;
 
 public class Reset extends GameCommand {
 
-	public Reset(Command parent) {
+	public Reset(Cmd parent) {
 		super(parent);
 	}
 
 	@Override
-	public Text name() {
+	public Text nameShort() {
 		return Text.RESET_NAME;
 	}
 	
@@ -34,10 +34,10 @@ public class Reset extends GameCommand {
 			return false;
 		
 		for (PlayerRep rep : game.players)
-			Chat.sendMessage(rep.getPlayer(), getMessage(Text.RESET_SUCCESS_P, rep.getPlayer(), game));
+			Chat.sendMessage(rep.getPlayer(), getMessage(Text.RESET_SUCCESS_P, rep.getPlayer()).put( "game", game));
 		game.stop();
 		BoardGenerator.switchBoard(game.board, game.board, game.box);
-		Chat.sendMessage(sender, getMessage(Text.RESET_SUCCESS, sender, game));
+		Chat.sendMessage(sender, getMessage(Text.RESET_SUCCESS, sender).put( "game", game));
 		return true;
 	}
 

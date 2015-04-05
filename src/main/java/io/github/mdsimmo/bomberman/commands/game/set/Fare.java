@@ -1,7 +1,7 @@
 package io.github.mdsimmo.bomberman.commands.game.set;
 
 import io.github.mdsimmo.bomberman.Game;
-import io.github.mdsimmo.bomberman.commands.Command;
+import io.github.mdsimmo.bomberman.commands.Cmd;
 import io.github.mdsimmo.bomberman.commands.GameCommand;
 import io.github.mdsimmo.bomberman.messaging.Chat;
 import io.github.mdsimmo.bomberman.messaging.Text;
@@ -15,12 +15,12 @@ import org.bukkit.inventory.ItemStack;
 
 public class Fare extends GameCommand {
 
-	public Fare(Command parent) {
+	public Fare(Cmd parent) {
 		super(parent);
 	}
 
 	@Override
-	public Text name() {
+	public Text nameShort() {
 		return Text.FARE_NAME;
 	}
 
@@ -44,21 +44,21 @@ public class Fare extends GameCommand {
 		String none = Text.FARE_NONE.getMessage(sender).toString();
 		if (args.size() == 1 && args.get(0).equalsIgnoreCase(none)) {
 			game.setFare(null);
-			Chat.sendMessage(sender, getMessage(Text.FARE_REMOVED, sender, game));
+			Chat.sendMessage(sender, getMessage(Text.FARE_REMOVED, sender).put( "game", game));
 			return true;
 		} else if (args.size() == 2) {
 			Material m = Material.getMaterial(args.get(0).toUpperCase());
 			if (m == null) {
-				Chat.sendMessage(sender, getMessage(Text.INVALID_MATERIAL, sender, args.get(0)));
+				Chat.sendMessage(sender, getMessage(Text.INVALID_MATERIAL, sender).put( "material", args.get(0)));
 				return true;
 			}
 			try {
 				int amount = Integer.parseInt(args.get(1));
 				game.setFare(new ItemStack(m, amount));
-				Chat.sendMessage(sender, getMessage(Text.FARE_SET, sender, game, game.getFare()));
+				Chat.sendMessage(sender, getMessage(Text.FARE_SET, sender).put( "game", game));
 				return true;
 			} catch (Exception e) {
-				Chat.sendMessage(sender, getMessage(Text.INVALID_NUMBER, sender, args.get(1)));
+				Chat.sendMessage(sender, getMessage(Text.INVALID_NUMBER, sender).put( "number", args.get(1)));
 				return true;
 			}
 		} else {

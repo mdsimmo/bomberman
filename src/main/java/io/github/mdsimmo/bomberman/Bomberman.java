@@ -1,6 +1,6 @@
 package io.github.mdsimmo.bomberman;
 
-import io.github.mdsimmo.bomberman.commands.CommandHandler;
+import io.github.mdsimmo.bomberman.commands.BaseCommand;
 import io.github.mdsimmo.bomberman.messaging.Text;
 import io.github.mdsimmo.bomberman.save.BoardSaver;
 
@@ -19,7 +19,7 @@ public class Bomberman extends JavaPlugin {
 		getDataFolder().mkdirs();
 		BoardGenerator.copyDefaults();
 		BoardSaver.convertOldArenas();
-		new CommandHandler();
+		new BaseCommand();
 		Game.loadGames();
 	}
 	

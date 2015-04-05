@@ -2,7 +2,7 @@ package io.github.mdsimmo.bomberman.commands.game;
 
 import io.github.mdsimmo.bomberman.Game;
 import io.github.mdsimmo.bomberman.PlayerRep;
-import io.github.mdsimmo.bomberman.commands.Command;
+import io.github.mdsimmo.bomberman.commands.Cmd;
 import io.github.mdsimmo.bomberman.commands.GameCommand;
 import io.github.mdsimmo.bomberman.messaging.Chat;
 import io.github.mdsimmo.bomberman.messaging.Text;
@@ -14,7 +14,7 @@ import org.bukkit.entity.Player;
 
 public class Ignore extends GameCommand {
 
-	public Ignore(Command parent) {
+	public Ignore(Cmd parent) {
 		super(parent);
 	}
 
@@ -34,16 +34,16 @@ public class Ignore extends GameCommand {
 		}
 		
 		if (game.observers.remove(PlayerRep.getPlayerRep((Player)sender))) {
-			Chat.sendMessage(sender, getMessage(Text.IGNORE_SUCCESS, sender, game));
+			Chat.sendMessage(sender, getMessage(Text.IGNORE_SUCCESS, sender).put( "game", game));
 		} else {
-			Chat.sendMessage(sender, getMessage(Text.IGNORE_NOT_WATCHED, sender, game));
+			Chat.sendMessage(sender, getMessage(Text.IGNORE_NOT_WATCHED, sender).put( "game", game));
 		}
 		
 		return true;
 	}
 
 	@Override
-	public Text name() {
+	public Text nameShort() {
 		return Text.IGNORE_NAME;
 	}
 

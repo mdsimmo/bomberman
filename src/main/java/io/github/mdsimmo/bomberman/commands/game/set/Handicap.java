@@ -2,10 +2,11 @@ package io.github.mdsimmo.bomberman.commands.game.set;
 
 import io.github.mdsimmo.bomberman.Game;
 import io.github.mdsimmo.bomberman.PlayerRep;
-import io.github.mdsimmo.bomberman.commands.Command;
+import io.github.mdsimmo.bomberman.commands.Cmd;
 import io.github.mdsimmo.bomberman.commands.GameCommand;
 import io.github.mdsimmo.bomberman.messaging.Chat;
 import io.github.mdsimmo.bomberman.messaging.Text;
+import io.github.mdsimmo.bomberman.playerstates.GamePlayingState;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -16,12 +17,12 @@ import org.bukkit.entity.Player;
 
 public class Handicap extends GameCommand {
 
-	public Handicap(Command parent) {
+	public Handicap(Cmd parent) {
 		super(parent);
 	}
 
 	@Override
-	public Text name() {
+	public Text nameShort() {
 		return Text.HANDICAP_NAME;
 	}
 
@@ -46,24 +47,24 @@ public class Handicap extends GameCommand {
 		@SuppressWarnings("deprecation")
 		PlayerRep rep = PlayerRep.getPlayerRep(Bukkit.getPlayer(args.get(0)));
 		if (rep == null) {
-			Chat.sendMessage(sender, getMessage(Text.INVALID_PLAYER, sender, args.get(0)));
+			Chat.sendMessage(sender, getMessage(Text.INVALID_PLAYER, sender).put( "player", args.get(0)));
 			return true;
 		}
 		int handicap = 0;
 		try {
 			handicap = Integer.parseInt(args.get(1));
 		} catch (NumberFormatException e) {
-			Chat.sendMessage(sender, getMessage(Text.INVALID_NUMBER, sender, args.get(1)));
+			Chat.sendMessage(sender, getMessage(Text.INVALID_NUMBER, sender).put( "number", args.get(1)));
 		}
 		game.setHandicap(rep, handicap);
 		if (handicap > 0)
-			Chat.sendMessage(sender, getMessage(Text.HANDICAP_HANDYCAPPED, sender, game, rep, handicap));
+			Chat.sendMessage(sender, getMessage(Text.HANDICAP_HANDYCAPPED, sender).put( "game", game).put( "player", rep ));
 		else if (handicap == 0)
-			Chat.sendMessage(sender, getMessage(Text.HANDICAP_REMOVED, sender, game, rep, handicap));
+			Chat.sendMessage(sender, getMessage(Text.HANDICAP_REMOVED, sender).put( "game", game).put( "player", rep ));
 		else
-			Chat.sendMessage(sender, getMessage(Text.HANDICAP_ADVANTAGED, sender, game, rep, handicap));
+			Chat.sendMessage(sender, getMessage(Text.HANDICAP_ADVANTAGE, sender).put( "game", game).put( "player", rep ));
 		
-		if (rep.isPlaying() && !rep.getGamePlaying().isPlaying)
+		if (rep.isPlaying() && !((GamePlayingState)rep.getState()).getGame().isPlaying)
 			game.initialise(rep);
 		return true;
 	}

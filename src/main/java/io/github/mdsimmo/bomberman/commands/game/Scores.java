@@ -1,7 +1,7 @@
 package io.github.mdsimmo.bomberman.commands.game;
 
 import io.github.mdsimmo.bomberman.Game;
-import io.github.mdsimmo.bomberman.commands.Command;
+import io.github.mdsimmo.bomberman.commands.Cmd;
 import io.github.mdsimmo.bomberman.commands.GameCommand;
 import io.github.mdsimmo.bomberman.messaging.Chat;
 import io.github.mdsimmo.bomberman.messaging.Text;
@@ -12,7 +12,7 @@ import org.bukkit.command.CommandSender;
 
 public class Scores extends GameCommand {
 
-	public Scores(Command parent) {
+	public Scores(Cmd parent) {
 		super(parent);
 	}
 
@@ -28,7 +28,7 @@ public class Scores extends GameCommand {
 	}
 
 	@Override
-	public Text name() {
+	public Text nameShort() {
 		return Text.SCORES_NAME;
 	}
 

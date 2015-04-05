@@ -12,69 +12,76 @@ import java.util.List;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
-public class LanguageCmd extends Command {
+public class LanguageCmd extends Cmd {
 
-	public LanguageCmd(Command parent) {
-		super(parent);
+	public LanguageCmd(Cmd parent) {
+		super( parent );
 	}
 
 	@Override
-	public Text name() {
-		return Text.LANGUAGE_NAME;
+	public Message name( CommandSender sender ) {
+		return getMessage( Text.LANGUAGE_NAME, sender );
 	}
 
 	@Override
-	public List<String> options(CommandSender sender, List<String> args) {
+	public List<String> options( CommandSender sender, List<String> args ) {
 		List<String> langs = Language.allLanguages();
-		if (!langs.contains("english"))
-			langs.add("english");
+		if ( !langs.contains( "english" ) )
+			langs.add( "english" );
 		return langs;
 	}
 
 	@Override
-	public boolean run(CommandSender sender, List<String> args) {
-		if (args.size() != 1)
+	public boolean run( CommandSender sender, List<String> args ) {
+		if ( args.size() != 1 )
 			return false;
-		
-		if (sender instanceof Player == false) {
-			Chat.sendMessage(sender, getMessage(Text.MUST_BE_PLAYER, sender));
+
+		if ( sender instanceof Player == false ) {
+			Chat.sendMessage( sender, getMessage( Text.MUST_BE_PLAYER, sender ) );
 			return true;
 		}
-		
-		Language lang = Language.getLanguage(args.get(0));
-		if (lang == null) {
-			if (args.get(0).equalsIgnoreCase("english")) {
-				PlayerRep.getPlayerRep((Player)sender).setLanguage(null);
-				Chat.sendMessage(sender, getMessage(Text.LANGUAGE_SUCCESS, sender, args.get(0)));
+
+		Language lang = Language.getLanguage( args.get( 0 ) );
+		if ( lang == null ) {
+			if ( args.get( 0 ).equalsIgnoreCase( "english" ) ) {
+				PlayerRep.getPlayerRep( (Player)sender ).setLanguage( null );
+				Chat.sendMessage(
+						sender,
+						getMessage( Text.LANGUAGE_SUCCESS, sender ).put(
+								"lang", args.get( 0 ) ) );
 			} else
-				Chat.sendMessage(sender, getMessage(Text.LANGUAGE_UNKNOWN, sender, args.get(0)));
+				Chat.sendMessage(
+						sender,
+						getMessage( Text.LANGUAGE_UNKNOWN, sender ).put( "lang" , args.get( 0 ) ) );
 		} else {
-			PlayerRep.getPlayerRep((Player)sender).setLanguage(lang);
-			Chat.sendMessage(sender, getMessage(Text.LANGUAGE_SUCCESS, sender, lang));
+			PlayerRep.getPlayerRep( (Player)sender ).setLanguage( lang );
+			Chat.sendMessage( sender,
+					getMessage( Text.LANGUAGE_SUCCESS, sender ).put( "lang", lang ) );
 		}
 		return true;
 	}
 
 	@Override
-	public Message extra(CommandSender sender, List<String> args) {
-		return getMessage(Text.LANGUAGE_EXTRA, sender);
+	public Message extra( CommandSender sender ) {
+		return getMessage( Text.LANGUAGE_EXTRA, sender );
 	}
 
 	@Override
-	public Message example(CommandSender sender, List<String> args) {
-		String lang = Utils.random(Language.allLanguages());
+	public Message example( CommandSender sender ) {
+		String lang = Utils.random( Language.allLanguages() );
 		lang = lang == null ? "mylang" : lang;
-		return getMessage(Text.LANGUAGE_EXAMPLE, sender, lang);
+		return getMessage( Text.LANGUAGE_EXAMPLE, sender )
+				.put( "example", lang );
 	}
 
 	@Override
-	public Message description(CommandSender sender, List<String> args) {
-		return getMessage(Text.LANGUAGE_DESCRIPTION, sender);
+	public Message description( CommandSender sender ) {
+		return getMessage( Text.LANGUAGE_DESCRIPTION, sender );
 	}
 
 	@Override
-	public Message usage(CommandSender sender, List<String> args) {
-		return getMessage(Text.LANGUAGE_USAGE, sender);
+	public Message usage( CommandSender sender ) {
+		return getMessage( Text.LANGUAGE_USAGE, sender );
 	}
 
 	@Override

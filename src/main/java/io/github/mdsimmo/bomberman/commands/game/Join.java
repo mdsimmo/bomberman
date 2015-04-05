@@ -2,10 +2,11 @@ package io.github.mdsimmo.bomberman.commands.game;
 
 import io.github.mdsimmo.bomberman.Game;
 import io.github.mdsimmo.bomberman.PlayerRep;
-import io.github.mdsimmo.bomberman.commands.Command;
+import io.github.mdsimmo.bomberman.commands.Cmd;
 import io.github.mdsimmo.bomberman.commands.GameCommand;
 import io.github.mdsimmo.bomberman.messaging.Chat;
 import io.github.mdsimmo.bomberman.messaging.Text;
+import io.github.mdsimmo.bomberman.playerstates.GamePlayingState;
 
 import java.util.List;
 
@@ -14,12 +15,12 @@ import org.bukkit.entity.Player;
 
 public class Join extends GameCommand {
 
-	public Join(Command parent) {
+	public Join(Cmd parent) {
 		super(parent);
 	}
 
 	@Override
-	public Text name() {
+	public Text nameShort() {
 		return Text.JOIN_NAME;
 	}
 
@@ -37,12 +38,12 @@ public class Join extends GameCommand {
 			return true;
 		}	
 		if (game.isPlaying) {
-			Chat.sendMessage(sender, getMessage(Text.JOIN_GAME_STARTED, sender, game));
+			Chat.sendMessage(sender, getMessage(Text.JOIN_GAME_STARTED, sender).put( "game", game));
 			return true;
 		}
 		PlayerRep rep = PlayerRep.getPlayerRep((Player) sender);
-		rep.setGameActive(game);
-		rep.joinGame();
+		rep.setActiveGame(game);
+		rep.switchStates( new GamePlayingState( rep ) );
 		return true;
 	}
 	

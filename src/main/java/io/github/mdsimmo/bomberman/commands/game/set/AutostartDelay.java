@@ -1,7 +1,7 @@
 package io.github.mdsimmo.bomberman.commands.game.set;
 
 import io.github.mdsimmo.bomberman.Game;
-import io.github.mdsimmo.bomberman.commands.Command;
+import io.github.mdsimmo.bomberman.commands.Cmd;
 import io.github.mdsimmo.bomberman.commands.GameCommand;
 import io.github.mdsimmo.bomberman.messaging.Chat;
 import io.github.mdsimmo.bomberman.messaging.Text;
@@ -12,12 +12,12 @@ import org.bukkit.command.CommandSender;
 
 public class AutostartDelay extends GameCommand {
 
-	public AutostartDelay(Command parent) {
+	public AutostartDelay(Cmd parent) {
 		super(parent);
 	}
 
 	@Override
-	public Text name() {
+	public Text nameShort() {
 		return Text.STARTDELAY_NAME;
 	}
 
@@ -33,9 +33,9 @@ public class AutostartDelay extends GameCommand {
 		        
         try {
             game.setAutostartDelay(Integer.parseInt(args.get(0)));
-            Chat.sendMessage(sender, getMessage(Text.STARTDELAY_SET, sender, game, game.getAutostartDelay()));
+            Chat.sendMessage(sender, getMessage(Text.STARTDELAY_SET, sender).put( "game", game) );
         } catch (NumberFormatException e) {
-            Chat.sendMessage(sender, getMessage(Text.INVALID_NUMBER, sender, args.get(0)));
+            Chat.sendMessage(sender, getMessage(Text.INVALID_NUMBER, sender).put( "number", args.get(0)));
         }
         return true;
 	}

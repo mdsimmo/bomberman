@@ -1,19 +1,17 @@
 package io.github.mdsimmo.bomberman.commands.game;
 
-import io.github.mdsimmo.bomberman.commands.Command;
+import io.github.mdsimmo.bomberman.commands.Cmd;
 import io.github.mdsimmo.bomberman.commands.CommandGroup;
 import io.github.mdsimmo.bomberman.commands.game.force.Force;
 import io.github.mdsimmo.bomberman.commands.game.set.Set;
 import io.github.mdsimmo.bomberman.messaging.Message;
 import io.github.mdsimmo.bomberman.messaging.Text;
 
-import java.util.List;
-
 import org.bukkit.command.CommandSender;
 
 public class Game extends CommandGroup {
 
-	public Game(Command parent) {
+	public Game(Cmd parent) {
 		super(parent);
 	}
 
@@ -36,8 +34,8 @@ public class Game extends CommandGroup {
 	}
 
 	@Override
-	public Text name() {
-		return Text.GAME_NAME;
+	public Message name( CommandSender sender ) {
+		return getMessage( Text.GAME_NAME, sender );
 	}
 
 	@Override
@@ -46,7 +44,7 @@ public class Game extends CommandGroup {
 	}
 
 	@Override
-	public Message description(CommandSender sender, List<String> args) {
+	public Message description(CommandSender sender ) {
 		return getMessage(Text.GAME_DESCRIPTION, sender);
 	}
 	

@@ -2,7 +2,7 @@ package io.github.mdsimmo.bomberman.commands.game;
 
 import io.github.mdsimmo.bomberman.Config;
 import io.github.mdsimmo.bomberman.Game;
-import io.github.mdsimmo.bomberman.commands.Command;
+import io.github.mdsimmo.bomberman.commands.Cmd;
 import io.github.mdsimmo.bomberman.commands.GameCommand;
 import io.github.mdsimmo.bomberman.messaging.Chat;
 import io.github.mdsimmo.bomberman.messaging.Text;
@@ -19,7 +19,7 @@ public class Protect extends GameCommand {
 
 	private static BiMap<Config, Text> options = HashBiMap.create();
 	
-	public Protect(Command parent) {
+	public Protect(Cmd parent) {
 		super(parent);
 		options.put(Config.PROTECT, Text.PROTECT_ENABLED);
 		options.put(Config.PROTECT_PLACING, Text.PROTECT_PLACEING);
@@ -31,7 +31,7 @@ public class Protect extends GameCommand {
 	}
 
 	@Override
-	public Text name() {
+	public Text nameShort() {
 		return Text.PROTECT_NAME;
 	}
 
@@ -101,9 +101,9 @@ public class Protect extends GameCommand {
 		String returnString = protection == Config.PROTECT ? "" : options.get(protection).getMessage(sender).toString();
 				
 		if (enable)
-			Chat.sendMessage(sender, getMessage(Text.PROTECT_ON, sender, game, returnString));
+			Chat.sendMessage(sender, getMessage(Text.PROTECT_ON, sender).put( "game", game).put( "protection", returnString));
 		else
-			Chat.sendMessage(sender, getMessage(Text.PROTECT_OFF, sender, game, returnString));
+			Chat.sendMessage(sender, getMessage(Text.PROTECT_OFF, sender).put( "game", game).put( "protection", returnString));
 		return true;
 	}
 	

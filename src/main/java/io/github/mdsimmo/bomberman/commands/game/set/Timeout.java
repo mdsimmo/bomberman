@@ -1,7 +1,7 @@
 package io.github.mdsimmo.bomberman.commands.game.set;
 
 import io.github.mdsimmo.bomberman.Game;
-import io.github.mdsimmo.bomberman.commands.Command;
+import io.github.mdsimmo.bomberman.commands.Cmd;
 import io.github.mdsimmo.bomberman.commands.GameCommand;
 import io.github.mdsimmo.bomberman.messaging.Chat;
 import io.github.mdsimmo.bomberman.messaging.Text;
@@ -13,7 +13,7 @@ import org.bukkit.command.CommandSender;
 
 public class Timeout extends GameCommand {
 
-	public Timeout(Command parent) {
+	public Timeout(Cmd parent) {
 		super(parent);
 	}
 
@@ -36,21 +36,21 @@ public class Timeout extends GameCommand {
 		
 		if (value.equals(Text.TIMEOUT_OFF.getMessage(sender).toString())) {
 			game.setTimeout(-1);
-			Chat.sendMessage(sender, getMessage(Text.TIMEOUT_REMOVED, sender, game));
+			Chat.sendMessage(sender, getMessage(Text.TIMEOUT_REMOVED, sender).put( "game", game));
 		} else {
 			try {
 				int time = (int)Double.parseDouble(value);
 				game.setTimeout(time);
-				Chat.sendMessage(sender, getMessage(Text.TIMEOUT_SET, sender, time));
+				Chat.sendMessage(sender, getMessage(Text.TIMEOUT_SET, sender).put( "game", game));
 			} catch (Exception e) {
-				Chat.sendMessage(sender, getMessage(Text.INVALID_NUMBER, sender, value));
+				Chat.sendMessage(sender, getMessage(Text.INVALID_NUMBER, sender).put( "number", value));
 			}
 		}
 		return true;
 	}
 
 	@Override
-	public Text name() {
+	public Text nameShort() {
 		return Text.TIMEOUT_NAME;
 	}
 

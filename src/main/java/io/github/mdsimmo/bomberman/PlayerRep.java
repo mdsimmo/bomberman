@@ -1,111 +1,79 @@
 package io.github.mdsimmo.bomberman;
 
-import io.github.mdsimmo.bomberman.Game.Stats;
-import io.github.mdsimmo.bomberman.messaging.Chat;
 import io.github.mdsimmo.bomberman.messaging.Formattable;
 import io.github.mdsimmo.bomberman.messaging.Language;
-import io.github.mdsimmo.bomberman.messaging.Text;
+import io.github.mdsimmo.bomberman.messaging.Message;
+import io.github.mdsimmo.bomberman.playerstates.GamePlayingState;
+import io.github.mdsimmo.bomberman.playerstates.PlayerState;
 
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.Map;
 
-import org.bukkit.GameMode;
-import org.bukkit.Location;
-import org.bukkit.Material;
-import org.bukkit.block.Block;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
-import org.bukkit.event.EventHandler;
-import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
-import org.bukkit.event.block.BlockBreakEvent;
-import org.bukkit.event.block.BlockPlaceEvent;
-import org.bukkit.event.entity.EntityRegainHealthEvent;
-import org.bukkit.event.entity.EntityRegainHealthEvent.RegainReason;
-import org.bukkit.event.player.PlayerDropItemEvent;
-import org.bukkit.event.player.PlayerItemConsumeEvent;
-import org.bukkit.event.player.PlayerMoveEvent;
-import org.bukkit.event.player.PlayerQuitEvent;
-import org.bukkit.event.player.PlayerTeleportEvent;
-import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.java.JavaPlugin;
-import org.bukkit.potion.Potion;
 import org.bukkit.potion.PotionEffect;
-import org.bukkit.potion.PotionType;
-import org.bukkit.util.Vector;
 
 public class PlayerRep implements Listener, Formattable {
 
-	private static JavaPlugin plugin = Bomberman.instance;
-	private static HashMap<Player, PlayerRep> lookup = new HashMap<>();
-	
-	public static PlayerRep getPlayerRep(Player player) {
-		PlayerRep rep = lookup.get(player);
-		if (rep == null)
-			return new PlayerRep(player);
+	private static JavaPlugin					plugin	= Bomberman.instance;
+	private static HashMap<Player, PlayerRep>	lookup	= new HashMap<>();
+
+	public static PlayerRep getPlayerRep( Player player ) {
+		PlayerRep rep = lookup.get( player );
+		if ( rep == null )
+			return new PlayerRep( player );
 		else
 			return rep;
 	}
-	
-	public static PlayerRep getPlayerRepSoft(CommandSender sender) {
-		return lookup.get(sender); 
-	}
-	
+
 	public static Collection<PlayerRep> allPlayers() {
 		return lookup.values();
 	}
-	
-	public static Language getLanguage(CommandSender sender) {
-		if (sender instanceof Player == false)
+
+	public static Language getLanguage( CommandSender sender ) {
+		if ( sender instanceof Player == false )
 			return null;
-		PlayerRep rep = lookup.get(sender);
+		PlayerRep rep = lookup.get( sender );
 		return rep == null ? null : rep.getLanguage();
 	}
-	
-	public final Player player;
-	private ItemStack[] spawnInventory;
-	private Location spawn;
-	private int spawnHunger;
-	private Game game;
-	private Game gamePlaying = null;
-	private int immunity = 0;
-	private Game editGame = null;
-	private LinkedHashMap<Block, BlockRep> changes;
-	private Language lang = Language.getLanguage((String)Config.LANGUAGE.getValue());
-	
-	public PlayerRep(Player player) {
+
+	private final Player	player;
+	private Game			game;
+
+	private Language		lang	= Language
+											.getLanguage( (String)Config.LANGUAGE
+													.getValue() );
+	private PlayerState		state	= null;
+
+	public PlayerRep( Player player ) {
 		this.player = player;
-		lookup.put(player, this);
-		plugin.getServer().getPluginManager().registerEvents(this, plugin);
+		lookup.put( player, this );
+		plugin.getServer().getPluginManager().registerEvents( this, plugin );
 	}
-	
+
 	/**
 	 * Gets the game that the player changed last
+	 * 
 	 * @return the active game
 	 */
-	public Game getGameActive() {
+	public Game getActiveGame() {
 		return game;
 	}
-	
+
 	/**
 	 * Sets the game that the player last did something to
-	 * @param game the nre active game
+	 * 
+	 * @param game
+	 *            the active game
 	 */
-	public void setGameActive(Game game) {
+	public void setActiveGame( Game game ) {
 		this.game = game;
-		if (game != null && !game.observers.contains(this))
-			game.observers.add(this);
+		if ( game != null && !game.observers.contains( this ) )
+			game.observers.add( this );
 	}
-	
-	/**
-	 * @return The game currently being played. If not playing, then null.
-	 */
-	public Game getGamePlaying() {
-		return gamePlaying;
-	}
-	
+
 	/**
 	 * @return the Player this PlayerRep represents
 	 */
@@ -113,338 +81,80 @@ public class PlayerRep implements Listener, Formattable {
 		return player;
 	}
 
-	/**
-	 * Join the active game
-	 * @return true if joined successfully
-	 */
-	public boolean joinGame() {
-		if (game == null) {
-			Chat.sendText(this, Text.SPECIFY_GAME);
-			return false;
-		}
-		if (gamePlaying != null) {
-			Chat.sendText(this, Text.ALREADY_PLAYING, gamePlaying);
-			return false;
-		}
-		this.spawn = player.getLocation();
-		Vector gameSpawn = game.findSpareSpawn();
-		if (gameSpawn == null) {
-			Chat.sendText(this, Text.GAME_FULL, game);
-			return false;
-		}
-		if (game.getFare() != null) {
-			if (player.getInventory().containsAtLeast(game.getFare(), game.getFare().getAmount())
-					|| player.getGameMode() == GameMode.CREATIVE)
-				player.getInventory().removeItem(game.getFare());
-			else {
-				Chat.sendText(this, Text.TOO_POOR, game, game.getFare());
-				return false;
-			}
-		}
-		Chat.sendText(game.observers, Text.PLAYER_JOINED, game, this);
-		player.teleport(game.box.corner().add(gameSpawn));
-		player.setGameMode(GameMode.SURVIVAL);
-		player.setHealth(game.getLives());
-		player.setMaxHealth(game.getLives());
-		player.setHealthScale(game.getLives() * 2);
-		player.setExhaustion(0);
-		spawnHunger = player.getFoodLevel();
-		player.setFoodLevel(10000); // just a big number
-		removeEffects();
-		spawnInventory = player.getInventory().getContents();
-		game.initialise(this); 
-		game.addPlayer(this);
-		gamePlaying = game;
-		return true;
+	public PlayerState getState() {
+		return state;
 	}
 
 	/**
-	 * Kills the player and notifies the joined game
-	 * @return true if killed successfully
+	 * Sets the current state of the player. This method will try to enable the
+	 * state. if the state fails to be enabled, nothing happens.
+	 * 
+	 * @param state
+	 *            the state to switch to. null to remove current state
+	 * @return true if the state was successfully added
 	 */
-	public boolean kill() {
-		if (gamePlaying == null)
+	public boolean switchStates( PlayerState state ) {
+		if ( this.state != null && !this.state.disable() )
 			return false;
-		player.getInventory().setContents(spawnInventory);
-		gamePlaying.alertRemoval(this);
-		gamePlaying = null;
-		player.setMaxHealth(20);
-		player.setHealth(20);
-		player.setHealthScale(20);
-		player.setFoodLevel(spawnHunger);
-		player.teleport(spawn);
-		removeEffects();
-		return true;
-	}
-	
-	@EventHandler
-	public void onPlayerPlaceBlock(BlockPlaceEvent e) {
-		if (e.isCancelled())
-			return;
-		if (e.getPlayer() == player) {
-			Block b = e.getBlock();
-			// create a bomb when placing tnt
-			if (gamePlaying != null) {
-				if (b.getType() == gamePlaying.getBombMaterial() && gamePlaying.isPlaying) {
-					new Bomb(gamePlaying, this, e.getBlock());
-					return;
-				}
-			}
-			// track edit mode changes
-			if (editGame != null) {
-				if (editGame.box.contains(e.getBlock().getLocation()))
-					changes.put(e.getBlock(), BlockRep.createBlock(e.getBlockReplacedState()));
-				else {
-					e.setCancelled(true);
-					Chat.sendText(this, Text.EDIT_BUILD_DENIED, editGame);
-				}
-			}
-		}
-	}
-	
-	@EventHandler
-	public void onBlockBreak(BlockBreakEvent e) {
-		if (e.getPlayer() == player && editGame != null) {
-			Block b = e.getBlock();
-			if (editGame.box.contains(b.getLocation()))
-				changes.put(e.getBlock(), BlockRep.createBlock(e.getBlock()));
-			else {
-				e.setCancelled(true);
-				Chat.sendText(this, Text.EDIT_DESTROY_DENIED, editGame);
-			}
-		}
-	}
 
-	@EventHandler
-	public void onPlayerMove(PlayerMoveEvent e) {
-		Player p = e.getPlayer();
-		if (p == this.player && gamePlaying != null && !gamePlaying.isPlaying) {
-			// stop the player from moving
-			Location from = e.getFrom();
-			double xfrom = e.getFrom().getX();
-			double yfrom = e.getFrom().getY();
-			double zfrom = e.getFrom().getZ();
-			double xto = e.getTo().getX();
-			double yto = e.getTo().getY();
-			double zto = e.getTo().getZ();
-			if (!(xfrom == xto && yfrom == yto && zfrom == zto)) {
-				p.teleport(from);
-			}
-		}
-	}
-	
-	@EventHandler
-	public void onPlayerDropItem(PlayerDropItemEvent e) {
-		if (player == e.getPlayer() && gamePlaying != null && !gamePlaying.isPlaying)
-			e.setCancelled(true);
-	}
-	
-	@EventHandler
-	public void onPlayerTelepot(PlayerTeleportEvent e) {
-		Player p = e.getPlayer();
-		if (p == this.player && gamePlaying != null  && !gamePlaying.box.contains(e.getTo())) {
-			e.setCancelled(true);
-			Chat.sendText(this, Text.TELEPORT_DENIED, gamePlaying);
-		}
-	}
+		this.state = null;
 
-	public int bombStrength() {
-		int strength = 0;
-		if (gamePlaying == null)
-			return 0;
-		for (ItemStack stack : player.getInventory().getContents()) {
-			if (stack != null && stack.getType() == gamePlaying.getPowerMaterial()) {
-				strength += stack.getAmount();
-			}
-		}
-		return Math.max(strength, 1);
-	}
-
-	public void damage(PlayerRep attacker) {
-		boolean dead = false;
-		if (immunity > 0)
-			return;
-		if (player.getHealth() > 1)
-			player.damage(1);
-		else
-			dead = true;
-		new Immunity();
-
-		Stats playerStats = gamePlaying.getStats(this);
-		Stats attackerStats = gamePlaying.getStats(attacker);
-
-		attackerStats.hitsGiven++;
-		playerStats.hitsTaken++;
-
-		if (!dead) {
-			if (attacker == this) {
-				Chat.sendText(this, Text.HIT_SUICIDE, gamePlaying);
-			} else {
-				Chat.sendText(this, Text.HIT_BY, gamePlaying, attacker);
-				Chat.sendText(attacker, Text.HIT_OPPONENT, gamePlaying, this);
-			}
-		} else {
-			playerStats.deaths++;
-			attackerStats.kills++;
-			if (attacker == this) {
-				Chat.sendText(this, Text.KILL_SUICIDE, gamePlaying);
-				playerStats.suicides++;
-			} else {
-				Chat.sendText(this, Text.KILLED_BY, gamePlaying, attacker);
-				Chat.sendText(attacker, Text.KILL_OPPONENT, gamePlaying, player);
-			}
-		}
-		
-		if (dead)
-			kill();
-	}
-
-	private class Immunity implements Runnable {
-
-		public Immunity() {
-			immunity++;
-			plugin.getServer().getScheduler()
-					.scheduleSyncDelayedTask(plugin, this, 20);
-		}
-
-		@Override
-		public void run() {
-			immunity--;
-		}
-	}
-
-	@EventHandler
-	public void onPlayerRegen(EntityRegainHealthEvent e) {
-		if (e.getEntity() == player && gamePlaying != null) {
-			if (e.getRegainReason() == RegainReason.MAGIC)
-				if (gamePlaying.isSuddenDeath())
-					Chat.sendText(this, Text.NO_REGEN, gamePlaying);
-				else
-					player.setHealth(Math.min(player.getHealth() + 1,
-							player.getMaxHealth()));
-					
-			e.setCancelled(true);
-		}
-	}
-
-	@EventHandler
-	public void onPlayerLeave(PlayerQuitEvent e) {
-		if (e.getPlayer() == player) {
-			kill();
-		}
-	}
-	
-	
-	// an attempt at making potion effects shorter
-	@EventHandler(priority = EventPriority.HIGHEST)
-	public void onPlayerDrinkPotion(PlayerItemConsumeEvent e) {
-		if (e.getPlayer() == player && gamePlaying != null) {
-			if (e.getItem().getType() == Material.POTION) {
-				Potion potion = Potion.fromItemStack(e.getItem());
-				if (potion.getType() == PotionType.INSTANT_HEAL
-						|| potion.getType() == PotionType.INSTANT_DAMAGE) {
-					// instant potions don't need the duration changed
-				} else {
-					e.setCancelled(true);
-					// hack to fix bug that creates a ghost bottle
-					plugin.getServer().getScheduler().scheduleSyncDelayedTask(plugin, new Runnable() {
-						@SuppressWarnings("deprecation")
-						@Override
-						public void run() {
-							player.updateInventory();
-						}
-					});
-					
-					player.addPotionEffect(new PotionEffect(potion.getType().getEffectType(), 20*game.getPotionDuration(), 1), true);
-				}
-				
-				// remove the bottle
-				plugin.getServer().getScheduler().scheduleSyncDelayedTask(plugin, new Runnable() {
-					@Override
-					public void run() {
-						player.setItemInHand(null);
-					}
-				});
-			}
-		}
-	}
-
-	public boolean startEditMode() {
-		if (gamePlaying != null || editGame != null || game == null)
-			return false;
-		else {
-			editGame = game;
-			if (changes == null)
-				changes = new LinkedHashMap<>();
-			else
-				changes.clear();
+		if ( state == null )
 			return true;
-		}
-	}
-	
-	public boolean saveChanges() {
-		if (editGame == null)
+
+		if ( state.enable() ) {
+			this.state = state;
+			return true;
+		} else {
 			return false;
-		for (Block b : changes.keySet()) {
-			Vector v = b.getLocation().subtract(editGame.box.x, editGame.box.y, editGame.box.z).toVector();
-			if (editGame.box.contains(b.getLocation()))
-				editGame.board.addBlock(BlockRep.createBlock(b), v);
 		}
-		BoardGenerator.saveBoard(editGame.board);
-		editGame = null;
-		return true;
 	}
-	
-	public boolean discardChanges(boolean remove) {
-		if (editGame == null)
-			return false;
-		if (remove) { 
-			for (Map.Entry<Block, BlockRep> entry : changes.entrySet()) {
-				Block current = entry.getKey();
-				BlockRep previous = entry.getValue();
-				previous.setBlock(current);
-			}
-		}
-		editGame = null;
-		return true;
-	}
-	
-	public boolean isPlaying() {
-		return gamePlaying != null;
-	}
-	
-	public boolean isEditting() {
-		return editGame != null;
-	}
-	
-	public Game getEditting() {
-		return editGame;
-	}
-	private void removeEffects() {
-		if (plugin.isEnabled())
+
+	public void removeEffects() {
+		if ( plugin.isEnabled() )
 			plugin.getServer().getScheduler()
-					.scheduleSyncDelayedTask(plugin, new Runnable() {
+					.scheduleSyncDelayedTask( plugin, new Runnable() {
 						@Override
 						public void run() {
-							player.setFireTicks(0);
-							for (PotionEffect effect : player.getActivePotionEffects()) {
-							    plugin.getLogger().info(effect.getType().toString());
-								player.removePotionEffect(effect.getType());
+							player.setFireTicks( 0 );
+							for ( PotionEffect effect : player
+									.getActivePotionEffects() ) {
+								plugin.getLogger().info(
+										effect.getType().toString() );
+								player.removePotionEffect( effect.getType() );
 							}
 						}
-					});
+					} );
 	}
-	
+
 	public Language getLanguage() {
 		return lang;
 	}
 
-	public void setLanguage(Language lang) {
+	public void setLanguage( Language lang ) {
 		this.lang = lang;
 	}
 
 	@Override
-	public String format(CommandSender sender) {
-		return player.getName();
+	public String format( Message message, String value ) {
+		if ( value == null )
+			return player.getName();
+		switch ( value ) {
+		case "name":
+			return player.getName();
+		case "lives":
+			return Integer.toString( (int)player.getHealth() );
+		case "bombs":
+			return "FIXME"; // FIXME
+		case "power":
+			return "FIXME";
+		default:
+			return null;
+		}
 	}
+
+	public boolean isPlaying() {
+		return state instanceof GamePlayingState;
+	}
+
 }

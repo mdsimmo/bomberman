@@ -1,7 +1,7 @@
 package io.github.mdsimmo.bomberman.commands.game.force;
 
 import io.github.mdsimmo.bomberman.Game;
-import io.github.mdsimmo.bomberman.commands.Command;
+import io.github.mdsimmo.bomberman.commands.Cmd;
 import io.github.mdsimmo.bomberman.commands.GameCommand;
 import io.github.mdsimmo.bomberman.messaging.Chat;
 import io.github.mdsimmo.bomberman.messaging.Text;
@@ -12,12 +12,12 @@ import org.bukkit.command.CommandSender;
 
 public class Start extends GameCommand {
 
-	public Start(Command parent) {
+	public Start(Cmd parent) {
 		super(parent);
 	}
 
 	@Override
-	public Text name() {
+	public Text nameShort() {
 		return Text.START_NAME;
 	}
 
@@ -32,12 +32,12 @@ public class Start extends GameCommand {
 			return false;
 		
 		if (game.isPlaying)
-			Chat.sendMessage(sender, getMessage(Text.GAME_ALREADY_STARTED, sender, game));
+			Chat.sendMessage(sender, getMessage(Text.GAME_ALREADY_STARTED, sender).put( "game", game));
 		else {
 			if (game.startGame())
-				Chat.sendMessage(sender, getMessage(Text.GAME_START_SUCCESS, sender, game));
+				Chat.sendMessage(sender, getMessage(Text.GAME_START_SUCCESS, sender).put( "game", game));
 			else
-				Chat.sendMessage(sender, getMessage(Text.GAME_MORE_PLAYERS, sender, game, game.getMinPlayers()));
+				Chat.sendMessage(sender, getMessage(Text.GAME_MORE_PLAYERS, sender).put( "game", game));
 		}
 		return true;
 	}

@@ -1,25 +1,26 @@
 package io.github.mdsimmo.bomberman.commands.game;
 
 import io.github.mdsimmo.bomberman.PlayerRep;
-import io.github.mdsimmo.bomberman.commands.Command;
+import io.github.mdsimmo.bomberman.commands.Cmd;
 import io.github.mdsimmo.bomberman.messaging.Chat;
 import io.github.mdsimmo.bomberman.messaging.Message;
 import io.github.mdsimmo.bomberman.messaging.Text;
+import io.github.mdsimmo.bomberman.playerstates.GamePlayingState;
 
 import java.util.List;
 
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
-public class Leave extends Command {
+public class Leave extends Cmd {
 
-	public Leave(Command parent) {
+	public Leave(Cmd parent) {
 		super(parent);
 	}
 
 	@Override
-	public Text name() {
-		return Text.LEAVE_NAME;
+	public Message name( CommandSender sender ) {
+		return getMessage( Text.LEAVE_NAME, sender );
 	}
 
 	@Override
@@ -33,12 +34,13 @@ public class Leave extends Command {
 			return false;
 		if (sender instanceof Player) {
 			PlayerRep rep = PlayerRep.getPlayerRep((Player) sender);
-			if (!rep.kill()) {
-				if (rep.getGamePlaying() == null)
-					Chat.sendMessage(sender, getMessage(Text.LEAVE_NOT_JOINED, sender));
-				else
-					Chat.sendMessage(sender, getMessage(Text.LEAVE_FAILED, sender));
+			if ( rep.getState() instanceof GamePlayingState ) {
+				GamePlayingState state = (GamePlayingState)rep.getState();
+				state.kill();
+			} else {
+				Chat.sendMessage(sender, getMessage(Text.LEAVE_NOT_JOINED, sender));
 			}
+			
 		} else {
 			Chat.sendMessage(sender, getMessage(Text.MUST_BE_PLAYER, sender));
 		}
@@ -51,22 +53,22 @@ public class Leave extends Command {
 	}
 
 	@Override
-	public Message extra(CommandSender sender, List<String> args) {
-		return getMessage(Text.JOIN_EXTRA, sender);
+	public Message extra(CommandSender sender ) {
+		return getMessage(Text.LEAVE_EXTRA, sender);
 	}
 
 	@Override
-	public Message description(CommandSender sender, List<String> args) {
-		return getMessage(Text.JOIN_DESCRIPTION, sender);
+	public Message description(CommandSender sender ) {
+		return getMessage(Text.LEAVE_DESCRIPTION, sender);
 	}
 
 	@Override
-	public Message usage(CommandSender sender, List<String> args) {
-		return getMessage(Text.JOIN_USAGE, sender);
+	public Message usage(CommandSender sender ) {
+		return getMessage(Text.LEAVE_USAGE, sender);
 	}
 
 	@Override
-	public Message example(CommandSender sender, List<String> args) {
+	public Message example(CommandSender sender ) {
 		return getMessage(Text.JOIN_EXAMPLE, sender);
 	}
 

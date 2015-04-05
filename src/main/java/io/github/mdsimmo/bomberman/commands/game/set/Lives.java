@@ -1,7 +1,7 @@
 package io.github.mdsimmo.bomberman.commands.game.set;
 
 import io.github.mdsimmo.bomberman.Game;
-import io.github.mdsimmo.bomberman.commands.Command;
+import io.github.mdsimmo.bomberman.commands.Cmd;
 import io.github.mdsimmo.bomberman.commands.GameCommand;
 import io.github.mdsimmo.bomberman.messaging.Chat;
 import io.github.mdsimmo.bomberman.messaging.Text;
@@ -12,12 +12,12 @@ import org.bukkit.command.CommandSender;
 
 public class Lives extends GameCommand {
 
-	public Lives(Command parent) {
+	public Lives(Cmd parent) {
 		super(parent);
 	}
 
 	@Override
-	public Text name() {
+	public Text nameShort() {
 		return Text.LIVES_NAME;
 	}
 
@@ -36,11 +36,11 @@ public class Lives extends GameCommand {
 			if (amount <= 0)
 				throw new Exception();
 		} catch (Exception e) {
-			Chat.sendMessage(sender, getMessage(Text.INVALID_NUMBER, sender, args.get(0)));
+			Chat.sendMessage(sender, getMessage(Text.INVALID_NUMBER, sender).put( "number", args.get(0)));
 			return true;
 		}
 		game.setLives(amount);
-		Chat.sendMessage(sender, getMessage(Text.LIVES_SET, sender, game, amount));
+		Chat.sendMessage(sender, getMessage(Text.LIVES_SET, sender).put( "game", game) );
 		return true;
 	}
 

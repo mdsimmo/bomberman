@@ -23,8 +23,8 @@ public class SuddenDeathCounter {
 		to.start();
 	}
 
-	private class SuddenDeath implements Runnable {
-		int suddenDeath;
+	public class SuddenDeath implements Runnable {
+		public int suddenDeath;
 			
 		public void start() {
 			if (game.getSuddenDeath() >= 0) {
@@ -40,21 +40,18 @@ public class SuddenDeathCounter {
 				plugin.getServer().getScheduler().cancelTask(sdID);
 			
 			suddenDeath--;
-			
 			if (suddenDeath == 30
 					|| suddenDeath == 10
 					|| (suddenDeath <= 5 && suddenDeath > 0))
 				game.sendMessages(
 						Text.SUDDENDEATH_COUNT_P,
 						Text.SUDDENDEATH_COUNT_O,
-						Text.SUDDENDEATH_COUNT_A,
-						game, suddenDeath);
+						Text.SUDDENDEATH_COUNT_A, null );
 			else if (suddenDeath == 0) {
 				game.sendMessages(
 						Text.SUDDENDEATH_P,
 						Text.SUDDENDEATH_O,
-						Text.SUDDENDEATH_A,
-						game, suddenDeath);
+						Text.SUDDENDEATH_A, null );
 				game.setSuddenDeath(true);
 				plugin.getServer().getScheduler().cancelTask(sdID);
 			}
@@ -62,8 +59,8 @@ public class SuddenDeathCounter {
 		
 	}
 	
-	private class Timeout implements Runnable {
-		int timeout;
+	public class Timeout implements Runnable {
+		public int timeout;
 		
 		public void start() {
 			if (game.getTimeout() >= 0) {
@@ -86,14 +83,12 @@ public class SuddenDeathCounter {
 				game.sendMessages(
 						Text.TIMEOUT_COUNT_P,
 						Text.TIMEOUT_COUNT_O,
-						Text.TIMEOUT_COUNT_A,
-						game, timeout);
+						Text.TIMEOUT_COUNT_A, null );
 			else if (timeout == 0) {
 				game.sendMessages(
 						Text.TIMEOUT_P,
 						Text.TIMEOUT_O,
-						Text.TIMEOUT_A,
-						game, timeout);
+						Text.TIMEOUT_A, null );
 				game.setSuddenDeath(true);
 				plugin.getServer().getScheduler().cancelTask(toID);
 			}

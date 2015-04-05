@@ -1,7 +1,7 @@
 package io.github.mdsimmo.bomberman.commands.game.set;
 
 import io.github.mdsimmo.bomberman.Game;
-import io.github.mdsimmo.bomberman.commands.Command;
+import io.github.mdsimmo.bomberman.commands.Cmd;
 import io.github.mdsimmo.bomberman.commands.GameCommand;
 import io.github.mdsimmo.bomberman.messaging.Chat;
 import io.github.mdsimmo.bomberman.messaging.Text;
@@ -15,12 +15,12 @@ import org.bukkit.inventory.ItemStack;
 
 public class Prize extends GameCommand {
 
-	public Prize(Command parent) {
+	public Prize(Cmd parent) {
 		super(parent);
 	}
 
 	@Override
-	public Text name() {
+	public Text nameShort() {
 		return Text.PRIZE_NAME;
 	}
 
@@ -45,24 +45,24 @@ public class Prize extends GameCommand {
 		if (args.size() == 1) {
 			if (args.get(0).equalsIgnoreCase(Text.PRIZE_NONE.getMessage(sender).toString())) {
 				game.setFare(null);
-				Chat.sendMessage(sender, getMessage(Text.PRIZE_REMOVED, sender, game));
+				Chat.sendMessage(sender, getMessage(Text.PRIZE_REMOVED, sender).put( "game", game));
 			} else if (args.get(0).equalsIgnoreCase(Text.PRIZE_POT.getMessage(sender).toString())) {
 				game.setPot(true);
-				Chat.sendMessage(sender, getMessage(Text.PRIZE_POT_SET, sender, game, game.getFare()));
+				Chat.sendMessage(sender, getMessage(Text.PRIZE_POT_SET, sender).put( "game", game ));
 			} else
 				return false;
 		} else if (args.size() == 2) {
 			Material m = Material.getMaterial(args.get(0).toUpperCase());
 			if (m == null) {
-				Chat.sendMessage(sender, getMessage(Text.INVALID_MATERIAL, sender, args.get(0)));
+				Chat.sendMessage(sender, getMessage(Text.INVALID_MATERIAL, sender).put( "number", args.get(0)));
 				return true;
 			}
 			try {
 				int amount = Integer.parseInt(args.get(1));
 				game.setPrize(new ItemStack(m, amount));
-				Chat.sendMessage(sender, getMessage(Text.PRIZE_SET, sender, game, game.getPrize()));
+				Chat.sendMessage(sender, getMessage(Text.PRIZE_SET, sender).put( "game", game));
 			} catch (Exception e) {
-				Chat.sendMessage(sender, getMessage(Text.INVALID_NUMBER, sender, args.get(1)));
+				Chat.sendMessage(sender, getMessage(Text.INVALID_NUMBER, sender).put( "number", args.get(1)));
 			}
 		} else {
 			return false;

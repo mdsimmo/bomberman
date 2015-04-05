@@ -30,7 +30,7 @@ public class BoardGenerator {
 	 * Copies all the default boards into the config folder
 	 */
 	public static void copyDefaults() {
-		String[] defaults = {"default"};
+		String[] defaults = {"default", "layers"};
 		for (String name : defaults) {
 			File file = toFile(name);
 			if (file.exists()) {

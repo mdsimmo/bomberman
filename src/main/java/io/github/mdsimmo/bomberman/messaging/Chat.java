@@ -1,7 +1,7 @@
 package io.github.mdsimmo.bomberman.messaging;
 
 import io.github.mdsimmo.bomberman.PlayerRep;
-import io.github.mdsimmo.bomberman.commands.Command.Permission;
+import io.github.mdsimmo.bomberman.commands.Cmd.Permission;
 
 import java.util.List;
 import java.util.Map;
@@ -10,26 +10,9 @@ import org.bukkit.ChatColor;
 import org.bukkit.command.CommandSender;
 
 public abstract class Chat {
-
-	public static void sendText(PlayerRep rep, Text text, Object... objs) {
-		sendText(rep.player, rep.getLanguage(), text, objs);
-	}
-	
-	public static void sendText(List<PlayerRep> playerList, Text text, Object ... objs) {
-		for (PlayerRep rep : playerList)
-			sendText(rep, text, objs);
-	}
-	
-	public static void sendText(CommandSender sender, Language lang, Text text, Object ... objs) {
-		sendMessage(sender, text.getMessage(lang, sender, objs));
-	}
-	
-	public static void sendText(CommandSender sender, Text text, Object ... objs) {
-		sendText(sender, PlayerRep.getLanguage(sender), text, objs);
-	}
 	
 	public static void sendMessage(PlayerRep rep, Message message) {
-		sendMessage(rep.player, message);
+		sendMessage(rep.getPlayer(), message);
 	}
 	
 	public static void sendMessage(CommandSender sender, Message message) {

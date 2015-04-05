@@ -13,110 +13,107 @@ import java.util.Map;
 
 import org.bukkit.command.CommandSender;
 
-public abstract class CommandGroup extends Command {
+public abstract class CommandGroup extends Cmd {
 
-	private List<Command> children = new ArrayList<>();
-	
+	List<Cmd> children = new ArrayList<>();
+
 	/**
 	 * Adds some child commands
-	 * @param children the child commands
+	 * 
+	 * @param children
+	 *            the child commands
 	 */
-	public void addChildren(Command ... children) {
-		this.children.addAll(Arrays.asList(children));
+	public void addChildren( Cmd... children ) {
+		this.children.addAll( Arrays.asList( children ) );
 	}
-	
-	public CommandGroup(Command parent) {
-		super(parent);
+
+	public CommandGroup( Cmd parent ) {
+		super( parent );
 		setChildren();
 	}
-	
+
 	@Override
-	public List<String> options(CommandSender sender, List<String> args) {
+	public List<String> options( CommandSender sender, List<String> args ) {
+		if ( args.size() != 1 )
+			return null;
 		List<String> options = new ArrayList<>();
-		for (Command c : children) {
-			if (c.isAllowedBy(sender))
-				options.add(c.name().getMessage(sender).toString());
+		for ( Cmd c : children ) {
+			if ( c.isAllowedBy( sender ) )
+				options.add( c.name( sender ).toString() );
 		}
 		return options;
 	}
-	
+
 	@Override
-	public void help(CommandSender sender, List<String> args) {
-		Command c = getCommand(sender, args);
-		if (c == this)
-			super.help(sender, args);
-		else
-			c.help(sender, args);
-	}
-	
-	@Override
-	public Message extra(CommandSender sender, List<String> args) {
+	public Message extra( CommandSender sender ) {
 		return null;
 	}
-	
+
 	@Override
-	public Message example(CommandSender sender, List<String> args) {
+	public Message example( CommandSender sender ) {
 		return null;
 	}
-	
+
 	@Override
-	public Map<Message, Message> info(CommandSender sender, List<String> args) {
+	public Map<Message, Message> info( CommandSender sender ) {
 		Map<Message, Message> info = new LinkedHashMap<Message, Message>();
-		info.put(getMessage(Text.DESCTIPTION, sender), description(sender, args));
-		info.put(getMessage(Text.COMMANDS, sender), usage(sender, args));
+		info.put( getMessage( Text.DESCTIPTION, sender ), description( sender ) );
+		info.put( getMessage( Text.COMMANDS, sender ), usage( sender ) );
 		return info;
 	}
-	
+
 	@Override
-	public Message usage(CommandSender sender, List<String> args) {
+	public Message usage( CommandSender sender ) {
 		String usage = "\n";
-		for (Command c : children) {
-			if (!c.isAllowedBy(sender))
+		for ( Cmd c : children ) {
+			if ( !c.isAllowedBy( sender ) )
 				continue;
-			
-			if (c instanceof CommandGroup)
-				usage += "    " + c.name().getMessage(sender) + " [...]\n";
+
+			if ( c instanceof CommandGroup )
+				usage += "    " + c.name( sender ) + " [...]\n";
 			else
-				usage += "    " + c.name().getMessage(sender) + "\n";
+				usage += "    " + c.name( sender ) + "\n";
 		}
-		return new Message(sender, usage);
+		return new Message( sender, usage );
 	}
-	
+
 	/**
 	 * sets what children this group has
 	 */
 	public abstract void setChildren();
 
 	@Override
-	public boolean run(CommandSender sender, List<String> args) {
-		if (args.size() == 0) {
-			help(sender, args);
+	public boolean run( CommandSender sender, List<String> args ) {
+		if ( args.size() == 0 ) {
+			help( sender );
 			return true;
 		} else {
-			for (Command c : children) {
-				if (c.name().getMessage(sender).toString().equalsIgnoreCase(args.get(0))) {
-					args.remove(0);
-					return c.execute(sender, args);
-				}				
+			for ( Cmd c : children ) {
+				if ( c.name( sender ).toString()
+						.equalsIgnoreCase( args.get( 0 ) ) ) {
+					args.remove( 0 );
+					return c.execute( sender, args );
+				}
 			}
-			Chat.sendMessage(sender, getMessage(Text.UNKNOWN_COMMAND, sender, Utils.listToString(args)));
-			help(sender, args);
+			Chat.sendMessage( sender, getMessage( Text.UNKNOWN_COMMAND, sender )
+					.put( "tried", Utils.listToString( args ) ) );
+			help( sender );
 			return true;
 		}
 	}
-	
-	public Command getCommand(CommandSender sender, List<String> args) {
-		if (args.size() == 0)
+
+	public Cmd getCommand( CommandSender sender, List<String> args ) {
+		System.out.println( "size " + args.size() + args );
+		if ( args.size() == 0 )
 			return this;
-		for (Command c : children) {
-			if (c.name().getMessage(sender).toString().equalsIgnoreCase(args.get(0))) {
-				args.remove(0);
-				if (c instanceof CommandGroup)
-					return ((CommandGroup)c).getCommand(sender, args);
-				else
-					return c;
+		for ( Cmd cmd : children ) {
+			if ( cmd.name( sender ).toString().equals( args.get( 0 ) )
+					&& cmd.isAllowedBy( sender ) ) {
+				args.remove( 0 );
+				return cmd;
 			}
 		}
 		return this;
 	}
+
 }

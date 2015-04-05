@@ -1,7 +1,7 @@
 package io.github.mdsimmo.bomberman.commands.game.set;
 
 import io.github.mdsimmo.bomberman.Game;
-import io.github.mdsimmo.bomberman.commands.Command;
+import io.github.mdsimmo.bomberman.commands.Cmd;
 import io.github.mdsimmo.bomberman.commands.GameCommand;
 import io.github.mdsimmo.bomberman.messaging.Chat;
 import io.github.mdsimmo.bomberman.messaging.Text;
@@ -13,12 +13,12 @@ import org.bukkit.command.CommandSender;
 
 public class Autostart extends GameCommand {
 
-	public Autostart(Command parent) {
+	public Autostart(Cmd parent) {
 		super(parent);
 	}
 
 	@Override
-	public Text name() {
+	public Text nameShort() {
 		return Text.AUTOSTART_NAME;
 	}
 
@@ -41,10 +41,10 @@ public class Autostart extends GameCommand {
 		
 		if (args.get(0).equalsIgnoreCase(Text.FALSE.getMessage(sender).toString())) {
 			game.setAutostart(false);
-			Chat.sendMessage(sender, getMessage(Text.AUTOSTART_DISABLED, sender, game));
+			Chat.sendMessage(sender, getMessage(Text.AUTOSTART_DISABLED, sender).put( "game", game));
 		} else if (args.get(0).equalsIgnoreCase(Text.TRUE.getMessage(sender).toString())) {
 			game.setAutostart(true);
-			Chat.sendMessage(sender, getMessage(Text.AUTOSTART_ENABLED, sender, game));
+			Chat.sendMessage(sender, getMessage(Text.AUTOSTART_ENABLED, sender).put( "game", game));
 		} else {
 			return false;
 		}

@@ -1,23 +1,21 @@
 package io.github.mdsimmo.bomberman.commands.arena;
 
-import io.github.mdsimmo.bomberman.commands.Command;
+import io.github.mdsimmo.bomberman.commands.Cmd;
 import io.github.mdsimmo.bomberman.commands.CommandGroup;
 import io.github.mdsimmo.bomberman.messaging.Message;
 import io.github.mdsimmo.bomberman.messaging.Text;
-
-import java.util.List;
 
 import org.bukkit.command.CommandSender;
 
 public class Arena extends CommandGroup {
 
-	public Arena(Command parent) {
+	public Arena(Cmd parent) {
 		super(parent);
 	}
 
 	@Override
-	public Message description(CommandSender sender, List<String> args) {
-		return Text.ARENA_DESCRIPTION.getMessage(sender);
+	public Message description(CommandSender sender) {
+		return getMessage( Text.ARENA_DESCRIPTION, sender );
 	}
 
 	@Override
@@ -32,8 +30,8 @@ public class Arena extends CommandGroup {
 	}
 
 	@Override
-	public Text name() {
-		return Text.ARENA_NAME;
+	public Message name( CommandSender sender ) {
+		return getMessage( Text.ARENA_NAME, sender );
 	}
 
 	@Override

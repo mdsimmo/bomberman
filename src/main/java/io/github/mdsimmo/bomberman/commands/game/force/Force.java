@@ -1,17 +1,15 @@
 package io.github.mdsimmo.bomberman.commands.game.force;
 
-import io.github.mdsimmo.bomberman.commands.Command;
+import io.github.mdsimmo.bomberman.commands.Cmd;
 import io.github.mdsimmo.bomberman.commands.CommandGroup;
 import io.github.mdsimmo.bomberman.messaging.Message;
 import io.github.mdsimmo.bomberman.messaging.Text;
-
-import java.util.List;
 
 import org.bukkit.command.CommandSender;
 
 public class Force extends CommandGroup {
 
-	public Force(Command parent) {
+	public Force(Cmd parent) {
 		super(parent);
 	}
 
@@ -25,8 +23,8 @@ public class Force extends CommandGroup {
 	}
 
 	@Override
-	public Text name() {
-		return Text.FORCE_NAME;
+	public Message name( CommandSender sender ) {
+		return getMessage( Text.FORCE_NAME, sender );
 	}
 
 	@Override
@@ -35,7 +33,7 @@ public class Force extends CommandGroup {
 	}
 
 	@Override
-	public Message description(CommandSender sender, List<String> args) {
+	public Message description(CommandSender sender ) {
 		return getMessage(Text.FORCE_DESCRIPTION, sender);
 	}
 }

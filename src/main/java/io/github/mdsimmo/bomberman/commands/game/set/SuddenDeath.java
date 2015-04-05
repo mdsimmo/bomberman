@@ -1,7 +1,7 @@
 package io.github.mdsimmo.bomberman.commands.game.set;
 
 import io.github.mdsimmo.bomberman.Game;
-import io.github.mdsimmo.bomberman.commands.Command;
+import io.github.mdsimmo.bomberman.commands.Cmd;
 import io.github.mdsimmo.bomberman.commands.GameCommand;
 import io.github.mdsimmo.bomberman.messaging.Chat;
 import io.github.mdsimmo.bomberman.messaging.Text;
@@ -13,7 +13,7 @@ import org.bukkit.command.CommandSender;
 
 public class SuddenDeath extends GameCommand {
 
-	public SuddenDeath(Command parent) {
+	public SuddenDeath(Cmd parent) {
 		super(parent);
 	}
 
@@ -36,12 +36,12 @@ public class SuddenDeath extends GameCommand {
 		
 		if (value.equals(getMessage(Text.SUDDENDEATH_OFF, sender).toString())) {
 			game.setSuddenDeath(-1);
-			Chat.sendMessage(sender, getMessage(Text.SUDDENDEATH_REMOVED, sender, game));
+			Chat.sendMessage(sender, getMessage(Text.SUDDENDEATH_REMOVED, sender).put( "game", game));
 		} else {
 			try {
 				int time = (int)Double.parseDouble(value);
 				game.setSuddenDeath(time);
-				Chat.sendMessage(sender, getMessage(Text.SUDDENDEATH_SET, sender, game, time));
+				Chat.sendMessage(sender, getMessage(Text.SUDDENDEATH_SET, sender).put( "game", game ));
 			} catch (Exception e) {
 				return false;
 			}
@@ -50,7 +50,7 @@ public class SuddenDeath extends GameCommand {
 	}
 
 	@Override
-	public Text name() {
+	public Text nameShort() {
 		return Text.SUDDENDEATH_NAME;
 	}
 

@@ -1,7 +1,7 @@
 package io.github.mdsimmo.bomberman.commands.game.set;
 
 import io.github.mdsimmo.bomberman.Game;
-import io.github.mdsimmo.bomberman.commands.Command;
+import io.github.mdsimmo.bomberman.commands.Cmd;
 import io.github.mdsimmo.bomberman.commands.GameCommand;
 import io.github.mdsimmo.bomberman.messaging.Chat;
 import io.github.mdsimmo.bomberman.messaging.Text;
@@ -12,12 +12,12 @@ import org.bukkit.command.CommandSender;
 
 public class MinPlayers extends GameCommand {
 
-	public MinPlayers(Command parent) {
+	public MinPlayers(Cmd parent) {
 		super(parent);
 	}
 
 	@Override
-	public Text name() {
+	public Text nameShort() {
 		return Text.MINPLAYERS_NAME;
 	}
 
@@ -38,7 +38,7 @@ public class MinPlayers extends GameCommand {
 			return false;
 		}
 		game.setMinPlayers(amount);	
-		Chat.sendMessage(sender, getMessage(Text.MINPLAYERS_SET, sender, game, amount));
+		Chat.sendMessage(sender, getMessage(Text.MINPLAYERS_SET, sender).put( "game", game ));
 		return true;
 	}
 

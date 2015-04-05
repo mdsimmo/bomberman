@@ -1,7 +1,7 @@
 package io.github.mdsimmo.bomberman.commands.arena;
 
 import io.github.mdsimmo.bomberman.BoardGenerator;
-import io.github.mdsimmo.bomberman.commands.Command;
+import io.github.mdsimmo.bomberman.commands.Cmd;
 import io.github.mdsimmo.bomberman.messaging.Chat;
 import io.github.mdsimmo.bomberman.messaging.Message;
 import io.github.mdsimmo.bomberman.messaging.Text;
@@ -11,37 +11,41 @@ import java.util.List;
 
 import org.bukkit.command.CommandSender;
 
-public class ArenaList extends Command {
+public class ArenaList extends Cmd {
 
-	public ArenaList(Command parent) {
-		super(parent);
+	public ArenaList( Cmd parent ) {
+		super( parent );
 	}
 
 	@Override
-	public Text name() {
-		return Text.ARENA_LIST_NAME;
+	public Message name( CommandSender sender ) {
+		return getMessage( Text.ARENA_LIST_NAME, sender );
 	}
 
 	@Override
-	public List<String> options(CommandSender sender, List<String> args) {
+	public List<String> options( CommandSender sender, List<String> args ) {
 		return null;
 	}
 
 	@Override
-	public boolean run(CommandSender sender, List<String> args) {
-		if (args.size() != 0)
+	public boolean run( CommandSender sender, List<String> args ) {
+		if ( args.size() != 0 )
 			return false;
 		List<String> arenas = BoardGenerator.allBoards();
-		if (arenas.size() == 0) {
-			Chat.sendMessage(sender, getMessage(Text.ARENA_LIST_NO_ARENA, sender));
+		if ( arenas.size() == 0 ) {
+			Chat.sendMessage( sender,
+					getMessage( Text.ARENA_LIST_NO_ARENA, sender ) );
 		} else {
-			Chat.sendHeading(sender, getMessage(Text.LIST, sender, Text.ARENA.getMessage(sender)));
+			Chat.sendHeading(
+					sender,
+					getMessage( Text.LIST, sender ).put( "title",
+							Text.ARENA.getMessage( sender ) ) );
 			List<Message> list = new ArrayList<>();
-			for (String name : arenas) {
-				if (!name.endsWith(".old"))
-					list.add(new Message(sender, name));
+			for ( String name : arenas ) {
+				if ( !name.endsWith( ".old" ) )
+					list.add( new Message( sender, name ) );
 			}
-			Chat.sendList(sender, list);
+			Chat.sendList( sender, list );
 		}
 		return true;
 	}
@@ -52,22 +56,22 @@ public class ArenaList extends Command {
 	}
 
 	@Override
-	public Message example(CommandSender sender, List<String> args) {		
-		return getMessage(Text.ARENA_LIST_EXAMPLE, sender);
+	public Message example( CommandSender sender ) {
+		return getMessage( Text.ARENA_LIST_EXAMPLE, sender );
 	}
 
 	@Override
-	public Message extra(CommandSender sender, List<String> args) {
-		return getMessage(Text.ARENA_LIST_EXTRA, sender);
+	public Message extra( CommandSender sender ) {
+		return getMessage( Text.ARENA_LIST_EXTRA, sender );
 	}
 
 	@Override
-	public Message description(CommandSender sender, List<String> args) {
-		return getMessage(Text.ARENA_LIST_DESCRIPTION, sender);
+	public Message description( CommandSender sender ) {
+		return getMessage( Text.ARENA_LIST_DESCRIPTION, sender );
 	}
 
 	@Override
-	public Message usage(CommandSender sender, List<String> args) {
-		return getMessage(Text.ARENA_LIST_USAGE, sender);
+	public Message usage( CommandSender sender ) {
+		return getMessage( Text.ARENA_LIST_USAGE, sender );
 	}
 }

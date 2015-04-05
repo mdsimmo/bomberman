@@ -1,7 +1,7 @@
 package io.github.mdsimmo.bomberman.commands.game;
 
 import io.github.mdsimmo.bomberman.Game;
-import io.github.mdsimmo.bomberman.commands.Command;
+import io.github.mdsimmo.bomberman.commands.Cmd;
 import io.github.mdsimmo.bomberman.commands.GameCommand;
 import io.github.mdsimmo.bomberman.messaging.Chat;
 import io.github.mdsimmo.bomberman.messaging.Message;
@@ -12,15 +12,15 @@ import java.util.List;
 import java.util.Map;
 
 import org.bukkit.command.CommandSender;
-import org.bukkit.inventory.ItemStack;
 
 public class Info extends GameCommand {
 
-	public Info(Command parent) {
-		super(parent);
+	public Info( Cmd parent ) {
+		super( parent );
 	}
 
-	public Text name() {
+	@Override
+	public Text nameShort() {
 		return Text.INFO_NAME;
 	}
 
@@ -30,7 +30,7 @@ public class Info extends GameCommand {
 	}
 
 	@Override
-	public List<String> shortOptions(CommandSender sender, List<String> args) {
+	public List<String> shortOptions( CommandSender sender, List<String> args ) {
 		return null;
 	}
 
@@ -39,7 +39,7 @@ public class Info extends GameCommand {
 		if (args.size() != 0)
 			return false;
 
-		Chat.sendHeading(sender, Text.INFO.getMessage(sender, game));
+		Chat.sendHeading(sender, Text.INFO.getMessage(sender).put( "game", game));
 		Map<Message, Message> list = new LinkedHashMap<>();
 		if (game.isPlaying)
 			list.put(getMessage(Text.INFO_STATUS, sender), getMessage(Text.INFO_IN_PROGRESS, sender));
@@ -67,33 +67,27 @@ public class Info extends GameCommand {
 		if (game.getFare() == null)
 			list.put(fare, getMessage(Text.INFO_NO_FARE, sender));
 		else
-			list.put(fare, new Message(sender, "{1}", game.getFare()));
+			list.put(fare, new Message(sender, game.getFare().toString() ));
 		
 		Message prize = getMessage(Text.INFO_PRIZE, sender);
 		if (game.getPot() == true && game.getFare() != null)
-			list.put(prize,
-					getMessage(Text.INFO_POT_AT, sender, 
-							new ItemStack(
-									game.getFare().getType(),
-									game.getFare().getAmount()*game.players.size()
-							)
-					)
-			);
+			list.put(prize, getMessage(Text.INFO_POT_AT, sender).put( "game", game )  );
 		else {
 			if (game.getPrize() == null)
 				list.put(prize, getMessage(Text.INFO_NO_PRIZE, sender));
 			else
-				list.put(prize, new Message(sender, "{1}", game.getPrize()));
+				list.put(prize, new Message(sender, game.getPrize().toString() ));
 		}
-		Message sd = game.getSuddenDeath() == -1 ? Text.INFO_OFF.getMessage(sender)	: Text.INFO_TIME.getMessage(sender, game.getSuddenDeath());
+		Message sd = game.getSuddenDeath() == -1 ? getMessage( Text.INFO_OFF,
+				sender ) : getMessage(Text.INFO_TIME, sender).put( "game", game);
 		list.put(getMessage(Text.INFO_SUDDENDEATH, sender), sd);
-		Message to = game.getTimeout() == -1 ? Text.INFO_OFF.getMessage(sender)	: Text.INFO_TIME.getMessage(sender, game.getTimeout());
+		Message to = game.getTimeout() == -1 ? Text.INFO_OFF.getMessage(sender)	: getMessage( Text.INFO_TIME, sender).put( "game", game );
 		list.put(getMessage(Text.INFO_TIMEOUT, sender), to);
-		list.put(Text.ARENA.getMessage(sender), new Message(sender, "{1}", game.board));
+		list.put(Text.ARENA.getMessage(sender), new Message(sender, game.board.name));
 		Chat.sendMap(sender, list);
 		return true;
 	}
-	
+
 	@Override
 	public Text extraShort() {
 		return Text.INFO_EXTRA;

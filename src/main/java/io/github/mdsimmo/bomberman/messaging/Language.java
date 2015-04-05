@@ -11,7 +11,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.plugin.Plugin;
 
@@ -73,9 +72,9 @@ public class Language implements Formattable {
 		} else
 			return t;
 	}
-
+	
 	@Override
-	public String format(CommandSender sender) {
+	public String format( Message message, String value ) {
 		return name;
 	}
 	

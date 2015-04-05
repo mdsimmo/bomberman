@@ -2,7 +2,7 @@ package io.github.mdsimmo.bomberman.commands.game.force;
 
 import io.github.mdsimmo.bomberman.Game;
 import io.github.mdsimmo.bomberman.PlayerRep;
-import io.github.mdsimmo.bomberman.commands.Command;
+import io.github.mdsimmo.bomberman.commands.Cmd;
 import io.github.mdsimmo.bomberman.commands.GameCommand;
 import io.github.mdsimmo.bomberman.messaging.Chat;
 import io.github.mdsimmo.bomberman.messaging.Text;
@@ -13,12 +13,12 @@ import org.bukkit.command.CommandSender;
 
 public class Stop extends GameCommand {
 
-	public Stop(Command parent) {
+	public Stop(Cmd parent) {
 		super(parent);
 	}
 
 	@Override
-	public Text name() {
+	public Text nameShort() {
 		return Text.STOP_NAME;
 	}
 
@@ -28,13 +28,13 @@ public class Stop extends GameCommand {
             return false;
 		
         if (!game.isPlaying)
-            Chat.sendMessage(sender, getMessage(Text.STOP_NOT_STARTED, sender, game));
+            Chat.sendMessage(sender, getMessage(Text.STOP_NOT_STARTED, sender).put( "game", game));
 	else {
         	game.stop();
             if (!game.players.contains(sender))
-            	Chat.sendMessage(sender, getMessage(Text.STOP_SUCCESS, sender, game));
+            	Chat.sendMessage(sender, getMessage(Text.STOP_SUCCESS, sender).put( "game", game));
             for (PlayerRep rep : game.players) {
-            	Chat.sendMessage(rep, getMessage(Text.STOP_SUCCESS, rep.getPlayer(), game));
+            	Chat.sendMessage(rep, getMessage(Text.STOP_SUCCESS, rep.getPlayer()).put( "game", game));
             }
             
         }
