@@ -52,6 +52,8 @@ public class Language implements Formattable {
 		for (File f : files) {
 			langs.add(Utils.getFileTitle(f.getName()));
 		}
+		if ( !langs.contains( "english" ) )
+			langs.add( "english" );
 		return langs;
 	}
 	
@@ -64,7 +66,7 @@ public class Language implements Formattable {
 	public String translate(Text text) {
 		String t = save.getString(text.getPath());
 		if (t == null) {
-			Language bup = getLanguage(save.getString(Config.LANGUAGE.getPath()));
+			Language bup = getLanguage((String)Config.LANGUAGE.getValue( save ));
 			if (bup == null)
 				return text.getDefault();
 			else

@@ -58,8 +58,10 @@ public class Game implements Formattable {
 		public void run() {
 			// Let online players know about the fun :)
 			if ( count == autostartDelay ) {
+				Map<String, Object> values = new HashMap<>();
+				values.put( "time", count );
 				sendMessages( Text.GAME_STARTING_PLAYERS,
-						Text.GAME_STARTING_OBSERVERS, Text.GAME_STARTING_ALL, null );
+						Text.GAME_STARTING_OBSERVERS, Text.GAME_STARTING_ALL, values );
 			}
 
 			if ( count > 0 ) {
@@ -71,9 +73,11 @@ public class Game implements Formattable {
 				// notify every 5 until count <= 3,
 				// notify every second last 3 seconds
 				if ( count % 15 == 0 || ( count < 15 && count % 5 == 0 )
-						|| count <= 3 ) {
+						|| count <= 5 ) {
+					Map<String, Object> values = new HashMap<>();
+					values.put( "time", count );
 					sendMessages( Text.GAME_COUNT_PLAYERS,
-							Text.GAME_COUNT_OBSERVERS, Text.GAME_COUNT_ALL, null );
+							Text.GAME_COUNT_OBSERVERS, Text.GAME_COUNT_ALL, values );
 				}
 			} else {
 				sendMessages( Text.GAME_STARTED_PLAYERS,
@@ -218,9 +222,10 @@ public class Game implements Formattable {
 					Text.PLAYER_LEFT_ALL, map);
 		}
 		if ( players.size() < minPlayers && getCountdownTimer() != null ) {
+			map.put( "time", getCountdownTimer().count );
 			getCountdownTimer().destroy();
 			sendMessages( Text.COUNT_STOPPED_PLAYERS,
-					Text.COUNT_STOPPED_OBSERVERS, Text.COUNT_STOPPED_ALL, null );
+					Text.COUNT_STOPPED_OBSERVERS, Text.COUNT_STOPPED_ALL, map );
 		}
 	}
 
@@ -435,8 +440,7 @@ public class Game implements Formattable {
 	// announce scores
 	private void winnersDisplay() {
 		for ( PlayerRep rep : observers ) {
-			Message message = Text.SCORE_ANNOUNCE.getMessage( rep.getPlayer() );
-			message.put( "game", this );
+			Message message = getMessage( Text.SCORE_ANNOUNCE, rep.getPlayer() );
 			Chat.sendMessage( rep, message );
 		}
 		Map<Message, Message> map = new LinkedHashMap<Message, Message>();
@@ -705,6 +709,7 @@ public class Game implements Formattable {
 	public void sendMessages( Text pText, Text oText, Text aText, Map<String, Object> values ) {
 		if ( values == null )
 			values = new HashMap<String, Object>();
+		values.put( "game", this );
 		for ( Player player : plugin.getServer().getOnlinePlayers() ) {
 			PlayerRep rep = PlayerRep.getPlayerRep( player );
 			if ( !observers.contains( rep ) && !players.contains( rep ) )

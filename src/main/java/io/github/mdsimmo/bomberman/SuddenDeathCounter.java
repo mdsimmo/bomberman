@@ -2,6 +2,9 @@ package io.github.mdsimmo.bomberman;
 
 import io.github.mdsimmo.bomberman.messaging.Text;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import org.bukkit.plugin.Plugin;
 
 public class SuddenDeathCounter {
@@ -42,12 +45,14 @@ public class SuddenDeathCounter {
 			suddenDeath--;
 			if (suddenDeath == 30
 					|| suddenDeath == 10
-					|| (suddenDeath <= 5 && suddenDeath > 0))
+					|| (suddenDeath <= 5 && suddenDeath > 0)) {
+				Map<String, Object> values = new HashMap<>();
+				values.put( "time", suddenDeath );
 				game.sendMessages(
 						Text.SUDDENDEATH_COUNT_P,
 						Text.SUDDENDEATH_COUNT_O,
-						Text.SUDDENDEATH_COUNT_A, null );
-			else if (suddenDeath == 0) {
+						Text.SUDDENDEATH_COUNT_A, values );
+			} else if (suddenDeath == 0) {
 				game.sendMessages(
 						Text.SUDDENDEATH_P,
 						Text.SUDDENDEATH_O,
@@ -79,12 +84,14 @@ public class SuddenDeathCounter {
 			
 			if (timeout == 30
 					|| timeout == 10
-					|| (timeout <= 5 && timeout > 0))
+					|| (timeout <= 5 && timeout > 0)) {
+				Map<String, Object> values = new HashMap<>();
+				values.put( "time", timeout );
 				game.sendMessages(
 						Text.TIMEOUT_COUNT_P,
 						Text.TIMEOUT_COUNT_O,
-						Text.TIMEOUT_COUNT_A, null );
-			else if (timeout == 0) {
+						Text.TIMEOUT_COUNT_A, values );
+			} else if (timeout == 0) {
 				game.sendMessages(
 						Text.TIMEOUT_P,
 						Text.TIMEOUT_O,

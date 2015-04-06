@@ -114,8 +114,12 @@ public class Board implements Formattable {
 		switch ( value ) {
 		case "name":
 			return name;
-		case "size":
-			return xSize+"x"+ySize+"x"+zSize;
+		case "xsize":
+			return Integer.toString( xSize );
+		case "ysize":
+			return Integer.toString( ySize );
+		case "zsize":
+			return Integer.toString( zSize );
 		default:
 			return null;
 		}

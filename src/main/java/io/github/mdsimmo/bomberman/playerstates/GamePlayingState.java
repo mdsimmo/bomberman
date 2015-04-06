@@ -61,7 +61,7 @@ public class GamePlayingState extends PlayerState implements Listener {
 		spawn = player.getLocation();
 		Vector gameSpawn = game.findSpareSpawn();
 		if ( gameSpawn == null ) {
-			Message message = Text.GAME_FULL.getMessage( player );
+			Message message = Text.GAME_FULL.getMessage( player ).put( "game", game );
 			message.put( "game", game );
 			Chat.sendMessage( rep, message );
 			return false;
@@ -72,8 +72,7 @@ public class GamePlayingState extends PlayerState implements Listener {
 					|| player.getGameMode() == GameMode.CREATIVE )
 				player.getInventory().removeItem( game.getFare() );
 			else {
-				Message message = Text.TOO_POOR.getMessage( player );
-				message.put( "game", game );
+				Message message = Text.TOO_POOR.getMessage( player ).put( "game", game );
 				Chat.sendMessage( rep, message );
 				return false;
 			}

@@ -25,10 +25,7 @@ public class LanguageCmd extends Cmd {
 
 	@Override
 	public List<String> options( CommandSender sender, List<String> args ) {
-		List<String> langs = Language.allLanguages();
-		if ( !langs.contains( "english" ) )
-			langs.add( "english" );
-		return langs;
+		return Language.allLanguages();
 	}
 
 	@Override

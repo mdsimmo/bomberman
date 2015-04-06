@@ -6,12 +6,56 @@ import org.bukkit.command.CommandSender;
 
 public enum Text {
 
+	MESSAGE_FORMAT(
+			"format.message",
+			"{green|[Bomberman]} {message}" ),
+	HEADING_FORMAT(
+			"format.heading",
+			"{yellow|--------} {type}: {title} {yellow|---------------}" ),
+	MAP_FORMAT(
+			"format.map",
+			"{gold|{title}:} {value}" ),
+	LIST_FORMAT(
+			"format.list",
+			"* {value}" ),
+
 	GAME(
-			"game",
+			"word.game",
 			"Game" ),
 	ARENA(
-			"arena",
+			"word.arena",
 			"Arena" ),
+
+	HELP(
+			"word.help",
+			"Help" ),
+	LIST(
+			"word.list",
+			"List" ),
+	INFO(
+			"word.info",
+			"Info" ),
+	DESCTIPTION(
+			"word.description",
+			"Description" ),
+	USAGE(
+			"word.usage",
+			"Usage" ),
+	EXTRA(
+			"word.extra",
+			"Extra" ),
+	COMMANDS(
+			"word.commands",
+			"Commands" ),
+	EXAMPLE(
+			"word.example",
+			"Example" ),
+	TRUE(
+			"word.true",
+			"true" ),
+	FALSE(
+			"word.false",
+			"false" ),
 
 	SPECIFY_GAME(
 			"join.specify-game",
@@ -28,7 +72,7 @@ public enum Text {
 
 	PLAYER_BUSY(
 			"player.busy",
-			"You're already doing something" ),
+			"You're already doing something in game {game}" ),
 
 	EDIT_BUILD_DENIED(
 			"editmode.builddenied",
@@ -63,7 +107,7 @@ public enum Text {
 			"{player} is out!" ),
 	PLAYER_KILLED_OBSERVERS(
 			"game-play.player-killed.observers",
-			"{player} died in game {game}!" ),
+			"{yellow|{player} died in game {game}!}" ),
 	PLAYER_KILLED_ALL(
 			"game-play.player-killed.all",
 			"" ),
@@ -90,10 +134,10 @@ public enum Text {
 			"Game {game} is starting soon. Type {aqua|/bm game join {game}} to play!" ),
 	GAME_COUNT_PLAYERS(
 			"game-play.count.players",
-			"Game starting in {game|time} seconds..." ),
+			"Game starting in {time} seconds..." ),
 	GAME_COUNT_OBSERVERS(
 			"game-play.count.observers",
-			"Game starting in {game|time} seconds..." ),
+			"Game starting in {time} seconds..." ),
 	GAME_COUNT_ALL(
 			"game-play.count.all",
 			"" ),
@@ -127,7 +171,7 @@ public enum Text {
 
 	SUDDENDEATH_COUNT_P(
 			"suddendeath.count.players",
-			"Sudden death in {game|suddendeath} seconds..." ),
+			"Sudden death in {time} seconds..." ),
 	SUDDENDEATH_COUNT_O(
 			"suddendeath.count.observers",
 			"" ),
@@ -139,13 +183,13 @@ public enum Text {
 			"{RED|Sudden death started!}" ),
 	SUDDENDEATH_O(
 			"suddendeath.start.observers",
-			"Sudden death started in {1}" ),
+			"Sudden death started in {game}" ),
 	SUDDENDEATH_A(
 			"suddendeath.start.all",
 			"" ),
 	TIMEOUT_COUNT_P(
 			"timeout.count.players",
-			"Time out in {game|timeout} seconds..." ),
+			"Time out in {time} seconds..." ),
 	TIMEOUT_COUNT_O(
 			"timeout.count.observers",
 			"" ),
@@ -170,51 +214,20 @@ public enum Text {
 			"The winners are:" ),
 	SCORE_SEE_SCORES(
 			"score.see-score",
-			"Type {AQUA|\bm game scores {game}} to see scores" ),
-
-	HELP(
-			"command.titles.help",
-			"Help: /{title}" ),
-	LIST(
-			"command.titles.list",
-			"List: {title}" ),
-	INFO(
-			"command.titles.info",
-			"Info: {title}" ),
-	DESCTIPTION(
-			"command.titles.description",
-			"Description" ),
-	USAGE(
-			"command.titles.usage",
-			"Usage" ),
-	EXTRA(
-			"command.titles.extra",
-			"Extra" ),
-	COMMANDS(
-			"command.titles.commands",
-			"Commands" ),
-	EXAMPLE(
-			"command.titles.example",
-			"Example" ),
+			"Type {AQUA|/bm game scores {game}} to see scores" ),
 
 	DENY_PERMISSION(
 			"command.deny-permission",
 			"{RED|You do not have permission to use /{command}!}" ),
 	INCORRECT_USAGE(
 			"command.incorrect-usage",
-			"{RED|Incorrect usage: {command} {command|usage}}" ),
+			"{RED|Incorrect usage: {command|usage}}" ),
 	UNKNOWN_COMMAND(
 			"command.unknown-command",
-			"{RED|Unknown command: {command}}" ),
+			"{RED|Unknown command: {attempt}}" ),
 	MUST_BE_PLAYER(
 			"command.must-be-player",
 			"You must be a player" ),
-	TRUE(
-			"command.true",
-			"true" ),
-	FALSE(
-			"command.false",
-			"false" ),
 	INVALID_NUMBER(
 			"command.invalid-number",
 			"{number} is not a valid number" ),
@@ -413,7 +426,7 @@ public enum Text {
 			"Forcibly start a game" ),
 	START_USAGE(
 			"command.start.usage",
-			"/{game} <game>" ),
+			"/{command|path} <game>" ),
 	START_EXAMPLE(
 			"command.start.example",
 			"" ),
@@ -438,7 +451,7 @@ public enum Text {
 			"Forcibly stop a game" ),
 	STOP_USAGE(
 			"command.stop.usage",
-			"/{command|name} <game>" ),
+			"/{command|path} <game>" ),
 	STOP_EXAMPLE(
 			"command.stop.example",
 			"" ),
@@ -1046,8 +1059,8 @@ public enum Text {
 			"command.language.success",
 			"Language set to {lang}" );
 
-	private final String	path;
-	private final String	message;
+	private final String path;
+	private final String message;
 
 	Text( String path, String message ) {
 		this.path = path;
@@ -1065,7 +1078,7 @@ public enum Text {
 	public Message getMessage( PlayerRep rep ) {
 		return getMessage( rep.getLanguage(), rep.getPlayer() );
 	}
-	
+
 	public Message getMessage( Language lang, CommandSender sender ) {
 		if ( lang == null )
 			return new Message( sender, this.message );

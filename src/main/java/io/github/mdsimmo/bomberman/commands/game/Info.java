@@ -35,56 +35,59 @@ public class Info extends GameCommand {
 	}
 
 	@Override
-	public boolean runShort(CommandSender sender, List<String> args, Game game) {
-		if (args.size() != 0)
+	public boolean runShort( CommandSender sender, List<String> args, Game game ) {
+		if ( args.size() != 0 )
 			return false;
 
-		Chat.sendHeading(sender, Text.INFO.getMessage(sender).put( "game", game));
+		Chat.sendHeading( sender, Text.INFO.getMessage( sender ),
+				new Message( sender, game.name ) );
 		Map<Message, Message> list = new LinkedHashMap<>();
-		if (game.isPlaying)
-			list.put(getMessage(Text.INFO_STATUS, sender), getMessage(Text.INFO_IN_PROGRESS, sender));
+		if ( game.isPlaying )
+			list.put( getMessage( Text.INFO_STATUS, sender ),
+					getMessage( Text.INFO_IN_PROGRESS, sender ) );
 		else
-			list.put(getMessage(Text.INFO_STATUS, sender), getMessage(Text.INFO_WAITING, sender));
-		list.put(
-				getMessage(Text.INFO_PLAYERS, sender),
-				new Message(sender, ""+game.players.size()));
-		list.put(
-				getMessage(Text.INFO_MIN_PLAYERS, sender),
-				new Message(sender, ""+game.getMinPlayers()));
-		list.put(
-				getMessage(Text.INFO_MAX_PLAYERS, sender),
-				new Message(sender, ""+game.board.spawnPoints.size()));
-		list.put(
-				getMessage(Text.INFO_INIT_BOMBS, sender),
-				new Message(sender, ""+game.getBombs()));
-		list.put(
-				getMessage(Text.INFO_INIT_LIVES, sender),
-				new Message(sender, ""+game.getLives()));
-		list.put(
-				getMessage(Text.INFO_INIT_POWER, sender),
-				new Message(sender, ""+game.getPower()));
-		Message fare = getMessage(Text.INFO_FARE, sender);
-		if (game.getFare() == null)
-			list.put(fare, getMessage(Text.INFO_NO_FARE, sender));
+			list.put( getMessage( Text.INFO_STATUS, sender ),
+					getMessage( Text.INFO_WAITING, sender ) );
+		list.put( getMessage( Text.INFO_PLAYERS, sender ), new Message( sender,
+				"" + game.players.size() ) );
+		list.put( getMessage( Text.INFO_MIN_PLAYERS, sender ), new Message(
+				sender, "" + game.getMinPlayers() ) );
+		list.put( getMessage( Text.INFO_MAX_PLAYERS, sender ), new Message(
+				sender, "" + game.board.spawnPoints.size() ) );
+		list.put( getMessage( Text.INFO_INIT_BOMBS, sender ), new Message(
+				sender, "" + game.getBombs() ) );
+		list.put( getMessage( Text.INFO_INIT_LIVES, sender ), new Message(
+				sender, "" + game.getLives() ) );
+		list.put( getMessage( Text.INFO_INIT_POWER, sender ), new Message(
+				sender, "" + game.getPower() ) );
+		Message fare = getMessage( Text.INFO_FARE, sender );
+		if ( game.getFare() == null )
+			list.put( fare, getMessage( Text.INFO_NO_FARE, sender ) );
 		else
-			list.put(fare, new Message(sender, game.getFare().toString() ));
-		
-		Message prize = getMessage(Text.INFO_PRIZE, sender);
-		if (game.getPot() == true && game.getFare() != null)
-			list.put(prize, getMessage(Text.INFO_POT_AT, sender).put( "game", game )  );
+			list.put( fare, new Message( sender, game.getFare().toString() ) );
+
+		Message prize = getMessage( Text.INFO_PRIZE, sender );
+		if ( game.getPot() == true && game.getFare() != null )
+			list.put( prize,
+					getMessage( Text.INFO_POT_AT, sender ).put( "game", game ) );
 		else {
-			if (game.getPrize() == null)
-				list.put(prize, getMessage(Text.INFO_NO_PRIZE, sender));
+			if ( game.getPrize() == null )
+				list.put( prize, getMessage( Text.INFO_NO_PRIZE, sender ) );
 			else
-				list.put(prize, new Message(sender, game.getPrize().toString() ));
+				list.put( prize, new Message( sender, game.getPrize()
+						.toString() ) );
 		}
 		Message sd = game.getSuddenDeath() == -1 ? getMessage( Text.INFO_OFF,
-				sender ) : getMessage(Text.INFO_TIME, sender).put( "game", game);
-		list.put(getMessage(Text.INFO_SUDDENDEATH, sender), sd);
-		Message to = game.getTimeout() == -1 ? Text.INFO_OFF.getMessage(sender)	: getMessage( Text.INFO_TIME, sender).put( "game", game );
-		list.put(getMessage(Text.INFO_TIMEOUT, sender), to);
-		list.put(Text.ARENA.getMessage(sender), new Message(sender, game.board.name));
-		Chat.sendMap(sender, list);
+				sender ) : getMessage( Text.INFO_TIME, sender ).put( "game",
+				game );
+		list.put( getMessage( Text.INFO_SUDDENDEATH, sender ), sd );
+		Message to = game.getTimeout() == -1 ? Text.INFO_OFF
+				.getMessage( sender ) : getMessage( Text.INFO_TIME, sender )
+				.put( "game", game );
+		list.put( getMessage( Text.INFO_TIMEOUT, sender ), to );
+		list.put( Text.ARENA.getMessage( sender ), new Message( sender,
+				game.board.name ) );
+		Chat.sendMap( sender, list );
 		return true;
 	}
 

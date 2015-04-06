@@ -3,7 +3,6 @@ package io.github.mdsimmo.bomberman.commands;
 import io.github.mdsimmo.bomberman.messaging.Chat;
 import io.github.mdsimmo.bomberman.messaging.Message;
 import io.github.mdsimmo.bomberman.messaging.Text;
-import io.github.mdsimmo.bomberman.utils.Utils;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -96,7 +95,7 @@ public abstract class CommandGroup extends Cmd {
 				}
 			}
 			Chat.sendMessage( sender, getMessage( Text.UNKNOWN_COMMAND, sender )
-					.put( "tried", Utils.listToString( args ) ) );
+					.put( "attempt", args.get( 0 ) ) );
 			help( sender );
 			return true;
 		}
@@ -110,7 +109,10 @@ public abstract class CommandGroup extends Cmd {
 			if ( cmd.name( sender ).toString().equals( args.get( 0 ) )
 					&& cmd.isAllowedBy( sender ) ) {
 				args.remove( 0 );
-				return cmd;
+				if ( cmd instanceof CommandGroup )
+					return ( (CommandGroup)cmd ).getCommand( sender, args );
+				else
+					return cmd;
 			}
 		}
 		return this;

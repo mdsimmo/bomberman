@@ -80,11 +80,6 @@ public abstract class Cmd implements Formattable {
 	public abstract boolean run( CommandSender sender, List<String> args );
 
 	public boolean execute( CommandSender sender, List<String> args ) {
-		if ( args.size() != 0
-				&& args.get( args.size() - 1 ).equalsIgnoreCase( "?" ) ) {
-			help( sender );
-			return true;
-		}
 		if ( isAllowedBy( sender ) ) {
 			if ( run( sender, args ) )
 				return true;
@@ -114,7 +109,7 @@ public abstract class Cmd implements Formattable {
 	 *            the player to help
 	 */
 	public void help( CommandSender sender ) {
-		Chat.sendHeading( sender, getMessage( Text.HELP, sender ).put( "title" , name( sender ) ) );
+		Chat.sendHeading( sender, Text.HELP.getMessage( sender ), name( sender ) );
 		Map<Message, Message> help = info( sender );
 		Message temp = extra( sender );
 		if ( temp != null ) {
@@ -229,10 +224,6 @@ public abstract class Cmd implements Formattable {
 			return path( sender );
 		case "usage":
 			return usage( sender ).toString();
-		case "info":
-			return info( sender ).toString();
-		case "extra":
-			return extra( sender ).toString();
 		case "description":
 			return description( sender ).toString();
 		default:

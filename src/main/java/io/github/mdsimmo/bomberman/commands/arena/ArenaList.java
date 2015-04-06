@@ -36,10 +36,8 @@ public class ArenaList extends Cmd {
 			Chat.sendMessage( sender,
 					getMessage( Text.ARENA_LIST_NO_ARENA, sender ) );
 		} else {
-			Chat.sendHeading(
-					sender,
-					getMessage( Text.LIST, sender ).put( "title",
-							Text.ARENA.getMessage( sender ) ) );
+			Chat.sendHeading( sender, Text.LIST.getMessage( sender ),
+					Text.ARENA.getMessage( sender ) );
 			List<Message> list = new ArrayList<>();
 			for ( String name : arenas ) {
 				if ( !name.endsWith( ".old" ) )
