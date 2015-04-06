@@ -25,7 +25,6 @@ public class Bomb implements Runnable {
 	private int eTaskId;
 
 	public Bomb( Game game, PlayerRep rep, Block tnt ) {
-		System.out.println( "TNT created" );
 		this.game = game;
 		this.rep = rep;
 		this.tnt = tnt;
@@ -44,7 +43,6 @@ public class Bomb implements Runnable {
 	public class Explosion implements Listener, Runnable {
 
 		public Explosion() {
-			System.out.println( "TNT EXPLODED!!!" );
 			tnt.setType( Material.AIR );
 			game.explosions.remove( tnt );
 			plugin.getServer().getPluginManager().registerEvents( this, plugin );

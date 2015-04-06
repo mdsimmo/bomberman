@@ -102,7 +102,6 @@ public abstract class CommandGroup extends Cmd {
 	}
 
 	public Cmd getCommand( CommandSender sender, List<String> args ) {
-		System.out.println( "size " + args.size() + args );
 		if ( args.size() == 0 )
 			return this;
 		for ( Cmd cmd : children ) {

@@ -1,5 +1,6 @@
 package io.github.mdsimmo.bomberman.playerstates;
 
+import io.github.mdsimmo.bomberman.BlockRep;
 import io.github.mdsimmo.bomberman.Bomb;
 import io.github.mdsimmo.bomberman.Game;
 import io.github.mdsimmo.bomberman.Game.Stats;
@@ -8,6 +9,7 @@ import io.github.mdsimmo.bomberman.messaging.Chat;
 import io.github.mdsimmo.bomberman.messaging.Message;
 import io.github.mdsimmo.bomberman.messaging.Text;
 
+import org.bukkit.DyeColor;
 import org.bukkit.GameMode;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -17,6 +19,7 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.HandlerList;
 import org.bukkit.event.Listener;
+import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityRegainHealthEvent;
@@ -40,6 +43,7 @@ public class GamePlayingState extends PlayerState implements Listener {
 	private GameMode spawnGameMode;
 	private int immunity = 0;
 	private boolean isPlaying = false;
+	private BlockRep[][][] cageBlocks = new BlockRep[3][4][3];
 
 	public GamePlayingState( PlayerRep rep ) {
 		super( rep );
@@ -61,7 +65,7 @@ public class GamePlayingState extends PlayerState implements Listener {
 		spawn = player.getLocation();
 		Vector gameSpawn = game.findSpareSpawn();
 		if ( gameSpawn == null ) {
-			Message message = Text.GAME_FULL.getMessage( player ).put( "game", game );
+			Message message = Text.GAME_FULL.getMessage( player );
 			message.put( "game", game );
 			Chat.sendMessage( message );
 			return false;
@@ -72,7 +76,8 @@ public class GamePlayingState extends PlayerState implements Listener {
 					|| player.getGameMode() == GameMode.CREATIVE )
 				player.getInventory().removeItem( game.getFare() );
 			else {
-				Message message = Text.TOO_POOR.getMessage( player ).put( "game", game );
+				Message message = Text.TOO_POOR.getMessage( player ).put(
+						"game", game );
 				Chat.sendMessage( message );
 				return false;
 			}
@@ -83,8 +88,9 @@ public class GamePlayingState extends PlayerState implements Listener {
 			Chat.sendMessage( message );
 		}
 		rep.getPlayer().teleport( game.box.corner().add( gameSpawn ) );
+		surroundCage();
 		spawnGameMode = player.getGameMode();
-		player.setGameMode( GameMode.ADVENTURE );
+		player.setGameMode( GameMode.SURVIVAL );
 		player.setHealth( game.getLives() );
 		player.setMaxHealth( game.getLives() );
 		player.setHealthScale( game.getLives() * 2 );
@@ -98,6 +104,51 @@ public class GamePlayingState extends PlayerState implements Listener {
 		isPlaying = true;
 		plugin.getServer().getPluginManager().registerEvents( this, plugin );
 		return true;
+	}
+	
+	public void gameStarted() {
+		removeCage();
+	}
+	
+	@SuppressWarnings( "deprecation" )
+	private void surroundCage() {
+		Location loc = rep.getPlayer().getLocation();
+		Location temp = loc.clone();
+		for ( int i = -1; i <= 1; i++ ) {
+			for ( int j = 0; j < 4; j++ ) {
+				for ( int k = -1; k <= 1; k++ ) {
+					if ( (j == 1 || j == 2 ) && j == 0 && k == 0 )
+						continue;
+					temp.setX( loc.getX() + i );
+					temp.setY( loc.getY() + j );
+					temp.setZ( loc.getZ() + k );
+					Block b = temp.getBlock();
+					if (b.getType().isSolid() )
+						continue;
+					cageBlocks[i+1][j][k+1] = BlockRep.createBlock( b );
+					b.setType( Material.STAINED_GLASS );
+					b.setData( DyeColor.WHITE.getData() );
+				}
+			}
+		}
+	}
+	
+	private void removeCage() {
+		Location loc = rep.getPlayer().getLocation();
+		Location temp = loc.clone();
+		for ( int i = -1; i <= 1; i++ ) {
+			for ( int j = 0; j < 4; j++ ) {
+				for ( int k = -1; k <= 1; k++ ) {
+					BlockRep bRep = cageBlocks[i+1][j][k+1];
+					if ( bRep == null )
+						continue;
+					temp.setX( loc.getX() + i );
+					temp.setY( loc.getY() + j );
+					temp.setZ( loc.getZ() + k );
+					bRep.setBlock( temp.getBlock() );
+				}
+			}
+		}
 	}
 
 	@Override
@@ -119,6 +170,8 @@ public class GamePlayingState extends PlayerState implements Listener {
 	 */
 	public void kill() {
 		isPlaying = false;
+		if ( !game.isPlaying )
+			removeCage();
 		disable();
 		player.setGameMode( spawnGameMode );
 		player.getInventory().setContents( spawnInventory );
@@ -131,17 +184,22 @@ public class GamePlayingState extends PlayerState implements Listener {
 		rep.removeEffects();
 	}
 
-	@EventHandler( priority = EventPriority.LOWEST )
+	@EventHandler( priority = EventPriority.HIGHEST )
 	public void onPlayerPlaceBlock( BlockPlaceEvent e ) {
-		plugin.getLogger().info( "Player placed a block" );
 		if ( e.isCancelled() || !enabled || e.getPlayer() != player )
 			return;
-		plugin.getLogger().info( "Player placed a block" );
 		Block b = e.getBlock();
 		// create a bomb when placing tnt
 		if ( b.getType() == game.getBombMaterial() && game.isPlaying ) {
 			new Bomb( game, rep, b );
 		}
+	}
+
+	@EventHandler( priority = EventPriority.LOWEST )
+	public void onPlayerBreakBlock( BlockBreakEvent e ) {
+		if ( e.isCancelled() || !enabled || e.getPlayer() != player )
+			return;
+		e.setCancelled( true );
 	}
 
 	@EventHandler( priority = EventPriority.LOWEST )
@@ -269,15 +327,17 @@ public class GamePlayingState extends PlayerState implements Listener {
 		if ( !dead ) {
 			if ( attacker == rep ) {
 				Message message = Text.HIT_SUICIDE.getMessage( player );
-				message.put( "game", game ).put( "attacker", attacker ).put( "defender", rep );
+				message.put( "game", game ).put( "attacker", attacker )
+						.put( "defender", rep );
 				Chat.sendMessage( message );
 			} else {
 				Message message = Text.HIT_BY.getMessage( player );
 				message.put( "game", game ).put( "attacker", attacker );
 				Chat.sendMessage( message );
-				
+
 				message = Text.HIT_OPPONENT.getMessage( player );
-				message.put( "game", game ).put( "attacker", attacker ).put( "defender", rep );
+				message.put( "game", game ).put( "attacker", attacker )
+						.put( "defender", rep );
 				Chat.sendMessage( message );
 			}
 		} else {
@@ -285,16 +345,19 @@ public class GamePlayingState extends PlayerState implements Listener {
 			attackerStats.kills++;
 			if ( attacker == rep ) {
 				Message message = Text.KILL_SUICIDE.getMessage( player );
-				message.put( "game", game ).put( "attacker", attacker ).put( "defender", rep );
+				message.put( "game", game ).put( "attacker", attacker )
+						.put( "defender", rep );
 				Chat.sendMessage( message );
 				playerStats.suicides++;
 			} else {
 				Message message = Text.KILLED_BY.getMessage( player );
-				message.put( "game", game ).put( "attacker", attacker ).put( "defender", rep );
+				message.put( "game", game ).put( "attacker", attacker )
+						.put( "defender", rep );
 				Chat.sendMessage( message );
-				
+
 				message = Text.KILL_OPPONENT.getMessage( player );
-				message.put( "game", game ).put( "attacker", attacker ).put( "defender", rep );
+				message.put( "game", game ).put( "attacker", attacker )
+						.put( "defender", rep );
 				Chat.sendMessage( message );
 			}
 		}

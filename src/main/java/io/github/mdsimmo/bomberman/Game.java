@@ -70,8 +70,8 @@ public class Game implements Formattable {
 						.scheduleSyncDelayedTask( plugin, this, 20 );
 
 				// Notify waiting players every 15 seconds until count <= 15,
-				// notify every 5 until count <= 3,
-				// notify every second last 3 seconds
+				// notify every 5 until count <= 5,
+				// notify every second past 5 seconds
 				if ( count % 15 == 0 || ( count < 15 && count % 5 == 0 )
 						|| count <= 5 ) {
 					Map<String, Object> values = new HashMap<>();
@@ -86,6 +86,8 @@ public class Game implements Formattable {
 						null );
 
 				isPlaying = true;
+				for ( PlayerRep rep : players )
+					((GamePlayingState)rep.getState()).gameStarted();
 				deathCounter = new SuddenDeathCounter( Game.this );
 				deathCounter.start();
 				// Cleanup and destroy the countdown timer
