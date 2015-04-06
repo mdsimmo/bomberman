@@ -213,7 +213,7 @@ public abstract class Cmd implements Formattable {
 	}
 	
 	@Override
-	public String format( Message message, String value ) {
+	public Object format( Message message, String value ) {
 		if ( value == null )
 			value = "name";
 		CommandSender sender = message.getSender();

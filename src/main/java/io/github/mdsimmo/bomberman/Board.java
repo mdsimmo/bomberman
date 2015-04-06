@@ -108,7 +108,7 @@ public class Board implements Formattable {
 	}
 
 	@Override
-	public String format( Message message, String value ) {
+	public Object format( Message message, String value ) {
 		if ( value == null )
 			return name;
 		switch ( value ) {

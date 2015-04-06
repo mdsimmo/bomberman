@@ -154,7 +154,7 @@ public class Message implements Formattable {
 			else
 				return ( (CommandSender)obj ).getName();
 		if ( obj instanceof Formattable )
-			return ( (Formattable)obj ).format( this, value );
+			return format( ( (Formattable)obj ).format( this, value ), null );
 		if ( obj instanceof ItemStack ) {
 			ItemStack stack = (ItemStack)obj;
 			int amount = stack.getAmount();
@@ -170,7 +170,7 @@ public class Message implements Formattable {
 	}
 
 	@Override
-	public String format( Message message, String value ) {
+	public Object format( Message message, String value ) {
 		colors.push( message.colors.peek() );
 		return this.toString();
 	}

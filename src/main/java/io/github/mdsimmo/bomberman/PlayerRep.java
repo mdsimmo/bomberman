@@ -136,7 +136,7 @@ public class PlayerRep implements Listener, Formattable {
 	}
 
 	@Override
-	public String format( Message message, String value ) {
+	public Object format( Message message, String value ) {
 		if ( value == null )
 			return player.getName();
 		switch ( value ) {

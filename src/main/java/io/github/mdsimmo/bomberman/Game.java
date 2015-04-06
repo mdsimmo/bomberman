@@ -723,30 +723,30 @@ public class Game implements Formattable {
 	}
 
 	@Override
-	public String format( Message message, String value ) {
+	public Object format( Message message, String value ) {
 		if ( value == null )
 			return name;
 		switch ( value ) {
 		case "name":
 			return name;
 		case "minplayers":
-			return Integer.toString( minPlayers );
+			return minPlayers;
 		case "maxplayers":
-			return Integer.toString( board.spawnPoints.size() );
+			return board.spawnPoints.size();
 		case "players":
-			return Integer.toString( players.size() );
+			return players.size();
 		case "power":
-			return Integer.toString( power );
+			return power;
 		case "bombs":
-			return Integer.toString( bombs );
+			return bombs;
 		case "fare":
-			return String.valueOf( fare );
+			return fare;
 		case "prize":
-			return String.valueOf( prize );
+			return prize;
 		case "timeout":
-			return Integer.toString( deathCounter.to.timeout );
+			return getTimeout();
 		case "suddendeath":
-			return Integer.toString( deathCounter.sd.suddenDeath );
+			return getSuddenDeath();
 		default:
 			return null;
 		}
