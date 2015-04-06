@@ -214,7 +214,7 @@ public enum Text {
 			"The winners are:" ),
 	WINNERS_LIST(
 			"scores.winners",
-			"{position}: {player}"),
+			" {gold|{place}:} {player}"),
 	SCORE_SEE_SCORES(
 			"score.see-score",
 			"Type {AQUA|/bm game scores {game}} to see scores" ),
