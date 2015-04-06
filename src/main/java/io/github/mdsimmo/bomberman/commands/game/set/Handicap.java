@@ -47,22 +47,22 @@ public class Handicap extends GameCommand {
 		@SuppressWarnings("deprecation")
 		PlayerRep rep = PlayerRep.getPlayerRep(Bukkit.getPlayer(args.get(0)));
 		if (rep == null) {
-			Chat.sendMessage(sender, getMessage(Text.INVALID_PLAYER, sender).put( "player", args.get(0)));
+			Chat.sendMessage(getMessage(Text.INVALID_PLAYER, sender).put( "player", args.get(0)));
 			return true;
 		}
 		int handicap = 0;
 		try {
 			handicap = Integer.parseInt(args.get(1));
 		} catch (NumberFormatException e) {
-			Chat.sendMessage(sender, getMessage(Text.INVALID_NUMBER, sender).put( "number", args.get(1)));
+			Chat.sendMessage(getMessage(Text.INVALID_NUMBER, sender).put( "number", args.get(1)));
 		}
 		game.setHandicap(rep, handicap);
 		if (handicap > 0)
-			Chat.sendMessage(sender, getMessage(Text.HANDICAP_HANDYCAPPED, sender).put( "game", game).put( "player", rep ));
+			Chat.sendMessage(getMessage(Text.HANDICAP_HANDYCAPPED, sender).put( "game", game).put( "player", rep ));
 		else if (handicap == 0)
-			Chat.sendMessage(sender, getMessage(Text.HANDICAP_REMOVED, sender).put( "game", game).put( "player", rep ));
+			Chat.sendMessage(getMessage(Text.HANDICAP_REMOVED, sender).put( "game", game).put( "player", rep ));
 		else
-			Chat.sendMessage(sender, getMessage(Text.HANDICAP_ADVANTAGE, sender).put( "game", game).put( "player", rep ));
+			Chat.sendMessage(getMessage(Text.HANDICAP_ADVANTAGE, sender).put( "game", game).put( "player", rep ));
 		
 		if (rep.isPlaying() && !((GamePlayingState)rep.getState()).getGame().isPlaying)
 			game.initialise(rep);

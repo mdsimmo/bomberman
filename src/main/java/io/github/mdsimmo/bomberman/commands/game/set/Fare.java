@@ -44,21 +44,21 @@ public class Fare extends GameCommand {
 		String none = Text.FARE_NONE.getMessage(sender).toString();
 		if (args.size() == 1 && args.get(0).equalsIgnoreCase(none)) {
 			game.setFare(null);
-			Chat.sendMessage(sender, getMessage(Text.FARE_REMOVED, sender).put( "game", game));
+			Chat.sendMessage(getMessage(Text.FARE_REMOVED, sender).put( "game", game));
 			return true;
 		} else if (args.size() == 2) {
 			Material m = Material.getMaterial(args.get(0).toUpperCase());
 			if (m == null) {
-				Chat.sendMessage(sender, getMessage(Text.INVALID_MATERIAL, sender).put( "material", args.get(0)));
+				Chat.sendMessage(getMessage(Text.INVALID_MATERIAL, sender).put( "material", args.get(0)));
 				return true;
 			}
 			try {
 				int amount = Integer.parseInt(args.get(1));
 				game.setFare(new ItemStack(m, amount));
-				Chat.sendMessage(sender, getMessage(Text.FARE_SET, sender).put( "game", game));
+				Chat.sendMessage(getMessage(Text.FARE_SET, sender).put( "game", game));
 				return true;
 			} catch (Exception e) {
-				Chat.sendMessage(sender, getMessage(Text.INVALID_NUMBER, sender).put( "number", args.get(1)));
+				Chat.sendMessage(getMessage(Text.INVALID_NUMBER, sender).put( "number", args.get(1)));
 				return true;
 			}
 		} else {

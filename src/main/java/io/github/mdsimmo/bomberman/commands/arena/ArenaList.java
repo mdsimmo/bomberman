@@ -33,17 +33,15 @@ public class ArenaList extends Cmd {
 			return false;
 		List<String> arenas = BoardGenerator.allBoards();
 		if ( arenas.size() == 0 ) {
-			Chat.sendMessage( sender,
-					getMessage( Text.ARENA_LIST_NO_ARENA, sender ) );
+			Chat.sendMessage( getMessage( Text.ARENA_LIST_NO_ARENA, sender ) );
 		} else {
-			Chat.sendHeading( sender, Text.LIST.getMessage( sender ),
-					Text.ARENA.getMessage( sender ) );
+			Chat.sendHeading( Text.LIST.getMessage( sender ), Text.ARENA.getMessage( sender ) );
 			List<Message> list = new ArrayList<>();
 			for ( String name : arenas ) {
 				if ( !name.endsWith( ".old" ) )
 					list.add( new Message( sender, name ) );
 			}
-			Chat.sendList( sender, list );
+			Chat.sendList( list );
 		}
 		return true;
 	}

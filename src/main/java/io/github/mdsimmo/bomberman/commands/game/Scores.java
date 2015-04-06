@@ -23,7 +23,7 @@ public class Scores extends GameCommand {
 
 	@Override
 	public boolean runShort(CommandSender sender, List<String> args, Game game) {
-		Chat.sendList(sender, game.scoreDisplay());
+		Chat.sendList(game.scoreDisplay());
 		return false;
 	}
 

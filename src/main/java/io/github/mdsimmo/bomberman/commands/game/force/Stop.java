@@ -28,13 +28,13 @@ public class Stop extends GameCommand {
             return false;
 		
         if (!game.isPlaying)
-            Chat.sendMessage(sender, getMessage(Text.STOP_NOT_STARTED, sender).put( "game", game));
+            Chat.sendMessage(getMessage(Text.STOP_NOT_STARTED, sender).put( "game", game));
 	else {
         	game.stop();
             if (!game.players.contains(sender))
-            	Chat.sendMessage(sender, getMessage(Text.STOP_SUCCESS, sender).put( "game", game));
+            	Chat.sendMessage(getMessage(Text.STOP_SUCCESS, sender).put( "game", game));
             for (PlayerRep rep : game.players) {
-            	Chat.sendMessage(rep, getMessage(Text.STOP_SUCCESS, rep.getPlayer()).put( "game", game));
+            	Chat.sendMessage(getMessage(Text.STOP_SUCCESS, rep.getPlayer()).put( "game", game));
             }
             
         }

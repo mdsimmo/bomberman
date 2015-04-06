@@ -41,10 +41,10 @@ public class Autostart extends GameCommand {
 		
 		if (args.get(0).equalsIgnoreCase(Text.FALSE.getMessage(sender).toString())) {
 			game.setAutostart(false);
-			Chat.sendMessage(sender, getMessage(Text.AUTOSTART_DISABLED, sender).put( "game", game));
+			Chat.sendMessage(getMessage(Text.AUTOSTART_DISABLED, sender).put( "game", game));
 		} else if (args.get(0).equalsIgnoreCase(Text.TRUE.getMessage(sender).toString())) {
 			game.setAutostart(true);
-			Chat.sendMessage(sender, getMessage(Text.AUTOSTART_ENABLED, sender).put( "game", game));
+			Chat.sendMessage(getMessage(Text.AUTOSTART_ENABLED, sender).put( "game", game));
 		} else {
 			return false;
 		}

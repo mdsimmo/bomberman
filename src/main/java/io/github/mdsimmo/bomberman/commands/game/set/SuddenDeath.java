@@ -36,12 +36,12 @@ public class SuddenDeath extends GameCommand {
 		
 		if (value.equals(getMessage(Text.SUDDENDEATH_OFF, sender).toString())) {
 			game.setSuddenDeath(-1);
-			Chat.sendMessage(sender, getMessage(Text.SUDDENDEATH_REMOVED, sender).put( "game", game));
+			Chat.sendMessage(getMessage(Text.SUDDENDEATH_REMOVED, sender).put( "game", game));
 		} else {
 			try {
 				int time = (int)Double.parseDouble(value);
 				game.setSuddenDeath(time);
-				Chat.sendMessage(sender, getMessage(Text.SUDDENDEATH_SET, sender).put( "game", game ));
+				Chat.sendMessage(getMessage(Text.SUDDENDEATH_SET, sender).put( "game", game ));
 			} catch (Exception e) {
 				return false;
 			}

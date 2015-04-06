@@ -33,9 +33,9 @@ public class AutostartDelay extends GameCommand {
 		        
         try {
             game.setAutostartDelay(Integer.parseInt(args.get(0)));
-            Chat.sendMessage(sender, getMessage(Text.STARTDELAY_SET, sender).put( "game", game) );
+            Chat.sendMessage(getMessage(Text.STARTDELAY_SET, sender).put( "game", game) );
         } catch (NumberFormatException e) {
-            Chat.sendMessage(sender, getMessage(Text.INVALID_NUMBER, sender).put( "number", args.get(0)));
+            Chat.sendMessage(getMessage(Text.INVALID_NUMBER, sender).put( "number", args.get(0)));
         }
         return true;
 	}

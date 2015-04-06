@@ -94,7 +94,7 @@ public abstract class CommandGroup extends Cmd {
 					return c.execute( sender, args );
 				}
 			}
-			Chat.sendMessage( sender, getMessage( Text.UNKNOWN_COMMAND, sender )
+			Chat.sendMessage( getMessage( Text.UNKNOWN_COMMAND, sender )
 					.put( "attempt", args.get( 0 ) ) );
 			help( sender );
 			return true;

@@ -45,24 +45,24 @@ public class Prize extends GameCommand {
 		if (args.size() == 1) {
 			if (args.get(0).equalsIgnoreCase(Text.PRIZE_NONE.getMessage(sender).toString())) {
 				game.setFare(null);
-				Chat.sendMessage(sender, getMessage(Text.PRIZE_REMOVED, sender).put( "game", game));
+				Chat.sendMessage(getMessage(Text.PRIZE_REMOVED, sender).put( "game", game));
 			} else if (args.get(0).equalsIgnoreCase(Text.PRIZE_POT.getMessage(sender).toString())) {
 				game.setPot(true);
-				Chat.sendMessage(sender, getMessage(Text.PRIZE_POT_SET, sender).put( "game", game ));
+				Chat.sendMessage(getMessage(Text.PRIZE_POT_SET, sender).put( "game", game ));
 			} else
 				return false;
 		} else if (args.size() == 2) {
 			Material m = Material.getMaterial(args.get(0).toUpperCase());
 			if (m == null) {
-				Chat.sendMessage(sender, getMessage(Text.INVALID_MATERIAL, sender).put( "number", args.get(0)));
+				Chat.sendMessage(getMessage(Text.INVALID_MATERIAL, sender).put( "number", args.get(0)));
 				return true;
 			}
 			try {
 				int amount = Integer.parseInt(args.get(1));
 				game.setPrize(new ItemStack(m, amount));
-				Chat.sendMessage(sender, getMessage(Text.PRIZE_SET, sender).put( "game", game));
+				Chat.sendMessage(getMessage(Text.PRIZE_SET, sender).put( "game", game));
 			} catch (Exception e) {
-				Chat.sendMessage(sender, getMessage(Text.INVALID_NUMBER, sender).put( "number", args.get(1)));
+				Chat.sendMessage(getMessage(Text.INVALID_NUMBER, sender).put( "number", args.get(1)));
 			}
 		} else {
 			return false;

@@ -1,6 +1,5 @@
 package io.github.mdsimmo.bomberman.messaging;
 
-import io.github.mdsimmo.bomberman.PlayerRep;
 import io.github.mdsimmo.bomberman.commands.Cmd.Permission;
 
 import java.util.List;
@@ -10,53 +9,40 @@ import org.bukkit.command.CommandSender;
 
 public abstract class Chat {
 
-	public static void sendMessage( PlayerRep rep, Message message ) {
-		sendMessage( rep.getPlayer(), message );
-	}
-
-	public static void sendMessage( CommandSender sender, Message message ) {
+	public static void sendMessage( Message message  ) {
 		if ( message.isBlank() )
 			return;
-		messageRaw(
-				sender,
-				Text.MESSAGE_FORMAT.getMessage( sender )
-						.put( "message", message ).toString() );
+		messageRaw( Text.MESSAGE_FORMAT.getMessage( message.getSender() ).put( "message",
+				message ) );
 	}
 
-	public static void sendMap( CommandSender sender,
-			Map<Message, Message> points ) {
+	public static void sendMap( Map<Message, Message> points  ) {
 		for ( Map.Entry<Message, Message> point : points.entrySet() ) {
 			if ( point.getValue().isBlank() || point.getKey().isBlank() )
 				continue;
-			messageRaw(
-					sender,
-					Text.MAP_FORMAT.getMessage( sender )
-							.put( "title", point.getKey() )
-							.put( "value", point.getValue() ).toString() );
+			messageRaw( Text.MAP_FORMAT.getMessage( point.getKey().getSender() )
+					.put( "title", point.getKey() )
+					.put( "value", point.getValue() ) );
 		}
 	}
 
-	public static void sendList( CommandSender sender, List<Message> list ) {
+	public static void sendList( List<Message> list  ) {
 		for ( Message line : list ) {
 			if ( line.isBlank() )
 				continue;
-			messageRaw( sender,
-					Text.LIST_FORMAT.getMessage( sender ).put( "value", line )
-							.toString() );
+			messageRaw( Text.LIST_FORMAT.getMessage( line.getSender() ).put( "value",
+					line ) );
 		}
 	}
 
-	private static void messageRaw( CommandSender sender, String message ) {
+	public static void messageRaw( Message message ) {
+		CommandSender sender = message.getSender();
 		if ( Permission.OBSERVER.isAllowedBy( sender ) )
-			sender.sendMessage( message );
+			sender.sendMessage( message.toString() );
 	}
 
-	public static void sendHeading( CommandSender sender, Message type,
-			Message title ) {
-		if ( title == null || title.isBlank() || type == null || type.isBlank() )
-			return;
-		messageRaw( sender,
-				Text.HEADING_FORMAT.getMessage( sender ).put( "type", type )
-						.put( "title", title ).toString() );
+	public static void sendHeading( Message type , Message title  ) {
+		messageRaw( Text.HEADING_FORMAT.getMessage( title.getSender() ).put( "type", type )
+				.put( "title", title ) );
 	}
 }

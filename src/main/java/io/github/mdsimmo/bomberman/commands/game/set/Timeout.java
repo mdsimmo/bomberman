@@ -36,14 +36,14 @@ public class Timeout extends GameCommand {
 		
 		if (value.equals(Text.TIMEOUT_OFF.getMessage(sender).toString())) {
 			game.setTimeout(-1);
-			Chat.sendMessage(sender, getMessage(Text.TIMEOUT_REMOVED, sender).put( "game", game));
+			Chat.sendMessage(getMessage(Text.TIMEOUT_REMOVED, sender).put( "game", game));
 		} else {
 			try {
 				int time = (int)Double.parseDouble(value);
 				game.setTimeout(time);
-				Chat.sendMessage(sender, getMessage(Text.TIMEOUT_SET, sender).put( "game", game));
+				Chat.sendMessage(getMessage(Text.TIMEOUT_SET, sender).put( "game", game));
 			} catch (Exception e) {
-				Chat.sendMessage(sender, getMessage(Text.INVALID_NUMBER, sender).put( "number", value));
+				Chat.sendMessage(getMessage(Text.INVALID_NUMBER, sender).put( "number", value));
 			}
 		}
 		return true;

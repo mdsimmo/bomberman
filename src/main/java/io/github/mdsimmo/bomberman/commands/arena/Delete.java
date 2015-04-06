@@ -39,7 +39,7 @@ public class Delete extends Cmd {
 		String arena = args.get( 0 );
 		File f = BoardGenerator.toFile( arena );
 		if ( !f.exists() ) {
-			Chat.sendMessage( sender, getMessage( Text.INVALID_ARENA, sender )
+			Chat.sendMessage( getMessage( Text.INVALID_ARENA, sender )
 					.put( "arena", arena ) );
 			return true;
 		}
@@ -48,7 +48,6 @@ public class Delete extends Cmd {
 			if ( game.board.name.equalsIgnoreCase( args.get( 0 ) )
 					|| game.oldBoard.name.equalsIgnoreCase( args.get( 0 ) ) ) {
 				Chat.sendMessage(
-						sender,
 						getMessage( Text.DELETE_ARENA_USED, sender ).put(
 								"arena", arena ).put( "game", game ) );
 				return true;
@@ -57,11 +56,10 @@ public class Delete extends Cmd {
 		BoardGenerator.remove( arena );
 		if ( f.delete() )
 			Chat.sendMessage(
-					sender,
 					getMessage( Text.DELETE_SUCCESSFUL, sender ).put( "arena",
 							arena ) );
 		else
-			Chat.sendMessage( sender, getMessage( Text.DELETE_TROUBLE, sender )
+			Chat.sendMessage( getMessage( Text.DELETE_TROUBLE, sender )
 					.put( "file", f ) );
 		return true;
 	}

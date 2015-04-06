@@ -101,9 +101,9 @@ public class Protect extends GameCommand {
 		String returnString = protection == Config.PROTECT ? "" : options.get(protection).getMessage(sender).toString();
 				
 		if (enable)
-			Chat.sendMessage(sender, getMessage(Text.PROTECT_ON, sender).put( "game", game).put( "protection", returnString));
+			Chat.sendMessage(getMessage(Text.PROTECT_ON, sender).put( "game", game).put( "protection", returnString));
 		else
-			Chat.sendMessage(sender, getMessage(Text.PROTECT_OFF, sender).put( "game", game).put( "protection", returnString));
+			Chat.sendMessage(getMessage(Text.PROTECT_OFF, sender).put( "game", game).put( "protection", returnString));
 		return true;
 	}
 	

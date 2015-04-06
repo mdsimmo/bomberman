@@ -34,10 +34,10 @@ public class Reset extends GameCommand {
 			return false;
 		
 		for (PlayerRep rep : game.players)
-			Chat.sendMessage(rep.getPlayer(), getMessage(Text.RESET_SUCCESS_P, rep.getPlayer()).put( "game", game));
+			Chat.sendMessage(getMessage(Text.RESET_SUCCESS_P, rep.getPlayer()).put( "game", game));
 		game.stop();
 		BoardGenerator.switchBoard(game.board, game.board, game.box);
-		Chat.sendMessage(sender, getMessage(Text.RESET_SUCCESS, sender).put( "game", game));
+		Chat.sendMessage(getMessage(Text.RESET_SUCCESS, sender).put( "game", game));
 		return true;
 	}
 

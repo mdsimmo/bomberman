@@ -29,14 +29,14 @@ public class Ignore extends GameCommand {
 			return false;
 		
 		if (sender instanceof Player == false) {
-			Chat.sendMessage(sender, getMessage(Text.MUST_BE_PLAYER, sender));
+			Chat.sendMessage(getMessage(Text.MUST_BE_PLAYER, sender));
 			return true;
 		}
 		
 		if (game.observers.remove(PlayerRep.getPlayerRep((Player)sender))) {
-			Chat.sendMessage(sender, getMessage(Text.IGNORE_SUCCESS, sender).put( "game", game));
+			Chat.sendMessage(getMessage(Text.IGNORE_SUCCESS, sender).put( "game", game));
 		} else {
-			Chat.sendMessage(sender, getMessage(Text.IGNORE_NOT_WATCHED, sender).put( "game", game));
+			Chat.sendMessage(getMessage(Text.IGNORE_NOT_WATCHED, sender).put( "game", game));
 		}
 		
 		return true;

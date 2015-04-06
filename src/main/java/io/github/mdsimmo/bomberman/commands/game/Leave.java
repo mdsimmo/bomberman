@@ -38,11 +38,11 @@ public class Leave extends Cmd {
 				GamePlayingState state = (GamePlayingState)rep.getState();
 				state.kill();
 			} else {
-				Chat.sendMessage(sender, getMessage(Text.LEAVE_NOT_JOINED, sender));
+				Chat.sendMessage(getMessage(Text.LEAVE_NOT_JOINED, sender));
 			}
 			
 		} else {
-			Chat.sendMessage(sender, getMessage(Text.MUST_BE_PLAYER, sender));
+			Chat.sendMessage(getMessage(Text.MUST_BE_PLAYER, sender));
 		}
 		return true;
 	}

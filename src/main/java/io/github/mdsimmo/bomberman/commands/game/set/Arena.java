@@ -39,20 +39,20 @@ public class Arena extends GameCommand {
 			return false;
 		
 		if (game.isPlaying) {
-			Chat.sendMessage(sender, getMessage(Text.SETARENA_GIP, sender).put( "game", game));
+			Chat.sendMessage(getMessage(Text.SETARENA_GIP, sender).put( "game", game));
 			return true;
 		}
 
 		Board board = BoardGenerator.loadBoard(args.get(0));
 		if (board == null) {
-			Chat.sendMessage(sender, getMessage(Text.INVALID_ARENA, sender).put( "arena", args.get(0)));
+			Chat.sendMessage(getMessage(Text.INVALID_ARENA, sender).put( "arena", args.get(0)));
 			return true;
 		}
 		BoardGenerator.switchBoard(game.board, game.oldBoard, game.box);
 		game.board = board;
 		game.oldBoard = BoardGenerator.createArena(game.name + ".old", game.box);
 		BoardGenerator.switchBoard(game.oldBoard, board, game.box);
-		Chat.sendMessage(sender, getMessage(Text.SETARENA_SUCCESS, sender).put( "game", game).put( "arena", board));
+		Chat.sendMessage(getMessage(Text.SETARENA_SUCCESS, sender).put( "game", game).put( "arena", board));
 		return true;
 	}
 

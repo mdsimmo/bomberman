@@ -39,8 +39,7 @@ public class Info extends GameCommand {
 		if ( args.size() != 0 )
 			return false;
 
-		Chat.sendHeading( sender, Text.INFO.getMessage( sender ),
-				new Message( sender, game.name ) );
+		Chat.sendHeading( Text.INFO.getMessage( sender ), new Message( sender, game.name ) );
 		Map<Message, Message> list = new LinkedHashMap<>();
 		if ( game.isPlaying )
 			list.put( getMessage( Text.INFO_STATUS, sender ),
@@ -87,7 +86,7 @@ public class Info extends GameCommand {
 		list.put( getMessage( Text.INFO_TIMEOUT, sender ), to );
 		list.put( Text.ARENA.getMessage( sender ), new Message( sender,
 				game.board.name ) );
-		Chat.sendMap( sender, list );
+		Chat.sendMap( list );
 		return true;
 	}
 

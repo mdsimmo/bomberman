@@ -32,12 +32,12 @@ public class Start extends GameCommand {
 			return false;
 		
 		if (game.isPlaying)
-			Chat.sendMessage(sender, getMessage(Text.GAME_ALREADY_STARTED, sender).put( "game", game));
+			Chat.sendMessage(getMessage(Text.GAME_ALREADY_STARTED, sender).put( "game", game));
 		else {
 			if (game.startGame())
-				Chat.sendMessage(sender, getMessage(Text.GAME_START_SUCCESS, sender).put( "game", game));
+				Chat.sendMessage(getMessage(Text.GAME_START_SUCCESS, sender).put( "game", game));
 			else
-				Chat.sendMessage(sender, getMessage(Text.GAME_MORE_PLAYERS, sender).put( "game", game));
+				Chat.sendMessage(getMessage(Text.GAME_MORE_PLAYERS, sender).put( "game", game));
 		}
 		return true;
 	}

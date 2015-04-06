@@ -34,11 +34,9 @@ public class GameList extends Cmd {
 			return false;
 		List<String> games = Game.allGames();
 		if ( games.size() == 0 ) {
-			Chat.sendMessage( sender,
-					getMessage( Text.GAMELIST_NO_GAMES, sender ) );
+			Chat.sendMessage( getMessage( Text.GAMELIST_NO_GAMES, sender ) );
 		} else {
-			Chat.sendHeading( sender, Text.LIST.getMessage( sender ),
-					Text.GAME.getMessage( sender ) );
+			Chat.sendHeading( Text.LIST.getMessage( sender ), Text.GAME.getMessage( sender ) );
 			Map<Message, Message> list = new LinkedHashMap<>();
 			for ( String name : games ) {
 				Game game = Game.findGame( name );
@@ -53,7 +51,7 @@ public class GameList extends Cmd {
 				Message value = new Message( sender, status.toString() );
 				list.put( key, value );
 			}
-			Chat.sendMap( sender, list );
+			Chat.sendMap( list );
 		}
 		return true;
 	}

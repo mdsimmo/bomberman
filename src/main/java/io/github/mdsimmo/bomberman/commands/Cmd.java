@@ -99,7 +99,7 @@ public abstract class Cmd implements Formattable {
 	}
 
 	public void denyPermission( CommandSender sender ) {
-		Chat.sendMessage( sender, getMessage( Text.DENY_PERMISSION, sender ) );
+		Chat.sendMessage( getMessage( Text.DENY_PERMISSION, sender ) );
 	}
 
 	/**
@@ -109,7 +109,7 @@ public abstract class Cmd implements Formattable {
 	 *            the player to help
 	 */
 	public void help( CommandSender sender ) {
-		Chat.sendHeading( sender, Text.HELP.getMessage( sender ), name( sender ) );
+		Chat.sendHeading( Text.HELP.getMessage( sender ), name( sender ) );
 		Map<Message, Message> help = info( sender );
 		Message temp = extra( sender );
 		if ( temp != null ) {
@@ -118,7 +118,7 @@ public abstract class Cmd implements Formattable {
 		temp = example( sender );
 		if ( temp != null )
 			help.put( getMessage( Text.EXAMPLE, sender ), temp );
-		Chat.sendMap( sender, help );
+		Chat.sendMap( help );
 	}
 
 	public abstract Message extra( CommandSender sender);
@@ -205,7 +205,7 @@ public abstract class Cmd implements Formattable {
 		Message message = Text.INCORRECT_USAGE.getMessage( sender );
 		message.put( "command", this );
 		message.put( "attempt", Utils.listToString( args ) );
-		Chat.sendMessage( sender, message );
+		Chat.sendMessage( message );
 	}
 
 	public Message getMessage( Text text, CommandSender sender ) {

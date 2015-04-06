@@ -43,7 +43,6 @@ public class Convert extends Cmd {
 			Game trial = Game.findGame( args.get( 0 ) );
 			if ( trial != null ) {
 				Chat.sendMessage(
-						sender,
 						getMessage( Text.CONVERT_GAME_EXISTS, sender ).put(
 								"game", trial ) );
 			} else {
@@ -58,12 +57,11 @@ public class Convert extends Cmd {
 				Game.register( game );
 				PlayerRep.getPlayerRep( (Player)sender ).setActiveGame( game );
 				Chat.sendMessage(
-						sender,
 						getMessage( Text.CONVERT_SUCCESS, sender ).put( "game",
 								game ) );
 			}
 		} else {
-			Chat.sendMessage( sender, getMessage( Text.MUST_BE_PLAYER, sender ) );
+			Chat.sendMessage( getMessage( Text.MUST_BE_PLAYER, sender ) );
 		}
 		return true;
 	}

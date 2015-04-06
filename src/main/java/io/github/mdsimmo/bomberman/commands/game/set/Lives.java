@@ -36,11 +36,11 @@ public class Lives extends GameCommand {
 			if (amount <= 0)
 				throw new Exception();
 		} catch (Exception e) {
-			Chat.sendMessage(sender, getMessage(Text.INVALID_NUMBER, sender).put( "number", args.get(0)));
+			Chat.sendMessage(getMessage(Text.INVALID_NUMBER, sender).put( "number", args.get(0)));
 			return true;
 		}
 		game.setLives(amount);
-		Chat.sendMessage(sender, getMessage(Text.LIVES_SET, sender).put( "game", game) );
+		Chat.sendMessage(getMessage(Text.LIVES_SET, sender).put( "game", game) );
 		return true;
 	}
 

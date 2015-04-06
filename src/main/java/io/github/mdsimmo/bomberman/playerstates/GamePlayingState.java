@@ -50,7 +50,7 @@ public class GamePlayingState extends PlayerState implements Listener {
 	public boolean onEnable() {
 		if ( game == null ) {
 			Message message = Text.SPECIFY_GAME.getMessage( player );
-			Chat.sendMessage( rep, message );
+			Chat.sendMessage( message );
 			return false;
 		}
 		if ( rep.getState() != null ) {
@@ -63,7 +63,7 @@ public class GamePlayingState extends PlayerState implements Listener {
 		if ( gameSpawn == null ) {
 			Message message = Text.GAME_FULL.getMessage( player ).put( "game", game );
 			message.put( "game", game );
-			Chat.sendMessage( rep, message );
+			Chat.sendMessage( message );
 			return false;
 		}
 		if ( game.getFare() != null ) {
@@ -73,14 +73,14 @@ public class GamePlayingState extends PlayerState implements Listener {
 				player.getInventory().removeItem( game.getFare() );
 			else {
 				Message message = Text.TOO_POOR.getMessage( player ).put( "game", game );
-				Chat.sendMessage( rep, message );
+				Chat.sendMessage( message );
 				return false;
 			}
 		}
 		for ( PlayerRep rep : game.observers ) {
-			Message message = Text.PLAYER_JOINED.getMessage( player );
+			Message message = Text.PLAYER_JOINED.getMessage( rep.getPlayer() );
 			message.put( "game", game ).put( "player", player );
-			Chat.sendMessage( rep, message );
+			Chat.sendMessage( message );
 		}
 		rep.getPlayer().teleport( game.box.corner().add( gameSpawn ) );
 		spawnGameMode = player.getGameMode();
@@ -160,7 +160,7 @@ public class GamePlayingState extends PlayerState implements Listener {
 		if ( !game.box.contains( e.getTo() ) ) {
 			Message message = Text.TELEPORT_DENIED.getMessage( player );
 			message.put( "game", game );
-			Chat.sendMessage( rep, message );
+			Chat.sendMessage( message );
 			e.setCancelled( true );
 		}
 	}
@@ -219,7 +219,7 @@ public class GamePlayingState extends PlayerState implements Listener {
 				if ( game.isSuddenDeath() ) {
 					Message message = Text.NO_REGEN.getMessage( player );
 					message.put( "game", game );
-					Chat.sendMessage( rep, message );
+					Chat.sendMessage( message );
 				} else
 					player.setHealth( Math.min( player.getHealth() + 1,
 							player.getMaxHealth() ) );
@@ -270,15 +270,15 @@ public class GamePlayingState extends PlayerState implements Listener {
 			if ( attacker == rep ) {
 				Message message = Text.HIT_SUICIDE.getMessage( player );
 				message.put( "game", game ).put( "attacker", attacker ).put( "defender", rep );
-				Chat.sendMessage( rep, message );
+				Chat.sendMessage( message );
 			} else {
 				Message message = Text.HIT_BY.getMessage( player );
 				message.put( "game", game ).put( "attacker", attacker );
-				Chat.sendMessage( rep, message );
+				Chat.sendMessage( message );
 				
 				message = Text.HIT_OPPONENT.getMessage( player );
 				message.put( "game", game ).put( "attacker", attacker ).put( "defender", rep );
-				Chat.sendMessage( rep, message );
+				Chat.sendMessage( message );
 			}
 		} else {
 			playerStats.deaths++;
@@ -286,16 +286,16 @@ public class GamePlayingState extends PlayerState implements Listener {
 			if ( attacker == rep ) {
 				Message message = Text.KILL_SUICIDE.getMessage( player );
 				message.put( "game", game ).put( "attacker", attacker ).put( "defender", rep );
-				Chat.sendMessage( rep, message );
+				Chat.sendMessage( message );
 				playerStats.suicides++;
 			} else {
 				Message message = Text.KILLED_BY.getMessage( player );
 				message.put( "game", game ).put( "attacker", attacker ).put( "defender", rep );
-				Chat.sendMessage( rep, message );
+				Chat.sendMessage( message );
 				
 				message = Text.KILL_OPPONENT.getMessage( player );
 				message.put( "game", game ).put( "attacker", attacker ).put( "defender", rep );
-				Chat.sendMessage( attacker, message );
+				Chat.sendMessage( message );
 			}
 		}
 

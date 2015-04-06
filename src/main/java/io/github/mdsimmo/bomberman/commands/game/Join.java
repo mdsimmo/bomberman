@@ -34,11 +34,11 @@ public class Join extends GameCommand {
 		if (args.size() != 0)
 			return false;
 		if (sender instanceof Player == false) {
-			Chat.sendMessage(sender, getMessage(Text.MUST_BE_PLAYER, sender));
+			Chat.sendMessage(getMessage(Text.MUST_BE_PLAYER, sender));
 			return true;
 		}	
 		if (game.isPlaying) {
-			Chat.sendMessage(sender, getMessage(Text.JOIN_GAME_STARTED, sender).put( "game", game));
+			Chat.sendMessage(getMessage(Text.JOIN_GAME_STARTED, sender).put( "game", game));
 			return true;
 		}
 		PlayerRep rep = PlayerRep.getPlayerRep((Player) sender);

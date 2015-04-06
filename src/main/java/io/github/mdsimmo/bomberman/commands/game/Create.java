@@ -47,7 +47,6 @@ public class Create extends Cmd {
 			Game trial = Game.findGame( args.get( 0 ) );
 			if ( trial != null ) {
 				Chat.sendMessage(
-						sender,
 						getMessage( Text.CREATE_GAME_EXISTS, sender ).put(
 								"game", args.get( 0 ) ) );
 			} else {
@@ -61,14 +60,12 @@ public class Create extends Cmd {
 				if ( arena == null ) {
 					if ( args.size() == 1 )
 						Chat.sendMessage(
-								sender,
 								getMessage( Text.CREATE_DEFAULTMISSING, sender )
 										.put( "arena",
 												(String)Config.DEFAULT_ARENA
 														.getValue() ) );
 					else
 						Chat.sendMessage(
-								sender,
 								getMessage( Text.INVALID_ARENA, sender ).put(
 										"arena", args.get( 1 ) ) );
 					return true;
@@ -79,12 +76,11 @@ public class Create extends Cmd {
 				Game game = createGame( args.get( 0 ), l, arena );
 				PlayerRep.getPlayerRep( (Player)sender ).setActiveGame( game );
 				Chat.sendMessage(
-						sender,
 						getMessage( Text.CREATE_SUCCESS, sender ).put( "game",
 								game ) );
 			}
 		} else {
-			Chat.sendMessage( sender, getMessage( Text.MUST_BE_PLAYER, sender ) );
+			Chat.sendMessage( getMessage( Text.MUST_BE_PLAYER, sender ) );
 		}
 		return true;
 	}

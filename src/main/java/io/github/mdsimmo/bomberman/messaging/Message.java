@@ -1,6 +1,7 @@
 package io.github.mdsimmo.bomberman.messaging;
 
 import io.github.mdsimmo.bomberman.Bomberman;
+import io.github.mdsimmo.bomberman.PlayerRep;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -10,6 +11,7 @@ import java.util.Stack;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.command.CommandSender;
+import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
 public class Message implements Formattable {
@@ -24,13 +26,14 @@ public class Message implements Formattable {
 		colors.push( ChatColor.RESET );
 	}
 
-	public Object get( String key ) {
+	private Object get( String key ) {
 		Object val = values.get( key );
 		if ( val == null )
 			try {
 				val = ChatColor.valueOf( key.toUpperCase() );
 			} catch ( IllegalArgumentException e ) {
-				Bomberman.instance.getLogger().info( "Key " + key + " has no associated value" );
+				Bomberman.instance.getLogger().info(
+						"Key " + key + " has no associated value" );
 			}
 		return val;
 	}
@@ -57,7 +60,7 @@ public class Message implements Formattable {
 
 	@Override
 	public String toString() {
-		try { 
+		try {
 			return expand( text );
 		} catch ( Exception e ) {
 			e.printStackTrace();
@@ -121,13 +124,13 @@ public class Message implements Formattable {
 			colors.push( (ChatColor)value );
 
 		if ( c == '}' ) {
-			if ( i == text.length()-1 ) {
+			if ( i == text.length() - 1 ) {
 				buffer.append( format( value, null ) );
 				return buffer.toString();
 			} else
 				throw new RuntimeException( "Expected ending brace" );
 		} else if ( c == '|' ) {
-			String subarg = expand( text.substring( i+1, text.length() - 1 ) );
+			String subarg = expand( text.substring( i + 1, text.length() - 1 ) );
 			buffer.append( format( value, subarg ) );
 			if ( value instanceof ChatColor ) {
 				buffer.append( subarg.trim() );
@@ -145,10 +148,13 @@ public class Message implements Formattable {
 	private String format( Object obj, String value ) {
 		if ( value != null )
 			value = value.trim();
+		if ( obj instanceof CommandSender )
+			if ( obj instanceof Player )
+				obj = PlayerRep.getPlayerRep( (Player)obj );
+			else
+				return ( (CommandSender)obj ).getName();
 		if ( obj instanceof Formattable )
 			return ( (Formattable)obj ).format( this, value );
-		if ( obj instanceof CommandSender )
-			return ( (CommandSender)obj ).getName();
 		if ( obj instanceof ItemStack ) {
 			ItemStack stack = (ItemStack)obj;
 			int amount = stack.getAmount();
@@ -162,7 +168,7 @@ public class Message implements Formattable {
 	public boolean isBlank() {
 		return text.isEmpty();
 	}
-	
+
 	@Override
 	public String format( Message message, String value ) {
 		colors.push( message.colors.peek() );

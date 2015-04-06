@@ -37,9 +37,9 @@ public class Destroy extends Cmd {
 		Game game = Game.findGame(args.get(0));
 		if (game != null) {
 			game.destroy();
-			Chat.sendMessage(sender, getMessage(Text.DESTROY_SUCCESS, sender).put( "game", game));
+			Chat.sendMessage(getMessage(Text.DESTROY_SUCCESS, sender).put( "game", game));
 		} else
-			Chat.sendMessage(sender, getMessage(Text.INVALID_GAME, sender).put( "game", args.get(0)));
+			Chat.sendMessage(getMessage(Text.INVALID_GAME, sender).put( "game", args.get(0)));
 		return true;
 	}
 

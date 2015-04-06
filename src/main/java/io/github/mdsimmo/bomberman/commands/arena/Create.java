@@ -43,20 +43,17 @@ public class Create extends Cmd {
 					(Player)sender, 100 ) );
 			if ( box == null ) {
 				Chat.sendMessage(
-						sender,
 						getMessage( Text.ARENA_CREATE_TOO_BIG, sender ).put(
 								"maxstructuresize",
 								Config.MAX_STRUCTURE.getValue() ) );
 				return true;
 			}
 			if ( box.xSize < 2 && box.ySize < 2 && box.zSize < 2 ) {
-				Chat.sendMessage( sender,
-						getMessage( Text.ARENA_CREATE_TOO_SMALL, sender ) );
+				Chat.sendMessage( getMessage( Text.ARENA_CREATE_TOO_SMALL, sender ) );
 			}
 			Board board = BoardGenerator.createArena( args.get( 0 ), box );
 			BoardGenerator.saveBoard( board );
-			Chat.sendMessage( sender,
-					getMessage( Text.ARENA_CREATED, sender) .put( "arena", board ) );
+			Chat.sendMessage( getMessage( Text.ARENA_CREATED, sender) .put( "arena", board ) );
 		}
 		return true;
 	}

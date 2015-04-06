@@ -34,7 +34,7 @@ public class LanguageCmd extends Cmd {
 			return false;
 
 		if ( sender instanceof Player == false ) {
-			Chat.sendMessage( sender, getMessage( Text.MUST_BE_PLAYER, sender ) );
+			Chat.sendMessage( getMessage( Text.MUST_BE_PLAYER, sender ) );
 			return true;
 		}
 
@@ -43,17 +43,14 @@ public class LanguageCmd extends Cmd {
 			if ( args.get( 0 ).equalsIgnoreCase( "english" ) ) {
 				PlayerRep.getPlayerRep( (Player)sender ).setLanguage( null );
 				Chat.sendMessage(
-						sender,
 						getMessage( Text.LANGUAGE_SUCCESS, sender ).put(
 								"lang", args.get( 0 ) ) );
 			} else
 				Chat.sendMessage(
-						sender,
 						getMessage( Text.LANGUAGE_UNKNOWN, sender ).put( "lang" , args.get( 0 ) ) );
 		} else {
 			PlayerRep.getPlayerRep( (Player)sender ).setLanguage( lang );
-			Chat.sendMessage( sender,
-					getMessage( Text.LANGUAGE_SUCCESS, sender ).put( "lang", lang ) );
+			Chat.sendMessage( getMessage( Text.LANGUAGE_SUCCESS, sender ).put( "lang", lang ) );
 		}
 		return true;
 	}

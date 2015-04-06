@@ -13,7 +13,6 @@ import java.io.File;
 import java.io.FilenameFilter;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -61,7 +60,8 @@ public class Game implements Formattable {
 				Map<String, Object> values = new HashMap<>();
 				values.put( "time", count );
 				sendMessages( Text.GAME_STARTING_PLAYERS,
-						Text.GAME_STARTING_OBSERVERS, Text.GAME_STARTING_ALL, values );
+						Text.GAME_STARTING_OBSERVERS, Text.GAME_STARTING_ALL,
+						values );
 			}
 
 			if ( count > 0 ) {
@@ -77,11 +77,13 @@ public class Game implements Formattable {
 					Map<String, Object> values = new HashMap<>();
 					values.put( "time", count );
 					sendMessages( Text.GAME_COUNT_PLAYERS,
-							Text.GAME_COUNT_OBSERVERS, Text.GAME_COUNT_ALL, values );
+							Text.GAME_COUNT_OBSERVERS, Text.GAME_COUNT_ALL,
+							values );
 				}
 			} else {
 				sendMessages( Text.GAME_STARTED_PLAYERS,
-						Text.GAME_STARTED_OBSERVERS, Text.GAME_STARTED_ALL, null );
+						Text.GAME_STARTED_OBSERVERS, Text.GAME_STARTED_ALL,
+						null );
 
 				isPlaying = true;
 				deathCounter = new SuddenDeathCounter( Game.this );
@@ -216,10 +218,11 @@ public class Game implements Formattable {
 			addWinner( rep );
 			if ( !checkFinish() )
 				sendMessages( Text.PLAYER_KILLED_PLAYERS,
-						Text.PLAYER_KILLED_OBSERVERS, Text.PLAYER_KILLED_ALL, map );
+						Text.PLAYER_KILLED_OBSERVERS, Text.PLAYER_KILLED_ALL,
+						map );
 		} else {
 			sendMessages( Text.PLAYER_LEFT_PLAYERS, Text.PLAYER_LEFT_OBSERVERS,
-					Text.PLAYER_LEFT_ALL, map);
+					Text.PLAYER_LEFT_ALL, map );
 		}
 		if ( players.size() < minPlayers && getCountdownTimer() != null ) {
 			map.put( "time", getCountdownTimer().count );
@@ -440,39 +443,32 @@ public class Game implements Formattable {
 	// announce scores
 	private void winnersDisplay() {
 		for ( PlayerRep rep : observers ) {
-			Message message = getMessage( Text.SCORE_ANNOUNCE, rep.getPlayer() );
-			Chat.sendMessage( rep, message );
-		}
-		Map<Message, Message> map = new LinkedHashMap<Message, Message>();
-		int i = 0;
-		while ( i < winners.size() && i < 8 ) {
-			PlayerRep rep = winners.get( i );
-			i++;
-			String place;
-			switch ( i ) {
-			case 1:
-				place = "1st";
-				break;
-			case 2:
-				place = "2nd";
-				break;
-			case 3:
-				place = "3rd";
-				break;
-			default:
-				place = i + "th";
+			Chat.sendMessage( getMessage( Text.SCORE_ANNOUNCE, rep.getPlayer() ) );
+
+			int i = 0;
+			while ( i < winners.size() && i < 8 ) {
+				PlayerRep repWinner = winners.get( i );
+				i++;
+				String place;
+				switch ( i ) {
+				case 1:
+					place = "1st";
+					break;
+				case 2:
+					place = "2nd";
+					break;
+				case 3:
+					place = "3rd";
+					break;
+				default:
+					place = i + "th";
+				}
+				Chat.messageRaw( getMessage( Text.WINNERS_LIST, rep.getPlayer() )
+						.put( "player", repWinner ).put( "place", place ) );
 			}
-			map.put( new Message( null, place ), new Message( rep.getPlayer(),
-					"{0}" ) );
-		}
-		for ( PlayerRep rep : observers ) {
-			Chat.sendMap( rep.getPlayer(), map );
-		}
-		
-		for ( PlayerRep rep : observers ) {
-			Message message = Text.SCORE_SEE_SCORES.getMessage( rep.getPlayer() );
-			message.put( "game", this );
-			Chat.sendMessage( rep, message );
+
+			Chat.sendMessage( getMessage( Text.SCORE_SEE_SCORES,
+					rep.getPlayer() ) );
 		}
 	}
 
@@ -705,22 +701,25 @@ public class Game implements Formattable {
 	public Message getMessage( Text text, CommandSender sender ) {
 		return text.getMessage( sender ).put( "game", this );
 	}
-	
-	public void sendMessages( Text pText, Text oText, Text aText, Map<String, Object> values ) {
+
+	public void sendMessages( Text pText, Text oText, Text aText,
+			Map<String, Object> values ) {
 		if ( values == null )
 			values = new HashMap<String, Object>();
 		values.put( "game", this );
 		for ( Player player : plugin.getServer().getOnlinePlayers() ) {
 			PlayerRep rep = PlayerRep.getPlayerRep( player );
 			if ( !observers.contains( rep ) && !players.contains( rep ) )
-				Chat.sendMessage( rep, getMessage( aText, rep.getPlayer()).put( values ) );
+				Chat.sendMessage( getMessage( aText, rep.getPlayer() ).put(
+						values ) );
 		}
 		for ( PlayerRep rep : observers ) {
 			if ( !players.contains( rep ) )
-				Chat.sendMessage( rep, getMessage( oText, rep.getPlayer() ).put( values ) );
+				Chat.sendMessage( getMessage( oText, rep.getPlayer() ).put(
+						values ) );
 		}
 		for ( PlayerRep rep : players )
-			Chat.sendMessage( rep, getMessage( pText, rep.getPlayer()).put( values ) );
+			Chat.sendMessage( getMessage( pText, rep.getPlayer() ).put( values ) );
 	}
 
 	@Override

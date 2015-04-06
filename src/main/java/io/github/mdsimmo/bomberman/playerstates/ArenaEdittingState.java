@@ -62,7 +62,7 @@ public class ArenaEdittingState extends PlayerState implements Listener {
 			Message message = Text.EDIT_BUILD_DENIED.getMessage( rep.getPlayer() );
 			message.put( "game", game );
 			message.put( "block", b );
-			Chat.sendMessage( rep, message );
+			Chat.sendMessage( message );
 		}
 	}
 
@@ -78,7 +78,7 @@ public class ArenaEdittingState extends PlayerState implements Listener {
 			Message message = Text.EDIT_DESTROY_DENIED.getMessage( player );
 			message.put( "game", game );
 			message.put( "block", b );
-			Chat.sendMessage( rep, message );
+			Chat.sendMessage( message );
 		}
 	}
 

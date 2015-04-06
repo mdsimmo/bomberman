@@ -53,7 +53,7 @@ public class EditArena extends Cmd {
 			return false;
 
 		if ( sender instanceof Player == false ) {
-			Chat.sendMessage( sender, getMessage( Text.MUST_BE_PLAYER, sender ) );
+			Chat.sendMessage( getMessage( Text.MUST_BE_PLAYER, sender ) );
 			return true;
 		}
 		Player player = (Player)sender;
@@ -71,17 +71,14 @@ public class EditArena extends Cmd {
 		if ( args.size() == 0 ) {
 			if ( state instanceof ArenaEdittingState )
 				Chat.sendMessage(
-						sender,
 						getMessage( Text.EDIT_ALREADY_STARTED, sender ).put(
 								"game", game ).put( "arena", board ) );
 			else if ( rep.getState() != null )
 				Chat.sendMessage(
-						sender,
 						getMessage( Text.EDIT_CANT_START, sender ).put( "game",
 								game ).put( "arena", board ) );
 			if ( game != null ) {
 				Chat.sendMessage(
-						sender,
 						getMessage( Text.EDIT_STARTED, sender ).put( "game",
 								game ).put( "arena", board ) );
 			} else {
@@ -98,27 +95,23 @@ public class EditArena extends Cmd {
 				editState = (ArenaEdittingState)state;
 			else
 				Chat.sendMessage(
-						sender,
 						getMessage( Text.EDIT_PROMPT_START, sender ).put(
 								"game", game ).put( "arena", board ) );
 
 			if ( save.equalsIgnoreCase( arg ) ) {
 				editState.saveChanges();
 				Chat.sendMessage(
-						sender,
 						getMessage( Text.EDIT_CHANGES_SAVED, sender ).put(
 								"game", game ).put( "arena", board ) );
 			} else if ( discard.equalsIgnoreCase( arg ) ) {
 				editState.discardChanges( true );
 				Chat.sendMessage(
-						sender,
 						getMessage( Text.EDIT_CANGES_REMOVED, sender ).put(
 								"game", game ).put( "arena", board ) );
 			} else if ( ignore.equalsIgnoreCase( arg ) ) {
 				editState.discardChanges( false );
-				Chat.sendMessage( sender,
-						getMessage( Text.EDIT_MODE_QUIT, sender ).put(
-								"game", game ).put( "arena", board ) );
+				Chat.sendMessage( getMessage( Text.EDIT_MODE_QUIT, sender ).put(
+						"game", game ).put( "arena", board ) );
 			} else {
 				Game game2 = Game.findGame( args.get( 0 ) );
 				if ( game2 == null )
