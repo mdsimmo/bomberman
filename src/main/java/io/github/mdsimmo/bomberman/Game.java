@@ -87,7 +87,7 @@ public class Game implements Formattable {
 
 				isPlaying = true;
 				for ( PlayerRep rep : players )
-					((GamePlayingState)rep.getState()).gameStarted();
+					( (GamePlayingState)rep.getState() ).gameStarted();
 				deathCounter = new SuddenDeathCounter( Game.this );
 				deathCounter.start();
 				// Cleanup and destroy the countdown timer
@@ -474,10 +474,11 @@ public class Game implements Formattable {
 		}
 	}
 
-	public List<Message> scoreDisplay() {
+	public List<Message> scoreDisplay( CommandSender sender ) {
 		List<Message> list = new ArrayList<Message>( players.size() );
 		for ( PlayerRep rep : players )
-			list.add( getMessage( Text.SCORE_DISPLAY, rep.getPlayer() ) );
+			list.add( getMessage( Text.SCORE_DISPLAY, sender ).put( "player",
+					rep ).put( "stats", getStats( rep ) ) );
 		return list;
 	}
 
@@ -660,7 +661,7 @@ public class Game implements Formattable {
 			return stat;
 	}
 
-	public class Stats {
+	public class Stats implements Formattable {
 
 		public final PlayerRep rep;
 		public int deaths = 0;
@@ -677,6 +678,27 @@ public class Game implements Formattable {
 
 		public void reset() {
 			deaths = kills = hitsGiven = hitsTaken = suicides = 0;
+		}
+
+		@Override
+		public Object format( Message message, String value ) {
+			switch ( value ) {
+			case "player":
+				return rep;
+			case "kills":
+				return kills;
+			case "deaths":
+				return deaths;
+			case "hitsgiven":
+				return hitsGiven;
+			case "hitstaken":
+				return hitsTaken;
+			case "suicides":
+				return suicides;
+			case "handicap":
+				return hadicapLevel;
+			}
+			return "INVALID REFERENCE";
 		}
 	}
 

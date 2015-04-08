@@ -1,17 +1,16 @@
 package io.github.mdsimmo.bomberman.messaging;
 
 import io.github.mdsimmo.bomberman.Bomberman;
-import io.github.mdsimmo.bomberman.PlayerRep;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Stack;
 
 import org.bukkit.ChatColor;
-import org.bukkit.Material;
 import org.bukkit.command.CommandSender;
-import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
 public class Message implements Formattable {
@@ -74,19 +73,9 @@ public class Message implements Formattable {
 		for ( int i = 0; i < text.length(); i++ ) {
 			char c = text.charAt( i );
 			if ( c == '{' ) {
-				StringBuffer subText = new StringBuffer();
-				int openBracesFound = 0;
-				while ( c != '}' || openBracesFound != 0 ) {
-					if ( c == '}' )
-						openBracesFound--;
-					subText.append( c );
-					i++;
-					c = text.charAt( i );
-					if ( c == '{' )
-						openBracesFound++;
-				}
-				subText.append( c );
-				expanded.append( expandBrace( subText.toString() ) );
+				String subtext = toNext( text, '}', i );
+				expanded.append( expandBrace( subtext ) );
+				i += subtext.length()-1; // -1 because starting brace was already counted
 			} else {
 				expanded.append( c );
 			}
@@ -123,45 +112,60 @@ public class Message implements Formattable {
 		if ( value instanceof ChatColor )
 			colors.push( (ChatColor)value );
 
-		if ( c == '}' ) {
-			if ( i == text.length() - 1 ) {
-				buffer.append( format( value, null ) );
-				return buffer.toString();
-			} else
-				throw new RuntimeException( "Expected ending brace" );
-		} else if ( c == '|' ) {
-			String subarg = expand( text.substring( i + 1, text.length() - 1 ) );
-			buffer.append( format( value, subarg ) );
-			if ( value instanceof ChatColor ) {
-				buffer.append( subarg.trim() );
-				colors.pop();
-				buffer.append( colors.peek().toString() );
+		List<String> args = new ArrayList<String>();
+		if ( text.charAt( i ) != '}' ) {
+			try {
+				while( true ) {
+					String subArg = toNext( text, '|', i );
+					args.add( expand( subArg.substring( 1, subArg.length() - 1 ) ) );
+					i += subArg.length()-1; // -1 because first '|' would get counted twice
+				}
+			} catch ( Exception e ) { // happens when cannot find any more '|'
+				String subArg = toNext( text, '}', i );
+				args.add( expand( subArg.substring( 1, subArg.length() - 1 ) ) );
+				i += subArg.length();
 			}
-		} else {
-			throw new RuntimeException( "Expected '|' or '}' " );
 		}
+
+		buffer.append( format( value, args ) );
 
 		return buffer.toString();
 
 	}
 
-	private String format( Object obj, String value ) {
-		if ( value != null )
-			value = value.trim();
-		if ( obj instanceof CommandSender )
-			if ( obj instanceof Player )
-				obj = PlayerRep.getPlayerRep( (Player)obj );
-			else
-				return ( (CommandSender)obj ).getName();
-		if ( obj instanceof Formattable )
-			return format( ( (Formattable)obj ).format( this, value ), null );
-		if ( obj instanceof ItemStack ) {
-			ItemStack stack = (ItemStack)obj;
-			int amount = stack.getAmount();
-			Material type = stack.getType();
-			return amount + " "
-					+ type.toString().replace( '_', ' ' ).toLowerCase();
+	/**
+	 * Gets the substring of sequence from index to the next endingChar but
+	 * takes into account brace skipping. The returned string will include both
+	 * the start and end characters.
+	 */
+	private String toNext( String sequence, char endingChar, int index ) {
+		int size = sequence.length();
+		int openBracesfound = 0;
+		for ( int i = index + 1; i < size; i++ ) {
+			char c = sequence.charAt( i );
+			if ( c == endingChar && openBracesfound == 0 )
+				return sequence.substring( index, i + 1 );
+			if ( c == '{' )
+				openBracesfound++;
+			if ( c == '}' )
+				openBracesfound--;
 		}
+		throw new RuntimeException( "Couldn't find any '" + endingChar
+				+ "' after index " + index + " in string " + sequence );
+	}
+
+	private String format( Object obj, List<String> values ) {
+		String value = values.size() > 0 ? values.remove( 0 ).trim() : null;
+		if ( obj instanceof ChatColor ) {
+			colors.pop();
+			return obj.toString() + value + colors.peek();
+		}
+		if ( obj instanceof CommandSender )
+			return format( new SenderWrapper( (CommandSender)obj ), values );
+		if ( obj instanceof Formattable )
+			return format( ( (Formattable)obj ).format( this, value ), values );
+		if ( obj instanceof ItemStack )
+			return format( new ItemWrapper( (ItemStack)obj ), values );
 		return String.valueOf( obj );
 	}
 

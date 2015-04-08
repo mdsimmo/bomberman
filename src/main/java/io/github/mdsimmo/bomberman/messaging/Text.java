@@ -208,7 +208,7 @@ public enum Text {
 
 	SCORE_DISPLAY(
 			"score.display",
-			" {player}: {player|lives} lives, {player|kills} kills and {player|deaths} deaths" ),
+			" {player}: {stats|kills} kills, {stats|deaths} deaths" ),
 	SCORE_ANNOUNCE(
 			"score.anounce",
 			"The winners are:" ),
