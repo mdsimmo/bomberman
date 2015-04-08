@@ -36,7 +36,7 @@ public class BaseCommand extends CommandGroup implements TabCompleter,
 
 	@Override
 	public Message name( CommandSender sender ) {
-		return getMessage( Text.BOMBERMAN_NAME, sender );
+		return new Message(sender, "bomberman");
 	}
 
 	@Override
@@ -55,7 +55,7 @@ public class BaseCommand extends CommandGroup implements TabCompleter,
 		List<String> arguments = new ArrayList<String>( Arrays.asList( args ) );
 		Cmd c = getCommand( sender, arguments );
 		if ( arguments.size() > 0
-				&& arguments.get( arguments.size() - 1 ) == "?" ) {
+				&& arguments.get( arguments.size() - 1 ).equals( "?" ) ) {
 			c.help( sender );
 			return true;
 		}

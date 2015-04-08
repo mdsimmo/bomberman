@@ -24,6 +24,7 @@ public class Scores extends GameCommand {
 	@Override
 	public boolean runShort(CommandSender sender, List<String> args, Game game) {
 		Chat.sendList(game.scoreDisplay( sender ));
+		// TODO scores command
 		return true;
 	}
 

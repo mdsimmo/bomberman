@@ -217,7 +217,7 @@ public enum Text {
 			" {gold|{place}:} {player}"),
 	SCORE_SEE_SCORES(
 			"score.see-score",
-			"Type {AQUA|/bm game scores {game}} to see scores" ),
+			"" ),
 
 	DENY_PERMISSION(
 			"command.deny-permission",
@@ -247,9 +247,7 @@ public enum Text {
 			"command.invalid-game",
 			"Game {game} not found" ),
 
-	BOMBERMAN_NAME(
-			"command.bomberman.name",
-			"bomberman" ),
+	// no Bomberman name as it must not be changed
 	BOMBERMAN_DESCRIPTION(
 			"command.bomberman.description",
 			"Main command for Bomberman" ),
