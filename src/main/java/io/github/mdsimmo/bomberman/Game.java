@@ -771,6 +771,8 @@ public class Game implements Formattable {
 			return getTimeout();
 		case "suddendeath":
 			return getSuddenDeath();
+		case "autostart":
+			return getAutostartDelay();
 		default:
 			return null;
 		}
