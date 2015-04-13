@@ -9,6 +9,8 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Stack;
 
+import net.objecthunter.exp4j.ExpressionBuilder;
+
 import org.bukkit.ChatColor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.inventory.ItemStack;
@@ -31,8 +33,7 @@ public class Message implements Formattable {
 			try {
 				val = ChatColor.valueOf( key.toUpperCase() );
 			} catch ( IllegalArgumentException e ) {
-				Bomberman.instance.getLogger().info(
-						"Key " + key + " has no associated value" );
+				Bomberman.instance.getLogger().info( "Key " + key + " has no associated value" );
 			}
 		return val;
 	}
@@ -62,8 +63,8 @@ public class Message implements Formattable {
 		try {
 			return expand( text );
 		} catch ( Exception e ) {
-			e.printStackTrace();
 			Bomberman.instance.getLogger().warning( "Faulty message: " + text );
+			e.printStackTrace();
 			return ChatColor.RED + "Internal format error";
 		}
 	}
@@ -95,6 +96,12 @@ public class Message implements Formattable {
 			i++;
 			c = text.charAt( i );
 		}
+		
+		if ( c == '=' ) {
+			// parse an equation
+			return expandEquation( text );
+		}
+		
 		// get reference
 		while ( Character.isJavaIdentifierPart( c ) ) {
 			buffer.append( c );
@@ -133,6 +140,49 @@ public class Message implements Formattable {
 
 	}
 
+	private String expandEquation( String text ) {
+		if ( text.charAt( 0 ) != '{' || text.charAt( text.length() - 1 ) != '}' )
+			throw new RuntimeException(
+					"expandEquation() must start and end with a brace" );
+		int i = 1;
+		char c = text.charAt( i );
+		// skip whitespace
+		while ( Character.isWhitespace( c ) ) {
+			i++;
+			c = text.charAt( i );
+			System.out.println( c );
+		}
+		
+		if ( c != '=' )
+			throw new RuntimeException( "Expected a starting '=': " + text );
+		i++;
+		c = text.charAt( i );
+		
+		// remove more whitespace
+		while ( Character.isWhitespace( c ) ) {
+			i++;
+			c = text.charAt( i );
+		}
+		
+		if ( c != '|' )
+			throw new RuntimeException( "Expected at least one arguement in equation: " + text );
+		
+		String expression = toNext( text, '}', i );
+		i += expression.length();
+		if ( i != text.length() )
+			throw new RuntimeException("Expected the ending brace at position " + i);
+		
+		expression = expression.substring( 1, expression.length()-1 );
+		expression = expand( expression );
+		try {
+			return Double.toString( new ExpressionBuilder( expression ).build().evaluate() );
+		} catch ( Exception e ) {
+			throw new RuntimeException( "Expression has invalid numerical imputs: " + expression, e );
+		}
+
+	}
+	
+	
 	/**
 	 * Gets the substring of sequence from index to the next endingChar but
 	 * takes into account brace skipping. The returned string will include both

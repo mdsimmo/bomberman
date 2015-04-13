@@ -31,5 +31,10 @@
 			<type>jar</type>
 			<scope>provided</scope>
 		</dependency>
+		<dependency>
+			<groupId>net.objecthunter</groupId>
+			<artifactId>exp4j</artifactId>
+			<version>0.4.4</version>
+		</dependency>
 	</dependencies>
 </project>
