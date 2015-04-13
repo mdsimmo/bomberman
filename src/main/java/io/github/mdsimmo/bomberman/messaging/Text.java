@@ -4,7 +4,8 @@ import io.github.mdsimmo.bomberman.PlayerRep;
 
 import org.bukkit.command.CommandSender;
 
-public enum Text {
+
+public enum Text implements Phrase {
 
 	MESSAGE_FORMAT(
 			"format.message",
@@ -17,7 +18,7 @@ public enum Text {
 			"{gold|{title}:} {value}" ),
 	LIST_FORMAT(
 			"format.list",
-			"* {value}" ),
+			" {gold|*} {value}" ),
 
 	GAME(
 			"word.game",
@@ -1093,26 +1094,26 @@ public enum Text {
 		this.message = message;
 	}
 
+	@Override
 	public String getDefault() {
 		return message;
 	}
 
+	@Override
 	public String getPath() {
 		return path;
 	}
-
+	
 	public Message getMessage( PlayerRep rep ) {
-		return getMessage( rep.getLanguage(), rep.getPlayer() );
+		return Chat.getMessage( this, rep );
 	}
 
 	public Message getMessage( Language lang, CommandSender sender ) {
-		if ( lang == null )
-			return new Message( sender, this.message );
-		else
-			return new Message( sender, lang.translate( this ) );
+		return Chat.getMessage( this, lang, sender );
 	}
 
 	public Message getMessage( CommandSender sender ) {
-		return getMessage( PlayerRep.getLanguage( sender ), sender );
+		return Chat.getMessage( this, sender );
 	}
+	
 }

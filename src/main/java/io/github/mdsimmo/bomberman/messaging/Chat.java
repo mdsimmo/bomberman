@@ -1,5 +1,6 @@
 package io.github.mdsimmo.bomberman.messaging;
 
+import io.github.mdsimmo.bomberman.PlayerRep;
 import io.github.mdsimmo.bomberman.commands.Cmd.Permission;
 
 import java.util.List;
@@ -12,7 +13,7 @@ public abstract class Chat {
 	public static void sendMessage( Message message  ) {
 		if ( message.isBlank() )
 			return;
-		messageRaw( Text.MESSAGE_FORMAT.getMessage( message.getSender() ).put( "message",
+		messageRaw( getMessage( Text.MESSAGE_FORMAT, message.getSender() ).put( "message",
 				message ) );
 	}
 
@@ -20,7 +21,7 @@ public abstract class Chat {
 		for ( Map.Entry<Message, Message> point : points.entrySet() ) {
 			if ( point.getValue().isBlank() || point.getKey().isBlank() )
 				continue;
-			messageRaw( Text.MAP_FORMAT.getMessage( point.getKey().getSender() )
+			messageRaw( getMessage( Text.MAP_FORMAT, point.getKey().getSender() )
 					.put( "title", point.getKey() )
 					.put( "value", point.getValue() ) );
 		}
@@ -30,7 +31,7 @@ public abstract class Chat {
 		for ( Message line : list ) {
 			if ( line.isBlank() )
 				continue;
-			messageRaw( Text.LIST_FORMAT.getMessage( line.getSender() ).put( "value",
+			messageRaw( getMessage(  Text.LIST_FORMAT, line.getSender() ).put( "value",
 					line ) );
 		}
 	}
@@ -42,7 +43,22 @@ public abstract class Chat {
 	}
 
 	public static void sendHeading( Message type , Message title  ) {
-		messageRaw( Text.HEADING_FORMAT.getMessage( title.getSender() ).put( "type", type )
+		messageRaw( getMessage( Text.HEADING_FORMAT, title.getSender() ).put( "type", type )
 				.put( "title", title ) );
+	}
+	
+	public static Message getMessage( Phrase phrase, PlayerRep rep ) {
+		return getMessage( phrase, rep.getLanguage(), rep.getPlayer() );
+	}
+
+	public static Message getMessage( Phrase phrase, Language lang, CommandSender sender ) {
+		if ( lang == null )
+			return new Message( sender, phrase.getDefault() );
+		else
+			return new Message( sender, lang.translate( phrase ) );
+	}
+
+	public static Message getMessage( Phrase phrase, CommandSender sender ) {
+		return getMessage( phrase, PlayerRep.getLanguage( sender ), sender );
 	}
 }

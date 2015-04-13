@@ -3,6 +3,7 @@ package io.github.mdsimmo.bomberman.commands;
 import io.github.mdsimmo.bomberman.messaging.Chat;
 import io.github.mdsimmo.bomberman.messaging.Formattable;
 import io.github.mdsimmo.bomberman.messaging.Message;
+import io.github.mdsimmo.bomberman.messaging.Phrase;
 import io.github.mdsimmo.bomberman.messaging.Text;
 import io.github.mdsimmo.bomberman.utils.Utils;
 
@@ -109,7 +110,7 @@ public abstract class Cmd implements Formattable {
 	 *            the player to help
 	 */
 	public void help( CommandSender sender ) {
-		Chat.sendHeading( Text.HELP.getMessage( sender ), name( sender ) );
+		Chat.sendHeading( getMessage( Text.HELP, sender ), name( sender ) );
 		Map<Message, Message> help = info( sender );
 		Message temp = extra( sender );
 		if ( temp != null ) {
@@ -202,14 +203,14 @@ public abstract class Cmd implements Formattable {
 	}
 
 	public void incorrectUsage( CommandSender sender, List<String> args ) {
-		Message message = Text.INCORRECT_USAGE.getMessage( sender );
+		Message message = getMessage( Text.INCORRECT_USAGE, sender );
 		message.put( "command", this );
 		message.put( "attempt", Utils.listToString( args ) );
 		Chat.sendMessage( message );
 	}
 
-	public Message getMessage( Text text, CommandSender sender ) {
-		return text.getMessage( sender ).put( "command", this );
+	public Message getMessage( Phrase phrase, CommandSender sender ) {
+		return Chat.getMessage( phrase, sender ).put( "command", this );
 	}
 	
 	@Override

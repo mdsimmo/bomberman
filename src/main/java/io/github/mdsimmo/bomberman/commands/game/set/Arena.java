@@ -7,6 +7,7 @@ import io.github.mdsimmo.bomberman.commands.Cmd;
 import io.github.mdsimmo.bomberman.commands.GameCommand;
 import io.github.mdsimmo.bomberman.messaging.Chat;
 import io.github.mdsimmo.bomberman.messaging.Message;
+import io.github.mdsimmo.bomberman.messaging.Phrase;
 import io.github.mdsimmo.bomberman.messaging.Text;
 import io.github.mdsimmo.bomberman.utils.Utils;
 
@@ -21,7 +22,7 @@ public class Arena extends GameCommand {
 	}
 
 	@Override
-	public Text nameShort() {
+	public Phrase nameShort() {
 		return Text.SETARENA_NAME;
 	}
 
@@ -62,12 +63,12 @@ public class Arena extends GameCommand {
 	}
 
 	@Override
-	public Text extraShort() {
+	public Phrase extraShort() {
 		return Text.SETARENA_EXTRA;
 	}
 
 	@Override
-	public Text exampleShort() {
+	public Phrase exampleShort() {
 		throw new RuntimeException("This method is invalid");
 	}
 	
@@ -81,12 +82,12 @@ public class Arena extends GameCommand {
 	}
 
 	@Override
-	public Text descriptionShort() {
+	public Phrase descriptionShort() {
 		return Text.SETARENA_DESCRIPTION;
 	}
 
 	@Override
-	public Text usageShort() {
+	public Phrase usageShort() {
 		return Text.SETARENA_USAGE;
 	}
 

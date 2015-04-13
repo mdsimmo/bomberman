@@ -4,6 +4,7 @@ import io.github.mdsimmo.bomberman.Game;
 import io.github.mdsimmo.bomberman.commands.Cmd;
 import io.github.mdsimmo.bomberman.commands.GameCommand;
 import io.github.mdsimmo.bomberman.messaging.Chat;
+import io.github.mdsimmo.bomberman.messaging.Phrase;
 import io.github.mdsimmo.bomberman.messaging.Text;
 
 import java.util.ArrayList;
@@ -20,7 +21,7 @@ public class Prize extends GameCommand {
 	}
 
 	@Override
-	public Text nameShort() {
+	public Phrase nameShort() {
 		return Text.PRIZE_NAME;
 	}
 
@@ -76,22 +77,22 @@ public class Prize extends GameCommand {
 	}
 
 	@Override
-	public Text extraShort() {		
+	public Phrase extraShort() {		
 		return Text.PRIZE_EXTRA;
 	}
 
 	@Override
-	public Text exampleShort() {
+	public Phrase exampleShort() {
 		return Text.PRIZE_EXAMPLE;
 	}
 
 	@Override
-	public Text descriptionShort() {
+	public Phrase descriptionShort() {
 		return Text.PRIZE_DESCRIPTION;
 	}
 
 	@Override
-	public Text usageShort() {
+	public Phrase usageShort() {
 		return Text.PRIZE_USAGE;
 	}
 }

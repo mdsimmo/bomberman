@@ -5,6 +5,7 @@ import io.github.mdsimmo.bomberman.commands.Cmd;
 import io.github.mdsimmo.bomberman.commands.GameCommand;
 import io.github.mdsimmo.bomberman.messaging.Chat;
 import io.github.mdsimmo.bomberman.messaging.Message;
+import io.github.mdsimmo.bomberman.messaging.Phrase;
 import io.github.mdsimmo.bomberman.messaging.Text;
 
 import java.util.LinkedHashMap;
@@ -20,7 +21,7 @@ public class Info extends GameCommand {
 	}
 
 	@Override
-	public Text nameShort() {
+	public Phrase nameShort() {
 		return Text.INFO_NAME;
 	}
 
@@ -91,22 +92,22 @@ public class Info extends GameCommand {
 	}
 
 	@Override
-	public Text extraShort() {
+	public Phrase extraShort() {
 		return Text.INFO_EXTRA;
 	}
 
 	@Override
-	public Text exampleShort() {
+	public Phrase exampleShort() {
 		return Text.INFO_EXAMPLE;
 	}
 
 	@Override
-	public Text descriptionShort() {
+	public Phrase descriptionShort() {
 		return Text.INFO_DESCRIPTION;
 	}
 
 	@Override
-	public Text usageShort() {
+	public Phrase usageShort() {
 		return Text.INFO_USAGE;
 	}
 

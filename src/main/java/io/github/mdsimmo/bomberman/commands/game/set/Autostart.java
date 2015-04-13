@@ -4,6 +4,7 @@ import io.github.mdsimmo.bomberman.Game;
 import io.github.mdsimmo.bomberman.commands.Cmd;
 import io.github.mdsimmo.bomberman.commands.GameCommand;
 import io.github.mdsimmo.bomberman.messaging.Chat;
+import io.github.mdsimmo.bomberman.messaging.Phrase;
 import io.github.mdsimmo.bomberman.messaging.Text;
 
 import java.util.ArrayList;
@@ -18,7 +19,7 @@ public class Autostart extends GameCommand {
 	}
 
 	@Override
-	public Text nameShort() {
+	public Phrase nameShort() {
 		return Text.AUTOSTART_NAME;
 	}
 
@@ -57,22 +58,22 @@ public class Autostart extends GameCommand {
 	}
 
 	@Override
-	public Text extraShort() {
+	public Phrase extraShort() {
 		return Text.AUTOSTART_EXTRA;
 	}
 
 	@Override
-	public Text exampleShort() {
+	public Phrase exampleShort() {
 		return Text.AUTOSTART_EXAMPLE;
 	}
 
 	@Override
-	public Text descriptionShort() {
+	public Phrase descriptionShort() {
 		return Text.AUTOSTART_DESCRIPTION;
 	}
 
 	@Override
-	public Text usageShort() {
+	public Phrase usageShort() {
 		return Text.AUTOSTART_USAGE;
 	}
 

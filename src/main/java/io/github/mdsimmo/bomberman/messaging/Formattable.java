@@ -9,7 +9,9 @@ import org.bukkit.inventory.ItemStack;
 
 public interface Formattable {
 	
-	class ItemWrapper implements Formattable { 
+	public Object format( Message message, String value );
+	
+	static class ItemWrapper implements Formattable { 
 		
 		private ItemStack item;
 		
@@ -27,11 +29,11 @@ public interface Formattable {
 			case "type":
 				return item.getType().toString().replace( '_', ' ' ).toLowerCase();
 			}
-			return "INVALID SPECIFICATION";
+			return null;
 		}
 	}
 	
-	class SenderWrapper implements Formattable {
+	static class SenderWrapper implements Formattable {
 
 		private final CommandSender sender;
 		private final PlayerRep rep;
@@ -53,5 +55,4 @@ public interface Formattable {
 		
 	}
 	
-	public Object format( Message message, String value );
 }

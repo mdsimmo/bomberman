@@ -4,6 +4,7 @@ import io.github.mdsimmo.bomberman.Game;
 import io.github.mdsimmo.bomberman.commands.Cmd;
 import io.github.mdsimmo.bomberman.commands.GameCommand;
 import io.github.mdsimmo.bomberman.messaging.Chat;
+import io.github.mdsimmo.bomberman.messaging.Phrase;
 import io.github.mdsimmo.bomberman.messaging.Text;
 
 import java.util.List;
@@ -29,7 +30,7 @@ public class Scores extends GameCommand {
 	}
 
 	@Override
-	public Text nameShort() {
+	public Phrase nameShort() {
 		return Text.SCORES_NAME;
 	}
 
@@ -39,22 +40,22 @@ public class Scores extends GameCommand {
 	}
 	
 	@Override
-	public Text extraShort() {
+	public Phrase extraShort() {
 		return Text.SCORES_EXTRA;
 	}
 
 	@Override
-	public Text exampleShort() {
+	public Phrase exampleShort() {
 		return Text.SCORES_EXAMPLE;
 	}
 
 	@Override
-	public Text descriptionShort() {
+	public Phrase descriptionShort() {
 		return Text.SCORES_DESCRIPTION;
 	}
 
 	@Override
-	public Text usageShort() {
+	public Phrase usageShort() {
 		return Text.SCORES_USAGE;
 	}
 }

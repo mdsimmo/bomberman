@@ -4,6 +4,7 @@ import io.github.mdsimmo.bomberman.Game;
 import io.github.mdsimmo.bomberman.commands.Cmd;
 import io.github.mdsimmo.bomberman.commands.GameCommand;
 import io.github.mdsimmo.bomberman.messaging.Chat;
+import io.github.mdsimmo.bomberman.messaging.Phrase;
 import io.github.mdsimmo.bomberman.messaging.Text;
 
 import java.util.List;
@@ -17,7 +18,7 @@ public class MinPlayers extends GameCommand {
 	}
 
 	@Override
-	public Text nameShort() {
+	public Phrase nameShort() {
 		return Text.MINPLAYERS_NAME;
 	}
 
@@ -48,22 +49,22 @@ public class MinPlayers extends GameCommand {
 	}
 
 	@Override
-	public Text extraShort() {
+	public Phrase extraShort() {
 		return Text.MINPLAYERS_EXTRA;
 	}
 
 	@Override
-	public Text exampleShort() {
+	public Phrase exampleShort() {
 		return Text.MINPLAYERS_EXAMPLE;
 	}
 
 	@Override
-	public Text descriptionShort() {
+	public Phrase descriptionShort() {
 		return Text.MINPLAYERS_DESCRIPTION;
 	}
 
 	@Override
-	public Text usageShort() {
+	public Phrase usageShort() {
 		return Text.MINPLAYERS_USAGE;
 	}
 }

@@ -5,6 +5,7 @@ import io.github.mdsimmo.bomberman.PlayerRep;
 import io.github.mdsimmo.bomberman.commands.Cmd;
 import io.github.mdsimmo.bomberman.commands.GameCommand;
 import io.github.mdsimmo.bomberman.messaging.Chat;
+import io.github.mdsimmo.bomberman.messaging.Phrase;
 import io.github.mdsimmo.bomberman.messaging.Text;
 
 import java.util.List;
@@ -43,7 +44,7 @@ public class Ignore extends GameCommand {
 	}
 
 	@Override
-	public Text nameShort() {
+	public Phrase nameShort() {
 		return Text.IGNORE_NAME;
 	}
 
@@ -53,22 +54,22 @@ public class Ignore extends GameCommand {
 	}
 
 	@Override
-	public Text extraShort() {
+	public Phrase extraShort() {
 		return Text.IGNORE_EXTRA;
 	}
 
 	@Override
-	public Text exampleShort() {
+	public Phrase exampleShort() {
 		return Text.IGNORE_EXAMPLE;
 	}
 
 	@Override
-	public Text descriptionShort() {
+	public Phrase descriptionShort() {
 		return Text.IGNORE_DESCRIPTION;
 	}
 
 	@Override
-	public Text usageShort() {
+	public Phrase usageShort() {
 		return Text.IGNORE_USAGE;
 	}
 

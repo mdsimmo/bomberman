@@ -3,7 +3,7 @@ package io.github.mdsimmo.bomberman.commands;
 import io.github.mdsimmo.bomberman.Game;
 import io.github.mdsimmo.bomberman.PlayerRep;
 import io.github.mdsimmo.bomberman.messaging.Message;
-import io.github.mdsimmo.bomberman.messaging.Text;
+import io.github.mdsimmo.bomberman.messaging.Phrase;
 import io.github.mdsimmo.bomberman.utils.Utils;
 
 import java.util.ArrayList;
@@ -19,7 +19,7 @@ public abstract class GameCommand extends Cmd {
 		return getMessage( nameShort(), sender );
 	}
 	
-	public abstract Text nameShort();
+	public abstract Phrase nameShort();
 	
 	public GameCommand( Cmd parent ) {
 		super( parent );
@@ -69,7 +69,7 @@ public abstract class GameCommand extends Cmd {
 		return getMessage( extraShort(), sender );
 	}
 
-	public abstract Text extraShort();
+	public abstract Phrase extraShort();
 
 	@Override
 	public Message example( CommandSender sender ) {
@@ -79,20 +79,20 @@ public abstract class GameCommand extends Cmd {
 		return getMessage( exampleShort(), sender ).put( "example", game );
 	}
 
-	public abstract Text exampleShort();
+	public abstract Phrase exampleShort();
 
 	@Override
 	public Message description( CommandSender sender ) {
 		return getMessage( descriptionShort(), sender );
 	}
 
-	public abstract Text descriptionShort();
+	public abstract Phrase descriptionShort();
 
 	@Override
 	public Message usage( CommandSender sender ) {
 		return getMessage( usageShort(), sender );
 	}
 
-	public abstract Text usageShort();
+	public abstract Phrase usageShort();
 
 }

@@ -5,6 +5,7 @@ import io.github.mdsimmo.bomberman.arenabuilder.ArenaGenerator;
 import io.github.mdsimmo.bomberman.messaging.Chat;
 import io.github.mdsimmo.bomberman.messaging.Formattable;
 import io.github.mdsimmo.bomberman.messaging.Message;
+import io.github.mdsimmo.bomberman.messaging.Phrase;
 import io.github.mdsimmo.bomberman.messaging.Text;
 import io.github.mdsimmo.bomberman.playerstates.GamePlayingState;
 import io.github.mdsimmo.bomberman.save.GameSaver;
@@ -735,11 +736,11 @@ public class Game implements Formattable {
 		return potionDuration;
 	}
 
-	public Message getMessage( Text text, CommandSender sender ) {
-		return text.getMessage( sender ).put( "game", this );
+	public Message getMessage( Phrase phrase, CommandSender sender ) {
+		return Chat.getMessage( phrase, sender ).put( "game", this );
 	}
 
-	public void sendMessages( Text pText, Text oText, Text aText,
+	public void sendMessages( Phrase pText, Phrase oText, Phrase aText,
 			Map<String, Object> values ) {
 		if ( values == null )
 			values = new HashMap<String, Object>();
