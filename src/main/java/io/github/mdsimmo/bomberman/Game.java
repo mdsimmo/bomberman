@@ -293,20 +293,31 @@ public class Game implements Formattable {
 		return !isPlaying;
 	}
 
+	/**
+	 * Desctroy's the games state and deletes its save file. Also deletes the old game boards
+	 * save file. Does <b>not</b> switch the arena back to its original state. Use {@link #resetArena()}
+	 * to do that.
+	 */
 	public void destroy() {
 		gameRegistry.remove( name.toLowerCase() );
-		stop();
-		ArenaGenerator.switchBoard( board, oldBoard, box );
 		HandlerList.unregisterAll( protector );
-		plugin.getLogger().info( "deleting old board: '" + board.name + '\'' );
-		File f = new File( plugin.getDataFolder(), name + ".game" );
-		ArenaGenerator.remove( oldBoard.name );
-		f.delete();
-		f = new File( plugin.getDataFolder(), name + ".old.arena" );
-		f.delete();
+		stop();
 		for ( PlayerRep rep : PlayerRep.allPlayers() ) {
 			rep.switchStates( null );
 		}
+		File gameSave = new File( plugin.getDataFolder(), name + ".game" );
+		gameSave.delete();
+		plugin.getLogger().info( "deleting old board: '" + board.name + '\'' );
+		ArenaGenerator.remove( oldBoard.name );
+		File boardsSave = new File( plugin.getDataFolder(), name + ".old.arena" );
+		boardsSave.delete();
+	}
+	
+	/**
+	 * Removes the arena from the world
+	 */
+	public void resetArena() {
+		ArenaGenerator.switchBoard( board, oldBoard, box );
 	}
 
 	public void drop( Location l, Material type ) {
@@ -777,6 +788,12 @@ public class Game implements Formattable {
 			return getSuddenDeath();
 		case "autostart":
 			return getAutostartDelay();
+		case "x":
+			return box.x;
+		case "y":
+			return box.y;
+		case "z":
+			return box.z;
 		default:
 			return null;
 		}

@@ -23,6 +23,7 @@ public class Game extends CommandGroup {
 				new Create(this),
 				new Convert(this),
 				new Destroy(this),
+				new Forget(this),
 				new GameList(this),
 				new Ignore(this),
 				new Info(this),

@@ -809,11 +809,30 @@ public enum Text {
 			"/" ),
 	DESTROY_EXTRA(
 			"command.destroy.extra",
-			"" ),
+			"See also: {aqua|/bm game forget <game>}" ),
 	DESTROY_SUCCESS(
 			"command.destroy.success",
 			"Game {game} destroyed" ),
 
+	FORGET_NAME(
+			"command.forget.name",
+			"forget" ),
+	FORGET_DESCRIPTION(
+			"command.forget.description",
+			"Forgets about a game but does not destroy/reset the arena" ),
+	FORGET_USAGE(
+			"command.forget.usage",
+			"/{command|path} <game>" ),
+	FORGET_EXAMPLE(
+			"command.forget.example",
+			"" ),
+	FORGET_EXTRA(
+			"command.forget.extra",
+			"See also: {aqua|/bm game destroy <game>}" ),
+	FORGET_SUCCESS(
+			"command.forget.success",
+			"Game {game} forgotten" ),
+			
 	GAME_NAME(
 			"command.game.name",
 			"game" ),
