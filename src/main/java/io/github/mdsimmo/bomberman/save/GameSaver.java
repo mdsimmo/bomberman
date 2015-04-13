@@ -70,9 +70,10 @@ public class GameSaver extends Save {
 		case V0_0_3d:
 			break;
 		case V0_1_0:
+		case V0_1_0_SNAPSHOT:
 			break;
 		case FUTURE:
-			plugin.getLogger().info("Unkowen version '" + raw + "' in " + file.getName());
+			plugin.getLogger().info("Unknown version '" + raw + "' in " + file.getName());
 			break;
 		}
 	}

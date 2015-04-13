@@ -126,6 +126,7 @@ public class BoardSaver extends Save{
 		case V0_0_3_SNAPSHOT:
 			break;
 		case V0_1_0:
+		case V0_1_0_SNAPSHOT:
 			break;
 		case FUTURE:
 			plugin.getLogger().info("Unkowen version " + getVersionRaw() + " in " + file.getName());
