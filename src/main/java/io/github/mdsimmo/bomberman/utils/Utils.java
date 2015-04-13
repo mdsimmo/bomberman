@@ -51,17 +51,23 @@ public class Utils {
 			fin[inserts.length + i] = initial[i];
 		return fin;
 	}
-	
-	public static final Block getTarget(Player player, Integer range) {
+
+	/**
+	 * Gets the block that the player is looking at
+	 * @param player the player
+	 * @param range the range that the block must be in
+	 * @return the block found. null if no block found in the range
+	 */
+	public static final Block getTarget(Player player, int range) {
 		BlockIterator iter = new BlockIterator(player, range);
 		Block lastBlock = iter.next();
 		while (iter.hasNext()) {
 			lastBlock = iter.next();
 			if (lastBlock.getType() == Material.AIR)
 				continue;
-			break;
+			return lastBlock;
 		}
-		return lastBlock;
+		return null;
 	}
 	
 	public static <T> ArrayList<T> asList(T[] array) {

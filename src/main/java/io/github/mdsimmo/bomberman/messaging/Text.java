@@ -312,11 +312,17 @@ public enum Text {
 	ARENA_CREATED(
 			"command.areacreate.success",
 			"Arena {arena} created" ),
+	ARENA_CREATING(
+			"command.arenacreate.started",
+			"Arena {arena} is being created... (it may take a while)" ),
+	ARENA_NO_TARGET(
+			"command.arenacreate.notarget",
+			"You must look at a block" ),
 	ARENA_CREATE_TOO_BIG(
 			"command.arenacreate.too-big",
-			"Max build size exceeded! {maxstructuresize} blocks maximum" ),
-	ARENA_CREATE_TOO_SMALL(
-			"command.arenacreate.too-small",
+			"Max build size exceeded! {maxstructuresize} blocks maximum. Creation cancelled" ),
+	ARENA_CREATE_VERY_SMALL(
+			"command.arenacreate.very-small",
 			"Structure is only a single block! Were you looking at a natural block?" ),
 
 	DELETE_NAME(
@@ -339,7 +345,7 @@ public enum Text {
 			"Arena {arena} successfully deleted" ),
 	DELETE_ARENA_USED(
 			"command.arenadelete.arena-used",
-			"Cannot delete arena {arena} since it is being used by game {4}" ),
+			"Cannot delete arena {arena} since it is being used by game {game}" ),
 	DELETE_TROUBLE(
 			"command.arenadelete.error",
 			"Error deleting file {file}" ),

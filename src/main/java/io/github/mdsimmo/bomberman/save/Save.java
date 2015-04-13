@@ -89,27 +89,29 @@ public abstract class Save extends YamlConfiguration {
 	}
 	
 	/**
-	 * @deprecated use save()
+	 * This will just throw a {@link UnsupportedOperationException}. DO NOT USE
+	 * @deprecated use save().
 	 */
 	@Deprecated
 	@Override
 	public void save(File file) throws IOException {
-		super.save(file);
+		throw new UnsupportedOperationException( "Use save()" );
 	}
 	
 	/**
-	 * @deprecated use save()
+	 * This will just throw a {@link UnsupportedOperationException}. DO NOT USE
+	 * @deprecated use save().
 	 */
 	@Deprecated
 	@Override
 	public void save(String file) throws IOException {
-		super.save(file);
+		throw new UnsupportedOperationException( "Use save()" );
 	}
 	
 	@Override
 	public void set(String path, Object value) {
 		if (value instanceof CompressedSection) {
-			super.set(path, ((CompressedSection)value).value);
+			super.set(path, ((CompressedSection)value).content.toString());
 		} else {
 			super.set(path, value);
 		}
@@ -118,7 +120,7 @@ public abstract class Save extends YamlConfiguration {
 	public CompressedSection getCompressedSection(String path) {
 		CompressedSection section = new CompressedSection();
 		section.setValue(getString(path));
-		section.seperator = section.value.charAt(section.value.length());
+		section.seperator = section.content.charAt(section.content.length());
 		return section;
 	}
 	
@@ -140,7 +142,7 @@ public abstract class Save extends YamlConfiguration {
 	
 	public static class CompressedSection {
 
-		private String value = "";
+		private StringBuilder content = new StringBuilder();
 		private char seperator;
 		
 		public CompressedSection(char seperator) {
@@ -153,9 +155,9 @@ public abstract class Save extends YamlConfiguration {
 		
 		public void addParts(Object... parts) {
 			for (Object part : parts) {
-				if (!value.isEmpty())
-					value += seperator;
-				value += part.toString();
+				if ( content.length() != 0 )
+					content.append( seperator );
+				content.append( part.toString() );
 			}
 		}
 
@@ -167,7 +169,9 @@ public abstract class Save extends YamlConfiguration {
 		public List<String> readParts() {
 			List<String> parts = new ArrayList<>();
 			String part = "";
-			for (char c : value.toCharArray()) {
+			int length = content.length();
+			for (int i = 0; i < length; i++ ) {
+				char c = content.charAt( i );
 				if (c == seperator) {
 					parts.add(part);
 					part = "";
@@ -181,13 +185,14 @@ public abstract class Save extends YamlConfiguration {
 		}
 
 		public void reset() {
-			value = "";
+			content.setLength( 0 );
 		}
 		
 		public void setValue(String value) {
 			if (value == null)
 				throw new NullArgumentException("value cannot be null");
-			this.value = value;
+			reset();
+			content.append( value );
 		}
 		
 		/**
@@ -195,7 +200,7 @@ public abstract class Save extends YamlConfiguration {
 		 */
 		@Override
 		public String toString() {
-			return value;
+			return content.toString();
 		}
 	}
 }

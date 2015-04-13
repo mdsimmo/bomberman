@@ -1,6 +1,6 @@
 package io.github.mdsimmo.bomberman.commands.arena;
 
-import io.github.mdsimmo.bomberman.BoardGenerator;
+import io.github.mdsimmo.bomberman.arenabuilder.ArenaGenerator;
 import io.github.mdsimmo.bomberman.commands.Cmd;
 import io.github.mdsimmo.bomberman.messaging.Chat;
 import io.github.mdsimmo.bomberman.messaging.Message;
@@ -31,7 +31,7 @@ public class ArenaList extends Cmd {
 	public boolean run( CommandSender sender, List<String> args ) {
 		if ( args.size() != 0 )
 			return false;
-		List<String> arenas = BoardGenerator.allBoards();
+		List<String> arenas = ArenaGenerator.allBoards();
 		if ( arenas.size() == 0 ) {
 			Chat.sendMessage( getMessage( Text.ARENA_LIST_NO_ARENA, sender ) );
 		} else {

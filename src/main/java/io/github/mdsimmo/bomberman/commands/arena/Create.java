@@ -1,8 +1,9 @@
 package io.github.mdsimmo.bomberman.commands.arena;
 
 import io.github.mdsimmo.bomberman.Board;
-import io.github.mdsimmo.bomberman.BoardGenerator;
 import io.github.mdsimmo.bomberman.Config;
+import io.github.mdsimmo.bomberman.arenabuilder.ArenaDetector.BoundingListener;
+import io.github.mdsimmo.bomberman.arenabuilder.ArenaGenerator;
 import io.github.mdsimmo.bomberman.commands.Cmd;
 import io.github.mdsimmo.bomberman.messaging.Chat;
 import io.github.mdsimmo.bomberman.messaging.Message;
@@ -12,6 +13,7 @@ import io.github.mdsimmo.bomberman.utils.Utils;
 
 import java.util.List;
 
+import org.bukkit.block.Block;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
@@ -29,7 +31,7 @@ public class Create extends Cmd {
 	@Override
 	public List<String> options( CommandSender sender, List<String> args ) {
 		if ( args.size() == 1 )
-			return BoardGenerator.allBoards();
+			return ArenaGenerator.allBoards();
 		else
 			return null;
 	}
@@ -38,24 +40,52 @@ public class Create extends Cmd {
 	public boolean run( CommandSender sender, List<String> args ) {
 		if ( args.size() != 1 )
 			return false;
-		if ( sender instanceof Player ) {
-			Box box = BoardGenerator.getBoundingStructure( Utils.getTarget(
-					(Player)sender, 100 ) );
-			if ( box == null ) {
-				Chat.sendMessage(
-						getMessage( Text.ARENA_CREATE_TOO_BIG, sender ).put(
-								"maxstructuresize",
-								Config.MAX_STRUCTURE.getValue() ) );
-				return true;
-			}
-			if ( box.xSize < 2 && box.ySize < 2 && box.zSize < 2 ) {
-				Chat.sendMessage( getMessage( Text.ARENA_CREATE_TOO_SMALL, sender ) );
-			}
-			Board board = BoardGenerator.createArena( args.get( 0 ), box );
-			BoardGenerator.saveBoard( board );
-			Chat.sendMessage( getMessage( Text.ARENA_CREATED, sender) .put( "arena", board ) );
+		if ( sender instanceof Player == false ) {
+			Chat.sendMessage( getMessage( Text.MUST_BE_PLAYER, sender ) );
+			return true;
+		}
+		String name = args.get( 0 );
+		Block target = Utils.getTarget( (Player)sender, 100 );
+		if ( target != null ) {
+			ArenaGenerator.getBoundingStructure( target, new BuildListener(
+					sender, name ) );
+			Message message = getMessage( Text.ARENA_CREATING, sender );
+			message.put( "arena", name );
+			Chat.sendMessage( message );
+		} else {
+			Chat.sendMessage( Text.ARENA_NO_TARGET.getMessage( sender ) );
 		}
 		return true;
+	}
+
+	private class BuildListener implements BoundingListener {
+
+		private final CommandSender sender;
+		private final String name;
+
+		public BuildListener( CommandSender sender, String name ) {
+			this.sender = sender;
+			this.name = name;
+		}
+
+		@Override
+		public void onBoundingDetected( Box box ) {
+			if ( box == null ) {
+				Chat.sendMessage( getMessage( Text.ARENA_CREATE_TOO_BIG, sender )
+						.put( "maxstructuresize",
+								Config.MAX_STRUCTURE.getValue() ) );
+				return;
+			}
+
+			if ( box.xSize < 2 && box.ySize < 2 && box.zSize < 2 ) {
+				Chat.sendMessage( getMessage( Text.ARENA_CREATE_VERY_SMALL,
+						sender ) );
+			}
+			Board board = ArenaGenerator.createArena( name, box );
+			ArenaGenerator.saveBoard( board );
+			Chat.sendMessage( getMessage( Text.ARENA_CREATED, sender ).put(
+					"arena", board ) );
+		}
 	}
 
 	@Override

@@ -1,8 +1,8 @@
 package io.github.mdsimmo.bomberman.commands.game.force;
 
-import io.github.mdsimmo.bomberman.BoardGenerator;
 import io.github.mdsimmo.bomberman.Game;
 import io.github.mdsimmo.bomberman.PlayerRep;
+import io.github.mdsimmo.bomberman.arenabuilder.ArenaGenerator;
 import io.github.mdsimmo.bomberman.commands.Cmd;
 import io.github.mdsimmo.bomberman.commands.GameCommand;
 import io.github.mdsimmo.bomberman.messaging.Chat;
@@ -36,7 +36,7 @@ public class Reset extends GameCommand {
 		for (PlayerRep rep : game.players)
 			Chat.sendMessage(getMessage(Text.RESET_SUCCESS_P, rep.getPlayer()).put( "game", game));
 		game.stop();
-		BoardGenerator.switchBoard(game.board, game.board, game.box);
+		ArenaGenerator.switchBoard(game.board, game.board, game.box);
 		Chat.sendMessage(getMessage(Text.RESET_SUCCESS, sender).put( "game", game));
 		return true;
 	}

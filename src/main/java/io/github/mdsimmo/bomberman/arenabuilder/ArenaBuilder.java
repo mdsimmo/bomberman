@@ -1,10 +1,14 @@
-package io.github.mdsimmo.bomberman;
+package io.github.mdsimmo.bomberman.arenabuilder;
+
+import io.github.mdsimmo.bomberman.Board;
+import io.github.mdsimmo.bomberman.Bomberman;
+import io.github.mdsimmo.bomberman.Config;
 
 import org.bukkit.Location;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.util.Vector;
 
-public class BoardBuilder implements Runnable {
+public class ArenaBuilder implements Runnable {
 	private static Plugin plugin = Bomberman.instance;
 	private static int buildRate = Config.BUILD_RATE.getValue();
 	private Board board;
@@ -13,7 +17,7 @@ public class BoardBuilder implements Runnable {
 	private int id;
 	
 		
-	public BoardBuilder(Board board, Location location) {
+	public ArenaBuilder(Board board, Location location) {
 		this.board = board;
 		this.location = location;
 		id = plugin.getServer().getScheduler().scheduleSyncRepeatingTask(plugin, this, 0, 1);

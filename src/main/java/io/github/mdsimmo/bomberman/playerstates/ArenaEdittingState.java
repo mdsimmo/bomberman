@@ -1,9 +1,9 @@
 package io.github.mdsimmo.bomberman.playerstates;
 
 import io.github.mdsimmo.bomberman.BlockRep;
-import io.github.mdsimmo.bomberman.BoardGenerator;
 import io.github.mdsimmo.bomberman.Game;
 import io.github.mdsimmo.bomberman.PlayerRep;
+import io.github.mdsimmo.bomberman.arenabuilder.ArenaGenerator;
 import io.github.mdsimmo.bomberman.messaging.Chat;
 import io.github.mdsimmo.bomberman.messaging.Message;
 import io.github.mdsimmo.bomberman.messaging.Text;
@@ -96,7 +96,7 @@ public class ArenaEdittingState extends PlayerState implements Listener {
 			if ( game.box.contains( b.getLocation() ) )
 				game.board.addBlock( BlockRep.createBlock( b ), v );
 		}
-		BoardGenerator.saveBoard( game.board );
+		ArenaGenerator.saveBoard( game.board );
 		rep.switchStates( null );
 	}
 

@@ -1,7 +1,7 @@
 package io.github.mdsimmo.bomberman.commands.arena;
 
-import io.github.mdsimmo.bomberman.BoardGenerator;
 import io.github.mdsimmo.bomberman.Game;
+import io.github.mdsimmo.bomberman.arenabuilder.ArenaGenerator;
 import io.github.mdsimmo.bomberman.commands.Cmd;
 import io.github.mdsimmo.bomberman.messaging.Chat;
 import io.github.mdsimmo.bomberman.messaging.Message;
@@ -27,7 +27,7 @@ public class Delete extends Cmd {
 	@Override
 	public List<String> options( CommandSender sender, List<String> args ) {
 		if ( args.size() == 1 )
-			return BoardGenerator.allBoards();
+			return ArenaGenerator.allBoards();
 		else
 			return null;
 	}
@@ -37,7 +37,7 @@ public class Delete extends Cmd {
 		if ( args.size() != 1 )
 			return false;
 		String arena = args.get( 0 );
-		File f = BoardGenerator.toFile( arena );
+		File f = ArenaGenerator.toFile( arena );
 		if ( !f.exists() ) {
 			Chat.sendMessage( getMessage( Text.INVALID_ARENA, sender )
 					.put( "arena", arena ) );
@@ -53,7 +53,7 @@ public class Delete extends Cmd {
 				return true;
 			}
 		}
-		BoardGenerator.remove( arena );
+		ArenaGenerator.remove( arena );
 		if ( f.delete() )
 			Chat.sendMessage(
 					getMessage( Text.DELETE_SUCCESSFUL, sender ).put( "arena",
@@ -71,7 +71,7 @@ public class Delete extends Cmd {
 
 	@Override
 	public Message example( CommandSender sender ) {
-		String arena = Utils.random( BoardGenerator.allBoards() );
+		String arena = Utils.random( ArenaGenerator.allBoards() );
 		if ( arena == null )
 			arena = "myarena";
 		return getMessage( Text.DELETE_EXAMPLE, sender).put( "example", arena );

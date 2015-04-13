@@ -49,7 +49,7 @@ public enum Config {
 	INITIAL_ITEMS("initialitems", Arrays.asList(
 			new ItemStack(Material.TNT, 3),
 			new ItemStack(Material.BLAZE_POWDER, 3))),
-	MAX_STRUCTURE("max-structue", 400000),
+	MAX_STRUCTURE("max-structue", 10000),
 	BUILD_RATE("build-rate", 500),
 	LANGUAGE("language-default", "");
 	

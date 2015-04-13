@@ -1,6 +1,7 @@
 package io.github.mdsimmo.bomberman;
 
 import io.github.mdsimmo.bomberman.Bomb.DeathBlock;
+import io.github.mdsimmo.bomberman.arenabuilder.ArenaGenerator;
 import io.github.mdsimmo.bomberman.messaging.Chat;
 import io.github.mdsimmo.bomberman.messaging.Formattable;
 import io.github.mdsimmo.bomberman.messaging.Message;
@@ -284,7 +285,7 @@ public class Game implements Formattable {
 			winnersDisplay();
 
 			// reset the game
-			BoardGenerator.switchBoard( this.board, this.board, box );
+			ArenaGenerator.switchBoard( this.board, this.board, box );
 			stop();
 
 			return true;
@@ -295,10 +296,11 @@ public class Game implements Formattable {
 	public void destroy() {
 		gameRegistry.remove( name.toLowerCase() );
 		stop();
-		BoardGenerator.switchBoard( board, oldBoard, box );
+		ArenaGenerator.switchBoard( board, oldBoard, box );
 		HandlerList.unregisterAll( protector );
+		plugin.getLogger().info( "deleting old board: '" + board.name + '\'' );
 		File f = new File( plugin.getDataFolder(), name + ".game" );
-		BoardGenerator.remove( oldBoard.name );
+		ArenaGenerator.remove( oldBoard.name );
 		f.delete();
 		f = new File( plugin.getDataFolder(), name + ".old.arena" );
 		f.delete();
@@ -757,6 +759,8 @@ public class Game implements Formattable {
 			return minPlayers;
 		case "maxplayers":
 			return board.spawnPoints.size();
+		case "arena":
+			return board;
 		case "players":
 			return players.size();
 		case "power":

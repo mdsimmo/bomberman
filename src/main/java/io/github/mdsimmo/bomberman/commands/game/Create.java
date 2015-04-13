@@ -1,10 +1,10 @@
 package io.github.mdsimmo.bomberman.commands.game;
 
 import io.github.mdsimmo.bomberman.Board;
-import io.github.mdsimmo.bomberman.BoardGenerator;
 import io.github.mdsimmo.bomberman.Config;
 import io.github.mdsimmo.bomberman.Game;
 import io.github.mdsimmo.bomberman.PlayerRep;
+import io.github.mdsimmo.bomberman.arenabuilder.ArenaGenerator;
 import io.github.mdsimmo.bomberman.commands.Cmd;
 import io.github.mdsimmo.bomberman.messaging.Chat;
 import io.github.mdsimmo.bomberman.messaging.Message;
@@ -34,7 +34,7 @@ public class Create extends Cmd {
 		if ( args.size() == 1 )
 			return Game.allGames();
 		else if ( args.size() == 2 )
-			return BoardGenerator.allBoards();
+			return ArenaGenerator.allBoards();
 		else
 			return null;
 	}
@@ -52,9 +52,9 @@ public class Create extends Cmd {
 			} else {
 				Board arena;
 				if ( args.size() == 2 ) {
-					arena = BoardGenerator.loadBoard( args.get( 1 ) );
+					arena = ArenaGenerator.loadBoard( args.get( 1 ) );
 				} else {
-					arena = BoardGenerator
+					arena = ArenaGenerator
 							.loadBoard( (String)Config.DEFAULT_ARENA.getValue() );
 				}
 				if ( arena == null ) {
@@ -89,8 +89,8 @@ public class Create extends Cmd {
 		Game game = new Game( name, new Box( l, arena.xSize, arena.ySize,
 				arena.zSize ) );
 		game.board = arena;
-		game.oldBoard = BoardGenerator.createArena( name + ".old", game.box );
-		BoardGenerator.switchBoard( game.oldBoard, game.board, game.box );
+		game.oldBoard = ArenaGenerator.createArena( name + ".old", game.box );
+		ArenaGenerator.switchBoard( game.oldBoard, game.board, game.box );
 		Game.register( game );
 		return game;
 	}
@@ -102,7 +102,7 @@ public class Create extends Cmd {
 
 	@Override
 	public Message example( CommandSender sender ) {
-		String arena = Utils.random( BoardGenerator.allBoards() );
+		String arena = Utils.random( ArenaGenerator.allBoards() );
 		arena = arena == null ? "myarena" : arena;
 		return getMessage( Text.CONVERT_EXAMPLE, sender )
 				.put( "example", arena );
