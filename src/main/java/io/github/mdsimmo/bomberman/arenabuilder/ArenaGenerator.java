@@ -22,6 +22,9 @@ import org.bukkit.entity.Item;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.util.Vector;
 
+/**
+ * A class designed to greatly symplify the process of generating arenas.
+ */
 public class ArenaGenerator {
 
 	private static HashMap<String, Board> loadedBoards = new HashMap<>();
@@ -107,14 +110,27 @@ public class ArenaGenerator {
 		}
 	}
 
-	public static Board remove( String name ) {
-		return loadedBoards.remove( name );
+	/**
+	 * Removes a board from the cache. Does not delete its file
+	 * @param name the name of the board to remove
+	 */
+	public static void remove( String name ) {
+		loadedBoards.remove( name );
 	}
 
+	/**
+	 * Gets the file that contains the board
+	 * @param name the name of the board
+	 * @return the boards save file
+	 */
 	public static File toFile( String name ) {
 		return new File( plugin.getDataFolder(), name.toLowerCase() + ".arena" );
 	}
 
+	/**
+	 * Gets a list of all the boards that are installed.
+	 * @return a list of al the boards name's
+	 */
 	public static List<String> allBoards() {
 		List<String> boards = new ArrayList<>();
 		File[] files = plugin.getDataFolder().listFiles( new FilenameFilter() {
@@ -130,15 +146,19 @@ public class ArenaGenerator {
 		return boards;
 	}
 
+	/**
+	 * Saves a board to its file
+	 * @param board the board to save
+	 */
 	public static void saveBoard( Board board ) {
 		loadedBoards.put( board.name, board );
 		new BoardSaver( board ).save();
 	}
 
 	/**
-	 * Gets the bounds of the structure.
-	 * 
-	 * @return a box around the structure
+	 * Gets the box that surrounds the target block. Happens in an synchronised thread.
+	 * @param target any block in the structure
+	 * @param callBack who it inform that the structure has finished being detected
 	 */
 	public static void getBoundingStructure( Block target,
 			BoundingListener callBack ) {
@@ -147,7 +167,10 @@ public class ArenaGenerator {
 	}
 
 	/**
-	 * Creates a board arena
+	 * Makes an arena from the given box. Does not save the arena.
+	 * @param arena what to call the arena
+	 * @param box the box that contains the arena's structure
+	 * @return The newly generated arena
 	 */
 	public static Board createArena( String arena, Box box ) {
 		Board board = new Board( arena, (int)box.xSize, (int)box.ySize,
