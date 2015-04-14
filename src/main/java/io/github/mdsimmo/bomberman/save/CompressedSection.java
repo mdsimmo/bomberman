@@ -8,7 +8,9 @@ import org.apache.commons.lang.NullArgumentException;
 public class CompressedSection {
 
 	private StringBuilder content = new StringBuilder();
-	private char separator;
+	private final char separator;
+	private final String multiple;
+	private final String multipleRegex;
 	private boolean dirty = false;
 	private List<Object> objects = new ArrayList<Object>();
 
@@ -17,13 +19,19 @@ public class CompressedSection {
 	 * edges between sections
 	 * @param separator the separator. Make sure no text added to the list contains
 	 * this character.
+	 * @param multiple the char to use to state the next object is multiplied. Elements can
+	 * have this character but must not start with this character and only have digits following
 	 */
-	public CompressedSection( char separator ) {
-		if ( separator == '!' )
-			throw new IllegalArgumentException( "Seperator may not be '!'" );
+	public CompressedSection( char separator, String multiple ) {
 		this.separator = separator;
+		this.multiple = multiple;
+		this.multipleRegex = multiple + "\\d+";
 	}
 
+	public CompressedSection( char seperator ) {
+		this( seperator, "!" );
+	}
+	
 	/**
 	 * Adds a part to this section.
 	 * @param parts the parts to add
@@ -74,7 +82,7 @@ public class CompressedSection {
 		if ( amount == 0 )
 			return;
 		if ( amount != 1 )
-			content.append( "!" ).append( amount ).append( separator );
+			content.append( multiple ).append( amount ).append( separator );
 		content.append( object ).append( separator );
 	}
 
@@ -93,8 +101,8 @@ public class CompressedSection {
 		for ( int i = 0; i < length; i++ ) {
 			char c = content.charAt( i );
 			if ( c == separator ) {
-				if ( part.charAt( 0 ) == '!' ) {
-					nextAmount = Integer.parseInt( part.substring( 1 ) );
+				if ( part.toString().matches( multipleRegex ) ) {
+					nextAmount = Integer.parseInt( part.substring( multiple.length() ) );
 				} else {
 					String p = part.toString();
 					for( int j = 0; j < nextAmount; j++ )
@@ -132,15 +140,13 @@ public class CompressedSection {
 	public void setValue( String value ) {
 		if ( value == null )
 			throw new NullArgumentException( "value cannot be null" );
-		if ( value.isEmpty() )
-			throw new NullArgumentException( "value cannot be empty" );
 		
 		// set the value
 		reset();
 		content.append( value );
 		
 		// add a ending separator if its not there already
-		if ( value.charAt( value.length()-1 ) != separator )
+		if ( value.length() != 0 && value.charAt( value.length()-1 ) != separator )
 			content.append( separator );
 	}
 
@@ -151,6 +157,9 @@ public class CompressedSection {
 	public String toString() {
 		flush();
 		// get the string minus the closing separator
-		return content.substring( 0, content.length()-1 );
+		if ( content.length() == 0 )
+			return "";
+		else
+			return content.substring( 0, content.length()-1 );
 	}
 }
