@@ -1,7 +1,7 @@
 package io.github.mdsimmo.bomberman;
 
+import io.github.mdsimmo.bomberman.save.CompressedSection;
 import io.github.mdsimmo.bomberman.save.Save;
-import io.github.mdsimmo.bomberman.save.Save.CompressedSection;
 
 import java.util.Arrays;
 import java.util.HashMap;
