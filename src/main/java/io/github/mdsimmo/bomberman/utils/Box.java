@@ -11,11 +11,11 @@ import org.bukkit.util.Vector;
 
 public class Box {
 
-	public double x, y, z;
-	public double xSize, ySize, zSize;
+	public int x, y, z;
+	public int xSize, ySize, zSize;
 	public final World world;
 
-	public Box(World world, double x, double y, double z, double xSize, double ySize, double zSize) {
+	public Box(World world, int x, int y, int z, int xSize, int ySize, int zSize) {
 		this.world = world;
 		this.x = x;
 		this.y = y;
@@ -27,26 +27,28 @@ public class Box {
 	
 	public Box (Location l, Vector size) {
 		world = l.getWorld();
-		x = l.getX();
-		y = l.getY();
-		z = l.getZ();
-		xSize = size.getX();
-		ySize = size.getY();
-		zSize = size.getZ();
+		x = l.getBlockX();
+		y = l.getBlockY();
+		z = l.getBlockZ();
+		xSize = size.getBlockX();
+		ySize = size.getBlockY();
+		zSize = size.getBlockZ();
 	}
 
-	public Box(Location l, double xSize, double ySize, double zSize) {
+	public Box(Location l, int xSize, int ySize, int zSize) {
 		world = l.getWorld();
-		x = l.getX();
-		y = l.getY();
-		z = l.getZ();
+		x = l.getBlockX();
+		y = l.getBlockY();
+		z = l.getBlockZ();
 		this.xSize = xSize;
 		this.ySize = ySize;
 		this.zSize = zSize;
 	}
 	
 	public Box(Location min, Location max) {
-		this(min, max.getX() - min.getX(), max.getY() - min.getY(), max.getZ() - min.getZ());
+		this(min, max.getBlockX() - min.getBlockX(),
+				max.getBlockY() - min.getBlockY(),
+				max.getBlockZ() - min.getBlockZ());
 	}
 
 
@@ -63,7 +65,7 @@ public class Box {
 		return new Location(world, x, y, z);
 	}
 	
-	public Location fromCorner(double xAdd, double yAdd, double zAdd) {
+	public Location fromCorner(int xAdd, int yAdd, int zAdd) {
 		return new Location(world, x + xAdd, y + yAdd, z + zAdd);
 	}
 	
