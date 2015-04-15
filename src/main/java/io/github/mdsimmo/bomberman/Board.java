@@ -108,10 +108,12 @@ public class Board implements Formattable {
 	}
 
 	@Override
-	public Object format( Message message, String value ) {
-		if ( value == null )
+	public String format( Message message, List<String> args ) {
+		if ( args.size() == 0 )
 			return name;
-		switch ( value ) {
+		if ( args.size() != 1 )
+			throw new RuntimeException( "Arenas can have at most one argument" );
+		switch ( args.get( 0 ) ) {
 		case "name":
 			return name;
 		case "xsize":

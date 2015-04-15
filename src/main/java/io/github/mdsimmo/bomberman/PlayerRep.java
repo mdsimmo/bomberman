@@ -8,6 +8,7 @@ import io.github.mdsimmo.bomberman.playerstates.PlayerState;
 
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.List;
 
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
@@ -136,10 +137,12 @@ public class PlayerRep implements Listener, Formattable {
 	}
 
 	@Override
-	public Object format( Message message, String value ) {
-		if ( value == null )
+	public String format( Message message, List<String> args ) {
+		if ( args.size() == 0 )
 			return player.getName();
-		switch ( value ) {
+		if ( args.size() != 1 )
+			throw new RuntimeException( "Players can have at most one argument" );
+		switch ( args.get( 0 ) ) {
 		case "name":
 			return player.getName();
 		case "lives":

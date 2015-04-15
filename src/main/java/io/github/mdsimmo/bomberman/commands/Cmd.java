@@ -214,21 +214,21 @@ public abstract class Cmd implements Formattable {
 	}
 	
 	@Override
-	public Object format( Message message, String value ) {
-		if ( value == null )
-			value = "name";
+	public String format( Message message, List<String> args ) {
+		if ( args.size() == 0 )
+			args.add( "name" );
 		CommandSender sender = message.getSender();
-		switch (value) {
+		switch (args.remove( 0 )) {
 		case "name":
-			return name( sender ).toString();
+			return name( sender ).format( message, args ) ;
 		case "path":
 			return path( sender );
 		case "usage":
-			return usage( sender ).toString();
+			return usage( sender ).format( message, args );
 		case "description":
-			return description( sender ).toString();
+			return description( sender ).format( message, args );
 		default:
-			throw new RuntimeException( "Unknown value " + value );
+			throw new RuntimeException( "Unknown value " + args.get( 0 ) );
 		}
 	}
 }

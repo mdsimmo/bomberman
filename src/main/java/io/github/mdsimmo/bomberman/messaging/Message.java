@@ -1,15 +1,11 @@
 package io.github.mdsimmo.bomberman.messaging;
 
-import io.github.mdsimmo.bomberman.Bomberman;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Stack;
-
-import net.objecthunter.exp4j.ExpressionBuilder;
 
 import org.bukkit.ChatColor;
 import org.bukkit.command.CommandSender;
@@ -20,20 +16,24 @@ public class Message implements Formattable {
 	private final String text;
 	private Stack<ChatColor> colors = new Stack<>();
 	private HashMap<String, Object> values = new HashMap<>();
+	private static final Equation equationExpander = new Equation();
+	private static final Switch switchExpander = new Switch();
 
 	public Message( CommandSender sender, String text ) {
 		this.text = text;
 		values.put( "sender", sender );
+		values.put( "=", equationExpander );
+		values.put( "switch", switchExpander );
 		colors.push( ChatColor.RESET );
 	}
-
+	
 	private Object get( String key ) {
 		Object val = values.get( key );
 		if ( val == null )
 			try {
 				val = ChatColor.valueOf( key.toUpperCase() );
 			} catch ( IllegalArgumentException e ) {
-				Bomberman.instance.getLogger().info( "Key " + key + " has no associated value" );
+				//Bomberman.instance.getLogger().info( "Key " + key + " has no associated value" );
 			}
 		return val;
 	}
@@ -63,7 +63,7 @@ public class Message implements Formattable {
 		try {
 			return expand( text );
 		} catch ( Exception e ) {
-			Bomberman.instance.getLogger().warning( "Faulty message: " + text );
+			//Bomberman.instance.getLogger().warning( "Faulty message: " + text );
 			e.printStackTrace();
 			return ChatColor.RED + "Internal format error";
 		}
@@ -97,13 +97,8 @@ public class Message implements Formattable {
 			c = text.charAt( i );
 		}
 		
-		if ( c == '=' ) {
-			// parse an equation
-			return expandEquation( text );
-		}
-		
 		// get reference
-		while ( Character.isJavaIdentifierPart( c ) ) {
+		while ( !Character.isWhitespace( c ) && c != '}' && c != '{' && c != '|' ) {
 			buffer.append( c );
 			i++;
 			c = text.charAt( i );
@@ -125,7 +120,7 @@ public class Message implements Formattable {
 				while( true ) {
 					String subArg = toNext( text, '|', i );
 					args.add( expand( subArg.substring( 1, subArg.length() - 1 ) ) );
-					i += subArg.length()-1; // -1 because first '|' would get counted twice
+					i += subArg.length()-1; // -1 because the first '|' would get counted twice
 				}
 			} catch ( Exception e ) { // happens when cannot find any more '|'
 				String subArg = toNext( text, '}', i );
@@ -139,49 +134,6 @@ public class Message implements Formattable {
 		return buffer.toString();
 
 	}
-
-	private String expandEquation( String text ) {
-		if ( text.charAt( 0 ) != '{' || text.charAt( text.length() - 1 ) != '}' )
-			throw new RuntimeException(
-					"expandEquation() must start and end with a brace" );
-		int i = 1;
-		char c = text.charAt( i );
-		// skip whitespace
-		while ( Character.isWhitespace( c ) ) {
-			i++;
-			c = text.charAt( i );
-			System.out.println( c );
-		}
-		
-		if ( c != '=' )
-			throw new RuntimeException( "Expected a starting '=': " + text );
-		i++;
-		c = text.charAt( i );
-		
-		// remove more whitespace
-		while ( Character.isWhitespace( c ) ) {
-			i++;
-			c = text.charAt( i );
-		}
-		
-		if ( c != '|' )
-			throw new RuntimeException( "Expected at least one arguement in equation: " + text );
-		
-		String expression = toNext( text, '}', i );
-		i += expression.length();
-		if ( i != text.length() )
-			throw new RuntimeException("Expected the ending brace at position " + i);
-		
-		expression = expression.substring( 1, expression.length()-1 );
-		expression = expand( expression );
-		try {
-			return Double.toString( new ExpressionBuilder( expression ).build().evaluate() );
-		} catch ( Exception e ) {
-			throw new RuntimeException( "Expression has invalid numerical imputs: " + expression, e );
-		}
-
-	}
-	
 	
 	/**
 	 * Gets the substring of sequence from index to the next endingChar but
@@ -204,18 +156,19 @@ public class Message implements Formattable {
 				+ "' after index " + index + " in string " + sequence );
 	}
 
-	private String format( Object obj, List<String> values ) {
-		String value = values.size() > 0 ? values.remove( 0 ).trim() : null;
+	private String format( Object obj, List<String> args ) {
+		if ( obj instanceof Formattable )
+			return ( (Formattable)obj ).format( this, args );
 		if ( obj instanceof ChatColor ) {
+			if ( args.size() != 1 )
+				throw new RuntimeException( "Colors must have exactly one argument" );
 			colors.pop();
-			return obj.toString() + value + colors.peek();
+			return obj.toString() + args.get( 0 ) + colors.peek();
 		}
 		if ( obj instanceof CommandSender )
-			return format( new SenderWrapper( (CommandSender)obj ), values );
-		if ( obj instanceof Formattable )
-			return format( ( (Formattable)obj ).format( this, value ), values );
+			return new SenderWrapper( (CommandSender)obj ).format( this, args );
 		if ( obj instanceof ItemStack )
-			return format( new ItemWrapper( (ItemStack)obj ), values );
+			return new ItemWrapper( (ItemStack)obj ).format( this, args );
 		return String.valueOf( obj );
 	}
 
@@ -224,7 +177,7 @@ public class Message implements Formattable {
 	}
 
 	@Override
-	public Object format( Message message, String value ) {
+	public String format( Message message, List<String> args ) {
 		colors.push( message.colors.peek() );
 		return this.toString();
 	}

@@ -695,22 +695,26 @@ public class Game implements Formattable {
 		}
 
 		@Override
-		public Object format( Message message, String value ) {
-			switch ( value ) {
+		public String format( Message message, List<String> args ) {
+			if ( args.size() == 0 )
+				args.add( "name" );
+			switch ( args.remove( 0 ) ) {
+			case "name":
+				return name;
 			case "player":
-				return rep;
+				return rep.format( message, args );
 			case "kills":
-				return kills;
+				return Integer.toString( kills );
 			case "deaths":
-				return deaths;
+				return Integer.toString( deaths );
 			case "hitsgiven":
-				return hitsGiven;
+				return Integer.toString( hitsGiven );
 			case "hitstaken":
-				return hitsTaken;
+				return Integer.toString( hitsTaken );
 			case "suicides":
-				return suicides;
+				return Integer.toString( suicides );
 			case "handicap":
-				return hadicapLevel;
+				return Integer.toString( hadicapLevel );
 			}
 			return "INVALID REFERENCE";
 		}
@@ -761,40 +765,43 @@ public class Game implements Formattable {
 	}
 
 	@Override
-	public Object format( Message message, String value ) {
-		if ( value == null )
+	public String format( Message message, List<String> args ) {
+		if ( args.size() == 0 )
 			return name;
-		switch ( value ) {
+		switch ( args.get( 0 ) ) {
 		case "name":
 			return name;
 		case "minplayers":
-			return minPlayers;
+			return Integer.toString( minPlayers );
 		case "maxplayers":
-			return board.spawnPoints.size();
+			return Integer.toString( board.spawnPoints.size() );
 		case "arena":
-			return board;
+			args.remove( 0 );
+			return board.format( message, args );
 		case "players":
-			return players.size();
+			return Integer.toString( players.size() );
 		case "power":
-			return power;
+			return Integer.toString( power );
 		case "bombs":
-			return bombs;
+			return Integer.toString( bombs );
 		case "fare":
-			return fare;
+			args.remove( 0 );
+			return new ItemWrapper( fare ).format( message, args );
 		case "prize":
-			return prize;
+			args.remove( 0 );
+			return new ItemWrapper( prize ).format( message, args );
 		case "timeout":
-			return getTimeout();
+			return Integer.toString( getTimeout() );
 		case "suddendeath":
-			return getSuddenDeath();
+			return Integer.toString( getSuddenDeath() );
 		case "autostart":
-			return getAutostartDelay();
+			return Integer.toString( getAutostartDelay() );
 		case "x":
-			return box.x;
+			return Integer.toString( box.x );
 		case "y":
-			return box.y;
+			return Integer.toString( box.y );
 		case "z":
-			return box.z;
+			return Integer.toString( box.z );
 		default:
 			return null;
 		}

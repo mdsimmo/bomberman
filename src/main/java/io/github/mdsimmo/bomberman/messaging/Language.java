@@ -76,7 +76,7 @@ public class Language implements Formattable {
 	}
 
 	@Override
-	public Object format( Message message, String value ) {
+	public String format( Message message, List<String> args ) {
 		return name;
 	}
 
