@@ -6,7 +6,9 @@ import io.github.mdsimmo.bomberman.messaging.Message;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
+import org.bukkit.DyeColor;
 import org.bukkit.Material;
 import org.bukkit.util.Vector;
 
@@ -18,8 +20,8 @@ public class Board implements Formattable {
 	public final int zSize;
 	private Vector shift = new Vector();
 	private BlockRep[][][] blocks;
-	public HashMap<Vector, BlockRep> delayed = new HashMap<>();
-	public ArrayList<Vector> spawnPoints = new ArrayList<>();
+	public Map<Vector, BlockRep> delayed = new HashMap<>();
+	public Map<DyeColor, List<Vector>> spawnPoints = new HashMap<>();
 	private List<Material> destructables = Config.BLOCKS_DESTRUCTABLE
 			.getValue();
 	private List<Material> droppingBlocks = Config.BLOCKS_DROPPING.getValue();
@@ -54,7 +56,12 @@ public class Board implements Formattable {
 			delayed.put( place, block );
 		}
 		if ( block.getMaterial() == Material.WOOL ) {
-			spawnPoints.add( place.add( new Vector( 0.5, 1, 0.5 ) ) );
+			@SuppressWarnings( "deprecation" )
+			DyeColor color = DyeColor.getByData( block.getData() );
+			List<Vector> list = spawnPoints.get( color );
+			if ( list == null )
+				spawnPoints.put( color, list = new ArrayList<Vector>() );
+			list.add( place.add( new Vector( 0.5, 1, 0.5 ) ) );
 		}
 	}
 

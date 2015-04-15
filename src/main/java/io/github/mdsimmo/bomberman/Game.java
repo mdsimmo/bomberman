@@ -18,6 +18,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.bukkit.DyeColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
@@ -197,7 +198,7 @@ public class Game implements Formattable {
 		if ( !observers.contains( rep ) )
 			observers.add( rep );
 		if ( autostart ) {
-			if ( findSpareSpawn() == null ) {
+			if ( findSpareSpawn( null ) == null ) {
 				startGame();
 			} else if ( this.players.size() >= this.minPlayers ) {
 				startGame( autostartDelay, false );
@@ -339,8 +340,24 @@ public class Game implements Formattable {
 		}
 	}
 
-	public Vector findSpareSpawn() {
-		for ( Vector v : board.spawnPoints ) {
+	public Vector findSpareSpawn( DyeColor team ) {
+		if ( team != null )
+			return findSpareSpawnOfTeam( team );
+		else {
+			for ( DyeColor color : board.spawnPoints.keySet() ) {
+				Vector loc = findSpareSpawn( color );
+				if ( loc != null )
+					return loc;
+			}
+		}
+		return null;
+	}
+	
+	private Vector findSpareSpawnOfTeam( DyeColor team ) {
+		List<Vector> list = board.spawnPoints.get( team );
+		if ( list == null )
+			return null;
+		for ( Vector v : list ) {
 			if ( blockEmpty( v ) )
 				return v;
 		}

@@ -37,6 +37,7 @@ import org.bukkit.util.Vector;
 public class GamePlayingState extends PlayerState implements Listener {
 
 	private final Game game;
+	private final DyeColor team;
 	private ItemStack[] spawnInventory;
 	private Location spawn;
 	private int spawnHunger;
@@ -45,9 +46,10 @@ public class GamePlayingState extends PlayerState implements Listener {
 	private boolean isPlaying = false;
 	private BlockRep[][][] cageBlocks = new BlockRep[3][4][3];
 
-	public GamePlayingState( PlayerRep rep ) {
+	public GamePlayingState( PlayerRep rep, DyeColor team ) {
 		super( rep );
 		this.game = rep.getActiveGame();
+		this.team = team;
 	}
 
 	@Override
@@ -63,7 +65,7 @@ public class GamePlayingState extends PlayerState implements Listener {
 			return false;
 		}
 		spawn = player.getLocation();
-		Vector gameSpawn = game.findSpareSpawn();
+		Vector gameSpawn = game.findSpareSpawn( team );
 		if ( gameSpawn == null ) {
 			Message message = Text.GAME_FULL.getMessage( player );
 			message.put( "game", game );
@@ -105,11 +107,11 @@ public class GamePlayingState extends PlayerState implements Listener {
 		plugin.getServer().getPluginManager().registerEvents( this, plugin );
 		return true;
 	}
-	
+
 	public void gameStarted() {
 		removeCage();
 	}
-	
+
 	@SuppressWarnings( "deprecation" )
 	private void surroundCage() {
 		Location loc = rep.getPlayer().getLocation();
@@ -117,29 +119,29 @@ public class GamePlayingState extends PlayerState implements Listener {
 		for ( int i = -1; i <= 1; i++ ) {
 			for ( int j = 0; j < 4; j++ ) {
 				for ( int k = -1; k <= 1; k++ ) {
-					if ( (j == 1 || j == 2 ) && j == 0 && k == 0 )
+					if ( ( j == 1 || j == 2 ) && j == 0 && k == 0 )
 						continue;
 					temp.setX( loc.getX() + i );
 					temp.setY( loc.getY() + j );
 					temp.setZ( loc.getZ() + k );
 					Block b = temp.getBlock();
-					if (b.getType().isSolid() )
+					if ( b.getType().isSolid() )
 						continue;
-					cageBlocks[i+1][j][k+1] = BlockRep.createBlock( b );
+					cageBlocks[i + 1][j][k + 1] = BlockRep.createBlock( b );
 					b.setType( Material.STAINED_GLASS );
 					b.setData( DyeColor.WHITE.getData() );
 				}
 			}
 		}
 	}
-	
+
 	private void removeCage() {
 		Location loc = rep.getPlayer().getLocation();
 		Location temp = loc.clone();
 		for ( int i = -1; i <= 1; i++ ) {
 			for ( int j = 0; j < 4; j++ ) {
 				for ( int k = -1; k <= 1; k++ ) {
-					BlockRep bRep = cageBlocks[i+1][j][k+1];
+					BlockRep bRep = cageBlocks[i + 1][j][k + 1];
 					if ( bRep == null )
 						continue;
 					temp.setX( loc.getX() + i );

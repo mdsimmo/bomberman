@@ -196,6 +196,10 @@ public class BlockRep {
 		return material;
 	}
 	
+	public byte getData() {
+		return data;
+	}
+	
 	private static String getExpandedSection(Save save) {
 		if (!ids.containsKey(save))
 			ids.put(save, 0);
