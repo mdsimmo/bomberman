@@ -40,6 +40,8 @@ public abstract class Save extends YamlConfiguration {
 				"0.1.0" ),
 		V0_1_0_SNAPSHOT(
 				"0.1.0-SNAPSHOT" ),
+		V0_1_0_SNAPSHOT_2(
+				"0.1.0-SNAPSHOT-2" ),
 		PAST(
 				"past" ),
 		FUTURE(

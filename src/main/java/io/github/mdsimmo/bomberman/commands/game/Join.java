@@ -34,14 +34,15 @@ public class Join extends GameCommand {
 			List<String> values = new ArrayList<String>();
 			for ( DyeColor color : DyeColor.values() )
 				values.add( color.toString() );
-			return values;
+			//return values;
+			return null;
 		}
 		return null;
 	}
 
 	@Override
 	public boolean runShort( CommandSender sender, List<String> args, Game game ) {
-		if ( args.size() > 1 )
+		if ( args.size() != 0 ) // > 1 )
 			return false;
 		if ( sender instanceof Player == false ) {
 			Chat.sendMessage( getMessage( Text.MUST_BE_PLAYER, sender ) );
