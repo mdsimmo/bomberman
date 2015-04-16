@@ -24,6 +24,7 @@ public class ArenaEdittingState extends PlayerState implements Listener {
 
 	private final Game game;
 	private LinkedHashMap<Block, BlockRep> changes;
+	private boolean finished;
 
 	public ArenaEdittingState( PlayerRep rep ) {
 		super( rep );
@@ -41,12 +42,18 @@ public class ArenaEdittingState extends PlayerState implements Listener {
 			changes = new LinkedHashMap<>();
 		else
 			changes.clear();
+		finished = false;
 		return true;
 	}
 
 	@Override
 	public boolean onDisable() {
+		if ( !finished ) {
+			System.out.println( "FALSE" );
+			return false;
+		}
 		HandlerList.unregisterAll( this );
+		System.out.println( "TRUE" );
 		return true;
 	}
 
@@ -97,7 +104,8 @@ public class ArenaEdittingState extends PlayerState implements Listener {
 				game.board.addBlock( BlockRep.createBlock( b ), v );
 		}
 		ArenaGenerator.saveBoard( game.board );
-		rep.switchStates( null );
+		finished = true;
+		System.out.println( rep.switchStates( null ) );
 	}
 
 	public void discardChanges( boolean remove ) {
@@ -108,7 +116,8 @@ public class ArenaEdittingState extends PlayerState implements Listener {
 				previous.setBlock( current );
 			}
 		}
-		rep.switchStates( null );
+		finished = true;
+		System.out.println( rep.switchStates( null ) );
 	}
 
 	public Game getGame() {

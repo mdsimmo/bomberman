@@ -43,8 +43,9 @@ public class EditArena extends Cmd {
 			} else {
 				return Game.allGames();
 			}
-		} else
+		} else {
 			return null;
+		}
 	}
 
 	@Override
@@ -69,61 +70,67 @@ public class EditArena extends Cmd {
 			board = game.board;
 
 		if ( args.size() == 0 ) {
-			if ( state instanceof ArenaEdittingState )
-				Chat.sendMessage(
-						getMessage( Text.EDIT_ALREADY_STARTED, sender ).put(
-								"game", game ).put( "arena", board ) );
-			else if ( rep.getState() != null )
-				Chat.sendMessage(
-						getMessage( Text.EDIT_CANT_START, sender ).put( "game",
-								game ).put( "arena", board ) );
-			if ( game != null ) {
-				Chat.sendMessage(
-						getMessage( Text.EDIT_STARTED, sender ).put( "game",
-								game ).put( "arena", board ) );
+			// asking to start edit mode
+			if ( game == null ) {
+				Chat.sendMessage( getMessage( Text.SPECIFY_GAME, sender ) );
 			} else {
-
+				if (rep.switchStates( new ArenaEdittingState( rep ) ) ) {
+					Chat.sendMessage( getMessage( Text.EDIT_STARTED, sender ).put(
+							"game", game ).put( "arena", board ) );
+				} else {
+					if ( state instanceof ArenaEdittingState ) {
+						Chat.sendMessage( getMessage( Text.EDIT_ALREADY_STARTED, sender )
+								.put( "game", game ).put( "arena", board ) );
+					} else {
+						Chat.sendMessage( getMessage( Text.PLAYER_BUSY, sender ).put(
+								"game", game ).put( "arena", board ) );
+					}
+				}
 			}
+			return true;
 		} else {
 
 			String arg = args.get( 0 );
+			
+			// see if first arg is a game
+			Game game2 = Game.findGame( arg );
+			if ( game2 != null ) {
+				rep.setActiveGame( game2 );
+				args.remove( 0 );
+				// lets do this again :)
+				return run( sender, args );
+			}
+			
+			ArenaEdittingState editState = null;
+			if ( state instanceof ArenaEdittingState ) {
+				editState = (ArenaEdittingState)state;
+			} else {
+				Chat.sendMessage( getMessage( Text.EDIT_PROMPT_START, sender )
+						.put( "game", game ).put( "arena", board ) );
+				return true;
+			}
 			String save = getMessage( Text.EDIT_SAVE, sender ).toString();
 			String discard = getMessage( Text.EDIT_DISCARD, sender ).toString();
 			String ignore = getMessage( Text.EDIT_IGNORE, sender ).toString();
-			ArenaEdittingState editState = null;
-			if ( state instanceof ArenaEdittingState )
-				editState = (ArenaEdittingState)state;
-			else
-				Chat.sendMessage(
-						getMessage( Text.EDIT_PROMPT_START, sender ).put(
-								"game", game ).put( "arena", board ) );
-
+			
 			if ( save.equalsIgnoreCase( arg ) ) {
 				editState.saveChanges();
-				Chat.sendMessage(
-						getMessage( Text.EDIT_CHANGES_SAVED, sender ).put(
-								"game", game ).put( "arena", board ) );
+				System.out.println( editState );
+				Chat.sendMessage( getMessage( Text.EDIT_CHANGES_SAVED, sender )
+						.put( "game", game ).put( "arena", board ) );
 			} else if ( discard.equalsIgnoreCase( arg ) ) {
 				editState.discardChanges( true );
-				Chat.sendMessage(
-						getMessage( Text.EDIT_CANGES_REMOVED, sender ).put(
-								"game", game ).put( "arena", board ) );
+				Chat.sendMessage( getMessage( Text.EDIT_CANGES_REMOVED, sender )
+						.put( "game", game ).put( "arena", board ) );
 			} else if ( ignore.equalsIgnoreCase( arg ) ) {
 				editState.discardChanges( false );
-				Chat.sendMessage( getMessage( Text.EDIT_MODE_QUIT, sender ).put(
-						"game", game ).put( "arena", board ) );
+				Chat.sendMessage( getMessage( Text.EDIT_MODE_QUIT, sender )
+						.put( "game", game ).put( "arena", board ) );
 			} else {
-				Game game2 = Game.findGame( args.get( 0 ) );
-				if ( game2 == null )
-					return false;
-				else {
-					rep.setActiveGame( game2 );
-					args.remove( 0 );
-					return run( sender, args );
-				}
+				return false;
 			}
+			return true;
 		}
-		return true;
 	}
 
 	@Override
@@ -146,11 +153,11 @@ public class EditArena extends Cmd {
 		String game = Utils.random( Game.allGames() );
 		if ( game == null )
 			game = "mygame";
-		return getMessage( Text.EDIT_EXAMPLE, sender).put( "example", game );
+		return getMessage( Text.EDIT_EXAMPLE, sender ).put( "example", game );
 	}
 
 	@Override
-	public Message description( CommandSender sender  ) {
+	public Message description( CommandSender sender ) {
 		return getMessage( Text.EDIT_DESCRIPTION, sender );
 	}
 

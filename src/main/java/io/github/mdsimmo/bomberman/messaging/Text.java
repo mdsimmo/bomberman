@@ -381,12 +381,12 @@ public enum Text implements Phrase {
 	EDIT_ALREADY_STARTED(
 			"command.arenaedit.already-started",
 			"You're already editting {game}" ),
-	EDIT_CANT_START(
-			"command.arenaedit.cant-start",
-			"Couldn't start edit mode in game {game}" ),
 	EDIT_CHANGES_SAVED(
 			"command.arenaedit.changes-saved",
 			"Changes saved" ),
+	EDIT_SPECIFY_GAME(
+			"command.arenaedit.specify-game",
+			"You must specify a game" ),
 	EDIT_PROMPT_START(
 			"command.arenaedit.prompt-start",
 			"Edit mode needs to be started first" ),

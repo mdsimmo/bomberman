@@ -95,18 +95,23 @@ public class PlayerRep implements Listener, Formattable {
 	 * @return true if the state was successfully added
 	 */
 	public boolean switchStates( PlayerState state ) {
-		if ( this.state != null && !this.state.disable() )
+		if ( this.state != null && !this.state.disable() ) {
+			System.out.println( "State failed to disable" );
 			return false;
-
+		}
 		this.state = null;
 
-		if ( state == null )
+		if ( state == null ) {
+			System.out.println( "State removed" );
 			return true;
+		}
 
 		if ( state.enable() ) {
+			System.out.println( "State enabled" );
 			this.state = state;
 			return true;
 		} else {
+			System.out.println( "State failed to enable" );
 			return false;
 		}
 	}
