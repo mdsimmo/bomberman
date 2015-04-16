@@ -33,8 +33,6 @@ public class ArenaEdittingState extends PlayerState implements Listener {
 
 	@Override
 	public boolean onEnable() {
-		if ( rep.getState() != null )
-			return false;
 		if ( game == null )
 			return false;
 		plugin.getServer().getPluginManager().registerEvents( this, plugin );

@@ -59,11 +59,6 @@ public class GamePlayingState extends PlayerState implements Listener {
 			Chat.sendMessage( message );
 			return false;
 		}
-		if ( rep.getState() != null ) {
-			Message message = Text.PLAYER_BUSY.getMessage( player );
-			message.put( "game", game );
-			return false;
-		}
 		spawn = player.getLocation();
 		Vector gameSpawn = game.findSpareSpawn( team );
 		if ( gameSpawn == null ) {

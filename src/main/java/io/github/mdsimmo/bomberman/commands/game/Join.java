@@ -5,6 +5,7 @@ import io.github.mdsimmo.bomberman.PlayerRep;
 import io.github.mdsimmo.bomberman.commands.Cmd;
 import io.github.mdsimmo.bomberman.commands.GameCommand;
 import io.github.mdsimmo.bomberman.messaging.Chat;
+import io.github.mdsimmo.bomberman.messaging.Message;
 import io.github.mdsimmo.bomberman.messaging.Phrase;
 import io.github.mdsimmo.bomberman.messaging.Text;
 import io.github.mdsimmo.bomberman.playerstates.GamePlayingState;
@@ -60,7 +61,14 @@ public class Join extends GameCommand {
 				return false;
 			}
 		rep.setActiveGame( game );
-		rep.switchStates( new GamePlayingState( rep, team ) );
+		if ( !rep.switchStates( new GamePlayingState( rep, team ) ) ) {
+			if ( rep.getState() != null ) {
+				Message message = Text.PLAYER_BUSY.getMessage( rep );
+				message.put( "game", game );
+				Chat.sendMessage( message );
+				return true;
+			}
+		}
 		return true;
 	}
 
