@@ -114,7 +114,7 @@ public class BoardSaver extends Save {
 	}
 
 	@Override
-	public void convert( Version version, String raw ) {
+	public void convert( Version version ) {
 		switch ( version ) {
 		case PAST:
 		case V0_0_1:
@@ -134,7 +134,7 @@ public class BoardSaver extends Save {
 			break;
 		case FUTURE:
 			plugin.getLogger().info(
-					"Unkowen version " + getVersionRaw() + " in "
+					"Unknown version " + getVersionRaw() + " in "
 							+ file.getName() );
 			break;
 		}

@@ -96,11 +96,11 @@ public abstract class Save extends YamlConfiguration {
 	 * @param raw
 	 *            the String of what was given in the save file
 	 */
-	public abstract void convert( Version version, String raw );
+	public abstract void convert( Version version );
 
 	public void convert() {
 		String raw = getString( VERSION_PATH );
-		convert( Version.from( raw ), raw );
+		convert( Version.from( raw ) );
 	}
 
 	@Override

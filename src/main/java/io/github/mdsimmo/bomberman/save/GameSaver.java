@@ -54,7 +54,7 @@ public class GameSaver extends Save {
 	}
 	
 	@Override
-	public void convert(Version version, String raw) {
+	public void convert(Version version ) {
 		switch (version) {
 		case PAST:
 		case V0_0_1:
@@ -74,7 +74,7 @@ public class GameSaver extends Save {
 		case V0_1_0_SNAPSHOT_2:
 			break;
 		case FUTURE:
-			plugin.getLogger().info("Unknown version '" + raw + "' in " + file.getName());
+			plugin.getLogger().info("Unknown version '" + getVersionRaw() + "' in " + file.getName());
 			break;
 		}
 	}
