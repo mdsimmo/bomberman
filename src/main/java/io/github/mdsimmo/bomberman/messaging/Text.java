@@ -1104,14 +1104,26 @@ public enum Text implements Phrase {
 		return path;
 	}
 	
+	/**
+	 * Convenience method. {@code|Exact same as Chat.getMessage( this, rep )}
+	 * @see {@link Chat#getMessage(Phrase, PlayerRep)}
+	 */
 	public Message getMessage( PlayerRep rep ) {
 		return Chat.getMessage( this, rep );
 	}
 
+	/**
+	 * Convenience method. {@code|Exact same as Chat.getMessage( this, lang, sender )}
+	 * @see {@link Chat#getMessage(Phrase, Language, CommandSender)}
+	 */
 	public Message getMessage( Language lang, CommandSender sender ) {
 		return Chat.getMessage( this, lang, sender );
 	}
 
+	/**
+	 * Convenience method. {@code|Exact same as Chat.getMessage( this, sender )}
+	 * @see {@link Chat#getMessage(Phrase, CommandSender)}
+	 */
 	public Message getMessage( CommandSender sender ) {
 		return Chat.getMessage( this, sender );
 	}
