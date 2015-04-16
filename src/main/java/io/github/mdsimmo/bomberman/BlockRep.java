@@ -143,8 +143,7 @@ public class BlockRep {
 	 */
 	@SuppressWarnings("deprecation")
 	public void setBlock(Block b) {
-		b.setType(material);
-		b.setData(data);
+		b.setTypeIdAndData( material.getId(), data, false );
 	}
 
 	public String save(Save save) {
