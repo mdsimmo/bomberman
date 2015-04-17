@@ -153,6 +153,7 @@ public class Game implements Formattable {
 	private int bombs;
 	private GameStarter countdownTimer = null;
 	public List<DeathBlock> deathBlocks = new ArrayList<>();
+	public boolean destroyed = false;
 	private double dropChance;
 	private List<ItemStack> drops;
 	public Map<Block, Bomb> explosions = new HashMap<>();
@@ -301,6 +302,7 @@ public class Game implements Formattable {
 	 * to do that.
 	 */
 	public void destroy() {
+		this.destroyed = true;
 		gameRegistry.remove( name.toLowerCase() );
 		HandlerList.unregisterAll( protector );
 		stop();

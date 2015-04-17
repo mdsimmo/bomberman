@@ -18,8 +18,8 @@ import org.bukkit.potion.PotionEffect;
 
 public class PlayerRep implements Listener, Formattable {
 
-	private static JavaPlugin					plugin	= Bomberman.instance;
-	private static HashMap<Player, PlayerRep>	lookup	= new HashMap<>();
+	private static JavaPlugin plugin = Bomberman.instance;
+	private static HashMap<Player, PlayerRep> lookup = new HashMap<>();
 
 	public static PlayerRep getPlayerRep( Player player ) {
 		PlayerRep rep = lookup.get( player );
@@ -40,13 +40,12 @@ public class PlayerRep implements Listener, Formattable {
 		return rep == null ? null : rep.getLanguage();
 	}
 
-	private final Player	player;
-	private Game			game;
+	private final Player player;
+	private Game game;
 
-	private Language		lang	= Language
-											.getLanguage( (String)Config.LANGUAGE
-													.getValue() );
-	private PlayerState		state	= null;
+	private Language lang = Language.getLanguage( (String)Config.LANGUAGE
+			.getValue() );
+	private PlayerState state = null;
 
 	public PlayerRep( Player player ) {
 		this.player = player;
@@ -60,6 +59,8 @@ public class PlayerRep implements Listener, Formattable {
 	 * @return the active game
 	 */
 	public Game getActiveGame() {
+		if ( game != null && game.destroyed )
+			this.game = null;
 		return game;
 	}
 
