@@ -309,7 +309,7 @@ public class Game implements Formattable {
 		}
 		File gameSave = new File( plugin.getDataFolder(), name + ".game" );
 		gameSave.delete();
-		plugin.getLogger().info( "deleting old board: '" + board.name + '\'' );
+		plugin.getLogger().info( "deleting old board: '" + oldBoard.name + '\'' );
 		ArenaGenerator.remove( oldBoard.name );
 		File boardsSave = new File( plugin.getDataFolder(), name + ".old.arena" );
 		boardsSave.delete();
