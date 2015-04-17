@@ -5,6 +5,7 @@ import io.github.mdsimmo.bomberman.Config;
 import io.github.mdsimmo.bomberman.Game;
 import io.github.mdsimmo.bomberman.PlayerRep;
 import io.github.mdsimmo.bomberman.arenabuilder.ArenaGenerator;
+import io.github.mdsimmo.bomberman.arenabuilder.ArenaGenerator.BuildListener;
 import io.github.mdsimmo.bomberman.commands.Cmd;
 import io.github.mdsimmo.bomberman.messaging.Chat;
 import io.github.mdsimmo.bomberman.messaging.Message;
@@ -73,11 +74,8 @@ public class Create extends Cmd {
 				// long location getting line to round to integers...
 				Location l = ( (Player)sender ).getLocation().getBlock()
 						.getLocation();
-				Game game = createGame( args.get( 0 ), l, arena );
+				Game game = createGame( args.get( 0 ), l, arena, sender );
 				PlayerRep.getPlayerRep( (Player)sender ).setActiveGame( game );
-				Chat.sendMessage(
-						getMessage( Text.CREATE_SUCCESS, sender ).put( "game",
-								game ) );
 			}
 		} else {
 			Chat.sendMessage( getMessage( Text.MUST_BE_PLAYER, sender ) );
@@ -85,13 +83,23 @@ public class Create extends Cmd {
 		return true;
 	}
 
-	private Game createGame( String name, Location l, Board arena ) {
-		Game game = new Game( name, new Box( l, arena.xSize, arena.ySize,
+	private Game createGame( String name, Location l, Board arena, final CommandSender sender ) {
+		final Game game = new Game( name, new Box( l, arena.xSize, arena.ySize,
 				arena.zSize ) );
 		game.board = arena;
 		game.oldBoard = ArenaGenerator.createArena( name + ".old", game.box );
-		ArenaGenerator.switchBoard( game.oldBoard, game.board, game.box );
-		Game.register( game );
+		ArenaGenerator.switchBoard( game.oldBoard, game.board, game.box, new BuildListener() {
+			@Override
+			public void onContructionComplete() {
+				Message message = getMessage( Text.CREATE_SUCCESS, sender );
+				message.put( "game", game );
+				Chat.sendMessage( message );
+				Game.register( game );
+			} 
+		} );
+		Message message = getMessage( Text.CREATE_STARTED, sender );
+		message.put( "game", game );
+		Chat.sendMessage( message );
 		return game;
 	}
 

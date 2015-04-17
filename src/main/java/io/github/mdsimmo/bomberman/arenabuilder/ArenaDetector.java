@@ -85,7 +85,8 @@ public class ArenaDetector implements Runnable {
 	private void finish( Box box ) {
 		plugin.getServer().getScheduler().cancelTask( taskID );
 		taskID = -1;
-		callBack.onBoundingDetected( box );
+		if ( callBack != null )
+			callBack.onBoundingDetected( box );
 		System.out.println( "Arena creation finished" );
 	}
 

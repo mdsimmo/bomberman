@@ -3,6 +3,7 @@ package io.github.mdsimmo.bomberman.arenabuilder;
 import io.github.mdsimmo.bomberman.Board;
 import io.github.mdsimmo.bomberman.Bomberman;
 import io.github.mdsimmo.bomberman.Config;
+import io.github.mdsimmo.bomberman.arenabuilder.ArenaGenerator.BuildListener;
 
 import org.bukkit.Location;
 import org.bukkit.plugin.Plugin;
@@ -15,11 +16,12 @@ public class ArenaBuilder implements Runnable {
 	private Location location;
 	private int ticks = 0, count = 0;
 	private int id;
-	
+	private BuildListener listener;
 		
-	public ArenaBuilder(Board board, Location location) {
+	public ArenaBuilder(Board board, Location location, BuildListener l ) {
 		this.board = board;
 		this.location = location;
+		this.listener = l;
 		id = plugin.getServer().getScheduler().scheduleSyncRepeatingTask(plugin, this, 0, 1);
 	}
 	
@@ -39,6 +41,8 @@ public class ArenaBuilder implements Runnable {
 					board.delayed.get(v).setBlock(l.getBlock());
 				}
 				plugin.getServer().getScheduler().cancelTask(id);
+				if ( listener != null )
+					listener.onContructionComplete();
 				return;
 			}				
 		}	

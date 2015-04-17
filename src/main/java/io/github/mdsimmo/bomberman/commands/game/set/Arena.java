@@ -3,12 +3,14 @@ package io.github.mdsimmo.bomberman.commands.game.set;
 import io.github.mdsimmo.bomberman.Board;
 import io.github.mdsimmo.bomberman.Game;
 import io.github.mdsimmo.bomberman.arenabuilder.ArenaGenerator;
+import io.github.mdsimmo.bomberman.arenabuilder.ArenaGenerator.BuildListener;
 import io.github.mdsimmo.bomberman.commands.Cmd;
 import io.github.mdsimmo.bomberman.commands.GameCommand;
 import io.github.mdsimmo.bomberman.messaging.Chat;
 import io.github.mdsimmo.bomberman.messaging.Message;
 import io.github.mdsimmo.bomberman.messaging.Phrase;
 import io.github.mdsimmo.bomberman.messaging.Text;
+import io.github.mdsimmo.bomberman.utils.Box;
 import io.github.mdsimmo.bomberman.utils.Utils;
 
 import java.util.List;
@@ -17,8 +19,8 @@ import org.bukkit.command.CommandSender;
 
 public class Arena extends GameCommand {
 
-	public Arena(Cmd parent) {
-		super(parent);
+	public Arena( Cmd parent ) {
+		super( parent );
 	}
 
 	@Override
@@ -27,33 +29,73 @@ public class Arena extends GameCommand {
 	}
 
 	@Override
-	public List<String> shortOptions(CommandSender sender, List<String> args) {
-		if (args.size() == 0)
+	public List<String> shortOptions( CommandSender sender, List<String> args ) {
+		if ( args
+				.size() == 0 )
 			return ArenaGenerator.allBoards();
 		else
 			return null;
 	}
 
 	@Override
-	public boolean runShort(CommandSender sender, List<String> args, Game game) {
-		if (args.size() != 1)
+	public boolean runShort( final CommandSender sender, List<String> args,
+			final Game game ) {
+		if ( args
+				.size() != 1 )
 			return false;
-		
-		if (game.isPlaying) {
-			Chat.sendMessage(getMessage(Text.SETARENA_GIP, sender).put( "game", game));
+
+		if ( game.isPlaying ) {
+			Chat.sendMessage( getMessage(
+					Text.SETARENA_GIP, sender )
+					.put( "game", game ) );
 			return true;
 		}
 
-		Board board = ArenaGenerator.loadBoard(args.get(0));
-		if (board == null) {
-			Chat.sendMessage(getMessage(Text.INVALID_ARENA, sender).put( "arena", args.get(0)));
+		final Board newboard = ArenaGenerator
+				.loadBoard( args
+						.get( 0 ) );
+		if ( newboard == null ) {
+			Chat.sendMessage( getMessage(
+					Text.INVALID_ARENA, sender )
+					.put( "arena", args.get( 0 ) ) );
 			return true;
 		}
-		ArenaGenerator.switchBoard(game.board, game.oldBoard, game.box);
-		game.board = board;
-		game.oldBoard = ArenaGenerator.createArena(game.name + ".old", game.box);
-		ArenaGenerator.switchBoard(game.oldBoard, board, game.box);
-		Chat.sendMessage(getMessage(Text.SETARENA_SUCCESS, sender).put( "game", game).put( "arena", board));
+
+		if ( game.isPlaying )
+			game.stop();
+
+		final Board oldboard = game.board;
+
+		BuildListener l = new BuildListener() {
+			@Override
+			public void onContructionComplete() {
+				game.board = newboard;
+				Box box = game.box;
+				box.xSize = newboard.xSize;
+				box.ySize = newboard.ySize;
+				box.zSize = newboard.zSize;
+				game.oldBoard = ArenaGenerator.createArena(	game.name + ".old", game.box );
+				BuildListener l2 = new BuildListener() {
+					@Override
+					public void onContructionComplete() {
+						Message message = getMessage(
+								Text.SETARENA_SUCCESS, sender )
+								.put( "game", game )
+								.put( "arena1", oldboard )
+								.put( "arena2", newboard );
+						Chat.sendMessage( message );
+					}
+				};
+				ArenaGenerator.switchBoard(	game.oldBoard, newboard, game.box, l2 );
+			}
+		};
+		ArenaGenerator.switchBoard( game.board, game.oldBoard, game.box, l );
+		Message message = getMessage(
+				Text.SETARENA_STARTED, sender )
+				.put( "game", game )
+				.put( "arena1", oldboard )
+				.put( "arena2", newboard );
+		Chat.sendMessage( message );
 		return true;
 	}
 
@@ -69,16 +111,19 @@ public class Arena extends GameCommand {
 
 	@Override
 	public Phrase exampleShort() {
-		throw new RuntimeException("This method is invalid");
+		throw new RuntimeException( "This method is invalid" );
 	}
-	
+
 	@Override
-	public Message example(CommandSender sender ) {
-		String game = Utils.random(Game.allGames());
+	public Message example( CommandSender sender ) {
+		String game = Utils.random( Game.allGames() );
 		game = game == null ? "mygame" : game;
-		String arena = Utils.random(ArenaGenerator.allBoards());
+		String arena = Utils.random( ArenaGenerator.allBoards() );
 		arena = arena == null ? "myarena" : game;
-		return getMessage(Text.SETARENA_EXAMPLE, sender).put( "game", game).put( "arena", arena);
+		return getMessage(
+				Text.SETARENA_EXAMPLE, sender )
+				.put( "game", game )
+				.put( "arena", arena );
 	}
 
 	@Override

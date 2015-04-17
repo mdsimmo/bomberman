@@ -419,13 +419,13 @@ public enum Text implements Phrase {
 	RESET_EXTRA(
 			"command.reset.extra",
 			"" ),
-	RESET_SUCCESS(
-			"command.reset.success",
-			"Game {game} reset" ),
-	RESET_SUCCESS_P(
-			"command.reset.success-players",
+	RESET_STARTED(
+			"command.reset.started",
 			"Game {game} resetting" ),
-
+	RESET_FINISHED(
+			"command.reset.finished",
+			"Game {game} reset" ),
+			
 	START_NAME(
 			"command.start.name",
 			"start" ),
@@ -491,9 +491,12 @@ public enum Text implements Phrase {
 	SETARENA_GIP(
 			"command.setarena.game-in-progress",
 			"Game {game} in progress. Cannot change arena" ),
+	SETARENA_STARTED(
+			"command.setarena.started",
+			"{game}'s arena is switching from {arena1} to {arena2} "),
 	SETARENA_SUCCESS(
 			"command.setarena.success",
-			"Game {game} arena's changed" ),
+			"{game}'s arena changed" ),
 
 	AUTOSTART_NAME(
 			"command.autostart.name",
@@ -789,6 +792,9 @@ public enum Text implements Phrase {
 	CREATE_GAME_EXISTS(
 			"command.create.game-exists",
 			"Game {game} already exists" ),
+	CREATE_STARTED(
+			"command.create.started",
+			"Creation started..."),
 	CREATE_SUCCESS(
 			"command.create.success",
 			"Game {game} created" ),

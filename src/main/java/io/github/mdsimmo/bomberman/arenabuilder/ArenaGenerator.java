@@ -62,35 +62,43 @@ public class ArenaGenerator {
 		}
 	}
 
+	public interface BuildListener {
+		public void onContructionComplete();
+	}
+	
 	/**
-	 * destroys the current board and replaces it with the next board. <br>
-	 * Use this method to destroy and create board;<br>
+	 * Cleanly replaces the current board with the next board. The boards should 
+	 * always be of equal size. Use this method to destroy and create board;
 	 * Note: when changing boards, this method should be used twice; once to the
-	 * original board, then to the new board.
+	 * original board, then to the new board. 
 	 * 
 	 * @param current
-	 *            the board currently in the world
+	 *            the board currently in the world. May be not be null
 	 * @param next
-	 *            the board that you want
+	 *            the board that you want. Must not be null.
 	 * @param box
-	 *            the box bounding the current board
+	 *            the box bounding the boards.
+	 * @param l the listener to inform the build has finished. Null to not listen
+	 * @throws IllegalArgumentException if the boards are not the same size
 	 */
-	public static void switchBoard( Board current, Board next, Box box ) {
+	public static void switchBoard( Board current, Board next, Box box, BuildListener l ) {
+		if ( current.xSize != next.xSize || current.xSize != box.xSize 
+				|| current.ySize != next.ySize || current.ySize != box.ySize
+				|| current.zSize != next.zSize || current.zSize != box.zSize )
+			throw new IllegalArgumentException( "Boards must all be the same size" );
+		
+		// destroy all items
 		for ( Entity entity : box.getEntities() ) {
 			if ( entity instanceof Item )
 				entity.remove();
 		}
-		// destroy delayed blocks first
+		
+		// destroy delayed blocks first so they don't pop off
 		for ( Vector v : current.delayed.keySet() ) {
 			BlockRep.createBlank().setBlock( box.fromCorner( v ).getBlock() );
 		}
 		// build other blocks
-		new ArenaBuilder( next, box.corner() );
-
-		// set the box to be the correct size
-		box.xSize = next.xSize;
-		box.ySize = next.ySize;
-		box.zSize = next.zSize;
+		new ArenaBuilder( next, box.corner(), l );
 	}
 
 	/**

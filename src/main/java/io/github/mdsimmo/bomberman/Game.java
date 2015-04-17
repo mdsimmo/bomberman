@@ -287,7 +287,7 @@ public class Game implements Formattable {
 			winnersDisplay();
 
 			// reset the game
-			ArenaGenerator.switchBoard( this.board, this.board, box );
+			ArenaGenerator.switchBoard( this.board, this.board, box, null );
 			stop();
 
 			return true;
@@ -313,13 +313,6 @@ public class Game implements Formattable {
 		ArenaGenerator.remove( oldBoard.name );
 		File boardsSave = new File( plugin.getDataFolder(), name + ".old.arena" );
 		boardsSave.delete();
-	}
-	
-	/**
-	 * Removes the arena from the world
-	 */
-	public void resetArena() {
-		ArenaGenerator.switchBoard( board, oldBoard, box );
 	}
 
 	public void drop( Location l, Material type ) {
