@@ -1,37 +1,40 @@
 package io.github.mdsimmo.bomberman.messaging;
 
-import java.math.BigDecimal;
+import java.util.Arrays;
 import java.util.List;
 
 public class Switch implements Formattable {
 
+	
+	public static void main( String[] args ) {
+		Switch s = new Switch();
+		System.out.println( s.format( null, Arrays.asList( "mdsimmo", "matt", "MATT", "a,MDSimmo", "hi", "other" ) ) );
+	}
+	
 	@Override
 	public String format( Message message, List<String> args ) {
-		BigDecimal value = new BigDecimal( args.get( 0 ) );
-		final int size = args.size()-1;
-		for ( int i = 1; i < size; i += 2 ) {
+		final int size = args.size();
+		if ( size < 4 )
+			throw new RuntimeException( "switch needs at least 4 arguments" );
+		if ( size % 2 != 0 )
+			throw new RuntimeException( "switch needs an even amount of arguments" );
+		
+		String val = args.get( 0 );
+		for ( int i = 1; i < size-1; i += 2 ) {
 			String test = args.get( i );
-			if ( equal( value, test ) )
+			if ( equal( val, test ) )
 				return args.get( i+1 );
 		}
 		// return the default value
-		return args.get( size );
+		return args.get( size-1 );
 	}
 	
-	private boolean equal( BigDecimal number, String arg ) {
+	private boolean equal( String start, String arg ) {
 		// TODO switch equaling is very heavy
 		String[] parts = arg.split( "," );
 		for ( String part : parts ) {
-			String[] subParts = part.split( "-" );
-			if ( subParts.length == 1 ) {
-				if ( new BigDecimal( part.trim() ).equals( number ) )
-					return true;
-			} else if ( subParts.length == 2 ) {
-				BigDecimal min = new BigDecimal( subParts[0].trim() );
-				BigDecimal max = new BigDecimal( subParts[1].trim() );
-				if (min.compareTo( number ) <= 0 && max.compareTo( number ) >= 0 )
-					return true;
-			}
+			if ( part.trim().equalsIgnoreCase( start ) )
+				return true;
 		}
 		return false;
 	}
