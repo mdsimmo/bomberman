@@ -71,6 +71,7 @@ public class GameSaver extends Save {
 		case V0_1_0:
 		case V0_1_0_SNAPSHOT:
 		case V0_1_0_SNAPSHOT_2:
+		case V0_1_0_SNAPSHOT_3:
 			break;
 		case FUTURE:
 			plugin.getLogger().info("Unknown version '" + getVersionRaw() + "' in " + file.getName());
