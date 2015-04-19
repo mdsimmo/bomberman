@@ -20,11 +20,13 @@ public class BoardSaver extends Save {
 	private Board board;
 
 	public BoardSaver( Board board ) {
+		// used when saving a board
 		super( board.name + ".arena" );
 		this.board = board;
 	}
 
-	public BoardSaver( File file ) {
+	private BoardSaver( File file ) {
+		// used when loading boards
 		super( file );
 	}
 

@@ -38,3 +38,6 @@ permissions:
   bomberman.void-protection:
     description: Protections placed on the game don't effect you
     default: op
+  bomberman.sign-maker:
+    description: Allows players to add commands to signs
+    default: op

@@ -28,7 +28,9 @@ public abstract class Cmd implements Formattable {
 		ARENA_EDITING(
 				"bomberman.arena" ),
 		PROTECTION_VOID(
-				"bomberman.void-protection" );
+				"bomberman.void-protection" ), 
+		SIGN_MAKER(
+				"bomberman.sign-maker");
 
 		public final String	permission;
 

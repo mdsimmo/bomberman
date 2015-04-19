@@ -1,0 +1,109 @@
+package io.github.mdsimmo.bomberman.commands.signs;
+
+import io.github.mdsimmo.bomberman.Bomberman;
+import io.github.mdsimmo.bomberman.CommandSign;
+import io.github.mdsimmo.bomberman.commands.Cmd;
+import io.github.mdsimmo.bomberman.messaging.Chat;
+import io.github.mdsimmo.bomberman.messaging.Message;
+import io.github.mdsimmo.bomberman.messaging.Text;
+import io.github.mdsimmo.bomberman.utils.BlockLocation;
+import io.github.mdsimmo.bomberman.utils.Utils;
+
+import java.util.List;
+
+import org.bukkit.block.Block;
+import org.bukkit.command.CommandSender;
+import org.bukkit.entity.Player;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
+import org.bukkit.event.HandlerList;
+import org.bukkit.event.Listener;
+import org.bukkit.event.block.Action;
+import org.bukkit.event.player.PlayerInteractEvent;
+import org.bukkit.plugin.Plugin;
+
+public class Add extends Cmd {
+
+	public Add( Cmd parent ) {
+		super( parent );
+	}
+
+	@Override
+	public Message name( CommandSender sender ) {
+		return getMessage( Text.SIGN_ADD_NAME, sender );
+	}
+
+	@Override
+	public List<String> options( CommandSender sender, List<String> args ) {
+		return null;
+	}
+
+	@Override
+	public boolean run( CommandSender sender, List<String> args ) {
+		if ( args.size() == 0 )
+			return false;
+		if ( sender instanceof Player == false ) {
+			Chat.sendMessage( Text.MUST_BE_PLAYER.getMessage( sender ) );
+			return true;
+		}
+		String command = Utils.listToString( args );
+		Chat.sendMessage( Text.SIGN_ADD_PROMT_CLICK.getMessage( sender ).put( "command", command ) );
+		new ClickListener( command, (Player) sender );
+		return true;
+	}
+	
+	private static class ClickListener implements Listener {
+		
+		private static final Plugin plugin = Bomberman.instance;
+		private final String command;
+		private final Player player;
+		
+		public ClickListener( String command, Player player ) {
+			this.command = command;
+			this.player = player;
+			plugin.getServer().getPluginManager().registerEvents( this, plugin );
+		}
+		
+		@EventHandler( priority = EventPriority.LOW )
+		public void onBlockClicked( PlayerInteractEvent e ) {
+			if ( e.isCancelled() )
+				return;
+			if ( e.getAction() != Action.RIGHT_CLICK_BLOCK )
+				return;
+			if ( e.getPlayer() != player )
+				return;
+			Block b = e.getClickedBlock();
+			CommandSign.addCommand( BlockLocation.getLocation( b ), command );
+			Chat.sendMessage( Text.SIGN_ADD_ADDED.getMessage( player ).put( "command", command ) );
+			HandlerList.unregisterAll( this );
+			e.setCancelled( true );
+		}
+		
+	}
+
+	@Override
+	public Message extra( CommandSender sender ) {
+		return getMessage( Text.SIGN_ADD_EXTRA, sender );
+	}
+
+	@Override
+	public Message example( CommandSender sender ) {
+		return getMessage( Text.SIGN_ADD_EXAMPLE, sender );
+	}
+
+	@Override
+	public Message description( CommandSender sender ) {
+		return getMessage( Text.SIGN_ADD_DESCRIPTION, sender );
+	}
+
+	@Override
+	public Message usage( CommandSender sender ) {
+		return getMessage( Text.SIGN_ADD_USAGE, sender );
+	}
+
+	@Override
+	public Permission permission() {
+		return Permission.SIGN_MAKER;
+	}
+
+}

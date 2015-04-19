@@ -52,13 +52,20 @@ public class Box {
 	}
 
 
-	public boolean contains(Location l) {
-		if (l.getWorld().equals(world)) {
-			return     l.getX() >= x && l.getX() < x + xSize
-					&& l.getY() >= y && l.getY() < y + ySize
-					&& l.getZ() >= z && l.getZ() < z + zSize;
-		} else
+	public boolean contains( Location l ) {
+		return contains( l.getWorld(), l.getBlockX(), l.getBlockY(), l.getBlockZ() );
+	}
+	
+	public boolean contains( BlockLocation l ) {
+		return contains( l.world, l.x, l.y, l.z );
+	}
+	
+	public boolean contains( World world, int x, int y, int z ) {
+		if ( !world.equals( this.world ) )
 			return false;
+		return x >= this.x && x < this.x + xSize 
+			&& y >= this.y && y < this.y + ySize
+			&& z >= this.z && z < this.z + zSize;
 	}
 	
 	public Location corner() {

@@ -4,7 +4,6 @@ import io.github.mdsimmo.bomberman.PlayerRep;
 
 import org.bukkit.command.CommandSender;
 
-
 public enum Text implements Phrase {
 
 	MESSAGE_FORMAT(
@@ -215,7 +214,7 @@ public enum Text implements Phrase {
 			"The winners are:" ),
 	WINNERS_LIST(
 			"scores.winners",
-			" {gold|{place}:} {player}"),
+			" {gold|{place}:} {player}" ),
 	SCORE_SEE_SCORES(
 			"score.see-score",
 			"" ),
@@ -425,7 +424,7 @@ public enum Text implements Phrase {
 	RESET_FINISHED(
 			"command.reset.finished",
 			"Game {game} reset" ),
-			
+
 	START_NAME(
 			"command.start.name",
 			"start" ),
@@ -493,7 +492,7 @@ public enum Text implements Phrase {
 			"Game {game} in progress. Cannot change arena" ),
 	SETARENA_STARTED(
 			"command.setarena.started",
-			"{game}'s arena is switching from {arena1} to {arena2} "),
+			"{game}'s arena is switching from {arena1} to {arena2} " ),
 	SETARENA_SUCCESS(
 			"command.setarena.success",
 			"{game}'s arena changed" ),
@@ -794,7 +793,7 @@ public enum Text implements Phrase {
 			"Game {game} already exists" ),
 	CREATE_STARTED(
 			"command.create.started",
-			"Creation started..."),
+			"Creation started..." ),
 	CREATE_SUCCESS(
 			"command.create.success",
 			"Game {game} created" ),
@@ -839,7 +838,7 @@ public enum Text implements Phrase {
 	FORGET_SUCCESS(
 			"command.forget.success",
 			"Game {game} forgotten" ),
-			
+
 	GAME_NAME(
 			"command.game.name",
 			"game" ),
@@ -1090,7 +1089,65 @@ public enum Text implements Phrase {
 			"Unknown language {lang}" ),
 	LANGUAGE_SUCCESS(
 			"command.language.success",
-			"Language set to {lang}" );
+			"Language set to {lang}" ),
+
+	SIGN_CANT_BREAK(
+			"command.signs.cant_break",
+			"Command blocks cannot be broken. Use {aqua|/bm sign remove}" ),
+
+	SIGN_NAME(
+			"command.signs.sign.name",
+			"sign" ),
+	SIGN_DESCRIPTION(
+			"command.signs.sign.description",
+			"Configures sign behaviour" ),
+
+	SIGN_ADD_NAME(
+			"command.signs.add.name",
+			"add" ),
+	SIGN_ADD_DESCRIPTION(
+			"command.signs.add.description",
+			"Adds a command to a sign" ),
+	SIGN_ADD_USAGE(
+			"command.signs.add.usage",
+			"/{command|path} <command>" ),
+	SIGN_ADD_EXAMPLE(
+			"command.signs.add.example",
+			"" ),
+	SIGN_ADD_EXTRA(
+			"command.signs.add.extra",
+			"" ),
+	SIGN_ADD_PROMT_CLICK(
+			"command.signs.add.prompt-click",
+			"Right click on the block to add the command to" ),
+	SIGN_ADD_ADDED(
+			"command.signs.add.added",
+			"Command added" ),
+
+	SIGN_REMOVE_NAME(
+			"command.signs.remove.name",
+			"remove" ),
+	SIGN_REMOVE_DESCRIPTION(
+			"command.signs.remove.description",
+			"Removes all commands from a sign" ),
+	SIGN_REMOVE_USAGE(
+			"command.signs.remove.usage",
+			"/{command|path}" ),
+	SIGN_REMOVE_EXAMPLE(
+			"command.signs.remove.example",
+			"" ),
+	SIGN_REMOVE_EXTRA(
+			"command.signs.remove.extra",
+			"" ),
+	SIGN_REMOVE_PROMT_CLICK(
+			"command.signs.remove.prompt-click",
+			"Right click on the block to remove commands from" ),
+	SIGN_REMOVE_SUCCESS(
+			"command.signs.remove.success",
+			"Commands removed" ),
+	SIGN_REMOVE_NO_COMMANDS(
+			"command.signs.remove.no-commands",
+			"No commands found on this block" );
 
 	private final String path;
 	private final String message;
@@ -1109,9 +1166,10 @@ public enum Text implements Phrase {
 	public String getPath() {
 		return path;
 	}
-	
+
 	/**
 	 * Convenience method. {@code|Exact same as Chat.getMessage( this, rep )}
+	 * 
 	 * @see {@link Chat#getMessage(Phrase, PlayerRep)}
 	 */
 	public Message getMessage( PlayerRep rep ) {
@@ -1119,7 +1177,9 @@ public enum Text implements Phrase {
 	}
 
 	/**
-	 * Convenience method. {@code|Exact same as Chat.getMessage( this, lang, sender )}
+	 * Convenience method. {@code|Exact same as Chat.getMessage( this, lang,
+	 * sender )}
+	 * 
 	 * @see {@link Chat#getMessage(Phrase, Language, CommandSender)}
 	 */
 	public Message getMessage( Language lang, CommandSender sender ) {
@@ -1128,10 +1188,11 @@ public enum Text implements Phrase {
 
 	/**
 	 * Convenience method. {@code|Exact same as Chat.getMessage( this, sender )}
+	 * 
 	 * @see {@link Chat#getMessage(Phrase, CommandSender)}
 	 */
 	public Message getMessage( CommandSender sender ) {
 		return Chat.getMessage( this, sender );
 	}
-	
+
 }

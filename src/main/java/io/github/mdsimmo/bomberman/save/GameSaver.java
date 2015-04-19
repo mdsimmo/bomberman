@@ -9,7 +9,6 @@ import java.io.File;
 
 import org.bukkit.World;
 
-
 public class GameSaver extends Save {
 
 	private Game game;
@@ -19,7 +18,7 @@ public class GameSaver extends Save {
 		this.game = game;
 	}
 	
-	public GameSaver(File file) {
+	private GameSaver(File file) {
 		super(file);
 	}
 

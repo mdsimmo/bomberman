@@ -18,10 +18,13 @@ public class Bomberman extends JavaPlugin {
 		BoardSaver.convertOldArenas();
 		new BaseCommand();
 		Game.loadGames();
+		CommandSign.load();
+		SignHandler.load();
 	}
 	
 	@Override
 	public void onDisable() {
+		CommandSign.save();
 		for (String game : Game.allGames()) {
 			Game.findGame(game).stop();
 			Game.findGame(game).saveGame();

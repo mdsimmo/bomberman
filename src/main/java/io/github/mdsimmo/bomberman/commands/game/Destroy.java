@@ -1,5 +1,6 @@
 package io.github.mdsimmo.bomberman.commands.game;
 
+import io.github.mdsimmo.bomberman.CommandSign;
 import io.github.mdsimmo.bomberman.Game;
 import io.github.mdsimmo.bomberman.arenabuilder.ArenaGenerator;
 import io.github.mdsimmo.bomberman.commands.Cmd;
@@ -38,6 +39,7 @@ public class Destroy extends Cmd {
 		Game game = Game.findGame(args.get(0));
 		if (game != null) {
 			game.destroy();
+			CommandSign.removeAll( game.box );
 			ArenaGenerator.switchBoard( game.board, game.oldBoard, game.box, null );
 			Chat.sendMessage(getMessage(Text.DESTROY_SUCCESS, sender).put( "game", game));
 		} else

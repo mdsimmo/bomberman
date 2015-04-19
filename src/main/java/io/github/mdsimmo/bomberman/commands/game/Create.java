@@ -1,6 +1,7 @@
 package io.github.mdsimmo.bomberman.commands.game;
 
 import io.github.mdsimmo.bomberman.Board;
+import io.github.mdsimmo.bomberman.CommandSign;
 import io.github.mdsimmo.bomberman.Config;
 import io.github.mdsimmo.bomberman.Game;
 import io.github.mdsimmo.bomberman.PlayerRep;
@@ -97,6 +98,7 @@ public class Create extends Cmd {
 				Game.register( game );
 			} 
 		} );
+		CommandSign.removeAll( game.box );
 		Message message = getMessage( Text.CREATE_STARTED, sender );
 		message.put( "game", game );
 		Chat.sendMessage( message );
