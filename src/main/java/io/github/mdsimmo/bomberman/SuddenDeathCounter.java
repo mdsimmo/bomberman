@@ -96,7 +96,7 @@ public class SuddenDeathCounter {
 						Text.TIMEOUT_P,
 						Text.TIMEOUT_O,
 						Text.TIMEOUT_A, null );
-				game.setSuddenDeath(true);
+				game.stop();
 				plugin.getServer().getScheduler().cancelTask(toID);
 			}
 		}
