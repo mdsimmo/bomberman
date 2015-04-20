@@ -798,7 +798,7 @@ public enum Text implements Phrase {
 			"/{command|path} <game>" ),
 	DESTROY_EXAMPLE(
 			"command.destroy.example",
-			"/" ),
+			"" ),
 	DESTROY_EXTRA(
 			"command.destroy.extra",
 			"See also: {aqua|/bm game forget <game>}" ),
