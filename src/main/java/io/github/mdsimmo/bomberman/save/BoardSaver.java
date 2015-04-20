@@ -122,14 +122,12 @@ public class BoardSaver extends Save {
 		case V0_0_1:
 		case V0_0_2:
 		case V0_0_2a:
-			break;
 		case V0_0_3:
 		case V0_0_3a:
 		case V0_0_3b:
 		case V0_0_3c:
 		case V0_0_3d:
 		case V0_0_3_SNAPSHOT:
-			break;
 		case V0_1_0:
 		case V0_1_0_SNAPSHOT:
 		case V0_1_0_SNAPSHOT_2:

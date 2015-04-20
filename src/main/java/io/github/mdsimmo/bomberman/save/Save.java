@@ -17,7 +17,7 @@ public abstract class Save extends YamlConfiguration {
 	protected final File file;
 	private static HashMap<String, Version> versions = new HashMap<>();
 
-	protected enum Version {
+	public enum Version {
 		V0_0_1(
 				"0.0.1" ),
 		V0_0_2(
@@ -36,14 +36,14 @@ public abstract class Save extends YamlConfiguration {
 				"0.0.3c" ),
 		V0_0_3d(
 				"0.0.3d" ),
-		V0_1_0(
-				"0.1.0" ),
 		V0_1_0_SNAPSHOT(
 				"0.1.0-SNAPSHOT" ),
 		V0_1_0_SNAPSHOT_2(
 				"0.1.0-SNAPSHOT-2" ),
 		V0_1_0_SNAPSHOT_3(
-					"0.1.0-SNAPSHOT-3" ),
+				"0.1.0-SNAPSHOT-3" ),
+		V0_1_0(
+				"0.1.0" ),
 		PAST(
 				"past" ),
 		FUTURE(
@@ -60,6 +60,14 @@ public abstract class Save extends YamlConfiguration {
 				Version v = versions.get( version );
 				return v == null ? FUTURE : versions.get( version );
 			}
+		}
+
+		public boolean isBefore( Version other ) {
+			return this.ordinal() < other.ordinal();
+		}
+
+		public boolean isAfter( Version other ) {
+			return this.ordinal() > other.ordinal();
 		}
 	}
 
@@ -131,5 +139,4 @@ public abstract class Save extends YamlConfiguration {
 		return getString( VERSION_PATH );
 	}
 
-	
 }

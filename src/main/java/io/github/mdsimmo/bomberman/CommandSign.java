@@ -1,7 +1,6 @@
 package io.github.mdsimmo.bomberman;
 
 import io.github.mdsimmo.bomberman.utils.BlockLocation;
-import io.github.mdsimmo.bomberman.utils.Box;
 
 import java.io.File;
 import java.io.FilenameFilter;
@@ -41,13 +40,17 @@ public class CommandSign {
 		sign.add( command );
 	}
 	
-	public static void removeAll( Box box ) {
-		for ( BlockLocation l : signs.keySet() ) {
-			if ( box.contains( l ) )
-				signs.remove( l );
-		}
+	public static void addCommands( BlockLocation l, List<String> commands ) {
+		List<String> sign = signs.get( l );
+		if ( sign == null )
+			signs.put( l, sign = new ArrayList<String>() );
+		sign.addAll( commands );
 	}
-
+	
+	public static List<String> getCommands( BlockLocation l ) {
+		return signs.get( l );
+	}
+	
 	public static void save() {
 		int id = 0;
 		for ( Entry<BlockLocation, List<String>> entry : signs.entrySet() ) {

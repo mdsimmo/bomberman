@@ -2,10 +2,12 @@ package io.github.mdsimmo.bomberman.commands.signs;
 
 import io.github.mdsimmo.bomberman.Bomberman;
 import io.github.mdsimmo.bomberman.CommandSign;
+import io.github.mdsimmo.bomberman.PlayerRep;
 import io.github.mdsimmo.bomberman.commands.Cmd;
 import io.github.mdsimmo.bomberman.messaging.Chat;
 import io.github.mdsimmo.bomberman.messaging.Message;
 import io.github.mdsimmo.bomberman.messaging.Text;
+import io.github.mdsimmo.bomberman.playerstates.ArenaEdittingState;
 import io.github.mdsimmo.bomberman.utils.BlockLocation;
 
 import java.util.List;
@@ -73,6 +75,11 @@ public class Remove extends Cmd {
 				Chat.sendMessage( Text.SIGN_REMOVE_SUCCESS.getMessage( player ) );
 			} else {
 				Chat.sendMessage( Text.SIGN_REMOVE_NO_COMMANDS.getMessage( player ) );
+			}
+			PlayerRep rep = PlayerRep.getPlayerRep( e.getPlayer() );
+			if ( rep.getState() instanceof ArenaEdittingState ) {
+				ArenaEdittingState state = (ArenaEdittingState)rep.getState();
+				state.update( e.getClickedBlock() );
 			}
 			HandlerList.unregisterAll( this );
 			e.setCancelled( true );

@@ -77,7 +77,7 @@ public class ArenaEdittingState extends PlayerState implements Listener {
 			return;
 		Block b = e.getBlock();
 		if ( game.box.contains( b.getLocation() ) ) {
-			changes.put( e.getBlock(), BlockRep.createBlock( e.getBlock() ) );
+			update( b );
 		} else {
 			e.setCancelled( true );
 			Message message = Text.EDIT_DESTROY_DENIED.getMessage( player );
@@ -85,6 +85,10 @@ public class ArenaEdittingState extends PlayerState implements Listener {
 			message.put( "block", b );
 			Chat.sendMessage( message );
 		}
+	}
+	
+	public void update( Block block ) {
+		changes.put( block, BlockRep.createBlock( block ) );
 	}
 
 	@EventHandler
