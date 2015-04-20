@@ -40,7 +40,7 @@ public class BlockRep {
 				} else {
 					contents = (List<ItemStack>) expandedSection.getList("contents");
 				}
-				this.contents = contents.toArray(new ItemStack[0]);
+				this.contents = contents.toArray(new ItemStack[contents.size()]);
 			} else {
 				contents = new ItemStack[]{};
 			}
@@ -237,7 +237,7 @@ public class BlockRep {
 			ids.put(save, 0);
 		Integer id = ids.get(save);
 		expandedSection = EXTRA_PATH + ".data-" + id;
-		id++;
+		id += 1;
 		return save.createSection( expandedSection );
 	}
 }

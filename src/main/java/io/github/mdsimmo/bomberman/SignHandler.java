@@ -11,6 +11,7 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.block.BlockBreakEvent;
+import org.bukkit.event.block.BlockPhysicsEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.material.Attachable;
 import org.bukkit.material.MaterialData;
@@ -46,8 +47,19 @@ public class SignHandler implements Listener {
 		}
 	}
 
+	// backup needed in case a sign breaks without our knowing of it
+	@EventHandler( priority = EventPriority.HIGH )
+	public void onSignBreak( BlockPhysicsEvent e ) {
+		if ( e.isCancelled() )
+			return;
+		Block b = e.getBlock();
+		if ( e.getBlock().getType() != e.getChangedType() )
+			if ( CommandSign.removeSign( BlockLocation.getLocation( b ) ) )
+				plugin.getLogger().warning( "Command sign broken at " + b.getLocation() );
+	}
+	
 	@EventHandler( priority = EventPriority.LOW )
-	public void onSignBreak( BlockBreakEvent e ) {
+	public void stopSignBreaking( BlockBreakEvent e ) {
 		if ( e.isCancelled() )
 			return;
 		Block b = e.getBlock();
