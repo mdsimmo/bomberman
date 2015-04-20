@@ -55,8 +55,8 @@ public class Add extends Cmd {
 	private static class ClickListener implements Listener {
 		
 		private static final Plugin plugin = Bomberman.instance;
-		private final String command;
-		private final Player player;
+		private String command;
+		private Player player;
 		
 		public ClickListener( String command, Player player ) {
 			this.command = command;
@@ -73,8 +73,10 @@ public class Add extends Cmd {
 			if ( e.getPlayer() != player )
 				return;
 			Block b = e.getClickedBlock();
-			CommandSign.addCommand( BlockLocation.getLocation( b ), command );
 			Chat.sendMessage( Text.SIGN_ADD_ADDED.getMessage( player ).put( "command", command ) );
+			if (command.charAt( 0 ) == '\\' || command.charAt( 0 ) == '/' )
+				command = command.substring( 1 );
+			CommandSign.addCommand( BlockLocation.getLocation( b ), command );
 			HandlerList.unregisterAll( this );
 			e.setCancelled( true );
 		}
