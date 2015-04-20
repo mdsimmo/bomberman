@@ -92,7 +92,7 @@ public abstract class Save extends YamlConfiguration {
 
 	public void save() {
 		try {
-			super.save( file );
+			save( file );
 		} catch ( IOException e ) {
 			e.printStackTrace();
 		}
