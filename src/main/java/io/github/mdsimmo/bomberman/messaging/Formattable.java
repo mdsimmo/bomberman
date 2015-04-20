@@ -6,6 +6,7 @@ import java.util.List;
 
 import io.github.mdsimmo.bomberman.PlayerRep;
 import net.objecthunter.exp4j.ExpressionBuilder;
+import net.objecthunter.exp4j.function.Function;
 
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
@@ -32,9 +33,9 @@ public interface Formattable {
 						+ format( message, Arrays.asList( "type" ) );
 			switch ( args.get( 0 ) ) {
 			case "amount":
-				return Integer.toString( item.getAmount() );
+				return Integer.toString( item == null ? 0 : item.getAmount() );
 			case "type":
-				return item.getType().toString().replace( '_', ' ' ).toLowerCase();
+				return item == null ? "none" : item.getType().toString().replace( '_', ' ' ).toLowerCase();
 			}
 			return null;
 		}
@@ -69,11 +70,35 @@ public interface Formattable {
 			if ( args.size() != 1 )
 				throw new RuntimeException("Equation must have exactly one argument: " + message.toString());
 			try {
-				double answer = new ExpressionBuilder( args.get( 0 ) ).build().evaluate();
+				double answer = new ExpressionBuilder( args.get( 0 ) ).function( SignFunction.instance ).build().evaluate();
 				return BigDecimal.valueOf( answer ).stripTrailingZeros().toPlainString();
 			} catch ( Exception e ) {
 				throw new RuntimeException( "Expression has invalid numerical imputs: " + args.get( 0 ), e );
 			}
+		}
+	}
+	
+	static class SignFunction extends Function {
+
+		public static SignFunction instance = new SignFunction();
+		
+		public SignFunction() {
+			super( "sign", 1 );
+		}
+		
+		@Override
+		public double apply( double... args ) {
+			if ( args.length != 1 )
+				throw new IllegalArgumentException( "Sign function can only have one argument. (" + args.length + " args given)" );
+			double val = args[0];
+			if ( val > 0 )
+				return 1;
+			else if ( val < 0 )
+				return -1;
+			else if ( val == 0 )
+				return 0;
+			else
+				return Double.NaN;
 		}
 	}
 	

@@ -153,10 +153,29 @@ public class PlayerRep implements Listener, Formattable {
 			return player.getName();
 		case "lives":
 			return Integer.toString( (int)player.getHealth() );
-		case "bombs":
-			return "FIXME"; // FIXME
 		case "power":
-			return "FIXME";
+			if ( isPlaying() ) {
+				int amount = ((GamePlayingState)getState()).bombStrength();
+				return Integer.toString( amount );
+			} else {
+				return "not playing";
+			}
+		case "bombs":
+			if ( isPlaying() ) {
+				int amount = ((GamePlayingState)getState()).bombAmount();
+				return Integer.toString( amount );
+			} else {
+				return "not playing";
+			}
+		case "handicap":
+			if ( isPlaying() ) {
+				Game game = ((GamePlayingState)getState()).getGame();
+				game.getStats( this );
+				int amount = game.getStats( this ).hadicapLevel;
+				return Integer.toString( amount );
+			} else {
+				return "not playing";
+			}
 		default:
 			return null;
 		}

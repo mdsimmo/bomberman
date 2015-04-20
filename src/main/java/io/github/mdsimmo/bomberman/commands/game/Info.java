@@ -42,55 +42,28 @@ public class Info extends GameCommand {
 
 		Chat.sendHeading( Text.INFO.getMessage( sender ), new Message( sender, game.name ) );
 		Map<Message, Message> list = new LinkedHashMap<>();
-		if ( game.isPlaying )
-			list.put( getMessage( Text.INFO_STATUS, sender ),
-					getMessage( Text.INFO_IN_PROGRESS, sender ) );
-		else
-			list.put( getMessage( Text.INFO_STATUS, sender ),
-					getMessage( Text.INFO_WAITING, sender ) );
-		list.put( getMessage( Text.INFO_PLAYERS, sender ), new Message( sender,
-				"" + game.players.size() ) );
-		list.put( getMessage( Text.INFO_MIN_PLAYERS, sender ), new Message(
-				sender, "" + game.getMinPlayers() ) );
-		list.put( getMessage( Text.INFO_MAX_PLAYERS, sender ), new Message(
-				sender, "" + game.board.spawnPoints.size() ) );
-		list.put( getMessage( Text.INFO_INIT_BOMBS, sender ), new Message(
-				sender, "" + game.getBombs() ) );
-		list.put( getMessage( Text.INFO_INIT_LIVES, sender ), new Message(
-				sender, "" + game.getLives() ) );
-		list.put( getMessage( Text.INFO_INIT_POWER, sender ), new Message(
-				sender, "" + game.getPower() ) );
-		Message fare = getMessage( Text.INFO_FARE, sender );
-		if ( game.getFare() == null )
-			list.put( fare, getMessage( Text.INFO_NO_FARE, sender ) );
-		else
-			list.put( fare, new Message( sender, game.getFare().toString() ) );
-
-		Message prize = getMessage( Text.INFO_PRIZE, sender );
-		if ( game.getPot() == true && game.getFare() != null )
-			list.put( prize,
-					getMessage( Text.INFO_POT_AT, sender ).put( "game", game ) );
-		else {
-			if ( game.getPrize() == null )
-				list.put( prize, getMessage( Text.INFO_NO_PRIZE, sender ) );
-			else
-				list.put( prize, new Message( sender, game.getPrize()
-						.toString() ) );
-		}
-		Message sd = game.getSuddenDeath() == -1 ? getMessage( Text.INFO_OFF,
-				sender ) : getMessage( Text.INFO_TIME, sender ).put( "game",
-				game );
-		list.put( getMessage( Text.INFO_SUDDENDEATH, sender ), sd );
-		Message to = game.getTimeout() == -1 ? Text.INFO_OFF
-				.getMessage( sender ) : getMessage( Text.INFO_TIME, sender )
-				.put( "game", game );
-		list.put( getMessage( Text.INFO_TIMEOUT, sender ), to );
-		list.put( Text.ARENA.getMessage( sender ), new Message( sender,
-				game.board.name ) );
+		add( list, game, sender, Text.INFO_STATUS, Text.INFO_STATUS_RESULT );
+		add( list, game, sender, Text.INFO_PLAYERS, Text.INFO_PLAYERS_RESULT );
+		add( list, game, sender, Text.INFO_MIN_PLAYERS, Text.INFO_MIN_PLAYERS_RESULT);
+		add( list, game, sender, Text.INFO_MAX_PLAYERS, Text.INFO_MAX_PLAYERS_RESULT);
+		add( list, game, sender, Text.INFO_INIT_BOMBS, Text.INFO_INIT_BOMBS_RESULT );
+		add( list, game, sender, Text.INFO_INIT_LIVES, Text.INFO_INIT_LIVES_RESULT);
+		add( list, game, sender, Text.INFO_INIT_POWER, Text.INFO_INIT_POWER_RESULT);
+		add( list, game, sender, Text.INFO_FARE, Text.INFO_FARE_RESULT);
+		add( list, game, sender, Text.INFO_PRIZE, Text.INFO_PRIZE_RESULT);
+		add( list, game, sender, Text.INFO_SUDDENDEATH, Text.INFO_SUDDENDEATH_RESULT);
+		add( list, game, sender, Text.INFO_TIMEOUT, Text.INFO_TIMEOUT_RESULT );
+		add( list, game, sender, Text.INFO_ARENA, Text.INFO_ARENA_RESULT);
 		Chat.sendMap( list );
 		return true;
 	}
 
+	private void add( Map<Message, Message> map, Game game, CommandSender sender, Phrase a, Phrase b ) {
+		Message messageA = getMessage( a, sender ).put( "game", game );
+		Message messageB = getMessage( b, sender ).put( "game", game );
+		map.put( messageA, messageB );
+	}
+	
 	@Override
 	public Phrase extraShort() {
 		return Text.INFO_EXTRA;

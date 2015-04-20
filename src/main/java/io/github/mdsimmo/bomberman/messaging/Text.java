@@ -572,15 +572,12 @@ public enum Text implements Phrase {
 	FARE_EXTRA(
 			"command.fare.extra",
 			"matirial must be the name in bukkit's code" ),
-	FARE_NONE(
-			"command.fare.none",
-			"none" ),
-	FARE_REMOVED(
-			"command.fare.removed",
-			"Fare removed" ),
 	FARE_SET(
 			"command.fare.set",
-			"Fare set to {game|fare}" ),
+			"{switch|{game|fare|amount}|0|Fare removed|Fare set to {game|fare}}" ),
+	FARE_NONE(
+			"command.fare.none",
+			"none"),
 
 	HANDICAP_NAME(
 			"command.handicap.name",
@@ -597,15 +594,10 @@ public enum Text implements Phrase {
 	HANDICAP_EXTRA(
 			"command.handicap.extra",
 			"Negitive levels give an advantage" ),
-	HANDICAP_HANDYCAPPED(
-			"command.handicap.handicapped",
-			"{player} handicap set to {player|handicap}" ),
-	HANDICAP_REMOVED(
-			"command.handicap.removed",
-			"Handicap removed from {player}" ),
-	HANDICAP_ADVANTAGE(
-			"command.handicap.advantage",
-			"{player} advantaged at {player|handicap}" ),
+	HANDICAP_SET(
+			"command.handicap.set",
+			"{switch|{=|sign({player|handicap})}|0|Handicap removed from {player}|-1|{player}'s avantage set to level {=|abs({player|handicap})}|{player}'s handicap set to level {player|handicap}}" ),
+	
 	LIVES_NAME(
 			"command.lives.name",
 			"lives" ),
@@ -686,13 +678,7 @@ public enum Text implements Phrase {
 			"none" ),
 	PRIZE_SET(
 			"command.prize.set",
-			"Prize set to {game|prize}" ),
-	PRIZE_REMOVED(
-			"command.prize.removed",
-			"Prize removed" ),
-	PRIZE_POT_SET(
-			"command.prize.pot-set",
-			"Pot set" ),
+			"{switch|{game|haspot}|true|Prize set to a pot|{switch|{game|prize|amount}|0|Prize removed|prize set to {game|prize}}}" ),
 
 	SET_NAME(
 			"command.set.name",
@@ -914,57 +900,81 @@ public enum Text implements Phrase {
 	INFO_STATUS(
 			"command.info.status",
 			"Status" ),
-	INFO_IN_PROGRESS(
+	INFO_STATUS_RESULT(
 			"command.info.in-progress",
-			"In progress" ),
-	INFO_WAITING(
-			"command.info.waiting",
-			"Waiting" ),
+			"{switch|{game|playing}|true|In progress|Waiting}" ),
 	INFO_PLAYERS(
 			"command.info.players",
 			"Players" ),
+	INFO_PLAYERS_RESULT(
+			"command.info.players-result",
+			"{game|players}"),
 	INFO_MIN_PLAYERS(
 			"command.info.min-players",
 			"Min players" ),
+	INFO_MIN_PLAYERS_RESULT(
+			"command.info.min-players-result",
+			"{game|minplayers}" ),
 	INFO_MAX_PLAYERS(
 			"command.info.max-players",
 			"Max players" ),
+	INFO_MAX_PLAYERS_RESULT(
+			"command.info.max-players-result",
+			"{game|maxplayers}" ),
 	INFO_INIT_BOMBS(
 			"command.info.initial-bombs",
 			"Init bombs" ),
+	INFO_INIT_BOMBS_RESULT(
+			"command.info.initial-bombs-result",
+			"{game|bombs}" ),
 	INFO_INIT_LIVES(
 			"command.info.initial-lives",
 			"Init lives" ),
+	INFO_INIT_LIVES_RESULT(
+			"command.info.initial-lives-result",
+			"{game|lives}" ),
 	INFO_INIT_POWER(
 			"command.info.initial-power",
 			"Init power" ),
+	INFO_INIT_POWER_RESULT(
+			"command.info.initial-power-result",
+			"{game|power}" ),
 	INFO_FARE(
-			"command.info.fare",
+			"command.info.fare-result",
 			"Entry fee" ),
-	INFO_NO_FARE(
-			"command.info.no-fare",
-			"No fee" ),
+	INFO_FARE_RESULT(
+			"command.info.fare-result",
+			"{switch|{game|fare|amount}|0|no fee|{game|fare}}" ),
 	INFO_PRIZE(
 			"command.info.prize",
 			"Prize" ),
-	INFO_NO_PRIZE(
-			"command.info.no-prize",
-			"No prize" ),
-	INFO_POT_AT(
-			"command.info.pot-at",
-			"Pot at {game|prize}" ),
+	INFO_PRIZE_RESULT(
+			"command.info.prize-result",
+			"{switch|{game|prize|amount}|0|No prize|{game|prize}}" ),
+	INFO_HAS_POT(
+			"command.info.has-pot",
+			"Has pot"),
+	INFO_HAS_POT_RESULT(
+			"command.info.has-pot-result",
+			"{game|haspot}"),
 	INFO_SUDDENDEATH(
 			"command.info.suddendeath",
 			"Sudden death" ),
-	INFO_OFF(
-			"command.info.sd-off",
-			"Off" ),
-	INFO_TIME(
-			"command.info.sd-time",
-			"{game|suddendeath} seconds" ),
+	INFO_SUDDENDEATH_RESULT(
+			"command.info.suddendeath-result",
+			"{switch|{game|suddendeath}|0,-1|Off|{game|suddendeath} seconds}" ),
 	INFO_TIMEOUT(
 			"command.info.timeout",
 			"Timeout" ),
+	INFO_TIMEOUT_RESULT(
+			"command.info.timeout-result",
+			"{switch|{game|timeout}|0,-1|Off|{game|timeout} seconds}"),
+	INFO_ARENA(
+			"command.info.arena",
+			"Arena" ),
+	INFO_ARENA_RESULT(
+			"command.info.arena-result",
+			"{game|arena}"),
 
 	JOIN_NAME(
 			"command.join.name",

@@ -796,12 +796,16 @@ public class Game implements Formattable {
 			return Integer.toString( power );
 		case "bombs":
 			return Integer.toString( bombs );
+		case "lives":
+			return Integer.toString( lives );
 		case "fare":
 			args.remove( 0 );
 			return new ItemWrapper( fare ).format( message, args );
 		case "prize":
 			args.remove( 0 );
 			return new ItemWrapper( prize ).format( message, args );
+		case "haspot":
+			return Boolean.toString( pot );
 		case "timeout":
 			return Integer.toString( getTimeout() );
 		case "suddendeath":

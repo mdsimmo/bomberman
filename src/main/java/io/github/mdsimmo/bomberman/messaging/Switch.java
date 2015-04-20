@@ -1,23 +1,18 @@
 package io.github.mdsimmo.bomberman.messaging;
 
-import java.util.Arrays;
+import io.github.mdsimmo.bomberman.utils.Utils;
+
 import java.util.List;
 
 public class Switch implements Formattable {
-
-	
-	public static void main( String[] args ) {
-		Switch s = new Switch();
-		System.out.println( s.format( null, Arrays.asList( "mdsimmo", "matt", "MATT", "a,MDSimmo", "hi", "other" ) ) );
-	}
 	
 	@Override
 	public String format( Message message, List<String> args ) {
 		final int size = args.size();
 		if ( size < 4 )
-			throw new RuntimeException( "switch needs at least 4 arguments" );
+			throw new RuntimeException( "switch needs at least 4 arguments: " + Utils.listToString( args ) );
 		if ( size % 2 != 0 )
-			throw new RuntimeException( "switch needs an even amount of arguments" );
+			throw new RuntimeException( "switch needs an even amount of arguments: " + Utils.listToString( args ) );
 		
 		String val = args.get( 0 );
 		for ( int i = 1; i < size-1; i += 2 ) {
@@ -30,7 +25,6 @@ public class Switch implements Formattable {
 	}
 	
 	private boolean equal( String start, String arg ) {
-		// TODO switch equaling is very heavy
 		String[] parts = arg.split( "," );
 		for ( String part : parts ) {
 			if ( part.trim().equalsIgnoreCase( start ) )

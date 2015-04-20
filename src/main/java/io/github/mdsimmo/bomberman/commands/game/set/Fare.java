@@ -16,8 +16,8 @@ import org.bukkit.inventory.ItemStack;
 
 public class Fare extends GameCommand {
 
-	public Fare(Cmd parent) {
-		super(parent);
+	public Fare( Cmd parent ) {
+		super( parent );
 	}
 
 	@Override
@@ -26,40 +26,44 @@ public class Fare extends GameCommand {
 	}
 
 	@Override
-	public List<String> shortOptions(CommandSender sender, List<String> args) {
-		if (args.size() == 1 ) {
+	public List<String> shortOptions( CommandSender sender, List<String> args ) {
+		if ( args.size() == 1 ) {
 			List<String> options = new ArrayList<>();
-			options.add("none");
-			for (Material m : Material.values())
-				options.add(m.toString());
+			options.add( "none" );
+			for ( Material m : Material.values() )
+				options.add( m.toString() );
 			return options;
 		} else
 			return null;
 	}
 
 	@Override
-	public boolean runShort(CommandSender sender, List<String> args, Game game) {
-		if (args.size() < 1 || args.size() > 2)
+	public boolean runShort( CommandSender sender, List<String> args, Game game ) {
+		if ( args.size() < 1 || args.size() > 2 )
 			return false;
-		
-		String none = Text.FARE_NONE.getMessage(sender).toString();
-		if (args.size() == 1 && args.get(0).equalsIgnoreCase(none)) {
-			game.setFare(null);
-			Chat.sendMessage(getMessage(Text.FARE_REMOVED, sender).put( "game", game));
+
+		String none = Text.FARE_NONE.getMessage( sender ).toString();
+		if ( args.size() == 1 && args.get( 0 ).equalsIgnoreCase( none ) ) {
+			game.setFare( null );
+			Chat.sendMessage( getMessage( Text.FARE_SET, sender ).put( "game",
+					game ) );
 			return true;
-		} else if (args.size() == 2) {
-			Material m = Material.getMaterial(args.get(0).toUpperCase());
-			if (m == null) {
-				Chat.sendMessage(getMessage(Text.INVALID_MATERIAL, sender).put( "material", args.get(0)));
+		} else if ( args.size() == 2 ) {
+			Material m = Material.getMaterial( args.get( 0 ).toUpperCase() );
+			if ( m == null ) {
+				Chat.sendMessage( getMessage( Text.INVALID_MATERIAL, sender )
+						.put( "material", args.get( 0 ) ) );
 				return true;
 			}
 			try {
-				int amount = Integer.parseInt(args.get(1));
-				game.setFare(new ItemStack(m, amount));
-				Chat.sendMessage(getMessage(Text.FARE_SET, sender).put( "game", game));
+				int amount = Integer.parseInt( args.get( 1 ) );
+				game.setFare( new ItemStack( m, amount ) );
+				Chat.sendMessage( getMessage( Text.FARE_SET, sender ).put(
+						"game", game ) );
 				return true;
-			} catch (Exception e) {
-				Chat.sendMessage(getMessage(Text.INVALID_NUMBER, sender).put( "number", args.get(1)));
+			} catch ( Exception e ) {
+				Chat.sendMessage( getMessage( Text.INVALID_NUMBER, sender )
+						.put( "number", args.get( 1 ) ) );
 				return true;
 			}
 		} else {

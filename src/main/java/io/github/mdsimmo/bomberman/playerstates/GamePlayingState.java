@@ -304,6 +304,18 @@ public class GamePlayingState extends PlayerState implements Listener {
 		}
 		return Math.max( strength, 1 );
 	}
+	
+	public int bombAmount() {
+		int strength = 0;
+		if ( game == null )
+			return 0;
+		for ( ItemStack stack : player.getInventory().getContents() ) {
+			if ( stack != null && stack.getType() == game.getBombMaterial() ) {
+				strength += stack.getAmount();
+			}
+		}
+		return Math.max( strength, 1 );
+	}
 
 	public void damage( PlayerRep attacker ) {
 		boolean dead = false;

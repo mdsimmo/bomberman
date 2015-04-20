@@ -58,12 +58,8 @@ public class Handicap extends GameCommand {
 			Chat.sendMessage(getMessage(Text.INVALID_NUMBER, sender).put( "number", args.get(1)));
 		}
 		game.setHandicap(rep, handicap);
-		if (handicap > 0)
-			Chat.sendMessage(getMessage(Text.HANDICAP_HANDYCAPPED, sender).put( "game", game).put( "player", rep ));
-		else if (handicap == 0)
-			Chat.sendMessage(getMessage(Text.HANDICAP_REMOVED, sender).put( "game", game).put( "player", rep ));
-		else
-			Chat.sendMessage(getMessage(Text.HANDICAP_ADVANTAGE, sender).put( "game", game).put( "player", rep ));
+		
+		Chat.sendMessage(getMessage(Text.HANDICAP_SET, sender).put( "game", game).put( "player", rep ));
 		
 		if (rep.isPlaying() && !((GamePlayingState)rep.getState()).getGame().isPlaying)
 			game.initialise(rep);
