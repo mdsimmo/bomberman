@@ -261,13 +261,14 @@ public class Game implements Formattable {
 	 */
 	public boolean checkFinish() {
 		if ( players.size() <= 1 && isPlaying ) {
-			isPlaying = false;
 
 			// kill the survivors
 			for ( PlayerRep rep : new ArrayList<>( players ) ) {
 				( (GamePlayingState)rep.getState() ).kill();
 			}
 
+			isPlaying = false;
+			
 			// get the total winnings
 			if ( pot == true )
 				if ( fare == null )
@@ -277,9 +278,18 @@ public class Game implements Formattable {
 							* winners.size() );
 
 			// give the winner the prize
-			if ( prize != null ) {
-				Player topPlayer = winners.get( 0 ).getPlayer();
+			if ( prize != null	 ) {
+				final Player topPlayer = winners.get( 0 ).getPlayer();
 				topPlayer.getInventory().addItem( prize );
+				// makes sure the inventory is correct
+				plugin.getServer().getScheduler()
+						.scheduleSyncDelayedTask( plugin, new Runnable() {
+							@SuppressWarnings( "deprecation" )
+							@Override
+							public void run() {
+								topPlayer.updateInventory();
+							}
+						} );
 			}
 
 			// display the scores
@@ -415,7 +425,7 @@ public class Game implements Formattable {
 	 * @param rep
 	 *            the PlayerRep to initialise
 	 */
-	public void initialise( PlayerRep rep ) {
+	public void initialise( final PlayerRep rep ) {
 		rep.getPlayer().getInventory().clear();
 		Stats stat = getStats( rep );
 		for ( ItemStack stack : initialitems ) {
@@ -431,6 +441,14 @@ public class Game implements Formattable {
 			rep.getPlayer().addPotionEffect(
 					new PotionEffect( PotionEffectType.SLOW,
 							stat.hadicapLevel * 20 * 60, stat.hadicapLevel ) );
+		plugin.getServer().getScheduler()
+				.scheduleSyncDelayedTask( plugin, new Runnable() {
+					@SuppressWarnings( "deprecation" )
+					@Override
+					public void run() {
+						rep.getPlayer().updateInventory();
+					}
+				} );
 	}
 
 	public void initVars() {
