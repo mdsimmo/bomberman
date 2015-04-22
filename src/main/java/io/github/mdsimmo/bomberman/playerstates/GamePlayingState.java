@@ -169,7 +169,7 @@ public class GamePlayingState extends PlayerState implements Listener {
 		isPlaying = false;
 		if ( !game.isPlaying )
 			removeCage();
-		disable();
+		rep.switchStates( null );
 		player.setGameMode( spawnGameMode );
 		player.getInventory().setContents( spawnInventory );
 		game.alertRemoval( rep );

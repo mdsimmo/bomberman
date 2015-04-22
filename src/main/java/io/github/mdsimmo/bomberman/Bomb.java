@@ -121,7 +121,7 @@ public class Bomb implements Runnable {
 		@Override
 		public void run() {
 			// check that the player is still playing
-			if ( rep.getState() instanceof GamePlayingState && rep.getActiveGame() == game )
+			if ( rep.isPlaying() && ((GamePlayingState)rep.getState()).getGame() == game )
 				rep.getPlayer().getInventory().addItem(
 						new ItemStack( game.getBombMaterial() ) );
 		}
