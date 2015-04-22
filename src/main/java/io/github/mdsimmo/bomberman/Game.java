@@ -452,34 +452,41 @@ public class Game implements Formattable {
 	}
 
 	public void initVars() {
-		GameSaver config = new GameSaver( this );
-		this.save = config;
-		prize = Config.PRIZE.getValue( config );
-		pot = Config.POT.getValue( config );
-		fare = Config.FARE.getValue( config );
-		bombs = Config.BOMBS.getValue( config );
-		power = Config.POWER.getValue( config );
-		lives = Config.LIVES.getValue( config );
-		minPlayers = Config.MIN_PLAYERS.getValue( config );
-		autostart = Config.AUTOSTART.getValue( config );
-		autostartDelay = Config.AUTOSTART_DELAY.getValue( config );
-		drops = Config.DROPS_ITEMS.getValue( config );
-		dropChance = Config.DROPS_CHANCE.getValue( config );
-		protection = Config.PROTECT.getValue( config );
-		protectBreak = Config.PROTECT_DESTROYING.getValue( config );
-		protectPlace = Config.PROTECT_PLACING.getValue( config );
-		protectFire = Config.PROTECT_FIRE.getValue( config );
-		protectExplosion = Config.PROTECT_EXPLOSIONS.getValue( config );
-		protectDamage = Config.PROTECT_DAMAGE.getValue( config );
-		protectPVP = Config.PROTECT_PVP.getValue( config );
-		suddenDeath = Config.SUDDEN_DEATH.getValue( config );
-		timeout = Config.TIME_OUT.getValue( config );
-		initialitems = Config.INITIAL_ITEMS.getValue( config );
-		potionDuration = Config.POTION_DURATION.getValue( config );
+		this.save = new GameSaver( this );
+		try {
+			prize = Config.PRIZE.getValue( save );
+		} catch( ClassCastException e ) {
+			prize = null;
+		}
+		pot = Config.POT.getValue( save );
+		try {
+			fare = Config.FARE.getValue( save );
+		} catch( ClassCastException e ) {
+			fare = null;
+		}
+		bombs = Config.BOMBS.getValue( save );
+		power = Config.POWER.getValue( save );
+		lives = Config.LIVES.getValue( save );
+		minPlayers = Config.MIN_PLAYERS.getValue( save );
+		autostart = Config.AUTOSTART.getValue( save );
+		autostartDelay = Config.AUTOSTART_DELAY.getValue( save );
+		drops = Config.DROPS_ITEMS.getValue( save );
+		dropChance = Config.DROPS_CHANCE.getValue( save );
+		protection = Config.PROTECT.getValue( save );
+		protectBreak = Config.PROTECT_DESTROYING.getValue( save );
+		protectPlace = Config.PROTECT_PLACING.getValue( save );
+		protectFire = Config.PROTECT_FIRE.getValue( save );
+		protectExplosion = Config.PROTECT_EXPLOSIONS.getValue( save );
+		protectDamage = Config.PROTECT_DAMAGE.getValue( save );
+		protectPVP = Config.PROTECT_PVP.getValue( save );
+		suddenDeath = Config.SUDDEN_DEATH.getValue( save );
+		timeout = Config.TIME_OUT.getValue( save );
+		initialitems = Config.INITIAL_ITEMS.getValue( save );
+		potionDuration = Config.POTION_DURATION.getValue( save );
 		bombMaterial = Material.getMaterial( (String)Config.BOMB_MATERIAL
-				.getValue( config ) );
+				.getValue( save ) );
 		powerMaterial = Material.getMaterial( (String)Config.POWER_MATERIAL
-				.getValue( config ) );
+				.getValue( save ) );
 	}
 
 	public boolean isSuddenDeath() {
@@ -543,7 +550,10 @@ public class Game implements Formattable {
 
 	public void setFare( ItemStack fare ) {
 		this.fare = fare;
-		save.set( Config.FARE.getPath(), fare );
+		if (fare == null ) // false as null removes the value
+			save.set( Config.FARE.getPath(), false );
+		else
+			save.set( Config.FARE.getPath(), fare );
 	}
 
 	public void setLives( int lives ) {
@@ -558,10 +568,7 @@ public class Game implements Formattable {
 
 	public void setPot( boolean pot ) {
 		this.pot = pot;
-		if ( pot )
-			save.set( Config.PRIZE.getPath(), true );
-		else
-			save.set( Config.PRIZE.getPath(), prize );
+		save.set( Config.POT.getPath(), pot );
 	}
 
 	public void setPower( int power ) {
@@ -572,7 +579,10 @@ public class Game implements Formattable {
 	public void setPrize( ItemStack prize ) {
 		this.prize = prize;
 		pot = false;
-		save.set( Config.PRIZE.getPath(), prize );
+		if ( prize != null)
+			save.set( Config.PRIZE.getPath(), prize );
+		else
+			save.set( Config.PRIZE.getPath(), false ); // false as null would just remove the prize
 	}
 
 	public void setPrize( ItemStack prize, boolean pot ) {
