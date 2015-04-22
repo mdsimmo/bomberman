@@ -566,28 +566,19 @@ public class Game implements Formattable {
 		save.set( Config.MIN_PLAYERS.getPath(), minPlayers );
 	}
 
-	public void setPot( boolean pot ) {
-		this.pot = pot;
-		save.set( Config.POT.getPath(), pot );
-	}
-
 	public void setPower( int power ) {
 		this.power = power;
 		save.set( Config.POWER.getPath(), power );
 	}
 
-	public void setPrize( ItemStack prize ) {
+	public void setPrize( ItemStack prize, boolean pot ) {
 		this.prize = prize;
-		pot = false;
+		this.pot = pot;
+		save.set( Config.POT.getPath(), pot );
 		if ( prize != null)
 			save.set( Config.PRIZE.getPath(), prize );
 		else
 			save.set( Config.PRIZE.getPath(), false ); // false as null would just remove the prize
-	}
-
-	public void setPrize( ItemStack prize, boolean pot ) {
-		setPrize( prize );
-		setPot( pot );
 	}
 
 	public boolean getProtected( Config protection ) {
