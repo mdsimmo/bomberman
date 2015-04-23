@@ -324,6 +324,9 @@ public enum Text implements Phrase {
 	ARENA_CREATE_VERY_SMALL(
 			"command.arenacreate.very-small",
 			"Structure is only a single block! Were you looking at a natural block?" ),
+	ARENA_CREATE_IN_USE(
+			"command.arenacreate.in-use",
+			"Cannot change an arena that is being used by a game" ),
 
 	DELETE_NAME(
 			"command.arenadelete.name",

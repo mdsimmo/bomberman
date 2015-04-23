@@ -2,6 +2,7 @@ package io.github.mdsimmo.bomberman.commands.arena;
 
 import io.github.mdsimmo.bomberman.Board;
 import io.github.mdsimmo.bomberman.Config;
+import io.github.mdsimmo.bomberman.Game;
 import io.github.mdsimmo.bomberman.arenabuilder.ArenaDetector.BoundingListener;
 import io.github.mdsimmo.bomberman.arenabuilder.ArenaGenerator;
 import io.github.mdsimmo.bomberman.commands.Cmd;
@@ -45,6 +46,15 @@ public class Create extends Cmd {
 			return true;
 		}
 		String name = args.get( 0 );
+		for ( String gameName : Game.allGames() ) { 
+			Game game = Game.findGame( gameName );
+			if ( game.board.name.equalsIgnoreCase( name ) ) {
+				Message message = getMessage( Text.ARENA_CREATE_IN_USE, sender );
+				message.put( "game", game ).put( "arena", game.board );
+				Chat.sendMessage( message );
+				return true;
+			}
+		}
 		Block target = Utils.getTarget( (Player)sender, 100 );
 		if ( target != null ) {
 			ArenaGenerator.getBoundingStructure( target, new BuildListener(
