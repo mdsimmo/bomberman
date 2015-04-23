@@ -163,7 +163,7 @@ public class Game implements Formattable {
 	private List<ItemStack> drops;
 	public Map<Block, Bomb> explosions = new HashMap<>();
 	private ItemStack fare;
-	public State state;
+	public State state = State.WAITING;
 	private int lives;
 	public Box box;
 	private int minPlayers;
