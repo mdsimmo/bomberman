@@ -137,7 +137,7 @@ public enum Text implements Phrase {
 			"Game starting in {time} seconds..." ),
 	GAME_COUNT_OBSERVERS(
 			"game-play.count.observers",
-			"Game starting in {time} seconds..." ),
+			"Game {game} starting in {time} seconds..." ),
 	GAME_COUNT_ALL(
 			"game-play.count.all",
 			"" ),
