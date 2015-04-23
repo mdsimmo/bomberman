@@ -482,6 +482,7 @@ public class Game implements Formattable {
 		power = Config.POWER.getValue( save );
 		lives = Config.LIVES.getValue( save );
 		minPlayers = Config.MIN_PLAYERS.getValue( save );
+		minPlayers = Math.max( 1, minPlayers );
 		autostart = Config.AUTOSTART.getValue( save );
 		autostartDelay = Config.AUTOSTART_DELAY.getValue( save );
 		drops = Config.DROPS_ITEMS.getValue( save );
@@ -576,7 +577,7 @@ public class Game implements Formattable {
 	}
 
 	public void setMinPlayers( int minPlayers ) {
-		this.minPlayers = minPlayers;
+		this.minPlayers = Math.max( 1, minPlayers );
 		save.set( Config.MIN_PLAYERS.getPath(), minPlayers );
 	}
 
