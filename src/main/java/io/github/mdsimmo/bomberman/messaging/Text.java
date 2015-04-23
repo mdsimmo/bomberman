@@ -850,15 +850,12 @@ public enum Text implements Phrase {
 	GAMELIST_NO_GAMES(
 			"command.gamelist.no-games",
 			"No games" ),
-	GAMELIST_PLAYING(
-			"command.gamelist.playing",
-			"Playing" ),
-	GAMELIST_WAITING(
-			"command.gamelist.waiting",
-			"Waiting" ),
-	GAMELIST_GAME_FORMAT(
-			"command.gamelist.game-format",
-			"" ),
+	GAMELIST_KEY(
+			"command.gamelist.key",
+			"{game}" ),
+	GAMELIST_VALUE(
+			"command.gamelist.value",
+			"{game|status}" ),
 
 	IGNORE_NAME(
 			"command.ignore.name",

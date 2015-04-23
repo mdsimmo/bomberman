@@ -1,5 +1,6 @@
 package io.github.mdsimmo.bomberman;
 
+import io.github.mdsimmo.bomberman.Game.State;
 import io.github.mdsimmo.bomberman.messaging.Text;
 
 import java.util.HashMap;
@@ -39,7 +40,7 @@ public class SuddenDeathCounter {
 		
 		@Override
 		public void run() {
-			if (!game.isPlaying)
+			if ( game.state != State.PLAYING )
 				plugin.getServer().getScheduler().cancelTask(sdID);
 			
 			suddenDeath--;
@@ -77,7 +78,7 @@ public class SuddenDeathCounter {
 		
 		@Override
 		public void run() {
-			if (!game.isPlaying)
+			if ( game.state != State.PLAYING )
 				plugin.getServer().getScheduler().cancelTask(toID);
 			
 			timeout--;

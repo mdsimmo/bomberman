@@ -40,15 +40,8 @@ public class GameList extends Cmd {
 			Map<Message, Message> list = new LinkedHashMap<>();
 			for ( String name : games ) {
 				Game game = Game.findGame( name );
-				Message status;
-				if ( game.isPlaying )
-					status = getMessage( Text.GAMELIST_PLAYING, sender ).put(
-							"game", game );
-				else
-					status = getMessage( Text.GAMELIST_WAITING, sender ).put(
-							"game", game );
-				Message key = new Message( sender, game.name );
-				Message value = new Message( sender, status.toString() );
+				Message key = getMessage( Text.GAMELIST_KEY, sender ).put( "game", game );
+				Message value = getMessage( Text.GAMELIST_KEY, sender ).put( "game", game );
 				list.put( key, value );
 			}
 			Chat.sendMap( list );

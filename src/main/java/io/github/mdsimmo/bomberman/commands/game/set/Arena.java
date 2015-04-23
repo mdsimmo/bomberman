@@ -2,6 +2,7 @@ package io.github.mdsimmo.bomberman.commands.game.set;
 
 import io.github.mdsimmo.bomberman.Board;
 import io.github.mdsimmo.bomberman.Game;
+import io.github.mdsimmo.bomberman.Game.State;
 import io.github.mdsimmo.bomberman.arenabuilder.ArenaGenerator;
 import io.github.mdsimmo.bomberman.arenabuilder.ArenaGenerator.BuildListener;
 import io.github.mdsimmo.bomberman.commands.Cmd;
@@ -44,7 +45,7 @@ public class Arena extends GameCommand {
 				.size() != 1 )
 			return false;
 
-		if ( game.isPlaying ) {
+		if ( game.state != State.WAITING ) {
 			Chat.sendMessage( getMessage(
 					Text.SETARENA_GIP, sender )
 					.put( "game", game ) );
@@ -61,8 +62,7 @@ public class Arena extends GameCommand {
 			return true;
 		}
 
-		if ( game.isPlaying )
-			game.stop();
+		game.stop();
 
 		final Board oldboard = game.board;
 

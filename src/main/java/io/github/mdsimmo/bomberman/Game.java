@@ -58,6 +58,7 @@ public class Game implements Formattable {
 		}
 
 		public void run() {
+			state = State.STARTING;
 			// Let online players know about the fun :)
 			if ( count == autostartDelay ) {
 				Map<String, Object> values = new HashMap<>();
@@ -88,7 +89,7 @@ public class Game implements Formattable {
 						Text.GAME_STARTED_OBSERVERS, Text.GAME_STARTED_ALL,
 						null );
 
-				isPlaying = true;
+				state = State.PLAYING;
 				for ( PlayerRep rep : players )
 					( (GamePlayingState)rep.getState() ).gameStarted();
 				deathCounter = new SuddenDeathCounter( Game.this );
@@ -101,6 +102,10 @@ public class Game implements Formattable {
 
 	}
 
+	public enum State {
+		PLAYING, WAITING, STARTING, ENDING;
+	}
+	
 	private static HashMap<String, Game> gameRegistry = new HashMap<>();
 
 	private static Plugin plugin = Bomberman.instance;
@@ -158,7 +163,7 @@ public class Game implements Formattable {
 	private List<ItemStack> drops;
 	public Map<Block, Bomb> explosions = new HashMap<>();
 	private ItemStack fare;
-	public boolean isPlaying;
+	public State state;
 	private int lives;
 	public Box box;
 	private int minPlayers;
@@ -209,8 +214,11 @@ public class Game implements Formattable {
 	}
 
 	private void addWinner( PlayerRep rep ) {
+		if ( !(state == State.PLAYING || state == State.ENDING ) )
+			return;
 		winners.remove( rep );
 		winners.add( 0, rep );
+		System.out.println( "Added a player: " + rep.getPlayer().getName() );
 	}
 
 	/**
@@ -220,8 +228,8 @@ public class Game implements Formattable {
 		players.remove( rep );
 		HashMap<String, Object> map = new HashMap<>();
 		map.put( "player", rep );
-		if ( isPlaying ) {
-			addWinner( rep );
+		addWinner( rep );
+		if ( state == State.PLAYING || state == State.ENDING ) {
 			if ( !checkFinish() )
 				sendMessages( Text.PLAYER_KILLED_PLAYERS,
 						Text.PLAYER_KILLED_OBSERVERS, Text.PLAYER_KILLED_ALL,
@@ -233,6 +241,7 @@ public class Game implements Formattable {
 		if ( players.size() < minPlayers && getCountdownTimer() != null ) {
 			map.put( "time", getCountdownTimer().count );
 			getCountdownTimer().destroy();
+			state = State.WAITING;
 			sendMessages( Text.COUNT_STOPPED_PLAYERS,
 					Text.COUNT_STOPPED_OBSERVERS, Text.COUNT_STOPPED_ALL, map );
 		}
@@ -260,14 +269,18 @@ public class Game implements Formattable {
 	 * @return true if the game has finished;
 	 */
 	public boolean checkFinish() {
-		if ( players.size() <= 1 && isPlaying ) {
+		if ( players.size() <= 1 && state == State.PLAYING ) {
+			
+			state = State.ENDING;
 
 			// kill the survivors
 			for ( PlayerRep rep : new ArrayList<>( players ) ) {
 				( (GamePlayingState)rep.getState() ).kill();
 			}
 
-			isPlaying = false;
+			// to avoid the above kill loop executing this method twice
+			if ( state != State.ENDING )
+				return true;
 			
 			// get the total winnings
 			if ( pot == true )
@@ -279,6 +292,7 @@ public class Game implements Formattable {
 
 			// give the winner the prize
 			if ( prize != null	 ) {
+				System.out.println( "Fetching top player" );
 				final Player topPlayer = winners.get( 0 ).getPlayer();
 				topPlayer.getInventory().addItem( prize );
 				// makes sure the inventory is correct
@@ -303,7 +317,7 @@ public class Game implements Formattable {
 
 			return true;
 		}
-		return !isPlaying;
+		return state == State.ENDING || state == State.WAITING;
 	}
 
 	/**
@@ -686,10 +700,11 @@ public class Game implements Formattable {
 	 * Does not give awards.
 	 */
 	public void stop() {
-		isPlaying = false;
+		state = State.WAITING;
 		for ( PlayerRep rep : new ArrayList<PlayerRep>( players ) )
 			( (GamePlayingState)rep.getState() ).kill();
 		winners.clear();
+		System.out.println( "Winners cleared" );
 		for ( Stats stat : stats.values() ) {
 			stat.reset();
 		}
@@ -837,6 +852,8 @@ public class Game implements Formattable {
 			return Integer.toString( box.y );
 		case "z":
 			return Integer.toString( box.z );
+		case "state":
+			return state.toString().toLowerCase();
 		default:
 			return null;
 		}

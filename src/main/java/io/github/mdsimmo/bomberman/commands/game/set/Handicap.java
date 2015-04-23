@@ -7,7 +7,6 @@ import io.github.mdsimmo.bomberman.commands.GameCommand;
 import io.github.mdsimmo.bomberman.messaging.Chat;
 import io.github.mdsimmo.bomberman.messaging.Phrase;
 import io.github.mdsimmo.bomberman.messaging.Text;
-import io.github.mdsimmo.bomberman.playerstates.GamePlayingState;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -62,8 +61,11 @@ public class Handicap extends GameCommand {
 		// its needed so that the handicap message gets the correct game
 		Chat.sendMessage(getMessage(Text.HANDICAP_SET, sender).put( "game", game).put( "player", rep ));
 		
-		if (rep.isPlaying() && !((GamePlayingState)rep.getState()).getGame().isPlaying)
-			game.initialise(rep);
+		if ( !rep.isPlaying() )
+			return true;
+		
+		game.initialise(rep);
+		
 		return true;
 	}
 	

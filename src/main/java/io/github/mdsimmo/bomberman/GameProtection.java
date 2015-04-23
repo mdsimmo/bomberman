@@ -1,5 +1,6 @@
 package io.github.mdsimmo.bomberman;
 
+import io.github.mdsimmo.bomberman.Game.State;
 import io.github.mdsimmo.bomberman.commands.Cmd.Permission;
 import io.github.mdsimmo.bomberman.playerstates.GamePlayingState;
 
@@ -30,7 +31,7 @@ public class GameProtection implements Listener {
 		plugin.getServer().getPluginManager().registerEvents( this, plugin );
 	}
 
-	@EventHandler( priority = EventPriority.HIGHEST )
+	@EventHandler( priority = EventPriority.LOWEST )
 	public void onBlockBreak( BlockBreakEvent e ) {
 		if ( game.getProtected( Config.PROTECT_DESTROYING )
 				&& game.box.contains( e.getBlock().getLocation() )
@@ -38,7 +39,7 @@ public class GameProtection implements Listener {
 			e.setCancelled( true );
 	}
 
-	@EventHandler( priority = EventPriority.HIGHEST )
+	@EventHandler( priority = EventPriority.LOWEST )
 	public void onPlaceBlock( BlockPlaceEvent e ) {
 		// protect from players placing blocks
 		if ( game.getProtected( Config.PROTECT_PLACING )
@@ -48,10 +49,10 @@ public class GameProtection implements Listener {
 			e.setCancelled( true );
 	}
 
-	@EventHandler( priority = EventPriority.HIGHEST )
+	@EventHandler( priority = EventPriority.LOWEST )
 	public void onBlockCobust( BlockBurnEvent e ) {
 		if ( game.box.contains( e.getBlock().getLocation() ) ) {
-			if ( game.isPlaying )
+			if ( game.state == State.PLAYING )
 				e.setCancelled( true );
 			if ( game.getProtected( Config.PROTECT_FIRE ) ) {
 				e.setCancelled( true );
@@ -59,10 +60,10 @@ public class GameProtection implements Listener {
 		}
 	}
 
-	@EventHandler
+	@EventHandler( priority = EventPriority.LOWEST)
 	public void onBlockIgnite( BlockIgniteEvent e ) {
 		if ( game.box.contains( e.getBlock().getLocation() ) ) {
-			if ( game.isPlaying )
+			if ( game.state == State.PLAYING )
 				e.setCancelled( true );
 			if ( game.getProtected( Config.PROTECT_FIRE ) ) {
 				if ( e.getPlayer() != null
@@ -73,7 +74,7 @@ public class GameProtection implements Listener {
 		}
 	}
 
-	@EventHandler
+	@EventHandler( priority = EventPriority.LOWEST )
 	public void onPlayerDamage( EntityDamageEvent e ) {
 		if ( e.isCancelled() )
 			return;
@@ -87,6 +88,7 @@ public class GameProtection implements Listener {
 		}
 	}
 
+	@EventHandler( priority = EventPriority.LOWEST )
 	public void onPVP( EntityDamageByEntityEvent e ) {
 		if ( e.isCancelled() )
 			return;
@@ -99,7 +101,7 @@ public class GameProtection implements Listener {
 		}
 	}
 
-	@EventHandler
+	@EventHandler( priority = EventPriority.LOWEST )
 	public void onExplosion( EntityExplodeEvent e ) {
 		if ( e.isCancelled() )
 			return;

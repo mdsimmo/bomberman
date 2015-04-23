@@ -3,6 +3,7 @@ package io.github.mdsimmo.bomberman.playerstates;
 import io.github.mdsimmo.bomberman.BlockRep;
 import io.github.mdsimmo.bomberman.Bomb;
 import io.github.mdsimmo.bomberman.Game;
+import io.github.mdsimmo.bomberman.Game.State;
 import io.github.mdsimmo.bomberman.Game.Stats;
 import io.github.mdsimmo.bomberman.PlayerRep;
 import io.github.mdsimmo.bomberman.messaging.Chat;
@@ -45,6 +46,9 @@ public class GamePlayingState extends PlayerState implements Listener {
 	private int immunity = 0;
 	private boolean isPlaying = false;
 	private BlockRep[][][] cageBlocks = new BlockRep[3][4][3];
+	private double spawnHealth;
+	private double spawnMaxHealth;
+	private double spawnHealthScale;
 
 	public GamePlayingState( PlayerRep rep, DyeColor team ) {
 		super( rep );
@@ -87,6 +91,9 @@ public class GamePlayingState extends PlayerState implements Listener {
 		rep.getPlayer().teleport( game.box.corner().add( gameSpawn ) );
 		surroundCage();
 		spawnGameMode = player.getGameMode();
+		spawnHealth = player.getHealth();
+		spawnHealthScale = player.getHealthScale();
+		spawnMaxHealth = player.getMaxHealth();
 		player.setGameMode( GameMode.SURVIVAL );
 		player.setHealth( game.getLives() );
 		player.setMaxHealth( game.getLives() );
@@ -152,6 +159,7 @@ public class GamePlayingState extends PlayerState implements Listener {
 	public boolean onDisable() {
 		if ( isPlaying )
 			return false;
+		System.out.println( "Removed event listener from " + player.getName() );
 		HandlerList.unregisterAll( this );
 		return true;
 	}
@@ -166,16 +174,16 @@ public class GamePlayingState extends PlayerState implements Listener {
 	 * @return true if killed successfully
 	 */
 	public void kill() {
+		System.out.println( "player: " + player.getName() + " " + spawnHealth);
 		isPlaying = false;
-		if ( !game.isPlaying )
-			removeCage();
+		removeCage();
 		rep.switchStates( null );
 		player.setGameMode( spawnGameMode );
 		player.getInventory().setContents( spawnInventory );
 		game.alertRemoval( rep );
-		player.setMaxHealth( 20 );
-		player.setHealth( 20 );
-		player.setHealthScale( 20 );
+		player.setMaxHealth( spawnMaxHealth );
+		player.setHealth( spawnHealth );
+		player.setHealthScale( spawnHealthScale );
 		player.setFoodLevel( spawnHunger );
 		player.teleport( spawn );
 		rep.removeEffects();
@@ -187,7 +195,7 @@ public class GamePlayingState extends PlayerState implements Listener {
 			return;
 		Block b = e.getBlock();
 		// create a bomb when placing tnt
-		if ( b.getType() == game.getBombMaterial() && game.isPlaying ) {
+		if ( b.getType() == game.getBombMaterial() && game.state == State.PLAYING ) {
 			new Bomb( game, rep, b );
 		}
 	}
@@ -204,7 +212,7 @@ public class GamePlayingState extends PlayerState implements Listener {
 		if ( e.isCancelled() || !enabled || player != e.getPlayer() )
 			return;
 		// waiting for game to start
-		if ( !game.isPlaying )
+		if ( game.state == State.STARTING )
 			e.setCancelled( true );
 	}
 

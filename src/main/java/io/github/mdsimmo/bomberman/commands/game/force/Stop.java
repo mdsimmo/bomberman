@@ -2,6 +2,7 @@ package io.github.mdsimmo.bomberman.commands.game.force;
 
 import io.github.mdsimmo.bomberman.Game;
 import io.github.mdsimmo.bomberman.PlayerRep;
+import io.github.mdsimmo.bomberman.Game.State;
 import io.github.mdsimmo.bomberman.commands.Cmd;
 import io.github.mdsimmo.bomberman.commands.GameCommand;
 import io.github.mdsimmo.bomberman.messaging.Chat;
@@ -28,7 +29,7 @@ public class Stop extends GameCommand {
 		if (args.size() != 0)
             return false;
 		
-        if (!game.isPlaying)
+        if ( game.state == State.WAITING )
             Chat.sendMessage(getMessage(Text.STOP_NOT_STARTED, sender).put( "game", game));
 	else {
         	game.stop();

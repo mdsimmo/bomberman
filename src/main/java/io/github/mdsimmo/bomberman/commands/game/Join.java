@@ -1,6 +1,7 @@
 package io.github.mdsimmo.bomberman.commands.game;
 
 import io.github.mdsimmo.bomberman.Game;
+import io.github.mdsimmo.bomberman.Game.State;
 import io.github.mdsimmo.bomberman.PlayerRep;
 import io.github.mdsimmo.bomberman.commands.Cmd;
 import io.github.mdsimmo.bomberman.commands.GameCommand;
@@ -48,7 +49,7 @@ public class Join extends GameCommand {
 			Chat.sendMessage( getMessage( Text.MUST_BE_PLAYER, sender ) );
 			return true;
 		}
-		if ( game.isPlaying ) {
+		if ( game.state == State.PLAYING || game.state == State.ENDING ) {
 			Chat.sendMessage( getMessage( Text.JOIN_GAME_STARTED, sender ).put(
 					"game", game ) );
 			return true;
