@@ -635,6 +635,9 @@ public enum Text implements Phrase {
 	MINPLAYERS_SET(
 			"command.minplayers.set",
 			"Min players set to {game|minplayers}" ),
+	MINPLAYERS_LESS_THAN_ONE(
+			"command.minplayers.more-than-zero",
+			"Min players cannot be less than one" ),
 
 	POWER_NAME(
 			"command.power.name",
