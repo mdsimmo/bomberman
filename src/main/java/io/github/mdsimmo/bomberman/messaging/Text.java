@@ -898,8 +898,8 @@ public enum Text implements Phrase {
 			"command.info.status",
 			"Status" ),
 	INFO_STATUS_RESULT(
-			"command.info.in-progress",
-			"{switch|{game|playing}|true|In progress|Waiting}" ),
+			"command.info.result",
+			"{switch|{game|state}|waiting|Waiting|playing|In progress|starting|Starting|ending|Ending|unknown}" ),
 	INFO_PLAYERS(
 			"command.info.players",
 			"Players" ),
@@ -941,19 +941,13 @@ public enum Text implements Phrase {
 			"Entry fee" ),
 	INFO_FARE_RESULT(
 			"command.info.fare-result",
-			"{switch|{game|fare|amount}|0|no fee|{game|fare}}" ),
+			"{switch|{game|fare|amount}|0|No fee|{game|fare}}" ),
 	INFO_PRIZE(
 			"command.info.prize",
 			"Prize" ),
 	INFO_PRIZE_RESULT(
 			"command.info.prize-result",
-			"{switch|{game|prize|amount}|0|No prize|{game|prize}}" ),
-	INFO_HAS_POT(
-			"command.info.has-pot",
-			"Has pot"),
-	INFO_HAS_POT_RESULT(
-			"command.info.has-pot-result",
-			"{game|haspot}"),
+			"{switch|{game|haspot}|true|Pot at {game|prize}|{switch|{game|prize|amount}|0|No prize|{game|prize}}}" ),
 	INFO_SUDDENDEATH(
 			"command.info.suddendeath",
 			"Sudden death" ),
