@@ -514,24 +514,9 @@ public class Game implements Formattable {
 		for ( PlayerRep rep : observers ) {
 			Chat.sendMessage( getMessage( Text.SCORE_ANNOUNCE, rep.getPlayer() ) );
 
-			int i = 0;
-			while ( i < winners.size() && i < 8 ) {
+			for ( int i = 0; i < winners.size(); i++ ) {
 				PlayerRep repWinner = winners.get( i );
-				i++;
-				String place;
-				switch ( i ) {
-				case 1:
-					place = "1st";
-					break;
-				case 2:
-					place = "2nd";
-					break;
-				case 3:
-					place = "3rd";
-					break;
-				default:
-					place = i + "th";
-				}
+				int place = i + 1;
 				Chat.messageRaw( getMessage( Text.WINNERS_LIST, rep.getPlayer() )
 						.put( "player", repWinner ).put( "place", place ) );
 			}
