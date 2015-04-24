@@ -57,7 +57,7 @@ public class Convert extends Cmd {
 		String name = args.get( 0 );
 		Block target = Utils.getTarget( (Player)sender, 100 );
 		if ( target == null ) {
-			Chat.sendMessage( Text.ARENA_NO_TARGET.getMessage( sender ) );
+			Chat.sendMessage( Text.ARENA_NO_TARGET.getMessage( sender ).put( "arena", name ) );
 		} else {
 			ArenaGenerator.getBoundingStructure( target, new BuildListener(
 					sender, name ) );
@@ -82,16 +82,16 @@ public class Convert extends Cmd {
 		public void onBoundingDetected( Box box ) {
 			if ( box == null ) {
 				Chat.sendMessage( getMessage( Text.ARENA_CREATE_TOO_BIG, sender )
-						.put( "maxstructuresize",
-								Config.MAX_STRUCTURE.getValue() ) );
+						.put( "maxstructuresize", Config.MAX_STRUCTURE.getValue() )
+						.put( "arena", name ) );
 				return;
 			}
 
+			Board board = ArenaGenerator.createArena( name + ".old", box );
 			if ( box.xSize < 2 && box.ySize < 2 && box.zSize < 2 ) {
 				Chat.sendMessage( getMessage( Text.ARENA_CREATE_VERY_SMALL,
-						sender ) );
+						sender ).put( "arena", board ) );
 			}
-			Board board = ArenaGenerator.createArena( name + ".old", box );
 			ArenaGenerator.saveBoard( board );
 			Game game = new Game( name, box );
 			game.board = board;

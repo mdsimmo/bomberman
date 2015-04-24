@@ -63,7 +63,7 @@ public class Create extends Cmd {
 			message.put( "arena", name );
 			Chat.sendMessage( message );
 		} else {
-			Chat.sendMessage( Text.ARENA_NO_TARGET.getMessage( sender ) );
+			Chat.sendMessage( Text.ARENA_NO_TARGET.getMessage( sender ).put( "arena", name ) );
 		}
 		return true;
 	}
@@ -82,16 +82,16 @@ public class Create extends Cmd {
 		public void onBoundingDetected( Box box ) {
 			if ( box == null ) {
 				Chat.sendMessage( getMessage( Text.ARENA_CREATE_TOO_BIG, sender )
-						.put( "maxstructuresize",
-								Config.MAX_STRUCTURE.getValue() ) );
+						.put( "maxstructuresize",Config.MAX_STRUCTURE.getValue() )
+						.put( "arena", name ) );
 				return;
 			}
 
+			Board board = ArenaGenerator.createArena( name, box );
 			if ( box.xSize < 2 && box.ySize < 2 && box.zSize < 2 ) {
 				Chat.sendMessage( getMessage( Text.ARENA_CREATE_VERY_SMALL,
-						sender ) );
+						sender ).put( "arena", board ) );
 			}
-			Board board = ArenaGenerator.createArena( name, box );
 			ArenaGenerator.saveBoard( board );
 			Chat.sendMessage( getMessage( Text.ARENA_CREATED, sender ).put(
 					"arena", board ) );

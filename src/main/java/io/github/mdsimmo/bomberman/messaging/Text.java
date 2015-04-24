@@ -210,11 +210,11 @@ public enum Text implements Phrase {
 			"score.display",
 			" {player}: {stats|kills} kills, {stats|deaths} deaths" ),
 	SCORE_ANNOUNCE(
-			"score.anounce",
+			"scores.announce",
 			"The winners are:" ),
 	WINNERS_LIST(
 			"scores.winners",
-			" {gold|{place}:} {player}" ),
+			" {gold|{switch|{place}|1|1st|2|2nd|3|3rd|{place}th}:} {player}" ),
 	SCORE_SEE_SCORES(
 			"score.see-score",
 			"" ),
@@ -251,22 +251,6 @@ public enum Text implements Phrase {
 	BOMBERMAN_DESCRIPTION(
 			"command.bomberman.description",
 			"Main command for Bomberman" ),
-
-	HELP_NAME(
-			"command.help.name",
-			"help" ),
-	HELP_DESCRIPTION(
-			"command.help.descripion",
-			"Help for the selected command" ),
-	HELP_USAGE(
-			"command.help.usage",
-			"/{command|path} <command>" ),
-	HELP_EXAMPLE(
-			"command.help.example",
-			"/{command|path} game set fare" ),
-	HELP_EXTRA(
-			"command.help.extra",
-			"Shortcut is to put '?' after a command" ),
 
 	ARENA_NAME(
 			"command.arena.name",
@@ -310,7 +294,7 @@ public enum Text implements Phrase {
 			"command.arenacreate.extra",
 			"Look at the arena when using. Natural blocks are ignored when detecting structures" ),
 	ARENA_CREATED(
-			"command.areacreate.success",
+			"command.arenacreate.success",
 			"Arena {arena} created" ),
 	ARENA_CREATING(
 			"command.arenacreate.started",
