@@ -32,7 +32,7 @@ public class Prize extends GameCommand {
 			options.add(Text.PRIZE_NONE.getMessage(sender).toString());
 			options.add(Text.PRIZE_POT.getMessage(sender).toString());
 			for (Material m : Material.values())
-				options.add(m.toString());
+				options.add( m.toString().toLowerCase() );
 			return options;
 		} else
 			return null;
@@ -52,16 +52,24 @@ public class Prize extends GameCommand {
 				return false;
 			}
 		} else if (args.size() == 2) {
-			Material m = Material.getMaterial(args.get(0).toUpperCase());
+			int materialArg = 0;
+			int numberArg = 1;
+			Material m = Material.getMaterial(args.get( materialArg ).toUpperCase());
 			if (m == null) {
-				Chat.sendMessage(getMessage(Text.INVALID_MATERIAL, sender).put( "number", args.get(0)));
-				return true;
+				// try with number before material
+				materialArg = 1;
+				numberArg = 0;
+				m = Material.getMaterial(args.get( materialArg ).toUpperCase());
+				if ( m == null ) {
+					Chat.sendMessage(getMessage(Text.INVALID_MATERIAL, sender).put( "number", args.get(0)));
+					return true;
+				}
 			}
 			try {
-				int amount = Integer.parseInt(args.get(1));
+				int amount = Integer.parseInt(args.get( numberArg ));
 				game.setPrize(new ItemStack(m, amount), false);
 			} catch (Exception e) {
-				Chat.sendMessage(getMessage(Text.INVALID_NUMBER, sender).put( "number", args.get(1)));
+				Chat.sendMessage(getMessage(Text.INVALID_NUMBER, sender).put( "number", args.get( numberArg )));
 				return true;
 			}
 		} else {

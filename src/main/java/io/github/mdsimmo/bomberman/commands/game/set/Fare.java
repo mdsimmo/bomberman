@@ -31,7 +31,7 @@ public class Fare extends GameCommand {
 			List<String> options = new ArrayList<>();
 			options.add( "none" );
 			for ( Material m : Material.values() )
-				options.add( m.toString() );
+				options.add( m.toString().toLowerCase() );
 			return options;
 		} else
 			return null;
@@ -49,21 +49,29 @@ public class Fare extends GameCommand {
 					game ) );
 			return true;
 		} else if ( args.size() == 2 ) {
-			Material m = Material.getMaterial( args.get( 0 ).toUpperCase() );
+			int materialArg = 0;
+			int numberArg = 1;
+			Material m = Material.getMaterial( args.get( materialArg ).toUpperCase() );
 			if ( m == null ) {
-				Chat.sendMessage( getMessage( Text.INVALID_MATERIAL, sender )
-						.put( "material", args.get( 0 ) ) );
-				return true;
+				// try again with material and number swapped
+				materialArg = 1;
+				numberArg = 0;
+				m = Material.getMaterial( args.get( materialArg ).toUpperCase() );
+				if ( m == null ) {
+					Chat.sendMessage( getMessage( Text.INVALID_MATERIAL, sender )
+							.put( "material", args.get( 0 ) ) );
+					return true;
+				}
 			}
 			try {
-				int amount = Integer.parseInt( args.get( 1 ) );
+				int amount = Integer.parseInt( args.get( numberArg ) );
 				game.setFare( new ItemStack( m, amount ) );
 				Chat.sendMessage( getMessage( Text.FARE_SET, sender ).put(
 						"game", game ) );
 				return true;
 			} catch ( Exception e ) {
 				Chat.sendMessage( getMessage( Text.INVALID_NUMBER, sender )
-						.put( "number", args.get( 1 ) ) );
+						.put( "number", args.get( numberArg ) ) );
 				return true;
 			}
 		} else {
