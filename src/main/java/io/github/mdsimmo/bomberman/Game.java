@@ -296,14 +296,15 @@ public class Game implements Formattable {
 				final Player topPlayer = winners.get( 0 ).getPlayer();
 				topPlayer.getInventory().addItem( prize );
 				// makes sure the inventory is correct
-				plugin.getServer().getScheduler()
-						.scheduleSyncDelayedTask( plugin, new Runnable() {
-							@SuppressWarnings( "deprecation" )
-							@Override
-							public void run() {
-								topPlayer.updateInventory();
-							}
-						} );
+				if ( plugin.isEnabled() )
+					plugin.getServer().getScheduler()
+							.scheduleSyncDelayedTask( plugin, new Runnable() {
+								@SuppressWarnings( "deprecation" )
+								@Override
+								public void run() {
+									topPlayer.updateInventory();
+								}
+							} );
 			}
 
 			// display the scores
