@@ -343,38 +343,33 @@ public class GamePlayingState extends PlayerState implements Listener {
 
 		if ( !dead ) {
 			if ( attacker == rep ) {
-				Message message = Text.HIT_SUICIDE.getMessage( player );
-				message.put( "game", game ).put( "attacker", attacker )
-						.put( "defender", rep );
+				Message message = game.getMessage( Text.HIT_SUICIDE, player );
+				message.put( "attacker", attacker ).put( "defender", rep );
 				Chat.sendMessage( message );
 			} else {
-				Message message = Text.HIT_BY.getMessage( player );
-				message.put( "game", game ).put( "attacker", attacker );
+				Message message = game.getMessage( Text.HIT_BY, player );
+				message.put( "attacker", attacker ).put( "defender", rep );
 				Chat.sendMessage( message );
 
-				message = Text.HIT_OPPONENT.getMessage( player );
-				message.put( "game", game ).put( "attacker", attacker )
-						.put( "defender", rep );
+				message = game.getMessage( Text.HIT_OPPONENT, attacker.getPlayer() );
+				message.put( "attacker", attacker ).put( "defender", rep );
 				Chat.sendMessage( message );
 			}
 		} else {
 			playerStats.deaths++;
 			attackerStats.kills++;
 			if ( attacker == rep ) {
-				Message message = Text.KILL_SUICIDE.getMessage( player );
-				message.put( "game", game ).put( "attacker", attacker )
-						.put( "defender", rep );
+				Message message = game.getMessage( Text.KILL_SUICIDE, player );
+				message.put( "attacker", attacker ).put( "defender", rep );
 				Chat.sendMessage( message );
 				playerStats.suicides++;
 			} else {
-				Message message = Text.KILLED_BY.getMessage( player );
-				message.put( "game", game ).put( "attacker", attacker )
-						.put( "defender", rep );
+				Message message = game.getMessage( Text.KILLED_BY, player );
+				message.put( "attacker", attacker ).put( "defender", rep );
 				Chat.sendMessage( message );
 
-				message = Text.KILL_OPPONENT.getMessage( player );
-				message.put( "game", game ).put( "attacker", attacker )
-						.put( "defender", rep );
+				message = game.getMessage( Text.KILL_OPPONENT, attacker.getPlayer() );
+				message.put( "attacker", attacker ).put( "defender", rep );
 				Chat.sendMessage( message );
 			}
 		}
