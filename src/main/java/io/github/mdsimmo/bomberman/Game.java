@@ -838,6 +838,14 @@ public class Game implements Formattable {
 			return new ItemWrapper( fare ).format( message, args );
 		case "prize":
 			args.remove( 0 );
+			if ( pot ) {
+				// re calculate current pot
+				if ( fare == null )
+					prize = null;
+				else 
+					prize = new ItemStack( fare.getType(), fare.getAmount()
+							* (winners.size() + players.size() ) );
+			}
 			return new ItemWrapper( prize ).format( message, args );
 		case "haspot":
 			return Boolean.toString( pot );
