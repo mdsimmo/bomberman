@@ -12,11 +12,10 @@ import java.util.List;
 
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
-import org.bukkit.event.Listener;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.potion.PotionEffect;
 
-public class PlayerRep implements Listener, Formattable {
+public class PlayerRep implements Formattable {
 
 	private static JavaPlugin plugin = Bomberman.instance;
 	private static HashMap<Player, PlayerRep> lookup = new HashMap<>();
@@ -50,7 +49,6 @@ public class PlayerRep implements Listener, Formattable {
 	public PlayerRep( Player player ) {
 		this.player = player;
 		lookup.put( player, this );
-		plugin.getServer().getPluginManager().registerEvents( this, plugin );
 	}
 
 	/**
