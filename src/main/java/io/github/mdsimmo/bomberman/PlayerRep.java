@@ -95,22 +95,18 @@ public class PlayerRep implements Formattable {
 	 */
 	public boolean switchStates( PlayerState state ) {
 		if ( this.state != null && !this.state.disable() ) {
-			System.out.println( "State failed to disable" );
 			return false;
 		}
 		this.state = null;
 
 		if ( state == null ) {
-			System.out.println( "State removed" );
 			return true;
 		}
 
 		if ( state.enable() ) {
-			System.out.println( "State enabled" );
 			this.state = state;
 			return true;
 		} else {
-			System.out.println( "State failed to enable" );
 			return false;
 		}
 	}
@@ -124,8 +120,6 @@ public class PlayerRep implements Formattable {
 							player.setFireTicks( 0 );
 							for ( PotionEffect effect : player
 									.getActivePotionEffects() ) {
-								plugin.getLogger().info(
-										effect.getType().toString() );
 								player.removePotionEffect( effect.getType() );
 							}
 						}

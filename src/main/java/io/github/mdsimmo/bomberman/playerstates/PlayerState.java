@@ -47,7 +47,6 @@ public abstract class PlayerState {
 	 */
 	public boolean disable() {
 		if ( !enabled ) {
-			System.out.println( "All ready disabled" );
 			return true;
 		}
 		boolean success = onDisable();

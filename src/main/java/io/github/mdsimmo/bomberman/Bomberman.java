@@ -46,7 +46,6 @@ public class Bomberman extends JavaPlugin {
 		try {
 			c.save( new File( "english.lang" ) );
 		} catch ( IOException e ) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}

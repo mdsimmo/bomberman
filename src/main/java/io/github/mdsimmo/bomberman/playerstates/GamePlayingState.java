@@ -159,7 +159,6 @@ public class GamePlayingState extends PlayerState implements Listener {
 	public boolean onDisable() {
 		if ( isPlaying )
 			return false;
-		System.out.println( "Removed event listener from " + player.getName() );
 		HandlerList.unregisterAll( this );
 		return true;
 	}
@@ -174,7 +173,6 @@ public class GamePlayingState extends PlayerState implements Listener {
 	 * @return true if killed successfully
 	 */
 	public void kill() {
-		System.out.println( "player: " + player.getName() + " " + spawnHealth);
 		isPlaying = false;
 		removeCage();
 		rep.switchStates( null );

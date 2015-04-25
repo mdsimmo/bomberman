@@ -218,7 +218,6 @@ public class Game implements Formattable {
 			return;
 		winners.remove( rep );
 		winners.add( 0, rep );
-		System.out.println( "Added a player: " + rep.getPlayer().getName() );
 	}
 
 	/**
@@ -292,7 +291,6 @@ public class Game implements Formattable {
 
 			// give the winner the prize
 			if ( prize != null	 ) {
-				System.out.println( "Fetching top player" );
 				final Player topPlayer = winners.get( 0 ).getPlayer();
 				topPlayer.getInventory().addItem( prize );
 				// makes sure the inventory is correct
@@ -691,7 +689,6 @@ public class Game implements Formattable {
 		for ( PlayerRep rep : new ArrayList<PlayerRep>( players ) )
 			( (GamePlayingState)rep.getState() ).kill();
 		winners.clear();
-		System.out.println( "Winners cleared" );
 		for ( Stats stat : stats.values() ) {
 			stat.reset();
 		}

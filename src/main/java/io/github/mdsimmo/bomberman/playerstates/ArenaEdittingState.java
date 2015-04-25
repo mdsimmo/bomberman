@@ -47,11 +47,9 @@ public class ArenaEdittingState extends PlayerState implements Listener {
 	@Override
 	public boolean onDisable() {
 		if ( !finished ) {
-			System.out.println( "FALSE" );
 			return false;
 		}
 		HandlerList.unregisterAll( this );
-		System.out.println( "TRUE" );
 		return true;
 	}
 
@@ -107,7 +105,7 @@ public class ArenaEdittingState extends PlayerState implements Listener {
 		}
 		ArenaGenerator.saveBoard( game.board );
 		finished = true;
-		System.out.println( rep.switchStates( null ) );
+		rep.switchStates( null );
 	}
 
 	public void discardChanges( boolean remove ) {
@@ -119,7 +117,7 @@ public class ArenaEdittingState extends PlayerState implements Listener {
 			}
 		}
 		finished = true;
-		System.out.println( rep.switchStates( null ) );
+		rep.switchStates( null );
 	}
 
 	public Game getGame() {

@@ -115,7 +115,6 @@ public class EditArena extends Cmd {
 			
 			if ( save.equalsIgnoreCase( arg ) ) {
 				editState.saveChanges();
-				System.out.println( editState );
 				Chat.sendMessage( getMessage( Text.EDIT_CHANGES_SAVED, sender )
 						.put( "game", game ).put( "arena", board ) );
 			} else if ( discard.equalsIgnoreCase( arg ) ) {

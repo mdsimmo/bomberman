@@ -87,7 +87,7 @@ public class ArenaDetector implements Runnable {
 		taskID = -1;
 		if ( callBack != null )
 			callBack.onBoundingDetected( box );
-		System.out.println( "Arena creation finished" );
+		plugin.getLogger().info( "Arena creation finished" );
 	}
 
 	public void run() {
