@@ -94,4 +94,9 @@ public class Box {
 		}
 		return entities;
 	}
+	
+	@Override
+	public String toString() {
+		return "corner at: (" + x + ',' + y + ',' + z + "); size: " + xSize + ' ' + ySize + ' ' + zSize;
+	}
 }

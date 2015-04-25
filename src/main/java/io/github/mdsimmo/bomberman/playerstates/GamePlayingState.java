@@ -88,7 +88,13 @@ public class GamePlayingState extends PlayerState implements Listener {
 			message.put( "game", game ).put( "player", player );
 			Chat.sendMessage( message );
 		}
-		rep.getPlayer().teleport( game.box.corner().add( gameSpawn ) );
+		Location teleportLocation = game.box.corner().add( gameSpawn );
+		if ( teleportLocation == null ) {
+			plugin.getLogger().info( "box: " + game.box );
+			plugin.getLogger().info( "gameSpawn: " + gameSpawn );
+			throw new NullPointerException( "teleport location null!" );
+		}
+		rep.getPlayer().teleport( teleportLocation );
 		surroundCage();
 		spawnGameMode = player.getGameMode();
 		spawnHealth = player.getHealth();
