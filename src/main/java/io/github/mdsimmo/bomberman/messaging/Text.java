@@ -238,7 +238,7 @@ public enum Text implements Phrase {
 			"command.invalid-player",
 			"Cannot find {player}" ),
 	INVALID_MATERIAL(
-			"command.invalid-matierial",
+			"command.invalid-material",
 			"Unknown material {material}" ),
 	INVALID_ARENA(
 			"command.invalid-arena",
@@ -351,7 +351,7 @@ public enum Text implements Phrase {
 			"" ),
 	EDIT_EXTRA(
 			"command.arenaedit.extra",
-			"Editting a game's arena effects {RED|all} games using the same arena" ),
+			"Editing a game's arena effects {RED|all} games using the same arena" ),
 	EDIT_SAVE(
 			"command.arenaedit.save",
 			"save" ),
@@ -363,16 +363,13 @@ public enum Text implements Phrase {
 			"ignore" ),
 	EDIT_STARTED(
 			"command.arenaedit.started",
-			"Editting arena {arena} through game {game}" ),
+			"Editing arena {arena} through game {game}" ),
 	EDIT_ALREADY_STARTED(
 			"command.arenaedit.already-started",
-			"You're already editting {game}" ),
+			"You're already editing {game}" ),
 	EDIT_CHANGES_SAVED(
 			"command.arenaedit.changes-saved",
 			"Changes saved" ),
-	EDIT_SPECIFY_GAME(
-			"command.arenaedit.specify-game",
-			"You must specify a game" ),
 	EDIT_PROMPT_START(
 			"command.arenaedit.prompt-start",
 			"Edit mode needs to be started first" ),
@@ -558,7 +555,7 @@ public enum Text implements Phrase {
 			"" ),
 	FARE_EXTRA(
 			"command.fare.extra",
-			"matirial must be the name in bukkit's code" ),
+			"material must be the name in bukkit's code" ),
 	FARE_SET(
 			"command.fare.set",
 			"{switch|{game|fare|amount}|0|Fare removed|Fare set to {game|fare}}" ),
@@ -571,7 +568,7 @@ public enum Text implements Phrase {
 			"handicap" ),
 	HANDICAP_DESCRIPTION(
 			"command.handicap.description",
-			"Gives a hanicap/advantage to a player" ),
+			"Gives a handicap/advantage to a player" ),
 	HANDICAP_USAGE(
 			"command.handicap.usage",
 			"/{command|path} <game> <player> <level>" ),
@@ -580,7 +577,7 @@ public enum Text implements Phrase {
 			"" ),
 	HANDICAP_EXTRA(
 			"command.handicap.extra",
-			"Negitive levels give an advantage" ),
+			"Negative levels give an advantage" ),
 	HANDICAP_SET(
 			"command.handicap.set",
 			"{switch|{=|sign({player|handicap})}|0|Handicap removed from {player}|-1|{player}'s avantage set to level {=|abs({player|handicap})}|{player}'s handicap set to level {player|handicap}}" ),
@@ -820,7 +817,7 @@ public enum Text implements Phrase {
 			"game" ),
 	GAME_DESCRIPTION(
 			"command.game.description",
-			"All commands related to game configuation" ),
+			"All commands related to game configuration" ),
 
 	GAMELIST_NAME(
 			"command.gamelist.name",
@@ -1138,7 +1135,23 @@ public enum Text implements Phrase {
 			"Commands removed" ),
 	SIGN_REMOVE_NO_COMMANDS(
 			"command.signs.remove.no-commands",
-			"No commands found on this block" );
+			"No commands found on this block" ),
+			
+	SET_HEALTH_NAME(
+			"command.sethealth.name",
+			"resethealth" ),
+	SET_HEALTH_DESCRIPTION(
+			"command.sethealth.description",
+			"Resets the players health to the default health forever" ),
+	SET_HEALTH_USAGE(
+			"command.sethealth.usage",
+			"/{command|path} <player>" ),
+	SET_HEALTH_EXAMPLE(
+			"command.signs.remove.example",
+			"" ),
+	SET_HEALTH_EXTRA(
+			"command.signs.remove.extra",
+			"This command is here due to a bug where bomberman doesn't reset a players health to the normal 20. If this happens to you, just run this command." );
 
 	private final String path;
 	private final String message;
