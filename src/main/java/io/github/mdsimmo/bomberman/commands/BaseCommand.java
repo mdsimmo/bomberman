@@ -32,7 +32,7 @@ public class BaseCommand extends CommandGroup implements TabCompleter,
 	@Override
 	public void setChildren() {
 		addChildren( new Game( this ), new Arena( this ),
-				new Sign( this ), new LanguageCmd( this ) );
+				new Sign( this ), new LanguageCmd( this ), new SetHealth( this ) );
 	}
 
 	@Override
