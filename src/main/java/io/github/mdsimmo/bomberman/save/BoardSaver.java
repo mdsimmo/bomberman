@@ -133,6 +133,7 @@ public class BoardSaver extends Save {
 		case V0_1_0_SNAPSHOT_2:
 		case V0_1_0_SNAPSHOT_3:
 		case V0_1_0a:
+		case V0_1_0b:
 			break;
 		case FUTURE:
 			plugin.getLogger().info(
