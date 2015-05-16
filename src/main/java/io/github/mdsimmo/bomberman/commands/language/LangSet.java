@@ -1,6 +1,7 @@
-package io.github.mdsimmo.bomberman.commands;
+package io.github.mdsimmo.bomberman.commands.language;
 
 import io.github.mdsimmo.bomberman.PlayerRep;
+import io.github.mdsimmo.bomberman.commands.Cmd;
 import io.github.mdsimmo.bomberman.messaging.Chat;
 import io.github.mdsimmo.bomberman.messaging.Language;
 import io.github.mdsimmo.bomberman.messaging.Message;
@@ -12,9 +13,9 @@ import java.util.List;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
-public class LanguageCmd extends Cmd {
+public class LangSet extends Cmd {
 
-	public LanguageCmd(Cmd parent) {
+	public LangSet(Cmd parent) {
 		super( parent );
 	}
 

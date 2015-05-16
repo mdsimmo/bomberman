@@ -1,15 +1,9 @@
 package io.github.mdsimmo.bomberman;
 
-import java.io.File;
-import java.io.IOException;
-
 import io.github.mdsimmo.bomberman.arenabuilder.ArenaGenerator;
 import io.github.mdsimmo.bomberman.commands.BaseCommand;
-import io.github.mdsimmo.bomberman.messaging.Phrase;
-import io.github.mdsimmo.bomberman.messaging.Text;
 import io.github.mdsimmo.bomberman.save.BoardSaver;
 
-import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.plugin.java.JavaPlugin;
 
 public class Bomberman extends JavaPlugin {
@@ -34,19 +28,6 @@ public class Bomberman extends JavaPlugin {
 		for (String game : Game.allGames()) {
 			Game.findGame(game).stop();
 			Game.findGame(game).saveGame();
-		}
-	}
-	
-	public static void main( String[] args ) {
-		YamlConfiguration c = new YamlConfiguration();
-		for ( Phrase text : Text.values() ) {
-			c.set( text.getPath(), text.getDefault() );
-		}
-		System.out.println( new File( "english.lang" ).getAbsolutePath() );
-		try {
-			c.save( new File( "english.lang" ) );
-		} catch ( IOException e ) {
-			e.printStackTrace();
 		}
 	}
 }

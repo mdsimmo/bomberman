@@ -25,14 +25,23 @@ public class Language implements Formattable {
 		if ( lang == null )
 			return null;
 		lang = lang.toLowerCase();
-		Language l = langs.get( lang );
-		if ( l == null ) {
-			if ( getFile( lang ).exists() )
-				return new Language( lang );
-			else
-				return null;
+		Language language = langs.get( lang );
+		if ( language != null ) {
+			return language;
 		} else {
-			return l;
+			if ( getFile( lang ).exists() ) {
+				language = new Language( lang );
+				langs.put( lang, language );
+				return language;
+			} else {
+				if ( lang.equalsIgnoreCase( "english" ) ) {
+					language = new EnglishLanguage();
+					langs.put( "english", language );
+					return language;
+				} else {
+					return null;
+				}
+			}
 		}
 	}
 
@@ -62,7 +71,7 @@ public class Language implements Formattable {
 		save = YamlConfiguration.loadConfiguration( f );
 		name = lang;
 	}
-
+	
 	public String translate( Phrase phrase ) {
 		String t = save.getString( phrase.getPath() );
 		if ( t == null ) {
@@ -74,10 +83,29 @@ public class Language implements Formattable {
 		} else
 			return t;
 	}
+	
+	public boolean contains( Phrase phrase ) {
+		return save.contains( phrase.getPath() );
+	}
 
 	@Override
 	public String format( Message message, List<String> args ) {
 		return name;
+	}
+	
+	private static class EnglishLanguage extends Language {
+		public EnglishLanguage() {
+			super( "english" );
+		}
+		
+		public String translate( Phrase phrase ) {
+			return phrase.getDefault();
+		}
+		
+		@Override
+		public boolean contains( Phrase phrase ) {
+			return true;
+		}
 	}
 
 }

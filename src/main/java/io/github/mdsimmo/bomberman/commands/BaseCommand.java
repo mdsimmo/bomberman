@@ -3,6 +3,7 @@ package io.github.mdsimmo.bomberman.commands;
 import io.github.mdsimmo.bomberman.Bomberman;
 import io.github.mdsimmo.bomberman.commands.arena.Arena;
 import io.github.mdsimmo.bomberman.commands.game.Game;
+import io.github.mdsimmo.bomberman.commands.language.Language;
 import io.github.mdsimmo.bomberman.commands.signs.Sign;
 import io.github.mdsimmo.bomberman.messaging.Message;
 import io.github.mdsimmo.bomberman.messaging.Text;
@@ -32,7 +33,7 @@ public class BaseCommand extends CommandGroup implements TabCompleter,
 	@Override
 	public void setChildren() {
 		addChildren( new Game( this ), new Arena( this ),
-				new Sign( this ), new LanguageCmd( this ), new SetHealth( this ) );
+				new Sign( this ), new Language( this ), new SetHealth( this ) );
 	}
 
 	@Override

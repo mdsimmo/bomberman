@@ -489,7 +489,7 @@ public enum Text implements Phrase {
 			"Set if the game should autostart" ),
 	AUTOSTART_USAGE(
 			"command.autostart.usage",
-			"/{game} <game> <true|false>" ),
+			"/{command|path} <game> <true|false>" ),
 	AUTOSTART_EXAMPLE(
 			"command.autostart.example",
 			"" ),
@@ -1060,28 +1060,83 @@ public enum Text implements Phrase {
 			"command.scores.extra",
 			"" ),
 
-	LANGUAGE_NAME(
+	LANGUAGE_GROUP_NAME(
 			"command.language.name",
 			"language" ),
-	LANGUAGE_DESCRIPTION(
+	LANGUAGE_GROUP_DESCRIPTION(
 			"command.language.description",
-			"Sets what language to use" ),
-	LANGUAGE_USAGE(
-			"command.language.usage",
-			"/{command|path} <lang>" ),
-	LANGUAGE_EXAMPLE(
-			"command.language.example",
-			"" ),
-	LANGUAGE_EXTRA(
-			"command.language.extra",
-			"" ),
+			"The language commands" ),
 	LANGUAGE_UNKNOWN(
 			"command.language.invalid",
 			"Unknown language {lang}" ),
+			
+	LANGUAGE_NAME(
+			"command.languageset.name",
+			"set" ),
+	LANGUAGE_DESCRIPTION(
+			"command.languageset.description",
+			"Sets what language to use" ),
+	LANGUAGE_USAGE(
+			"command.languageset.usage",
+			"/{command|path} <lang>" ),
+	LANGUAGE_EXAMPLE(
+			"command.languageset.example",
+			"" ),
+	LANGUAGE_EXTRA(
+			"command.languageset.extra",
+			"" ),
 	LANGUAGE_SUCCESS(
-			"command.language.success",
+			"command.languageset.success",
 			"Language set to {lang}" ),
-
+	
+	
+	TOLUA_NAME(
+			"command.tolua.name",
+			"tolua" ),
+	TOLUA_DESCRIPTION(
+			"command.tolua.description",
+			"Converts a luguage to a lua file (for uploading to the bukkit repo)" ),
+	TOLUA_USAGE(
+			"command.tolua.usage",
+			"/{command|path} <lang> <exportfile>" ),
+	TOLUA_EXAMPLE(
+			"command.tolua.example",
+			"" ),
+	TOLUA_EXTRA(
+			"command.tolua.extra",
+			"Exported file will be in 'global strings' format" ),
+	TOLUA_SUCCESS(
+			"command.tolua.success",
+			"lua file created" ),
+	TOLUA_FAILED(
+			"command.tolua.failed",
+			"Failed to create file {aqua|{file}}. Was the filename legal?"),
+	
+	FROMLUA_NAME(
+			"command.fromlua.name",
+			"fromlua" ),
+	FROMLUA_DESCRIPTION(
+			"command.fromlua.description",
+			"Converts a lua file into a yaml file" ),
+	FROMLUA_USAGE(
+			"command.fromlua.usage",
+			"/{command|path} <importfile> <langname>" ),
+	FROMLUA_EXAMPLE(
+			"command.fromlua.example",
+			"" ),
+	FROMLUA_EXTRA(
+			"command.fromlua.extra",
+			"Lua languages must be in 'global strings' format" ),
+	FROMLUA_SUCCESS(
+			"command.fromlua.success",
+			"language {lang} created" ),
+	FROMLUA_FILE_NOT_FOUND(
+			"command.fromlua.file-not-found",
+			"File {file} was not found"),
+	FROMLUA_FAILED(
+			"command.fromlua.failed",
+			"Failed to import language {lang}"),
+			
 	SIGN_CANT_BREAK(
 			"command.signs.cant_break",
 			"Command blocks cannot be broken. Use {aqua|/bm sign remove}" ),
@@ -1148,7 +1203,7 @@ public enum Text implements Phrase {
 			"Resets the players health to the default health forever" ),
 	SET_HEALTH_USAGE(
 			"command.sethealth.usage",
-			"/{command|path} <player>" ),
+			"/{command|path} <player> [health]" ),
 	SET_HEALTH_EXAMPLE(
 			"command.signs.remove.example",
 			"" ),

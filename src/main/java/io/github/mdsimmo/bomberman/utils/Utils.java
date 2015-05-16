@@ -1,5 +1,8 @@
 package io.github.mdsimmo.bomberman.utils;
 
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
@@ -89,5 +92,13 @@ public class Utils {
 			return file;
 		else
 			return parts[0];
+	}
+	
+	public static String readFile( File file ) throws IOException {
+		try {
+			return new String( Files.readAllBytes( file.toPath() ) );
+		} catch ( Exception e ) {
+			throw new IOException( "Error reading file: " + file, e );
+		}
 	}
 }
