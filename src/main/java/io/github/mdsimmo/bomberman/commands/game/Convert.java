@@ -61,8 +61,8 @@ public class Convert extends Cmd {
 		} else {
 			ArenaGenerator.getBoundingStructure( target, new BuildListener(
 					sender, name ) );
-			Message message = getMessage( Text.ARENA_CREATING, sender );
-			message.put( "arena", name );
+			Message message = getMessage( Text.CONVERT_STARTED, sender );
+			message.put( "game", name );
 			Chat.sendMessage( message );
 		}
 		return true;

@@ -580,7 +580,7 @@ public enum Text implements Phrase {
 			"Negative levels give an advantage" ),
 	HANDICAP_SET(
 			"command.handicap.set",
-			"{switch|{=|sign({player|handicap})}|0|Handicap removed from {player}|-1|{player}'s avantage set to level {=|abs({player|handicap})}|{player}'s handicap set to level {player|handicap}}" ),
+			"{switch|{=|sign({player|handicap})}|0|Handicap removed from {player}|-1|{player}'s advantage set to level {=|abs({player|handicap})}|{player}'s handicap set to level {player|handicap}}" ),
 	
 	LIVES_NAME(
 			"command.lives.name",
@@ -742,6 +742,9 @@ public enum Text implements Phrase {
 	CONVERT_GAME_EXISTS(
 			"command.convert.game-exists",
 			"Game {game} already exists" ),
+	CONVERT_STARTED(
+			"command.convert.started",
+			"Conversion in progress..." ),
 	CONVERT_SUCCESS(
 			"command.convert.success",
 			"Game {game} created" ),
@@ -881,78 +884,84 @@ public enum Text implements Phrase {
 	INFO_EXTRA(
 			"command.info.extra",
 			"" ),
-	INFO_STATUS(
-			"command.info.status",
+	INFO_1(
+			"command.info.1-key",
 			"Status" ),
-	INFO_STATUS_RESULT(
-			"command.info.result",
+	INFO_1_RESULT(
+			"command.info.1-value",
 			"{switch|{game|state}|waiting|Waiting|playing|In progress|starting|Starting|ending|Ending|unknown}" ),
-	INFO_PLAYERS(
-			"command.info.players",
+	INFO_2(
+			"command.info.2-key",
 			"Players" ),
-	INFO_PLAYERS_RESULT(
-			"command.info.players-result",
+	INFO_2_RESULT(
+			"command.info.2-value",
 			"{game|players}"),
-	INFO_MIN_PLAYERS(
-			"command.info.min-players",
+	INFO_3(
+			"command.info.3-key",
 			"Min players" ),
-	INFO_MIN_PLAYERS_RESULT(
-			"command.info.min-players-result",
+	INFO_3_RESULT(
+			"command.info.3-value",
 			"{game|minplayers}" ),
-	INFO_MAX_PLAYERS(
-			"command.info.max-players",
+	INFO_4(
+			"command.info.4-key",
 			"Max players" ),
-	INFO_MAX_PLAYERS_RESULT(
-			"command.info.max-players-result",
+	INFO_4_RESULT(
+			"command.info.4-value",
 			"{game|maxplayers}" ),
-	INFO_INIT_BOMBS(
-			"command.info.initial-bombs",
+	INFO_5(
+			"command.info.5-key",
 			"Init bombs" ),
-	INFO_INIT_BOMBS_RESULT(
-			"command.info.initial-bombs-result",
+	INFO_5_RESULT(
+			"command.info.5-value",
 			"{game|bombs}" ),
-	INFO_INIT_LIVES(
-			"command.info.initial-lives",
+	INFO_6 (
+			"command.info.6-key",
 			"Init lives" ),
-	INFO_INIT_LIVES_RESULT(
-			"command.info.initial-lives-result",
+	INFO_6_RESULT(
+			"command.info.6-value",
 			"{game|lives}" ),
-	INFO_INIT_POWER(
-			"command.info.initial-power",
+	INFO_7(
+			"command.info.7-key",
 			"Init power" ),
-	INFO_INIT_POWER_RESULT(
-			"command.info.initial-power-result",
+	INFO_7_RESULT(
+			"command.info.7-value",
 			"{game|power}" ),
-	INFO_FARE(
-			"command.info.fare-result",
+	INFO_8(
+			"command.info.8-key",
 			"Entry fee" ),
-	INFO_FARE_RESULT(
-			"command.info.fare-result",
+	INFO_8_RESULT(
+			"command.info.8-value",
 			"{switch|{game|fare|amount}|0|No fee|{game|fare}}" ),
-	INFO_PRIZE(
-			"command.info.prize",
+	INFO_9(
+			"command.info.9-key",
 			"Prize" ),
-	INFO_PRIZE_RESULT(
-			"command.info.prize-result",
+	INFO_9_RESULT(
+			"command.info.9-value",
 			"{switch|{game|haspot}|true|Pot at {game|prize}|{switch|{game|prize|amount}|0|No prize|{game|prize}}}" ),
-	INFO_SUDDENDEATH(
-			"command.info.suddendeath",
+	INFO_10(
+			"command.info.10-key",
 			"Sudden death" ),
-	INFO_SUDDENDEATH_RESULT(
-			"command.info.suddendeath-result",
+	INFO_10_RESULT(
+			"command.info.10-value",
 			"{switch|{game|suddendeath}|0,-1|Off|{game|suddendeath} seconds}" ),
-	INFO_TIMEOUT(
-			"command.info.timeout",
+	INFO_11(
+			"command.info.11-key",
 			"Timeout" ),
-	INFO_TIMEOUT_RESULT(
-			"command.info.timeout-result",
+	INFO_11_RESULT(
+			"command.info.11-value",
 			"{switch|{game|timeout}|0,-1|Off|{game|timeout} seconds}"),
-	INFO_ARENA(
-			"command.info.arena",
+	INFO_12(
+			"command.info.12-key",
 			"Arena" ),
-	INFO_ARENA_RESULT(
-			"command.info.arena-result",
+	INFO_12_RESULT(
+			"command.info.12-value",
 			"{game|arena}"),
+	INFO_13( "command.info.13-key", "" ),
+	INFO_13_RESULT("command.info.13-value",""),
+	INFO_14("command.info.14-key",""),
+	INFO_14_RESULT("command.info.14-value",""),
+	INFO_15("command.info.15-key",""),
+	INFO_15_RESULT("command.info.15-value",""),
 
 	JOIN_NAME(
 			"command.join.name",
@@ -1007,12 +1016,6 @@ public enum Text implements Phrase {
 	PROTECT_EXTRA(
 			"command.protect.extra",
 			"" ),
-	PROTECT_NOT_JOINED(
-			"command.protect.not-joined",
-			"You're not part of a game" ),
-	PROTECT_FAILED(
-			"command.protect.failed",
-			"Couldn't remove you" ),
 	PROTECT_ENABLED(
 			"command.protect.enabled",
 			"enabled" ),

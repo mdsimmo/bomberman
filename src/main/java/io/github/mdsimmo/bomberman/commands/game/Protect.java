@@ -18,7 +18,7 @@ import com.google.common.collect.HashBiMap;
 
 public class Protect extends GameCommand {
 
-	private static BiMap<Config, Text> options = HashBiMap.create();
+	private BiMap<Config, Text> options = HashBiMap.create();
 	
 	public Protect(Cmd parent) {
 		super(parent);

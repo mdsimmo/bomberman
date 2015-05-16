@@ -66,7 +66,7 @@ public class SignHandler implements Listener {
 		BlockLocation l = BlockLocation.getLocation( b );
 		if ( CommandSign.isCommandSign( l ) ) {
 			Chat.sendMessage( Text.SIGN_CANT_BREAK.getMessage(
-					e.getPlayer() ).put( "block", b ) );
+					e.getPlayer() ).put( "block", b ).put( "signblock", b ) );
 			e.setCancelled( true );
 			return;
 		}
@@ -81,7 +81,7 @@ public class SignHandler implements Listener {
 			BlockLocation l2 = BlockLocation.getLocation( adjacent );
 			if ( CommandSign.isCommandSign( l2 ) ) {
 				Chat.sendMessage( Text.SIGN_CANT_BREAK.getMessage(
-						e.getPlayer() ).put( "block", b ) );
+						e.getPlayer() ).put( "block", b ).put( "signblock", adjacent ) );
 				e.setCancelled( true );
 				return;
 			}

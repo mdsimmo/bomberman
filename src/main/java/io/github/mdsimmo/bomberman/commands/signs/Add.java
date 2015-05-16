@@ -26,6 +26,8 @@ import org.bukkit.plugin.Plugin;
 
 public class Add extends Cmd {
 
+	private static final Plugin plugin = Bomberman.instance;
+	
 	public Add( Cmd parent ) {
 		super( parent );
 	}
@@ -45,18 +47,17 @@ public class Add extends Cmd {
 		if ( args.size() == 0 )
 			return false;
 		if ( sender instanceof Player == false ) {
-			Chat.sendMessage( Text.MUST_BE_PLAYER.getMessage( sender ) );
+			Chat.sendMessage( getMessage( Text.MUST_BE_PLAYER, sender ) );
 			return true;
 		}
 		String command = Utils.listToString( args );
-		Chat.sendMessage( Text.SIGN_ADD_PROMT_CLICK.getMessage( sender ).put( "command", command ) );
+		Chat.sendMessage( getMessage( Text.SIGN_ADD_PROMT_CLICK, sender ).put( "command", command ) );
 		new ClickListener( command, (Player) sender );
 		return true;
 	}
 	
-	private static class ClickListener implements Listener {
+	private class ClickListener implements Listener {
 		
-		private static final Plugin plugin = Bomberman.instance;
 		private String command;
 		private Player player;
 		
@@ -75,7 +76,9 @@ public class Add extends Cmd {
 			if ( e.getPlayer() != player )
 				return;
 			Block b = e.getClickedBlock();
-			Chat.sendMessage( Text.SIGN_ADD_ADDED.getMessage( player ).put( "command", command ) );
+			Chat.sendMessage( getMessage( Text.SIGN_ADD_ADDED, player )
+					.put( "command", command )
+					.put( "block", b ));
 			if (command.charAt( 0 ) == '\\' || command.charAt( 0 ) == '/' )
 				command = command.substring( 1 );
 			PlayerRep rep = PlayerRep.getPlayerRep( e.getPlayer() );

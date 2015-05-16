@@ -25,6 +25,8 @@ import org.bukkit.plugin.Plugin;
 
 public class Remove extends Cmd {
 
+	private static final Plugin plugin = Bomberman.instance;
+	
 	public Remove( Cmd parent ) {
 		super( parent );
 	}
@@ -44,17 +46,16 @@ public class Remove extends Cmd {
 		if ( args.size() != 0 )
 			return false;
 		if ( sender instanceof Player == false ) {
-			Chat.sendMessage( Text.MUST_BE_PLAYER.getMessage( sender ) );
+			Chat.sendMessage( getMessage( Text.MUST_BE_PLAYER, sender ) );
 			return true;
 		}
-		Chat.sendMessage( Text.SIGN_REMOVE_PROMT_CLICK.getMessage( sender ) );
+		Chat.sendMessage( getMessage( Text.SIGN_REMOVE_PROMT_CLICK, sender ) );
 		new ClickListener( (Player) sender );
 		return true;
 	}
 	
-	private static class ClickListener implements Listener {
+	private class ClickListener implements Listener {
 		
-		private static final Plugin plugin = Bomberman.instance;
 		private final Player player;
 		
 		public ClickListener( Player player ) {
@@ -72,9 +73,10 @@ public class Remove extends Cmd {
 				return;
 			Block b = e.getClickedBlock();
 			if ( CommandSign.removeSign( BlockLocation.getLocation( b ) ) ) {
-				Chat.sendMessage( Text.SIGN_REMOVE_SUCCESS.getMessage( player ) );
+				Chat.sendMessage( getMessage( Text.SIGN_REMOVE_SUCCESS, player )
+						.put( "block", b ));
 			} else {
-				Chat.sendMessage( Text.SIGN_REMOVE_NO_COMMANDS.getMessage( player ) );
+				Chat.sendMessage( getMessage( Text.SIGN_REMOVE_NO_COMMANDS, player ).put( "block", b ) );
 			}
 			PlayerRep rep = PlayerRep.getPlayerRep( e.getPlayer() );
 			if ( rep.getState() instanceof ArenaEdittingState ) {

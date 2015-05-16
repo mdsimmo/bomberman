@@ -42,18 +42,21 @@ public class Info extends GameCommand {
 
 		Chat.sendHeading( Text.INFO.getMessage( sender ), new Message( sender, game.name ) );
 		Map<Message, Message> list = new LinkedHashMap<>();
-		add( list, game, sender, Text.INFO_STATUS, Text.INFO_STATUS_RESULT );
-		add( list, game, sender, Text.INFO_PLAYERS, Text.INFO_PLAYERS_RESULT );
-		add( list, game, sender, Text.INFO_MIN_PLAYERS, Text.INFO_MIN_PLAYERS_RESULT);
-		add( list, game, sender, Text.INFO_MAX_PLAYERS, Text.INFO_MAX_PLAYERS_RESULT);
-		add( list, game, sender, Text.INFO_INIT_BOMBS, Text.INFO_INIT_BOMBS_RESULT );
-		add( list, game, sender, Text.INFO_INIT_LIVES, Text.INFO_INIT_LIVES_RESULT);
-		add( list, game, sender, Text.INFO_INIT_POWER, Text.INFO_INIT_POWER_RESULT);
-		add( list, game, sender, Text.INFO_FARE, Text.INFO_FARE_RESULT);
-		add( list, game, sender, Text.INFO_PRIZE, Text.INFO_PRIZE_RESULT);
-		add( list, game, sender, Text.INFO_SUDDENDEATH, Text.INFO_SUDDENDEATH_RESULT);
-		add( list, game, sender, Text.INFO_TIMEOUT, Text.INFO_TIMEOUT_RESULT );
-		add( list, game, sender, Text.INFO_ARENA, Text.INFO_ARENA_RESULT);
+		add( list, game, sender, Text.INFO_1, Text.INFO_1_RESULT );
+		add( list, game, sender, Text.INFO_2, Text.INFO_2_RESULT );
+		add( list, game, sender, Text.INFO_3, Text.INFO_3_RESULT );
+		add( list, game, sender, Text.INFO_4, Text.INFO_4_RESULT );
+		add( list, game, sender, Text.INFO_5, Text.INFO_5_RESULT );
+		add( list, game, sender, Text.INFO_6, Text.INFO_6_RESULT );
+		add( list, game, sender, Text.INFO_7, Text.INFO_7_RESULT );
+		add( list, game, sender, Text.INFO_8, Text.INFO_8_RESULT );
+		add( list, game, sender, Text.INFO_9, Text.INFO_9_RESULT );
+		add( list, game, sender, Text.INFO_10, Text.INFO_10_RESULT );
+		add( list, game, sender, Text.INFO_11, Text.INFO_11_RESULT );
+		add( list, game, sender, Text.INFO_12, Text.INFO_12_RESULT );
+		add( list, game, sender, Text.INFO_13, Text.INFO_13_RESULT );
+		add( list, game, sender, Text.INFO_14, Text.INFO_14_RESULT );
+		add( list, game, sender, Text.INFO_15, Text.INFO_15_RESULT );
 		Chat.sendMap( list );
 		return true;
 	}

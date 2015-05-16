@@ -39,7 +39,9 @@ public class MinPlayers extends GameCommand {
 			return false;
 		}
 		if ( amount <= 0 ) {
-			Chat.sendMessage( getMessage(Text.MINPLAYERS_LESS_THAN_ONE, sender).put("amount", amount) );
+			Chat.sendMessage( getMessage(Text.MINPLAYERS_LESS_THAN_ONE, sender)
+					.put( "game", game )
+					.put("amount", amount) );
 			return true;
 		}
 		game.setMinPlayers(amount);	

@@ -838,6 +838,8 @@ public class Game implements Formattable {
 			return Integer.toString( getSuddenDeath() );
 		case "autostart":
 			return Integer.toString( getAutostartDelay() );
+		case "hasautostart":
+			return Boolean.toString( getAutostart() );
 		case "x":
 			return Integer.toString( box.x );
 		case "y":
