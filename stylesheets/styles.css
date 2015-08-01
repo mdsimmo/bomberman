@@ -104,13 +104,13 @@ strong {
   color: #333;
 }
 
-.wrapper {
+main {
   width: 650px;
   margin: 0 auto;
-  position: relative;
+  margin-top: 190px;
 }
 
-section img {
+main img {
   max-width: 100%;
 }
 
@@ -208,6 +208,7 @@ header {
   -webkit-font-smoothing: antialiased;
   min-height: 76px;
 }
+
 header h1 {
   font: 40px/48px "Copse", "Helvetica Neue", Helvetica, Arial, sans-serif;
   color: #f3f3f3;
@@ -219,6 +220,7 @@ header h1 {
   -o-text-overflow: ellipsis;
   -ms-text-overflow: ellipsis;
 }
+
 header p {
   color: #d8d8d8;
   text-shadow: rgba(0, 0, 0, 0.2) 0 1px 0;
@@ -248,6 +250,7 @@ header p {
   border-radius: 0px 2px 2px 0px;
   padding-right: 10px;
 }
+
 #banner .button {
   border: 1px solid #dba500;
   background: -webkit-gradient(linear, 50% 0%, 50% 100%, color-stop(0%, #ffe788), color-stop(100%, #ffce38));
@@ -277,6 +280,7 @@ header p {
   display: inline-block;
   text-align: center;
 }
+
 #banner .button:hover {
   background: -webkit-gradient(linear, 50% 0%, 50% 100%, color-stop(0%, #ffe788), color-stop(100%, #ffe788));
   background: -webkit-linear-gradient(#ffe788, #ffe788);
@@ -286,6 +290,7 @@ header p {
   background: linear-gradient(#ffe788, #ffe788);
   background-color: #ffeca0;
 }
+
 #banner .fork {
   position: fixed;
   left: 50%;
@@ -296,10 +301,12 @@ header p {
   font-size: 14px;
   background-color: #FFE788;
 }
+
 #banner .downloads {
   float: right;
   margin: 0 45px 0 0;
 }
+
 #banner .downloads span {
   float: left;
   line-height: 52px;
@@ -308,6 +315,7 @@ header p {
   text-transform: uppercase;
   text-shadow: rgba(255, 255, 255, 0.2) 0 1px 0;
 }
+
 #banner ul {
   list-style: none;
   height: 40px;
@@ -315,12 +323,15 @@ header p {
   float: left;
   margin-left: 10px;
 }
+
 #banner ul li {
   display: inline;
 }
+
 #banner ul li a.button {
   background-color: #FFE788;
 }
+
 #banner #logo {
   position: absolute;
   height: 36px;
@@ -331,11 +342,10 @@ header p {
   background: url(../images/octocat-logo.png);
 }
 
-section {
+article {
   width: 590px;
   padding: 30px 30px 50px 30px;
   margin: 20px 0;
-  margin-top: 190px;
   position: relative;
   background: #fbfbfb;
   -moz-border-radius: 3px;
@@ -401,19 +411,15 @@ footer {
 }
 
 @media print, screen and (max-width: 1060px) {
-  div.wrapper {
-    width: auto;
-    margin: 0;
-  }
-
   nav {
     display: none;
   }
 
-  header, section, footer {
+  header, article, footer {
     float: none;
   }
-  header h1, section h1, footer h1 {
+  
+  header h1, article h1, footer h1 {
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -429,14 +435,6 @@ footer {
   }
   #banner #logo {
     margin-right: 15px;
-  }
-
-  section {
-    border: 1px solid #e5e5e5;
-    border-width: 1px 0;
-    padding: 20px auto;
-    margin: 190px auto 20px;
-    max-width: 600px;
   }
 
   footer {
@@ -457,6 +455,7 @@ footer {
     padding: 20px 20px;
     margin: 0;
   }
+  
   header h1 {
     font-size: 32px;
     white-space: nowrap;
@@ -465,6 +464,7 @@ footer {
     -o-text-overflow: ellipsis;
     -ms-text-overflow: ellipsis;
   }
+  
   header p {
     display: none;
   }
@@ -480,10 +480,16 @@ footer {
     left: 20px;
   }
 
-  section {
-    margin-top: 130px;
+  main {
+    margin-top: 150px;
     margin-bottom: 0px;
     width: auto;
+	max-width:650px;
+  }
+  
+  article {
+    width: auto;
+    max-width: 590px;
   }
 
   header ul, header p.view {
@@ -505,7 +511,7 @@ footer {
     -ms-text-overflow: ellipsis;
   }
 
-  section {
+  main {
     margin-top: 5px;
   }
 
