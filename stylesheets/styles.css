@@ -499,3 +499,12 @@ figcaption {
   }
 }
 
+@media print {
+  header, #banner, footer {
+    display: none;
+  }
+  
+  main {
+    margin-top: 0;
+  }
+}
