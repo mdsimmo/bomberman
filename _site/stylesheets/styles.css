@@ -145,7 +145,6 @@ footer {
   -ms-border-radius: 0px 2px 2px 0px;
   -khtml-border-radius: 0px 2px 2px 0px;
   border-radius: 0px 2px 2px 0px;
-  padding-right: 10px;
 }
 
 #banner a {
@@ -215,7 +214,7 @@ footer {
   position: absolute;
   height: 36px;
   width: 36px;
-  right: 7px;
+  right: 3px;
   top: 7px;
   display: block;
   background: url(../images/bukkit_logo.png);
@@ -383,12 +382,13 @@ figcaption {
 
   #banner {
     width: 100%;
+    /* if the border is not removed, then the 
+       page can scroll horizontally by 2 px */
+    border-left: 0;
+    border-right: 0;
   }
   #banner .downloads {
     margin-right: 60px;
-  }
-  #banner #logo {
-    margin-right: 5px;
   }
 
   footer {
@@ -477,7 +477,6 @@ figcaption {
     background-size: 20px;
     width: 20px;
     height: 20px;
-    margin-right: 8px;
     top: 2px;
   }
 }
