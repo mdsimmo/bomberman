@@ -52,26 +52,22 @@ body {
   background: url(../images/body-background.png) #eae6d1;
 }
 
-header {
-  padding: 25px 20px 40px 20px;
-  margin: 0;
+#banner {
   position: fixed;
+  width: 100%;
   top: 0;
   left: 0;
   right: 0;
-  width: 100%;
-  text-align: center;
   background: url(../images/background.png) #4276b6;
-  -moz-box-shadow: 1px 0px 2px rgba(0, 0, 0, 0.75);
-  -webkit-box-shadow: 1px 0px 2px rgba(0, 0, 0, 0.75);
-  -o-box-shadow: 1px 0px 2px rgba(0, 0, 0, 0.75);
-  box-shadow: 1px 0px 2px rgba(0, 0, 0, 0.75);
-  z-index: 99;
-  -webkit-font-smoothing: antialiased;
-  min-height: 76px;
+  z-index: 100;
 }
 
-header h1 {
+#banner header {
+  padding: 25px 20px 40px;
+  text-align: center;
+}
+
+#banner header h1 {
   font: 40px/48px "Copse", "Helvetica Neue", Helvetica, Arial, sans-serif;
   color: #f3f3f3;
   text-shadow: 0px 2px 0px #235796;
@@ -83,7 +79,7 @@ header h1 {
   -ms-text-overflow: ellipsis;
 }
 
-header p {
+#banner header p {
   color: #d8d8d8;
   text-shadow: rgba(0, 0, 0, 0.2) 0 1px 0;
   font-size: 18px;
@@ -125,13 +121,13 @@ footer {
   line-height: 16px;
 }
 
-#banner {
+#banner nav {
   z-index: 100;
+  position: absolute;
   left: 0;
   right: 50%;
   height: 50px;
   margin-right: -382px;
-  position: fixed;
   top: 115px;
   background: #ffcc00;
   border: 1px solid #f0b500;
@@ -147,7 +143,7 @@ footer {
   border-radius: 0px 2px 2px 0px;
 }
 
-#banner a {
+#banner nav a {
   border: 1px solid #dba500;
   background: -webkit-gradient(linear, 50% 0%, 50% 100%, color-stop(0%, #ffe788), color-stop(100%, #ffce38));
   background: -webkit-linear-gradient(#ffe788, #ffce38);
@@ -177,7 +173,7 @@ footer {
   text-align: center;
 }
 
-#banner a:hover {
+#banner nav a:hover {
   background: -webkit-gradient(linear, 50% 0%, 50% 100%, color-stop(0%, #ffe788), color-stop(100%, #ffe788));
   background: -webkit-linear-gradient(#ffe788, #ffe788);
   background: -moz-linear-gradient(#ffe788, #ffe788);
@@ -187,18 +183,18 @@ footer {
   background-color: #ffeca0;
 }
 
-#banner .main-nav {
-  position: fixed;
+#banner nav .main-nav {
+  position: absolute;
   left: 50%;
   margin-left: -325px;
 }
 
-#banner .downloads-nav {
+#banner nav .downloads-nav {
   float: right;
   margin-right: 45px;
 }
 
-#banner ul {
+#banner nav ul {
   list-style: none;
   height: 40px;
   padding: 0;
@@ -206,7 +202,7 @@ footer {
   margin-left: 10px;
 }
 
-#banner ul li {
+#banner nav ul li {
   display: inline;
 }
 
@@ -372,22 +368,14 @@ figcaption {
 
 @media all and (max-width: 900px) {
   
-  header h1, article h1, footer h1 {
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    -o-text-overflow: ellipsis;
-    -ms-text-overflow: ellipsis;
-  }
-
-  #banner {
+  #banner nav {
     width: 100%;
     /* if the border is not removed, then the 
        page can scroll horizontally by 2 px */
     border-left: 0;
     border-right: 0;
   }
-  #banner .downloads {
+  #banner nav .downloads {
     margin-right: 60px;
   }
 
@@ -405,27 +393,25 @@ figcaption {
     word-wrap: break-word;
   }
 
-  header {
+  #banner header {
     padding: 20px 20px;
     margin: 0;
   }
   
-  header h1 {
+  #banner header h1 {
     font-size: 32px;
   }
   
-  header p {
+  #banner header p {
     display: none;
   }
 
-  #banner {
+  #banner nav {
     top: 80px;
   }
-  #banner .main-nav {
+  #banner nav .main-nav {
     float: left;
-    display: inline-block;
     margin-left: 0px;
-    position: fixed;
     left: 20px;
   }
 
@@ -442,35 +428,57 @@ figcaption {
   }
 }
 
-@media all and (max-width: 480px) {
-  header {
+@media all and (max-height: 600px) { 
+  #banner {
     position: relative;
-    padding: 5px 0px;
-    min-height: 0px;
   }
-  header h1 {
-    font-size: 24px;
+  
+  main {
+    margin-top: 60px;
   }
+  
+  footer {
+    text-align: center;
+    margin: 20px auto;
+    position: relative;
+    left: auto;
+    bottom: auto;
+    width: auto;
+  }
+}
 
+@media all and (max-width: 480px) {
   main {
     margin-top: 5px;
   }
 
   #banner {
     position: relative;
-    top: -10px;
+  }
+  
+  #banner header {
+    padding: 5px 0px;
+    min-height: 0px;
+  }
+  #banner header h1 {
+    font-size: 24px;
+  }
+
+  #banner nav {
+    position: absolute;
+    top: 50px;
     height: 25px;
   }
-  #banner a {
+  #banner nav a {
     font-size: 10px;
     line-height: 10px;
     padding: 5px 6px;
     margin: 0px;
   }
-  #banner .main-nav {
+  #banner nav .main-nav {
     position: relative;
   }
-  #banner .downloads-nav {
+  #banner nav .downloads-nav {
     margin-right: 30px;
   }
   #banner #logo {
@@ -482,24 +490,13 @@ figcaption {
 }
 
 @media all and (max-width: 300px) {
-  #banner .downloads-nav {
+  #banner nav .downloads-nav {
     display: none;
   }
 }
 
-@media all and (max-height: 600px) { 
-  footer {
-    text-align: center;
-    margin: 20px auto;
-    position: relative;
-    left: auto;
-    bottom: auto;
-    width: auto;
-  }
-}
-
 @media print {
-  header, #banner, footer {
+  #banner, footer {
     display: none;
   }
   
