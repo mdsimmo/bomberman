@@ -23,7 +23,7 @@ public class Language implements Formattable {
 
 	public static Language getLanguage( String lang ) {
 		if ( lang == null )
-			return null;
+			return getLanguage( "english" );
 		lang = lang.toLowerCase();
 		Language language = langs.get( lang );
 		if ( language != null ) {
@@ -34,7 +34,11 @@ public class Language implements Formattable {
 				langs.put( lang, language );
 				return language;
 			} else {
-				if ( lang.equalsIgnoreCase( "english" ) ) {
+				if ( lang.isEmpty() ) {
+					language = getLanguage( "english" );
+					langs.put( lang, language );
+					return language;
+				} else if ( lang.equalsIgnoreCase( "english" ) ) {
 					language = new EnglishLanguage();
 					langs.put( "english", language );
 					return language;
@@ -76,7 +80,7 @@ public class Language implements Formattable {
 		String t = save.getString( phrase.getPath() );
 		if ( t == null ) {
 			Language bup = getLanguage( (String)Config.LANGUAGE.getValue( save ) );
-			if ( bup == null )
+			if ( bup == null || bup == this )
 				return phrase.getDefault();
 			else
 				return bup.translate( phrase );

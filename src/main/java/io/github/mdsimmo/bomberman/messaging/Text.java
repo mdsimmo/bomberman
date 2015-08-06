@@ -1208,7 +1208,7 @@ public enum Text implements Phrase {
 			"command.signs.remove.example",
 			"" ),
 	SET_HEALTH_EXTRA(
-			"command.signs.remove.extra",
+			"command.sethealth.extra",
 			"This command is here due to a bug where bomberman doesn't reset a players health to the normal 20. If this happens to you, just run this command." );
 
 	private final String path;

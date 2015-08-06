@@ -18,42 +18,25 @@ public abstract class Save extends YamlConfiguration {
 	private static HashMap<String, Version> versions = new HashMap<>();
 
 	public enum Version {
-		V0_0_1(
-				"0.0.1" ),
-		V0_0_2(
-				"0.0.2" ),
-		V0_0_2a(
-				"0.0.2a" ),
-		V0_0_3_SNAPSHOT(
-				"0.0.3-SNAPSHOT" ),
-		V0_0_3(
-				"0.0.3" ),
-		V0_0_3a(
-				"0.0.3a" ),
-		V0_0_3b(
-				"0.0.3b" ),
-		V0_0_3c(
-				"0.0.3c" ),
-		V0_0_3d(
-				"0.0.3d" ),
-		V0_1_0_SNAPSHOT(
-				"0.1.0-SNAPSHOT" ),
-		V0_1_0_SNAPSHOT_2(
-				"0.1.0-SNAPSHOT-2" ),
-		V0_1_0_SNAPSHOT_3(
-				"0.1.0-SNAPSHOT-3" ),
-		V0_1_0(
-				"0.1.0" ),
-		V0_1_0a(
-				"0.1.0a" ),
-		V0_1_0b(
-				"0.1.0b" ),
-		V0_1_0c(
-				"0.1.0c" ),
-		PAST(
-				"past" ),
-		FUTURE(
-				"future" );
+		V0_0_1 ( "0.0.1" ),
+		V0_0_2 ( "0.0.2" ),
+		V0_0_2a( "0.0.2a" ),
+		V0_0_3_SNAPSHOT( "0.0.3-SNAPSHOT" ),
+		V0_0_3( "0.0.3" ),
+		V0_0_3a( "0.0.3a" ),
+		V0_0_3b( "0.0.3b" ),
+		V0_0_3c( "0.0.3c" ),
+		V0_0_3d( "0.0.3d" ),
+		V0_1_0_SNAPSHOT  ( "0.1.0-SNAPSHOT" ),
+		V0_1_0_SNAPSHOT_2( "0.1.0-SNAPSHOT-2" ),
+		V0_1_0_SNAPSHOT_3( "0.1.0-SNAPSHOT-3" ),
+		V0_1_0 ( "0.1.0" ),
+		V0_1_0a( "0.1.0a" ),
+		V0_1_0b( "0.1.0b" ),
+		V0_1_0c( "0.1.0c" ),
+		V0_1_0d( "0.1.0d" ),
+		PAST( "past" ),
+		FUTURE(	"future" );
 
 		Version( String name ) {
 			versions.put( name, this );
