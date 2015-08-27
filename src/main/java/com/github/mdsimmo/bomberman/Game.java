@@ -1,5 +1,7 @@
 package com.github.mdsimmo.bomberman;
 
+import com.github.mdsimmo.bomberman.GameConfig;
+
 public interface Game {
 
     /**

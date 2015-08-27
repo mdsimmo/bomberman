@@ -72,5 +72,4 @@ public class BlockRep implements ConfigurationSerializable {
         return new BlockRep( material, data );
     }
 
-
 }

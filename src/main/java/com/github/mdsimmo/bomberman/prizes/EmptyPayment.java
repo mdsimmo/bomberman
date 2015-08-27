@@ -35,4 +35,5 @@ public final class EmptyPayment implements Payment {
     public boolean takeFrom(Player player) {
         return true;
     }
+
 }

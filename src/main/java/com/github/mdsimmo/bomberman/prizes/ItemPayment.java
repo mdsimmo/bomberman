@@ -18,11 +18,12 @@ public final class ItemPayment implements Payment {
     /**
      * Creates a payment from a collection of items. The passed collection is
      * cloned before being used
+     *
      * @param items the items to create the collection from
      * @return the created payment
      * @throws NullPointerException if any ItemStack is null
      */
-    public static ItemPayment of( ItemStack ... items ) {
+    public static ItemPayment of( ItemStack... items ) {
         return new ItemPayment( items );
     }
 
@@ -38,7 +39,7 @@ public final class ItemPayment implements Payment {
         if ( player.getGameMode() == GameMode.CREATIVE )
             return true;
         for ( ItemStack stack : stacks )
-            if ( !player.getInventory().containsAtLeast( new ItemStack( stack ), stack.getAmount() ))
+            if ( !player.getInventory().containsAtLeast( new ItemStack( stack ), stack.getAmount() ) )
                 return false;
         return true;
     }
@@ -64,6 +65,7 @@ public final class ItemPayment implements Payment {
 
     /**
      * Gets a copy of the items that this payment is representing
+     *
      * @return this payments items
      */
     public ItemStack[] getItems() {
@@ -73,6 +75,7 @@ public final class ItemPayment implements Payment {
     /**
      * Creates a deep clone of {@link #stacks}. Cloning all the items is needed as adding/removing stacks
      * to/from players can alter the stacks amount if the item stacks don't fit completely
+     *
      * @return the cloned items stacks
      */
     private static ItemStack[] copy( ItemStack[] stacks ) {
@@ -98,11 +101,11 @@ public final class ItemPayment implements Payment {
         int compressed = 0;
 
         // combine and nullify similar items
-        for ( int i = 0; i < stacks.length-1; i++ ) {
+        for ( int i = 0; i < stacks.length - 1; i++ ) {
             ItemStack stackA = stacks[i];
             if ( stackA == null )
                 continue;
-            for ( int j = i+1; j < stacks.length; j++ ) {
+            for ( int j = i + 1; j < stacks.length; j++ ) {
                 ItemStack stackB = stacks[j];
                 if ( stackB == null )
                     continue;

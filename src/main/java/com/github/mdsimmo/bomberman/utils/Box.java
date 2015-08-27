@@ -91,9 +91,7 @@ public final class Box implements Region {
     }
 
     @Override
-    public boolean contains( Place p ) {/**
-     * For serialization puropses only. DO NOT USE
-     */
+    public boolean contains( Place p ) {
         return contains( p.world, p.x, p.y, p.z );
     }
 

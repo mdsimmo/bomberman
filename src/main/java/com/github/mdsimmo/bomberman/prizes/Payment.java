@@ -1,10 +1,6 @@
 package com.github.mdsimmo.bomberman.prizes;
 
 import org.bukkit.entity.Player;
-import org.bukkit.inventory.ItemStack;
-
-import java.math.BigInteger;
-import java.util.Objects;
 
 /**
  * A payment is something that can be used as an entry fare or for a games prize.
