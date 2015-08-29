@@ -36,6 +36,8 @@ public class InventoryBlock extends BlockRep implements ConfigurationSerializabl
 
     /**
      * For serialization use only. DO NOT USE
+     * @param map a InventoryBlocks data
+     * @return a new InventoryBlock
      */
     public static InventoryBlock deserialize( Map<String, Object> map ) {
         String type = (String)map.get( "type" );
