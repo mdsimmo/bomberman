@@ -1,16 +1,20 @@
 package com.github.mdsimmo.bomberman.localisation;
 
+import com.github.mdsimmo.bomberman.BmPlayer;
 import com.github.mdsimmo.bomberman.Bomberman;
+import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.file.YamlConfiguration;
+import org.bukkit.configuration.serialization.ConfigurationSerializable;
+import org.bukkit.configuration.serialization.ConfigurationSerialization;
+import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class Language implements Formattable {
+public class Language implements Formattable, ConfigurationSerializable {
 
     public static class LanguageNotFoundException extends Exception {
         public LanguageNotFoundException( String s, Throwable throwable ) {
@@ -25,6 +29,20 @@ public class Language implements Formattable {
 
     static {
         langs.put( "english", EnglishLanguage.instance );
+        ConfigurationSerialization.registerClass( Language.class );
+    }
+
+    /**
+     * Gets the language that should be used for the given CommandSender. If the
+     * sender is a Player, then the representative BmPlayer will be asked what
+     * language should be used. Otherwise, the default language will be returned.
+     * @param sender the sender to ask
+     * @return the language to use. Never null.
+     */
+    public static Language of ( CommandSender sender ) {
+        if ( sender instanceof Player )
+            return BmPlayer.of( (Player)sender ).getLanguage();
+        return getDefaultLanguage();
     }
 
     /**
@@ -32,9 +50,10 @@ public class Language implements Formattable {
      * @param name the name of the language to fetch
      * @return the language to use for that name. Never null.
      * @throws NullPointerException if name is null
-     * @throws FileNotFoundException if there is no language file for the requested file
+     * @throws com.github.mdsimmo.bomberman.localisation.Language.LanguageNotFoundException
+     * if there is no language file for the requested language name
      */
-    public static Language getLanguage( String name ) throws FileNotFoundException {
+    public static Language getLanguage( String name ) throws LanguageNotFoundException {
         if ( name == null )
             throw new NullPointerException( "name cannot be null" );
 
@@ -54,12 +73,28 @@ public class Language implements Formattable {
     }
 
     /**
+     * Very similar to {@link #of(String)} but when the requested language is
+     * not found, then default language is returned.
+     * @param name the name of the language to try to use
+     * @return the language that matches the given name of the default language
+     * if that language did not exist.
+     */
+    public static Language of( String name ) {
+        try {
+            return getLanguage( name );
+        } catch ( LanguageNotFoundException e ) {
+            return getDefaultLanguage();
+        }
+    }
+
+    /**
      * Looks up the file that the given language will be stored in.
      * @param name the name of the language to look for
      * @return the languages location
-     * @throws FileNotFoundException
+     * @throws LanguageNotFoundException when no language is found for the given name
      */
-    private static File getFile( String name ) throws FileNotFoundException {
+    private static File getFile( String name ) throws LanguageNotFoundException {
+        // todo use a database to match language files
         return new File( languagesDir, name );
     }
 
@@ -99,13 +134,13 @@ public class Language implements Formattable {
 
     Language getBup() {
         String bupName = save.getString( "backup-language" );
-        Language bup = null;
+        Language bup;
         if ( bupName == null ) {
             bup = getDefaultLanguage();
         } else {
             try {
                 bup = getLanguage( name );
-            } catch ( FileNotFoundException e ) {
+            } catch ( LanguageNotFoundException e ) {
                 bup = getDefaultLanguage();
                 plugin.getLogger().warning( "language " + name + " had an invalid backup language " + bupName + ". Using " + bup.name + "." );
             }
@@ -156,7 +191,26 @@ public class Language implements Formattable {
         public String translate( Phrase phrase ) {
             return phrase.getDefault();
         }
-
     }
 
+    /**
+     * For serialization purposes only. DO NOT USE.
+     * @return this objects data
+     */
+    @Override
+    public Map<String, Object> serialize() {
+        Map<String, Object> map = new HashMap<String, Object>();
+        map.put( "name", name );
+        return map;
+    }
+
+    /**
+     * For serialization purposes only. DO NOT USE.
+     * @param map the objects data
+     * @return a new object
+     */
+    public static Language deserialize( Map<String, Object> map ) {
+        String name = (String)map.get( "name" );
+        return Language.of( name );
+    }
 }

@@ -1,6 +1,6 @@
 package com.github.mdsimmo.bomberman.commands;
 
-import com.github.mdsimmo.bomberman.localisation.Phrase;
+import com.github.mdsimmo.bomberman.localisation.Language;
 import org.bukkit.command.CommandSender;
 
 import java.util.List;
@@ -16,7 +16,7 @@ public abstract class CmdGroup implements Cmd {
 
     @Override
     public boolean hasPermission( CommandSender sender ) {
-        // only has permission if all sublcasses have permission
+        // only has permission if any sub commands have permission
         for ( Cmd cmd : getChildren() ) {
             if ( cmd.hasPermission( sender ) )
                 return true;
@@ -26,7 +26,15 @@ public abstract class CmdGroup implements Cmd {
 
     @Override
     public boolean execute( CommandSender sender, List<String> args, List<String> options ) {
-        for ( Cmd)
+        Language l = Language.of( sender );
+        String name = args.get( 0 );
+        args.remove( 0 );
+        for ( Cmd cmd : getChildren() ) {
+            if ( !cmd.hasPermission( sender ) )
+                continue;
+            if ( l.translate( cmd.name() ).equalsIgnoreCase( name ) )
+                return cmd.execute( sender, args, options );
+        }
         return false;
     }
 }

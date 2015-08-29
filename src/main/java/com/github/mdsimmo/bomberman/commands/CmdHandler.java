@@ -1,6 +1,7 @@
 package com.github.mdsimmo.bomberman.commands;
 
 import com.github.mdsimmo.bomberman.Bomberman;
+import com.github.mdsimmo.bomberman.localisation.Chat;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -35,13 +36,29 @@ public final class CmdHandler implements CommandExecutor {
         return children;
     }
 
+    private final BaseCmd baseCmd = new BaseCmd();
+
     private CmdHandler() {
     }
 
     @Override
     public boolean onCommand( CommandSender sender, Command command, String label, String[] args ) {
-        if ( !command.getName().equalsIgnoreCase( "bomberman" )
+        if ( !command.getName().equalsIgnoreCase( "bomberman" ) )
             return false;
+
+        // sort out passed arguments
+        List<String> arguments = new ArrayList<String>();
+        List<String> options = new ArrayList<String>();
+        for ( String arg : args ) {
+            if ( arg.startsWith( "-" ) )
+                options.add( arg.substring( 1 ) );
+            else
+                arguments.add( arg );
+        }
+
+        boolean success = baseCmd.execute( sender, arguments, options );
+        if ( !success )
+            Chat.send( sender, baseCmd.usage() );
 
         return true;
     }
