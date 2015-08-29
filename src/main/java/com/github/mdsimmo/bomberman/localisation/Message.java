@@ -4,19 +4,16 @@ import org.bukkit.ChatColor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.inventory.ItemStack;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Stack;
+import java.util.*;
 
 /**
  * A message is like a Phrase but is responsible for formatting the phrases markup.
  */
-public class Message {
+public class Message implements Formattable {
     private final String text;
-    private Stack<ChatColor> colors = new Stack<>();
-    private Map<String, Object> values = new HashMap<>();
-    private static final Equation equationExpander = new Equation();
+    private Stack<ChatColor> colors = new Stack<ChatColor>();
+    private Map<String, Object> values = new HashMap<String, Object>();
+    private static final Formattable.Equation equationExpander = new Formattable.Equation();
     private static final Switch switchExpander = new Switch();
 
     public Message( CommandSender sender, String text ) {
