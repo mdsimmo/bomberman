@@ -3,17 +3,12 @@ package com.github.mdsimmo.bomberman.arenas.blocks;
 import org.bukkit.Material;
 import org.bukkit.block.BlockState;
 import org.bukkit.configuration.serialization.ConfigurationSerializable;
-import org.bukkit.configuration.serialization.ConfigurationSerialization;
 import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemStack;
 
 import java.util.Map;
 
-class InventoryBlock extends BlockRep implements ConfigurationSerializable {
-
-    static {
-        ConfigurationSerialization.registerClass( InventoryBlock.class );
-    }
+public class InventoryBlock extends BlockRep implements ConfigurationSerializable {
 
     private final ItemStack[] contents;
 

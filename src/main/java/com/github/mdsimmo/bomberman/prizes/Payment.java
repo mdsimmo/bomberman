@@ -1,5 +1,6 @@
 package com.github.mdsimmo.bomberman.prizes;
 
+import org.bukkit.configuration.serialization.ConfigurationSerializable;
 import org.bukkit.entity.Player;
 
 /**
@@ -7,7 +8,7 @@ import org.bukkit.entity.Player;
  * It is generally just a wrapper around an ItemStack, but this is not required.
  * It could be anything such as a bunch of xp points or Vault's money.
  */
-public interface Payment {
+public interface Payment extends ConfigurationSerializable {
 
     /**
      * Tests if the player can currently pay the payment

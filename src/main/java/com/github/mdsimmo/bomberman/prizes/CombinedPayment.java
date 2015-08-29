@@ -2,6 +2,9 @@ package com.github.mdsimmo.bomberman.prizes;
 
 import org.bukkit.entity.Player;
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * The combined payment is a grouping of multiple payments.
@@ -54,6 +57,10 @@ public final class CombinedPayment implements Payment {
         return true;
     }
 
+    /**
+     * Gets a copy of the payments that this CombinedPayment is made up of.
+     * @return the combined payments
+     */
     public Payment[] getPayments() {
         return copy( payments );
     }
@@ -73,4 +80,16 @@ public final class CombinedPayment implements Payment {
         }
     }
 
+    @Override
+    public Map<String, Object> serialize() {
+        Map<String, Object> map = new HashMap<String, Object>();
+        map.put( "payments", copy( payments ) );
+        return map;
+    }
+
+    public static CombinedPayment deserialize( Map<String, Object> map ) {
+        @SuppressWarnings( "unchecked" )
+        List<Payment> payments = (List<Payment>)map.get( "payments" );
+        return CombinedPayment.of( payments.toArray( new Payment[payments.size()] ) );
+    }
 }

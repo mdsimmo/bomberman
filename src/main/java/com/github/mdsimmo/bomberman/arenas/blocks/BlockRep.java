@@ -4,7 +4,6 @@ import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockState;
 import org.bukkit.configuration.serialization.ConfigurationSerializable;
-import org.bukkit.configuration.serialization.ConfigurationSerialization;
 import org.bukkit.inventory.InventoryHolder;
 
 import java.util.HashMap;
@@ -14,10 +13,6 @@ import java.util.Map;
  * A simple representation of a block
  */
 public class BlockRep implements ConfigurationSerializable {
-
-    static {
-        ConfigurationSerialization.registerClass( BlockRep.class );
-    }
 
     public static BlockRep getRep( BlockState state ) {
         if ( state instanceof InventoryHolder )

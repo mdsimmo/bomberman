@@ -5,7 +5,6 @@ import com.github.mdsimmo.bomberman.Bomberman;
 import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.configuration.serialization.ConfigurationSerializable;
-import org.bukkit.configuration.serialization.ConfigurationSerialization;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
 
@@ -29,7 +28,6 @@ public class Language implements Formattable, ConfigurationSerializable {
 
     static {
         langs.put( "english", EnglishLanguage.instance );
-        ConfigurationSerialization.registerClass( Language.class );
     }
 
     /**

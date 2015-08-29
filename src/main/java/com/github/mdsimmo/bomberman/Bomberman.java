@@ -1,5 +1,17 @@
 package com.github.mdsimmo.bomberman;
 
+import com.github.mdsimmo.bomberman.arenas.BoxArena;
+import com.github.mdsimmo.bomberman.arenas.blocks.BlockRep;
+import com.github.mdsimmo.bomberman.arenas.blocks.InventoryBlock;
+import com.github.mdsimmo.bomberman.localisation.Language;
+import com.github.mdsimmo.bomberman.prizes.CombinedPayment;
+import com.github.mdsimmo.bomberman.prizes.EmptyPayment;
+import com.github.mdsimmo.bomberman.prizes.ItemPayment;
+import com.github.mdsimmo.bomberman.prizes.XpPayment;
+import com.github.mdsimmo.bomberman.utils.Place;
+import com.github.mdsimmo.bomberman.utils.Point3D;
+import com.github.mdsimmo.bomberman.utils.Point3Df;
+import org.bukkit.configuration.serialization.ConfigurationSerialization;
 import org.bukkit.plugin.java.JavaPlugin;
 
 /**
@@ -22,9 +34,24 @@ public class Bomberman extends JavaPlugin {
 
     public void onEnable() {
         instance = this;
+        registerConfigClasses();
     }
 
-    @Override
-    public void onDisable() {
+    /**
+     * Registers all the bomberman classes that implement ConfigurationSerialization
+     */
+    private void registerConfigClasses() {
+        ConfigurationSerialization.registerClass( BoxArena.class );
+        ConfigurationSerialization.registerClass( BlockRep.class );
+        ConfigurationSerialization.registerClass( InventoryBlock.class );
+        ConfigurationSerialization.registerClass( Language.class );
+        ConfigurationSerialization.registerClass( Place.class );
+        ConfigurationSerialization.registerClass( Point3D.class );
+        ConfigurationSerialization.registerClass( Point3Df.class );
+        ConfigurationSerialization.registerClass( CombinedPayment.class );
+        ConfigurationSerialization.registerClass( XpPayment.class );
+        ConfigurationSerialization.registerClass( EmptyPayment.class );
+        ConfigurationSerialization.registerClass( ItemPayment.class );
     }
+
 }

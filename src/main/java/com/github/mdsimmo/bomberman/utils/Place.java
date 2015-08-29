@@ -5,7 +5,6 @@ import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.configuration.serialization.ConfigurationSerializable;
-import org.bukkit.configuration.serialization.ConfigurationSerialization;
 
 import java.io.Serializable;
 import java.util.HashMap;
@@ -17,10 +16,6 @@ import java.util.UUID;
  * integers and does not have an associated direction.
  */
 public final class Place implements Serializable, ConfigurationSerializable {
-
-    static {
-        ConfigurationSerialization.registerClass( Place.class );
-    }
 
     /**
      * Creates a Place from a Location. The x, y and z components will be taken

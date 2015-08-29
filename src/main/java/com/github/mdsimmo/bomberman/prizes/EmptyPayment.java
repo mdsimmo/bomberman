@@ -2,6 +2,9 @@ package com.github.mdsimmo.bomberman.prizes;
 
 import org.bukkit.entity.Player;
 
+import java.util.Collections;
+import java.util.Map;
+
 /**
  * An empty payment is a payment worth nothing. All players can pay the payment
  * and giving it to a player does nothing.
@@ -34,6 +37,15 @@ public final class EmptyPayment implements Payment {
     @Override
     public boolean takeFrom(Player player) {
         return true;
+    }
+
+    @Override
+    public Map<String, Object> serialize() {
+        return Collections.emptyMap();
+    }
+
+    public static EmptyPayment deserialize( Map<String, Object> map ) {
+        return EmptyPayment.getEmptyPayment();
     }
 
 }

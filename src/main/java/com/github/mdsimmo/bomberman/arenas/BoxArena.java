@@ -4,7 +4,6 @@ import com.github.mdsimmo.bomberman.arenas.blocks.BlockRep;
 import com.github.mdsimmo.bomberman.utils.Box;
 import com.github.mdsimmo.bomberman.utils.Place;
 import com.github.mdsimmo.bomberman.utils.Point3D;
-import org.bukkit.configuration.serialization.ConfigurationSerialization;
 import org.bukkit.util.Vector;
 
 import java.io.FileNotFoundException;
@@ -17,10 +16,6 @@ import java.util.Map;
  * handle structures bound by a single box region.
  */
 public class BoxArena implements Arena {
-
-    static {
-        ConfigurationSerialization.registerClass( BoxArena.class );
-    }
 
     /**
      * Defines a new arena. The method will schedule a background task to create

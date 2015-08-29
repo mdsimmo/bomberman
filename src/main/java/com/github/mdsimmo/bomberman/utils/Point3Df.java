@@ -1,7 +1,6 @@
 package com.github.mdsimmo.bomberman.utils;
 
 import org.bukkit.configuration.serialization.ConfigurationSerializable;
-import org.bukkit.configuration.serialization.ConfigurationSerialization;
 import org.bukkit.util.Vector;
 
 import java.io.Serializable;
@@ -12,10 +11,6 @@ import java.util.Map;
  * An immutable representation of a point in 3D space
  */
 public final class Point3Df implements Serializable, ConfigurationSerializable {
-
-    static {
-        ConfigurationSerialization.registerClass( Point3Df.class );
-    }
 
     /**
      * Creates a new point from the passed vector.

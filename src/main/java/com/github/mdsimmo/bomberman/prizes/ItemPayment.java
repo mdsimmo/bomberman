@@ -133,4 +133,17 @@ public final class ItemPayment implements Payment {
             throw new RuntimeException( "Write index should always be eaqual to result length!" );
         return result;
     }
+
+    @Override
+    public Map<String, Object> serialize() {
+        Map<String, Object> map = new HashMap<String, Object>();
+        map.put( "items", stacks );
+        return map;
+    }
+
+    public static ItemPayment deserialize( Map<String, Object> map ) {
+        @SuppressWarnings( "unchecked" )
+        List<ItemStack> stacks = (List<ItemStack>)map.get( "items" );
+        return ItemPayment.of( stacks.toArray( new ItemStack[stacks.size()] ) );
+    }
 }
