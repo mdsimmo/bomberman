@@ -3,6 +3,8 @@ package com.github.mdsimmo.bomberman;
 import com.github.mdsimmo.bomberman.arenas.BoxArena;
 import com.github.mdsimmo.bomberman.arenas.blocks.BlockRep;
 import com.github.mdsimmo.bomberman.arenas.blocks.InventoryBlock;
+import com.github.mdsimmo.bomberman.commands.CmdHandler;
+import com.github.mdsimmo.bomberman.commands.BmCmd;
 import com.github.mdsimmo.bomberman.localisation.Language;
 import com.github.mdsimmo.bomberman.prizes.CombinedPayment;
 import com.github.mdsimmo.bomberman.prizes.EmptyPayment;
@@ -35,6 +37,8 @@ public class Bomberman extends JavaPlugin {
     public void onEnable() {
         instance = this;
         registerConfigClasses();
+        CmdHandler executor = new CmdHandler( new BmCmd() );
+        getCommand( "bomberman" ).setExecutor( executor );
     }
 
     /**

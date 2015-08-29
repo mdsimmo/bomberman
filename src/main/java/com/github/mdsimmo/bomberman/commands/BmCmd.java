@@ -3,10 +3,9 @@ package com.github.mdsimmo.bomberman.commands;
 import com.github.mdsimmo.bomberman.localisation.Phrase;
 
 /**
- * The base level command which is handled specially by the {@link CmdHandler}. All other commands parents must
- * eventually link back to this command.
+ * The base level command which all other commands in bomberman are children of.
  */
-public class BaseCmd extends CmdGroup {
+public class BmCmd extends CmdGroup {
 
     private static final Phrase
         NAME        = new Phrase( "command-basecmd-name", "bm" ),
@@ -28,9 +27,4 @@ public class BaseCmd extends CmdGroup {
         return USAGE;
     }
 
-    @Override
-    public Class<CmdGroup> parent() {
-        // only the base command is allowed to return null
-        return null;
-    }
 }

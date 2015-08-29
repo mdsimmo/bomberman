@@ -1,51 +1,34 @@
 package com.github.mdsimmo.bomberman.commands;
 
-import com.github.mdsimmo.bomberman.Bomberman;
-import com.github.mdsimmo.bomberman.localisation.Chat;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
-import org.bukkit.plugin.java.JavaPlugin;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 
+/**
+ * A CmdHandler handles the interface between Bukkit's command system and Bomberman's
+ * command system. This class will handle correct execution of commands and
+ * tab completion. The command must be registered with
+ * {@link org.bukkit.command.PluginCommand#setExecutor(CommandExecutor)}
+ */
 public final class CmdHandler implements CommandExecutor {
 
-    private static final JavaPlugin plugin = Bomberman.instance();
-    private static final HashMap<Class<? extends CmdGroup>, List<Cmd>> commands = new HashMap<Class<? extends CmdGroup>, List<Cmd>>();
-    static {
-        plugin.getCommand( "bomberman" ).setExecutor( new CmdHandler() );
-    }
+    private final Cmd startCmd;
 
-    public static void register( Cmd command ) {
-        Class<CmdGroup> parent = command.parent();
-        List<Cmd> subCommands = commands.get( parent );
-        if ( subCommands == null )
-            commands.put( parent, subCommands = new ArrayList<Cmd>() );
-        subCommands.add( command );
-    }
-
-    public static List<Cmd> childrenOf( Class<? extends CmdGroup> cmd ) {
-        if ( cmd == null )
+    /**
+     * Creates a CmdHandler to handle all execution for the specific command.
+     * @param command the command to pass off execution to
+     */
+    public CmdHandler( Cmd command ) {
+        if ( command == null )
             throw new NullPointerException( "command cannot be null" );
-        List<Cmd> children = commands.get( cmd );
-        if ( children == null )
-            commands.put( cmd, children = new ArrayList<Cmd>() );
-        return children;
-    }
-
-    private final BaseCmd baseCmd = new BaseCmd();
-
-    private CmdHandler() {
+        this.startCmd = command;
     }
 
     @Override
     public boolean onCommand( CommandSender sender, Command command, String label, String[] args ) {
-        if ( !command.getName().equalsIgnoreCase( "bomberman" ) )
-            return false;
-
         // sort out passed arguments
         List<String> arguments = new ArrayList<String>();
         List<String> options = new ArrayList<String>();
@@ -55,11 +38,6 @@ public final class CmdHandler implements CommandExecutor {
             else
                 arguments.add( arg );
         }
-
-        boolean success = baseCmd.execute( sender, arguments, options );
-        if ( !success )
-            Chat.send( sender, baseCmd.usage() );
-
-        return true;
+        return startCmd.execute( sender, arguments, options );
     }
 }
