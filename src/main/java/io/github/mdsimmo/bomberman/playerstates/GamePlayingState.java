@@ -1,5 +1,8 @@
 package io.github.mdsimmo.bomberman.playerstates;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import io.github.mdsimmo.bomberman.BlockRep;
 import io.github.mdsimmo.bomberman.Bomb;
 import io.github.mdsimmo.bomberman.Game;
@@ -45,7 +48,7 @@ public class GamePlayingState extends PlayerState implements Listener {
 	private GameMode spawnGameMode;
 	private int immunity = 0;
 	private boolean isPlaying = false;
-	private BlockRep[][][] cageBlocks = new BlockRep[3][4][3];
+	private Map<Location, BlockRep> cageBlocks = new HashMap<>();
 	private double spawnHealth;
 	private double spawnMaxHealth;
 	private double spawnHealthScale;
@@ -125,9 +128,9 @@ public class GamePlayingState extends PlayerState implements Listener {
 		Location loc = rep.getPlayer().getLocation();
 		Location temp = loc.clone();
 		for ( int i = -1; i <= 1; i++ ) {
-			for ( int j = 0; j < 4; j++ ) {
+			for ( int j = -1; j <= 2; j++ ) {
 				for ( int k = -1; k <= 1; k++ ) {
-					if ( ( j == 1 || j == 2 ) && j == 0 && k == 0 )
+					if ( ( j == 0 || j == 1 ) && i == 0 && k == 0 )
 						continue;
 					temp.setX( loc.getX() + i );
 					temp.setY( loc.getY() + j );
@@ -135,7 +138,7 @@ public class GamePlayingState extends PlayerState implements Listener {
 					Block b = temp.getBlock();
 					if ( b.getType().isSolid() )
 						continue;
-					cageBlocks[i + 1][j][k + 1] = BlockRep.createBlock( b );
+					cageBlocks.put( temp.clone(), BlockRep.createBlock( b ) );
 					b.setType( Material.STAINED_GLASS );
 					b.setData( DyeColor.WHITE.getData() );
 				}
@@ -144,20 +147,10 @@ public class GamePlayingState extends PlayerState implements Listener {
 	}
 
 	private void removeCage() {
-		Location loc = rep.getPlayer().getLocation();
-		Location temp = loc.clone();
-		for ( int i = -1; i <= 1; i++ ) {
-			for ( int j = 0; j < 4; j++ ) {
-				for ( int k = -1; k <= 1; k++ ) {
-					BlockRep bRep = cageBlocks[i + 1][j][k + 1];
-					if ( bRep == null )
-						continue;
-					temp.setX( loc.getX() + i );
-					temp.setY( loc.getY() + j );
-					temp.setZ( loc.getZ() + k );
-					bRep.setBlock( temp.getBlock() );
-				}
-			}
+		for ( Map.Entry<Location, BlockRep> entry : cageBlocks.entrySet() ) {
+			Location l = entry.getKey();
+			BlockRep bRep = entry.getValue();
+			bRep.setBlock( l.getBlock() );
 		}
 	}
 

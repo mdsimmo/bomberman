@@ -61,7 +61,10 @@ public class Board implements Formattable {
 			List<Vector> list = spawnPoints.get( color );
 			if ( list == null )
 				spawnPoints.put( color, list = new ArrayList<Vector>() );
-			list.add( place.add( new Vector( 0.5, 1, 0.5 ) ) );
+			// alter the position so players spawn in the center of the block above.
+			// y+=1.1 instead of 1 because players sometimes fall through block
+			// (maybe due to some rounding issues?)
+			list.add( place.add( new Vector( 0.5, 1.1, 0.5 ) ) );
 		}
 	}
 
