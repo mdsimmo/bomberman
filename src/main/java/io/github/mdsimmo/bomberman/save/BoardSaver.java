@@ -118,29 +118,14 @@ public class BoardSaver extends Save {
 	@Override
 	public void convert( Version version ) {
 		switch ( version ) {
-		case PAST:
-		case V0_0_1:
-		case V0_0_2:
-		case V0_0_2a:
-		case V0_0_3:
-		case V0_0_3a:
-		case V0_0_3b:
-		case V0_0_3c:
-		case V0_0_3d:
-		case V0_0_3_SNAPSHOT:
-		case V0_1_0:
-		case V0_1_0_SNAPSHOT:
-		case V0_1_0_SNAPSHOT_2:
-		case V0_1_0_SNAPSHOT_3:
-		case V0_1_0a:
-		case V0_1_0b:
-		case V0_1_0c:
-		case V0_1_0d:
-			break;
 		case FUTURE:
 			plugin.getLogger().info(
 					"Unknown version " + getVersionRaw() + " in "
 							+ file.getName() );
+			break;
+		default:
+			// although old files do need converting, they also had a different
+			// naming convention so the conversion has already been done
 			break;
 		}
 	}
