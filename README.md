@@ -8,4 +8,14 @@ In the rebuild, I am also thinking greatly about extensibility and I am
 working towards letting other users build plugins for bomberman :)
 
 While I'm rebuilding the plugin, I won't be updating the main bomberman branch
-(except for major bug fixes).
+(except for bug fixes).
+
+## Building
+
+To build bomberman, run
+
+<code>gradle build</code>
+
+Gradle is also configured to let you automatically copy the generated jar to your sever:
+
+<code>gradle install -PserverLocation=/path/to/server</code>
