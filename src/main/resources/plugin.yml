@@ -1,3 +1,41 @@
-name: Bomberman
+name: ${name}
 main: com.github.mdsimmo.bomberman.Bomberman
-version: 0.0.0
+version: ${version}
+
+commands:
+  bomberman:
+    description: All bomberman reated commands. Type '/bomberman help' for help
+    usage: /bomberman ...
+    aliases:
+    - bm
+    permission: bomberman.player
+    permission-message: You don't have permission
+
+permissions:
+  bomberman.*:
+    description: Gives access to all doorman commands
+    children:
+      bomberman.player: true
+      bomberman.operator: true
+      bomberman.dictator: true
+      bomberman.void-protection: true
+      bomberman.arena: true
+      bomberman.sign-maker: true
+  bomberman.player:
+    dsecription: Players can participate in games
+    default: true
+  bomberman.operator:
+    description: Players can start/stop a game
+    default: op
+  bomberman.dictator:
+    description: Players can build new games and controll all games' settings.
+    default: op
+  bomberman.void-protection:
+    description: Players are not effected by the anti-grief protections placed on a game
+    default: op
+  bomberman.arena:
+    description: Players can make new arenas
+    default: op
+  bomberman.sign-maker:
+    description: Players can add/remove commands on blocks
+    default: op
