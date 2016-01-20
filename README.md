@@ -19,3 +19,5 @@ To build bomberman, run
 Gradle is also configured to let you automatically copy the generated jar to your sever:
 
 <code>gradle install -PserverLocation=/path/to/server</code>
+
+To work with Intellij, running <code>gradle idea</code> should correctly create an idea project.

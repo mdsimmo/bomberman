@@ -2,6 +2,10 @@
 /target
 /build/*
 /build
+/.gradle
+/.gradle/*
 .idea
 .idea/*
 *.iml
+*.ipr
+*.iws
