@@ -566,7 +566,7 @@ public enum Text implements Phrase {
 			"command.fare.xp",
 			"xp" ),
 	FARE_VAULT(
-			"command.fare.vault",
+			"command.fare.money",
 			"money"),
 	FARE_IN_HAND(
 			"command.fare.inhand",
@@ -679,7 +679,7 @@ public enum Text implements Phrase {
 			"command.prize.inhand",
 			"inhand" ),
 	PRIZE_VAULT(
-			"command.prize.vault",
+			"command.prize.money",
 			"money"),
 	PRIZE_SET(
 			"command.prize.set",
