@@ -31,7 +31,7 @@ public class PotPayment implements Payment {
 	}
 	
 	public static PotPayment deserialize( Map<String, Object> map ) {
-        String name = (String)map.get( "name" );
+        String name = (String)map.get( "game" );
         return new PotPayment( name );
     }
 
