@@ -782,7 +782,10 @@ public class Game implements Formattable {
 		case "minplayers":
 			return Integer.toString( minPlayers );
 		case "maxplayers":
-			return Integer.toString( board.spawnPoints.size() );
+			int size = 0;
+			for ( List<Vector> list : board.spawnPoints.values())
+				size += list.size();
+			return Integer.toString( size );
 		case "arena":
 			args.remove( 0 );
 			return board.format( message, args );
