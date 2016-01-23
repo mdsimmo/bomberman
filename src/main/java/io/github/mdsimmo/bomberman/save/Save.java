@@ -18,6 +18,7 @@ public abstract class Save extends YamlConfiguration {
 	private static HashMap<String, Version> versions = new HashMap<>();
 
 	public enum Version {
+		PAST( "past" ),
 		V0_0_1 ( "0.0.1" ),
 		V0_0_2 ( "0.0.2" ),
 		V0_0_2a( "0.0.2a" ),
@@ -37,7 +38,6 @@ public abstract class Save extends YamlConfiguration {
 		V0_1_0d( "0.1.0d" ),
 		V0_1_0e( "0.1.0e" ),
 		V0_2_0( "0.2.0" ),
-		PAST( "past" ),
 		FUTURE(	"future" );
 
 		Version( String name ) {
