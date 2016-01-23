@@ -29,6 +29,10 @@ public class VaultPayment implements Payment {
 	}
 	
 	private boolean hasEcconomy() {
+		if ( ecconomy != null )
+			return true;
+		if ( !Bukkit.getPluginManager().isPluginEnabled( "Vault" ) )
+			return false;
 		RegisteredServiceProvider<Economy> provider = Bukkit.getServer().getServicesManager().getRegistration( Economy.class );
 		if ( provider == null ) {
 			return false;
