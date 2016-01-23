@@ -17,6 +17,7 @@ import java.util.List;
 
 import org.bukkit.Material;
 import org.bukkit.command.CommandSender;
+import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
 public class Prize extends GameCommand {
@@ -36,7 +37,8 @@ public class Prize extends GameCommand {
 			List<String> options = new ArrayList<>();
 			options.add(Text.PRIZE_NONE.getMessage(sender).toString());
 			options.add(Text.PRIZE_POT.getMessage(sender).toString());
-			options.add( Text.PRIZE_XP.getMessage( sender ).toString() );
+			options.add(Text.PRIZE_XP.getMessage( sender ).toString() );
+			options.add(Text.PRIZE_IN_HAND.getMessage( sender ).toString() );
 			for (Material m : Material.values())
 				options.add( m.toString().toLowerCase() );
 			return options;
@@ -56,7 +58,20 @@ public class Prize extends GameCommand {
 				prize = EmptyPayment.getEmptyPayment();
 			} else if (args.get(0).equalsIgnoreCase(Text.PRIZE_POT.getMessage(sender).toString())) {
 				prize = new PotPayment( game );
-			} else { 
+			} else if (args.get(0).equalsIgnoreCase(Text.PRIZE_IN_HAND.getMessage(sender).toString())) { 
+				if ( sender instanceof Player ) {
+					Player player = (Player)sender;
+					ItemStack stack = player.getItemInHand();
+					if ( stack == null || stack.getAmount() == 0 ) {
+						prize = EmptyPayment.getEmptyPayment();
+					} else { 
+						prize = ItemPayment.of( stack );
+					}
+				} else {
+					Chat.sendMessage( getMessage( Text.MUST_BE_PLAYER, sender ) );
+					return true;
+				}
+			} else {
 				return false;
 			}
 		} else if ( args.size() == 2 ) {

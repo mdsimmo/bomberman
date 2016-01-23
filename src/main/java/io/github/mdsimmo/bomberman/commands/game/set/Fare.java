@@ -16,6 +16,7 @@ import java.util.List;
 
 import org.bukkit.Material;
 import org.bukkit.command.CommandSender;
+import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
 public class Fare extends GameCommand {
@@ -35,6 +36,7 @@ public class Fare extends GameCommand {
 			List<String> options = new ArrayList<>();
 			options.add( Text.FARE_NONE.getMessage( sender ).toString() );
 			options.add( Text.FARE_XP.getMessage( sender ).toString() );
+			options.add( Text.FARE_IN_HAND.getMessage( sender ).toString() );
 			for ( Material m : Material.values() )
 				options.add( m.toString().toLowerCase() );
 			return options;
@@ -51,8 +53,21 @@ public class Fare extends GameCommand {
 		
 		// try for an empty payment
 		String none = Text.FARE_NONE.getMessage( sender ).toString();
-		if ( args.size() >= 1 && args.get( 0 ).equalsIgnoreCase( none ) ) {
+		if ( args.get( 0 ).equalsIgnoreCase( none ) ) {
 			payment = EmptyPayment.getEmptyPayment();
+		} else if ( args.get( 0 ).equalsIgnoreCase( Text.FARE_IN_HAND.getMessage( sender ).toString() ) ) {
+			if ( sender instanceof Player ) {
+				Player player = (Player)sender;
+				ItemStack stack = player.getItemInHand();
+				if ( stack == null || stack.getAmount() <= 0 ) {
+					payment = EmptyPayment.getEmptyPayment();
+				} else {
+					payment = ItemPayment.of( stack );
+				}
+			} else {
+				Chat.sendMessage( getMessage( Text.MUST_BE_PLAYER, sender ) );
+				return true;
+			}
 		} else {
 			// try for an xp payment
 			String xp = Text.FARE_XP.getMessage( sender ).toString();

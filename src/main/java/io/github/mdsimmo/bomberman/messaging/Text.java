@@ -549,7 +549,7 @@ public enum Text implements Phrase {
 			"Change a game's fare" ),
 	FARE_USAGE(
 			"command.fare.usage",
-			"/{command|path} <game> <material|xp|none> [amount]" ),
+			"/{command|path} <game> <material|xp|inhand|none> [amount]" ),
 	FARE_EXAMPLE(
 			"command.fare.example",
 			"" ),
@@ -565,6 +565,9 @@ public enum Text implements Phrase {
 	FARE_XP(
 			"command.fare.xp",
 			"xp" ),
+	FARE_IN_HAND(
+			"command.fare.inhand",
+			"inhand" ),
 
 	HANDICAP_NAME(
 			"command.handicap.name",
@@ -653,7 +656,7 @@ public enum Text implements Phrase {
 			"Change a game's prize" ),
 	PRIZE_USAGE(
 			"command.prize.usage",
-			"/{command|path} <game> <material|xp|none> [amount]" ),
+			"/{command|path} <game> <material|xp|inhand|none> [amount]" ),
 	PRIZE_EXAMPLE(
 			"command.prize.example",
 			"" ),
@@ -669,6 +672,9 @@ public enum Text implements Phrase {
 	PRIZE_XP(
 			"command.prize.xp",
 			"xp" ),
+	PRIZE_IN_HAND(
+			"command.prize.inhand",
+			"inhand" ),
 	PRIZE_SET(
 			"command.prize.set",
 			"Prize set to {game|prize}" ),
