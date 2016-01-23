@@ -549,7 +549,7 @@ public enum Text implements Phrase {
 			"Change a game's fare" ),
 	FARE_USAGE(
 			"command.fare.usage",
-			"/{command|path} <game> <material|xp|inhand|none> [amount]" ),
+			"/{command|path} <game> <material|xp|inhand|money|none> [amount]" ),
 	FARE_EXAMPLE(
 			"command.fare.example",
 			"" ),
@@ -659,7 +659,7 @@ public enum Text implements Phrase {
 			"Change a game's prize" ),
 	PRIZE_USAGE(
 			"command.prize.usage",
-			"/{command|path} <game> <material|xp|inhand|none> [amount]" ),
+			"/{command|path} <game> <material|pot|xp|inhand|money|none> [amount]" ),
 	PRIZE_EXAMPLE(
 			"command.prize.example",
 			"" ),
