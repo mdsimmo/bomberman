@@ -20,16 +20,16 @@ public class VaultPayment implements Payment {
 	}
 
 	private final double amount;
-	private Economy ecconomy;
+	private Economy economy;
 	
 	private VaultPayment( double amount ) {
 		if ( amount < 0 )
-			throw new IllegalArgumentException( "Cannot have a ecconomy payment of less than 0" );
+			throw new IllegalArgumentException( "Cannot have a economy payment of less than 0" );
 		this.amount = amount;
 	}
 	
-	private boolean hasEcconomy() {
-		if ( ecconomy != null )
+	private boolean hasEconomy() {
+		if ( economy != null )
 			return true;
 		if ( !Bukkit.getPluginManager().isPluginEnabled( "Vault" ) )
 			return false;
@@ -37,7 +37,7 @@ public class VaultPayment implements Payment {
 		if ( provider == null ) {
 			return false;
 		}
-		ecconomy = provider.getProvider();
+		economy = provider.getProvider();
 		return true;
 	}
 
@@ -57,28 +57,28 @@ public class VaultPayment implements Payment {
 	public String format( Message message, List<String> args ) {
 		if ( args.size() > 0 ) {
 			if ( args.get( 0 ).equalsIgnoreCase( "ptype" ) )
-				return "ecconomy";
+				return "economy";
 			if ( args.get( 0 ).equalsIgnoreCase( "amount" ) )
 				return Double.toString( amount );
 		}
-		if ( hasEcconomy() )
-			return ecconomy.format( amount );
+		if ( hasEconomy() )
+			return economy.format( amount );
 		else
 			return "$" + amount;
 	}
 
 	@Override
 	public void giveTo( Player player ) {
-		if ( !hasEcconomy() )
+		if ( !hasEconomy() )
 			return;
-		ecconomy.depositPlayer( player, amount );
+		economy.depositPlayer( player, amount );
 	}
 
 	@Override
 	public boolean takeFrom( Player player ) {
-		if ( !hasEcconomy() )
+		if ( !hasEconomy() )
 			return true;
-		EconomyResponse response = ecconomy.withdrawPlayer( player, amount );
+		EconomyResponse response = economy.withdrawPlayer( player, amount );
 		return response.transactionSuccess();
 	}
 
