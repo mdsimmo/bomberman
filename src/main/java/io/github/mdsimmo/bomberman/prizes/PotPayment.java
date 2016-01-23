@@ -21,6 +21,8 @@ public class PotPayment implements Payment {
 	
 	private PotPayment( String name ) {
 		this.name = name;
+		if ( name == null )
+			throw new NullPointerException( "Cannot have a game with a null name" );
 	}
 
 	@Override

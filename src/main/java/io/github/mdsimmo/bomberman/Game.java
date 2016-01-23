@@ -108,7 +108,7 @@ public class Game implements Formattable {
 		PLAYING, WAITING, STARTING, ENDING;
 	}
 	
-	private static HashMap<String, Game> gameRegistry = new HashMap<>();
+	private static final HashMap<String, Game> gameRegistry = new HashMap<>();
 
 	private static Plugin plugin = Bomberman.instance;
 
