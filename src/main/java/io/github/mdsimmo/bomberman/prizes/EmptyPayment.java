@@ -28,11 +28,6 @@ public final class EmptyPayment implements Payment {
     }
 
     @Override
-    public boolean ownedBy(Player player) {
-        return true;
-    }
-
-    @Override
     public void giveTo(Player player) {
 
     }

@@ -10,6 +10,7 @@ import io.github.mdsimmo.bomberman.prizes.EmptyPayment;
 import io.github.mdsimmo.bomberman.prizes.ItemPayment;
 import io.github.mdsimmo.bomberman.prizes.Payment;
 import io.github.mdsimmo.bomberman.prizes.PotPayment;
+import io.github.mdsimmo.bomberman.prizes.VaultPayment;
 import io.github.mdsimmo.bomberman.prizes.XpPayment;
 
 import java.util.ArrayList;
@@ -39,6 +40,7 @@ public class Prize extends GameCommand {
 			options.add(Text.PRIZE_POT.getMessage(sender).toString());
 			options.add(Text.PRIZE_XP.getMessage( sender ).toString() );
 			options.add(Text.PRIZE_IN_HAND.getMessage( sender ).toString() );
+			options.add(Text.PRIZE_VAULT.getMessage( sender ).toString() );
 			for (Material m : Material.values())
 				options.add( m.toString().toLowerCase() );
 			return options;
@@ -79,6 +81,14 @@ public class Prize extends GameCommand {
 				try {
 					int amount = Integer.parseInt(args.get( 1 ));
 					prize = XpPayment.of( amount );
+				} catch ( Exception e ) {
+					Chat.sendMessage( getMessage( Text.INVALID_NUMBER, sender ).put( "number", args.get( 1 ) ) );
+					return true;
+				}
+			} else if ( args.get( 0 ).equalsIgnoreCase( Text.PRIZE_VAULT.getMessage( sender ).toString() ) ) {
+				try {
+					double amount = Double.parseDouble( args.get( 1 ));
+					prize = VaultPayment.of( amount );
 				} catch ( Exception e ) {
 					Chat.sendMessage( getMessage( Text.INVALID_NUMBER, sender ).put( "number", args.get( 1 ) ) );
 					return true;

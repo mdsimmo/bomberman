@@ -38,8 +38,7 @@ public final class XpPayment implements Payment {
         return amount;
     }
 
-    @Override
-    public boolean ownedBy( Player player ) {
+    private boolean ownedBy( Player player ) {
         return player.getTotalExperience() >= amount;
     }
 

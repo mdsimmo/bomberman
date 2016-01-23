@@ -13,13 +13,6 @@ import org.bukkit.entity.Player;
 public interface Payment extends ConfigurationSerializable, Formattable {
 
     /**
-     * Tests if the player can currently pay the payment
-     * @param player the player to test
-     * @return true if the player has the prize
-     */
-    boolean ownedBy( Player player );
-
-    /**
      * Gives the payment to a player. If the player cannot hold the entire
      * payment (e.g. their inventory is full), then the remaining payment should
      * just be thrown at the players feet.

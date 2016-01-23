@@ -38,8 +38,7 @@ public final class ItemPayment implements Payment {
         this.stack = copy( stack );
     }
 
-    @Override
-    public boolean ownedBy( Player player ) {
+    private boolean ownedBy( Player player ) {
         if ( player.getGameMode() == GameMode.CREATIVE )
             return true;
         if ( !player.getInventory().containsAtLeast( new ItemStack( stack ), stack.getAmount() ) )

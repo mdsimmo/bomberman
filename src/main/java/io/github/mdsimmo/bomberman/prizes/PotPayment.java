@@ -41,12 +41,6 @@ public class PotPayment implements Payment {
 	}
 
 	@Override
-	public boolean ownedBy( Player player ) {
-		// never called. Only given
-		return false;
-	}
-
-	@Override
 	public void giveTo( Player player ) {
 		Game game = this.game;
 		if ( game == null )

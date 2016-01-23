@@ -9,7 +9,7 @@ commands:
     aliases: bm
     permission: bomberman.observer
   
-softdepend: [Multiverse-Core]
+softdepend: [Multiverse-Core, Vault]
   
 permissions:
   bomberman.*:

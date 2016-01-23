@@ -5,6 +5,7 @@ import io.github.mdsimmo.bomberman.commands.BaseCommand;
 import io.github.mdsimmo.bomberman.prizes.EmptyPayment;
 import io.github.mdsimmo.bomberman.prizes.ItemPayment;
 import io.github.mdsimmo.bomberman.prizes.PotPayment;
+import io.github.mdsimmo.bomberman.prizes.VaultPayment;
 import io.github.mdsimmo.bomberman.prizes.XpPayment;
 import io.github.mdsimmo.bomberman.save.BoardSaver;
 
@@ -24,6 +25,7 @@ public class Bomberman extends JavaPlugin {
 		ConfigurationSerialization.registerClass( EmptyPayment.class );
 		ConfigurationSerialization.registerClass( XpPayment.class );
 		ConfigurationSerialization.registerClass( PotPayment.class );
+		ConfigurationSerialization.registerClass( VaultPayment.class );
 
 		
 		getDataFolder().mkdirs();
