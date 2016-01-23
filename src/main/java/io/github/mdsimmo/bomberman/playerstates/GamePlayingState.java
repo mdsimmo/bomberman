@@ -74,17 +74,11 @@ public class GamePlayingState extends PlayerState implements Listener {
 			Chat.sendMessage( message );
 			return false;
 		}
-		if ( game.getFare() != null ) {
-			if ( player.getInventory().containsAtLeast( game.getFare(),
-					game.getFare().getAmount() )
-					|| player.getGameMode() == GameMode.CREATIVE )
-				player.getInventory().removeItem( game.getFare() );
-			else {
-				Message message = Text.TOO_POOR.getMessage( player ).put(
-						"game", game );
-				Chat.sendMessage( message );
-				return false;
-			}
+		if ( !game.getFare().takeFrom( player ) ) {
+			Message message = Text.TOO_POOR.getMessage( player ).put(
+					"game", game );
+			Chat.sendMessage( message );
+			return false;
 		}
 		for ( PlayerRep rep : game.observers ) {
 			Message message = Text.PLAYER_JOINED.getMessage( rep.getPlayer() );

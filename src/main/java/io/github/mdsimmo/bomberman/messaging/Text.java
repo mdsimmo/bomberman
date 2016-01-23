@@ -549,7 +549,7 @@ public enum Text implements Phrase {
 			"Change a game's fare" ),
 	FARE_USAGE(
 			"command.fare.usage",
-			"/{command|path} <game> <material|none> [amount]" ),
+			"/{command|path} <game> <material|xp|none> [amount]" ),
 	FARE_EXAMPLE(
 			"command.fare.example",
 			"" ),
@@ -558,10 +558,13 @@ public enum Text implements Phrase {
 			"material must be the name in bukkit's code" ),
 	FARE_SET(
 			"command.fare.set",
-			"{switch|{game|fare|amount}|0|Fare removed|Fare set to {game|fare}}" ),
+			"Fare set to {game|fare}" ),
 	FARE_NONE(
 			"command.fare.none",
 			"none"),
+	FARE_XP(
+			"command.fare.xp",
+			"xp" ),
 
 	HANDICAP_NAME(
 			"command.handicap.name",
@@ -650,7 +653,7 @@ public enum Text implements Phrase {
 			"Change a game's prize" ),
 	PRIZE_USAGE(
 			"command.prize.usage",
-			"/{command|path} <game> <material|pot|none> [amount]" ),
+			"/{command|path} <game> <material|xp|none> [amount]" ),
 	PRIZE_EXAMPLE(
 			"command.prize.example",
 			"" ),
@@ -663,10 +666,13 @@ public enum Text implements Phrase {
 	PRIZE_NONE(
 			"command.prize.none",
 			"none" ),
+	PRIZE_XP(
+			"command.prize.xp",
+			"xp" ),
 	PRIZE_SET(
 			"command.prize.set",
-			"{switch|{game|haspot}|true|Prize set to a pot|{switch|{game|prize|amount}|0|Prize removed|prize set to {game|prize}}}" ),
-
+			"Prize set to {game|prize}" ),
+			
 	SET_NAME(
 			"command.set.name",
 			"set" ),
@@ -931,13 +937,13 @@ public enum Text implements Phrase {
 			"Entry fee" ),
 	INFO_8_RESULT(
 			"command.info.8-value",
-			"{switch|{game|fare|amount}|0|No fee|{game|fare}}" ),
+			"{game|fare}" ),
 	INFO_9(
 			"command.info.9-key",
 			"Prize" ),
 	INFO_9_RESULT(
 			"command.info.9-value",
-			"{switch|{game|haspot}|true|Pot at {game|prize}|{switch|{game|prize|amount}|0|No prize|{game|prize}}}" ),
+			"{game|prize}" ),
 	INFO_10(
 			"command.info.10-key",
 			"Sudden death" ),

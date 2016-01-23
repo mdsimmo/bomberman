@@ -6,6 +6,11 @@ import io.github.mdsimmo.bomberman.commands.GameCommand;
 import io.github.mdsimmo.bomberman.messaging.Chat;
 import io.github.mdsimmo.bomberman.messaging.Phrase;
 import io.github.mdsimmo.bomberman.messaging.Text;
+import io.github.mdsimmo.bomberman.prizes.EmptyPayment;
+import io.github.mdsimmo.bomberman.prizes.ItemPayment;
+import io.github.mdsimmo.bomberman.prizes.Payment;
+import io.github.mdsimmo.bomberman.prizes.PotPayment;
+import io.github.mdsimmo.bomberman.prizes.XpPayment;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -31,6 +36,7 @@ public class Prize extends GameCommand {
 			List<String> options = new ArrayList<>();
 			options.add(Text.PRIZE_NONE.getMessage(sender).toString());
 			options.add(Text.PRIZE_POT.getMessage(sender).toString());
+			options.add( Text.PRIZE_XP.getMessage( sender ).toString() );
 			for (Material m : Material.values())
 				options.add( m.toString().toLowerCase() );
 			return options;
@@ -43,38 +49,44 @@ public class Prize extends GameCommand {
 		if (args.size() < 1 || args.size() > 2)
 			return false;
 
-		if (args.size() == 1) {
+		final Payment prize;
+		
+		if ( args.size() == 1 ) {
 			if (args.get(0).equalsIgnoreCase(Text.PRIZE_NONE.getMessage(sender).toString())) {
-				game.setPrize( null, false );
+				prize = EmptyPayment.getEmptyPayment();
 			} else if (args.get(0).equalsIgnoreCase(Text.PRIZE_POT.getMessage(sender).toString())) {
-				game.setPrize( null, true );
-			} else {
+				prize = new PotPayment( game );
+			} else { 
 				return false;
 			}
-		} else if (args.size() == 2) {
-			int materialArg = 0;
-			int numberArg = 1;
-			Material m = Material.getMaterial(args.get( materialArg ).toUpperCase());
-			if (m == null) {
-				// try with number before material
-				materialArg = 1;
-				numberArg = 0;
-				m = Material.getMaterial(args.get( materialArg ).toUpperCase());
-				if ( m == null ) {
-					Chat.sendMessage(getMessage(Text.INVALID_MATERIAL, sender).put( "number", args.get(0)));
+		} else if ( args.size() == 2 ) {
+			if ( args.get( 0 ).equalsIgnoreCase( Text.PRIZE_XP.getMessage( sender ).toString() ) ) {
+				try {
+					int amount = Integer.parseInt(args.get( 1 ));
+					prize = XpPayment.of( amount );
+				} catch ( Exception e ) {
+					Chat.sendMessage( getMessage( Text.INVALID_NUMBER, sender ).put( "number", args.get( 1 ) ) );
 					return true;
 				}
-			}
-			try {
-				int amount = Integer.parseInt(args.get( numberArg ));
-				game.setPrize(new ItemStack(m, amount), false);
-			} catch (Exception e) {
-				Chat.sendMessage(getMessage(Text.INVALID_NUMBER, sender).put( "number", args.get( numberArg )));
-				return true;
+			} else {	
+				Material m = Material.getMaterial(args.get( 0 ).toUpperCase());
+				if ( m == null ) {
+					return false;
+				}
+				try {
+					int amount = Integer.parseInt(args.get( 1 ));
+					ItemStack stack = new ItemStack( m, amount );
+					prize = ItemPayment.of( stack );
+				} catch ( Exception e ) {
+					Chat.sendMessage( getMessage( Text.INVALID_NUMBER, sender ).put( "number", args.get( 1 ) ) );
+					return true;
+				}
 			}
 		} else {
 			return false;
 		}
+		
+		game.setPrize(  prize );
 		Chat.sendMessage(getMessage(Text.PRIZE_SET, sender).put( "game", game));
 		return true;
 	}

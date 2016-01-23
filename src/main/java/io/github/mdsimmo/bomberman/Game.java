@@ -8,6 +8,8 @@ import io.github.mdsimmo.bomberman.messaging.Message;
 import io.github.mdsimmo.bomberman.messaging.Phrase;
 import io.github.mdsimmo.bomberman.messaging.Text;
 import io.github.mdsimmo.bomberman.playerstates.GamePlayingState;
+import io.github.mdsimmo.bomberman.prizes.EmptyPayment;
+import io.github.mdsimmo.bomberman.prizes.Payment;
 import io.github.mdsimmo.bomberman.save.GameSaver;
 import io.github.mdsimmo.bomberman.utils.Box;
 
@@ -162,7 +164,7 @@ public class Game implements Formattable {
 	private double dropChance;
 	private List<ItemStack> drops;
 	public Map<Block, Bomb> explosions = new HashMap<>();
-	private ItemStack fare;
+	private Payment fare;
 	public State state = State.WAITING;
 	private int lives;
 	public Box box;
@@ -171,10 +173,9 @@ public class Game implements Formattable {
 	public ArrayList<PlayerRep> observers = new ArrayList<>();
 	public Board oldBoard;
 	public ArrayList<PlayerRep> players = new ArrayList<>();
-	private boolean pot;
 	private int power;
 	private Material powerMaterial;
-	private ItemStack prize;
+	private Payment prize;
 	private boolean protection;
 	private boolean protectFire;
 	private boolean protectPlace;
@@ -282,29 +283,9 @@ public class Game implements Formattable {
 				return true;
 			
 			// get the total winnings
-			if ( pot == true )
-				if ( fare == null )
-					prize = null;
-				else
-					prize = new ItemStack( fare.getType(), fare.getAmount()
-							* winners.size() );
-
-			// give the winner the prize
-			if ( prize != null	 ) {
-				final Player topPlayer = winners.get( 0 ).getPlayer();
-				topPlayer.getInventory().addItem( prize );
-				// makes sure the inventory is correct
-				if ( plugin.isEnabled() )
-					plugin.getServer().getScheduler()
-							.scheduleSyncDelayedTask( plugin, new Runnable() {
-								@SuppressWarnings( "deprecation" )
-								@Override
-								public void run() {
-									topPlayer.updateInventory();
-								}
-							} );
-			}
-
+			final Player topPlayer = winners.get( 0 ).getPlayer();
+			prize.giveTo( topPlayer );
+			
 			// display the scores
 			sendMessages( Text.GAME_OVER_PLAYERS, Text.GAME_OVER_OBSERVERS,
 					Text.GAME_COUNT_ALL, null );
@@ -398,7 +379,7 @@ public class Game implements Formattable {
 		return countdownTimer;
 	}
 
-	public ItemStack getFare() {
+	public Payment getFare() {
 		return fare;
 	}
 
@@ -410,18 +391,18 @@ public class Game implements Formattable {
 		return minPlayers;
 	}
 
-	public boolean getPot() {
-		return pot;
-	}
-
 	public int getPower() {
 		return power;
 	}
 
-	public ItemStack getPrize() {
+	public Payment getPrize() {
 		return prize;
 	}
 
+	public int playersJoined() {
+		return winners.size() + players.size();
+	}
+	
 	public int getSuddenDeath() {
 		return suddenDeath;
 	}
@@ -468,15 +449,16 @@ public class Game implements Formattable {
 		this.save = new GameSaver( this );
 		try {
 			prize = Config.PRIZE.getValue( save );
-		} catch( ClassCastException e ) {
-			prize = null;
+		} catch( ClassCastException ignored ) {
 		}
-		pot = Config.POT.getValue( save );
+		if ( prize == null )
+			prize = EmptyPayment.getEmptyPayment();
 		try {
 			fare = Config.FARE.getValue( save );
-		} catch( ClassCastException e ) {
-			fare = null;
+		} catch( ClassCastException ignored ) {
 		}
+		if ( fare == null )
+			fare = EmptyPayment.getEmptyPayment();
 		bombs = Config.BOMBS.getValue( save );
 		power = Config.POWER.getValue( save );
 		lives = Config.LIVES.getValue( save );
@@ -547,12 +529,11 @@ public class Game implements Formattable {
 		save.set( Config.BOMBS.getPath(), bombs );
 	}
 
-	public void setFare( ItemStack fare ) {
+	public void setFare( Payment fare ) {
+		if ( fare == null )
+			throw new NullPointerException( "Cannot set a null fare" );
 		this.fare = fare;
-		if (fare == null ) // false as null removes the value
-			save.set( Config.FARE.getPath(), false );
-		else
-			save.set( Config.FARE.getPath(), fare );
+		save.set( Config.FARE.getPath(), fare );
 	}
 
 	public void setLives( int lives ) {
@@ -570,14 +551,11 @@ public class Game implements Formattable {
 		save.set( Config.POWER.getPath(), power );
 	}
 
-	public void setPrize( ItemStack prize, boolean pot ) {
+	public void setPrize( Payment prize ) {
+		if ( prize == null )
+			throw new NullPointerException( "Cannot set a null prize" );
 		this.prize = prize;
-		this.pot = pot;
-		save.set( Config.POT.getPath(), pot );
-		if ( prize != null)
-			save.set( Config.PRIZE.getPath(), prize );
-		else
-			save.set( Config.PRIZE.getPath(), false ); // false as null would just remove the prize
+		save.set( Config.PRIZE.getPath(), prize );
 	}
 
 	public boolean getProtected( Config protection ) {
@@ -818,20 +796,10 @@ public class Game implements Formattable {
 			return Integer.toString( lives );
 		case "fare":
 			args.remove( 0 );
-			return new ItemWrapper( fare ).format( message, args );
+			return fare.format( message, args );
 		case "prize":
 			args.remove( 0 );
-			if ( pot ) {
-				// re calculate current pot
-				if ( fare == null )
-					prize = null;
-				else 
-					prize = new ItemStack( fare.getType(), fare.getAmount()
-							* (winners.size() + players.size() ) );
-			}
-			return new ItemWrapper( prize ).format( message, args );
-		case "haspot":
-			return Boolean.toString( pot );
+			return prize.format( message, args );
 		case "timeout":
 			return Integer.toString( getTimeout() );
 		case "suddendeath":
