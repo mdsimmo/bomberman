@@ -43,8 +43,11 @@ public class Bomb implements Runnable {
 	public class Explosion implements Listener, Runnable {
 
 		public Explosion() {
-			tnt.setType( Material.AIR );
 			game.explosions.remove( tnt );
+			// avoid bombs going off after game has finished
+			if ( game.state != Game.State.PLAYING )
+				return;
+			tnt.setType( Material.AIR );
 			plugin.getServer().getPluginManager().registerEvents( this, plugin );
 			plugin.getServer().getScheduler()
 					.scheduleSyncDelayedTask( plugin, this, 20 );
