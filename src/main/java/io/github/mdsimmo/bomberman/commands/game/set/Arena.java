@@ -32,7 +32,7 @@ public class Arena extends GameCommand {
 	@Override
 	public List<String> shortOptions( CommandSender sender, List<String> args ) {
 		if ( args
-				.size() == 0 )
+				.size() == 1 )
 			return ArenaGenerator.allBoards();
 		else
 			return null;
