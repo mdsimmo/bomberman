@@ -15,7 +15,11 @@ public class Language extends CommandGroup {
 
 	@Override
 	public void setChildren() {
-		addChildren( new LangSet( this ), new FromLua( this ), new ToLua( this ) );
+		addChildren( 
+				new LangSet( this ),
+				new FromLua( this ),
+				new ToLua( this ),
+				new Reload( this ) );
 	}
 
 	@Override

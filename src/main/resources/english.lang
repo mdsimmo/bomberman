@@ -710,6 +710,15 @@ command:
     # The language was set successfully
     # {lang}: the language changed to
     success: Language set to {lang}
+  # Messages relating to '/bm language reload'
+  langreload:
+    name: reload
+    description: Reloads all languages
+    usage: /{command|path}
+    example: ''
+    extra: ''
+    # All languages have been reloaded
+    success: All languages reloaded
   # Messages relating to '/bm language tolua'
   tolua:
     name: tolua

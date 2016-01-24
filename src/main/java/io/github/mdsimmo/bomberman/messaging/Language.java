@@ -20,7 +20,7 @@ public class Language implements Formattable {
 	private static Plugin plugin = Bomberman.instance;
 	private final YamlConfiguration save;
 	private final String name;
-
+	
 	public static Language getLanguage( String lang ) {
 		if ( lang == null )
 			return getLanguage( "english" );
@@ -49,6 +49,10 @@ public class Language implements Formattable {
 		}
 	}
 
+	public static void reload() {
+		langs.clear();
+	}
+	
 	private static File getFile( String lang ) {
 		return new File( plugin.getDataFolder(), lang.toLowerCase() + ".lang" );
 	}

@@ -410,6 +410,12 @@ public enum Text implements Phrase {
 	LANGUAGE_EXTRA ( "command.languageset.extra" ),
 	LANGUAGE_SUCCESS ( "command.languageset.success" ),
 	
+	LANG_RELOAD_NAME( "command.langreload.name" ),
+	LANG_RELOAD_DESCRIPTION( "command.langreload.description" ),
+	LANG_RELOAD_USAGE( "command.langreload.usage" ),
+	LANG_RELOAD_EXAMPLE( "command.langreload.example" ),
+	LANG_RELOAD_EXTRA( "command.langreload.extra" ),
+	LANG_RELOAD_SUCCESS( "command.langreload.success" ),
 	
 	TOLUA_NAME ( "command.tolua.name" ),
 	TOLUA_DESCRIPTION ( "command.tolua.description" ),
