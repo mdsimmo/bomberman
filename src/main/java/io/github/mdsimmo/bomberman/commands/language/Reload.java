@@ -17,7 +17,7 @@ public class Reload extends Cmd {
 
 	@Override
 	public Message name( CommandSender sender ) {
-		return Text.LANG_RELOAD_NAME.getMessage( sender );
+		return getMessage( Text.LANG_RELOAD_NAME, sender );
 	}
 
 	@Override
@@ -28,28 +28,28 @@ public class Reload extends Cmd {
 	@Override
 	public boolean run( CommandSender sender, List<String> args ) {
 		io.github.mdsimmo.bomberman.messaging.Language.reload();		
-		Chat.sendMessage( Text.LANG_RELOAD_SUCCESS.getMessage( sender ) );
+		Chat.sendMessage( getMessage( Text.LANG_RELOAD_SUCCESS, sender ) );
 		return true;
 	}
 
 	@Override
 	public Message extra( CommandSender sender ) {
-		return Text.LANG_RELOAD_EXTRA.getMessage( sender );
+		return getMessage( Text.LANG_RELOAD_EXTRA, sender );
 	}
 
 	@Override
 	public Message example( CommandSender sender ) {
-		return Text.LANG_RELOAD_EXAMPLE.getMessage( sender );
+		return getMessage( Text.LANG_RELOAD_EXAMPLE, sender );
 	}
 
 	@Override
 	public Message description( CommandSender sender ) {
-		return Text.LANG_RELOAD_DESCRIPTION.getMessage( sender );
+		return getMessage( Text.LANG_RELOAD_DESCRIPTION, sender );
 	}
 
 	@Override
 	public Message usage( CommandSender sender ) {
-		return Text.LANG_RELOAD_USAGE.getMessage( sender );
+		return getMessage( Text.LANG_RELOAD_USAGE, sender );
 	}
 
 
