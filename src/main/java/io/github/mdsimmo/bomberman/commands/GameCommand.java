@@ -46,7 +46,7 @@ public abstract class GameCommand extends Cmd {
 
 	@Override
 	public final boolean run( CommandSender sender, List<String> args ) {
-		Game game = null;
+		Game game;
 		if ( args.size() >= 1 && Game.allGames().contains( args.get( 0 ) ) ) {
 			game = Game.findGame( args.get( 0 ) );
 			if ( sender instanceof Player )
@@ -55,7 +55,7 @@ public abstract class GameCommand extends Cmd {
 		} else {
 			if ( sender instanceof Player )
 				game = PlayerRep.getPlayerRep( (Player)sender ).getActiveGame();
-			if ( game == null )
+			else
 				return false;
 		}
 		return runShort( sender, args, game );

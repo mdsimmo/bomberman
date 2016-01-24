@@ -120,6 +120,7 @@ public class ArenaEdittingState extends PlayerState implements Listener {
 		rep.switchStates( null );
 	}
 
+	@Override
 	public Game getGame() {
 		return game;
 	}

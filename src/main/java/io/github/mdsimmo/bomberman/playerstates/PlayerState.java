@@ -1,6 +1,7 @@
 package io.github.mdsimmo.bomberman.playerstates;
 
 import io.github.mdsimmo.bomberman.Bomberman;
+import io.github.mdsimmo.bomberman.Game;
 import io.github.mdsimmo.bomberman.PlayerRep;
 
 import org.bukkit.entity.Player;
@@ -66,4 +67,6 @@ public abstract class PlayerState {
 	public boolean isEnabled() {
 		return enabled;
 	}
+	
+	public abstract Game getGame();
 }

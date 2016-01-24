@@ -10,6 +10,7 @@ import io.github.mdsimmo.bomberman.messaging.Message;
 import io.github.mdsimmo.bomberman.messaging.Phrase;
 import io.github.mdsimmo.bomberman.messaging.Text;
 import io.github.mdsimmo.bomberman.playerstates.GamePlayingState;
+import io.github.mdsimmo.bomberman.playerstates.PlayerState;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -43,7 +44,7 @@ public class Join extends GameCommand {
 
 	@Override
 	public boolean runShort( CommandSender sender, List<String> args, Game game ) {
-		if ( args.size() != 0 ) // > 1 )
+		if ( args.size() != 0 )
 			return false;
 		if ( sender instanceof Player == false ) {
 			Chat.sendMessage( getMessage( Text.MUST_BE_PLAYER, sender ) );
@@ -62,15 +63,15 @@ public class Join extends GameCommand {
 			} catch (Exception e) {
 				return false;
 			}
-		rep.setActiveGame( game );
 		if ( !rep.switchStates( new GamePlayingState( rep, team ) ) ) {
-			if ( rep.getState() != null ) {
-				Message message = Text.PLAYER_BUSY.getMessage( rep );
-				message.put( "game", game );
-				Chat.sendMessage( message );
-				return true;
-			}
+			PlayerState state = rep.getState();
+			Game activeGame = state.getGame();
+			Message message = Text.PLAYER_BUSY.getMessage( rep );
+			message.put( "game", activeGame );
+			Chat.sendMessage( message );
+			return true;
 		}
+		rep.setActiveGame( game );
 		return true;
 	}
 
