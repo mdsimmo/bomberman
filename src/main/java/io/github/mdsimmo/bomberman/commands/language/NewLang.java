@@ -37,7 +37,7 @@ public class NewLang extends Cmd {
 		if ( args.size() != 1 )
 			return false;
 		
-		String langName = args.get( 0 );
+		String langName = args.get( 0 ).toLowerCase();
 		
 		JavaPlugin plugin = Bomberman.instance;		
 		File outFile = new File( plugin.getDataFolder(), langName + ".lang" );
