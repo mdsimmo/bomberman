@@ -18,8 +18,6 @@ public class Language implements Formattable {
 
 	private static Map<String, Language> langs = new HashMap<>();
 	private static Plugin plugin = Bomberman.instance;
-	private final YamlConfiguration save;
-	private final String name;
 	
 	public static Language getLanguage( String lang ) {
 		if ( lang == null )
@@ -80,10 +78,17 @@ public class Language implements Formattable {
 		return langs;
 	}
 
+	private final YamlConfiguration save;
+	private final String name;
+	
 	private Language( String lang ) {
 		File f = getFile( lang );
 		save = YamlConfiguration.loadConfiguration( f );
 		name = lang;
+	}
+	
+	public String name() {
+		return name;
 	}
 	
 	public String translate( Phrase phrase ) {

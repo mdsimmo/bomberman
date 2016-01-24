@@ -42,7 +42,7 @@ public class PlayerRep implements Formattable {
 	private final Player player;
 	private Game game;
 
-	private Language lang = Language.getLanguage( (String)Config.LANGUAGE.getValue() );
+	private String lang = (String)Config.LANGUAGE.getValue();
 	private PlayerState state = null;
 
 	public PlayerRep( Player player ) {
@@ -126,11 +126,11 @@ public class PlayerRep implements Formattable {
 	}
 
 	public Language getLanguage() {
-		return lang;
+		return Language.getLanguage( lang );
 	}
 
 	public void setLanguage( Language lang ) {
-		this.lang = lang;
+		this.lang = lang.name();
 	}
 
 	@Override
