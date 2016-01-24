@@ -583,7 +583,7 @@ command:
     key: '{game}'
     # The value to show for this entry
     # {game}: the game that this entry is about
-    value: '{game|status}'
+    value: '{game|state}'
   # Messages relating to '/bm game ignore'
   ignore:
     name: ignore

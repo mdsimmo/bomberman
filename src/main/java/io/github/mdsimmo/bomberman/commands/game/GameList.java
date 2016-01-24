@@ -41,7 +41,7 @@ public class GameList extends Cmd {
 			for ( String name : games ) {
 				Game game = Game.findGame( name );
 				Message key = getMessage( Text.GAMELIST_KEY, sender ).put( "game", game );
-				Message value = getMessage( Text.GAMELIST_KEY, sender ).put( "game", game );
+				Message value = getMessage( Text.GAMELIST_VALUE, sender ).put( "game", game );
 				list.put( key, value );
 			}
 			Chat.sendMap( list );
