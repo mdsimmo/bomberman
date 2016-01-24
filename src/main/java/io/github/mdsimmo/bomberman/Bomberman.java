@@ -2,6 +2,7 @@ package io.github.mdsimmo.bomberman;
 
 import io.github.mdsimmo.bomberman.arenabuilder.ArenaGenerator;
 import io.github.mdsimmo.bomberman.commands.BaseCommand;
+import io.github.mdsimmo.bomberman.messaging.Language;
 import io.github.mdsimmo.bomberman.prizes.EmptyPayment;
 import io.github.mdsimmo.bomberman.prizes.ItemPayment;
 import io.github.mdsimmo.bomberman.prizes.PotPayment;
@@ -35,6 +36,15 @@ public class Bomberman extends JavaPlugin {
 		Game.loadGames();
 		CommandSign.load();
 		SignHandler.load();
+		
+		// make sure the default language is enabled
+		String defLang = Config.LANGUAGE.<String>getValue();
+		Language lang = Language.getLanguage( defLang );
+		if ( lang == null ) {
+			getLogger().warning( "Could not find default language: '" + defLang + "'" );
+			if ( defLang != null && defLang.endsWith( ".lang" ) )
+				getLogger().warning( "Do not put the '.lang' extention on the language name!" );
+		}
 	}
 	
 	@Override
