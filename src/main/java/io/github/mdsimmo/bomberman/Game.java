@@ -500,19 +500,16 @@ public class Game implements Formattable {
 				Chat.messageRaw( getMessage( Text.WINNERS_LIST, rep.getPlayer() )
 						.put( "player", repWinner ).put( "place", place ) );
 			}
-
-			Chat.sendMessage( getMessage( Text.SCORE_SEE_SCORES,
-					rep.getPlayer() ) );
 		}
 	}
 
-	public List<Message> scoreDisplay( CommandSender sender ) {
-		List<Message> list = new ArrayList<Message>( players.size() );
-		for ( PlayerRep rep : players )
-			list.add( getMessage( Text.SCORE_DISPLAY, sender ).put( "player",
-					rep ).put( "stats", getStats( rep ) ) );
-		return list;
-	}
+//	public List<Message> scoreDisplay( CommandSender sender ) {
+//		List<Message> list = new ArrayList<Message>( players.size() );
+//		for ( PlayerRep rep : players )
+//			list.add( getMessage( Text.SCORE_DISPLAY, sender ).put( "player",
+//					rep ).put( "stats", getStats( rep ) ) );
+//		return list;
+//	}
 
 	public void setAutostart( boolean autostart ) {
 		this.autostart = autostart;

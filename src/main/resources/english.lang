@@ -1,0 +1,791 @@
+format:
+  # How a basic message looks
+  # {message}: the message being sent
+  message: '{green|[Bomberman]} {message}'
+  # How to format a heading
+  # {type}: the titles category (e.g. list, Help ...)
+  # {title}: The title
+  heading: '{yellow|--------} {type}: {title} {yellow|---------------}'
+  # How to format a list of key-value pairs
+  # {title}: the maps key
+  # {value} the map's value 
+  map: '{gold|{title}:} {value}'
+  # How to display a list
+  # {value}: the value of the list
+  list: ' {gold|*} {value}'
+# A list of words for general use. Do not assume any arguments
+word:
+  game: Game
+  arena: Arena
+  help: Help
+  list: List
+  info: Info
+  description: Description
+  usage: Usage
+  extra: Extra
+  commands: Commands
+  example: Example
+  'true': 'true'
+  'false': 'false'
+# Commands stated when a player joins a game
+join:
+  # The player did not say which game to join
+  specify-game: You must specify a game to join
+  # The game has no spare spawn points
+  # {game}: the game attempted to be joined
+  game-full: Game {game} is full
+  # Players does not have the required fare
+  # {game} the game joining
+  poor-man: You need {game|fare} to join {game}
+  # A player has joined the game. Sent to all observers of a game
+  # {game}: the game joined
+  # {player}: the player who joined 
+  player-joined: '{player} joined game {game}'
+player:
+  # Called when trying to join/edit while editing/playing
+  # {game}: the game currently busy in
+  busy: You're already doing something in game {game}
+editmode:
+  # Sent when a player builds outside of an arena
+  # {game}: the game editing
+  builddenied: Cannot build outside while in editmode
+  # Sent when a player destroys blocks outside of an arena
+  # {game}: the game editing
+  destroydenied: Cannot destroy blocks outside while in editmode
+# Messages sent concerning actions during a game. All commands have a {game} argument.
+# Messages with 'players', 'observers' and 'all' sub paths will be sent to the different groups of players.  
+game-play:
+  # Sent when a player tries to teleport while playing
+  teleport-denied: '{RED|Cannot teleport while part of a game}'
+  # Sent to player who hit someone else
+  # {attacker}: the player who placed the bomb (same as {sender})
+  # {defender}: the player who got hit
+  hit-opponent: You hit {defender}
+  # Sent when a player gets hits themselves
+  # {attacker}: the player (same as {sender})
+  # {defender}: the player (same as {sender})
+  hit-suicide: You hit yourself
+  # Sent to player who got damaged
+  # {attacker}: the player who hit this player
+  # {defender}: this player (same as {sender})
+  hit-by: You were hit by {attacker}
+  # Sent to player who killed another player
+  # {attacker}: this player (same as {sender})
+  # {defender}: the player who died
+  kill-opponent: '{YELLOW|You killed {defender}}'
+  # Sent to a player who killed them-self
+  # {attacker}: this player
+  # {defender}: this player
+  kill-suicide: '{RED|You killed yourself!}'
+  # Sent to a player who has been killed
+  # {attacker}: the player who killed this player
+  # {defender}: this player
+  killed-by: '{RED|Killed by {attacker}}'
+  # Informs all the other players not involved that a player died
+  # {player}: the player who died 
+  player-killed:
+    players: '{player} is out!'
+    observers: '{yellow|{player} died in game {game}!}'
+    all: ''
+  # Informs all players of a game that a player left
+  # {player}: the player who left
+  player-left:
+    players: '{player} left'
+    observers: '{player} left game {game}!'
+    all: ''
+  # Called when a player drinks a potion during sudden death
+  no-regen: No regen in sudden death!
+  # Sent when a game's auto-start countdown timer beings counting
+  # {time}: time till the game starts
+  starting:
+    players: Game {game} is starting soon
+    observers: Game {game} is starting soon. Type {aqua|/bm game join {game}} to play!
+    all: Game {game} is starting soon. Type {aqua|/bm game join {game}} to play!
+  # Sent as the game timer counts down. Called ever 
+  # {time}: the time till the game begins
+  count:
+    players: Game starting in {time} seconds...
+    observers: Game {game} starting in {time} seconds...
+    all: ''
+  # Sent when the game starts
+  started:
+    players: '{YELLOW|Game started!}'
+    observers: Game {game} started!
+    all: Game {game} started!
+  # sent when the count-down stops because a player left
+  stopped-count:
+    players: Not enough players remaining. The countdown timer has been stopped
+    observers: ''
+    all: ''
+  # Called when a game finishes
+  game-over:
+    players: '{YELLOW|The game is over!}'
+    observers: Game {game} is over!
+    all: ''
+# Messages related to events concerning sudden death
+# All these commands have a {game} argument that has been omitted
+suddendeath:
+  # Count down fro when sudden death is about to occur
+  # {time}: time till sudden death in seconds 
+  count:
+    players: Sudden death in {time} seconds...
+    observers: ''
+    all: ''
+  # Sudden death has just started
+  start:
+    players: '{RED|Sudden death started!}'
+    observers: Sudden death started in {game}
+    all: ''
+# Messages related to timeout
+# All these commands have a {game} argument
+timeout:
+  # Countdown for when game is about to end
+  # {time}: time till the game ends
+  count:
+    players: Time out in {time} seconds...
+    observers: ''
+    all: ''
+  # Timeout has just started
+  start:
+    players: Game timed out!
+    observers: Game {game} timed out!
+    all: ''
+# Display of scores when a game ends
+scores:
+  # A message that precedes 'scores.winners'
+  # {game}: the game
+  announce: 'The winners of {game} are:'
+  # How to show the list of winners. This will be shown to all game's observers
+  # The first 8 winners will have this line displayed for them
+  # {game}: the game
+  # {player}: the winner
+  # {place}: the players position (as a number)
+  winners: ' {gold|{switch|{place}|1|1st|2|2nd|3|3rd|{place}th}:} {player}'
+# All messages that can be displayed when executing a command. All these messages will only be
+# shown to the player who ran the command. 
+# All the messages have a {command} argument
+command:
+  # Shown when a player tries to run a command they do not have permission to use
+  deny-permission: '{RED|You do not have permission to use /{command|path}!}'
+  # Shown when the player uses a command incorrectly
+  # {attempt}: the string that the player typed
+  incorrect-usage: '{RED|Incorrect usage: {command|usage}}'
+  # Shown when a player types a command that does not exist
+  # {attempt}: the string that the player typed
+  unknown-command: '{RED|Unknown command: {attempt}}'
+  # Shown to the console when it tries to run a command that needs to be done as a player 
+  must-be-player: You must be a player
+  # Shown when a command needs a number but they typed something else
+  # {number}: the string of what they typed (this will _not_ be a number)
+  invalid-number: '{number} is not a valid number'
+  # Shown when a command asks for a player but the player does not exist
+  # {player}: the player that was typed (is not a valid player)
+  invalid-player: Cannot find {player}
+  # Shown when a command asks for a material type but receives something else
+  # {material}: the string of the material that the player typed
+  invalid-material: Unknown material {material}
+  # Shown when an invalid arena name is passed to a command
+  # {arena}: the arena that was typed ( not a valid arena )
+  invalid-arena: Arena {arena} does not exist
+  # Shown when an invalid game is passed to a command
+  # {game}: the game that was typed (not a valid game)
+  invalid-game: Game {game} not found
+  # The base command details
+  bomberman:
+    description: Main command for Bomberman
+  # details for '/bm arena'
+  arena:
+    name: arena
+    description: Arena management commands
+  # details for '/bm arena list'
+  arenalist:
+    name: list
+    description: List available arena types
+    usage: /{command|path}
+    example: ''
+    extra: ''
+    # Shown when there are no arena's
+    no-arena: No arenas
+  # details for '/bm arena create'
+  arenacreate:
+    name: create
+    description: Create a new arena type for games to use
+    usage: /{command|path} <arena>
+    example: /{command|path} redPuddingArena
+    extra: Look at the arena when using. Natural blocks are ignored when detecting structures
+    # Shown when the arena detection algorithm starts
+    # {arena}: the name of the arena that will be created (not a valid arena) 
+    started: Arena {arena} is being created... (it may take a while)
+    # Shown when the player was not looking at any block
+    # {arena}: the name of the arena attempted to be constructed (not a valid arena)
+    notarget: You must look at a block
+    # Shown when the arena exceeds the max build size
+    # {maxstructuresize}: the maximum amount of blocks that can be in an arena
+    # {arena}: the name of the arena attempted to be constructed (not a valid arena)
+    too-big: Max build size exceeded! {maxstructuresize} blocks maximum. Creation cancelled
+    # Shown when the arena is only one block
+    # {arena}: the arena created
+    very-small: Structure is only a single block! Were you looking at a natural block?
+    # Shown when the arena being created tries to override an arena that is in use by a game
+    # {game}: a game that is using the arena's name
+    # {arena}: the arena that the game used
+    in-use: Cannot change an arena that is being used by a game
+    # The arena has finished being created
+    # {arena} the created arena
+    success: Arena {arena} created
+  # Messages relating to '/bm arena delete'
+  arenadelete:
+    name: delete
+    description: Deletes an arena permanently
+    usage: /{command|path} <arena>
+    example: ''
+    extra: Only works if arena is not used by a game
+    # The arena has been deleted
+    # {arena}: the deleted arena (it _is_ a valid arena )
+    success: Arena {arena} successfully deleted
+    # The arena cannot be deleted because it is being used
+    # {arena}: the arena attempted to be deleted
+    # {game}: the game using the arena
+    arena-used: Cannot delete arena {arena} since it is being used by game {game}
+    # There was some error deleting the arena's file. Who knows what happened.
+    # {arena}: the games arena
+    # {file}: the game's file name
+    error: Error deleting file {file}
+  # Commands related to editing a game's arena
+  arenaedit:
+    name: edit
+    description: Edit a game's arena
+    usage: /{command|path} <game> <save|discard|ignore> (leave blank to start edit mode)
+    example: ''
+    extra: Editing a game's arena effects {RED|all} games using the same arena
+    # word to save changes on an arena
+    save: save
+    # the word to discard changes ( revert all edits made ) 
+    discard: discard
+    # the word to quit edit mode but not to save changes
+    ignore: ignore
+    # Called to say that edit mode has been started
+    # {game}: the game getting edited
+    # {arena}: the arena being edited
+    started: Editing arena {arena} through game {game}
+    # Called to say that edit mode has already be started
+    # {game}: the game trying to re-start edit mode in
+    # {arena}: the arena getting edited
+    already-started: You're already editing {game}
+    # Message to say that edits have been saved
+    # {game}: the game that has been edited
+    # {arena}: the arena that has been edited
+    changes-saved: Changes saved
+    # Player tried to save/discard changes without being in edit mode
+    # {game}: the game being edited
+    # {arena}: the arena being edited
+    prompt-start: Edit mode needs to be started first
+    # Notice to say that all changes have been removed
+    # {game}: the game that was being edited
+    # {arena}: the arena that was being edited
+    changes-removed: Changes removed
+    # Notice to say that player has left edit mode with no changes save/discarded
+    # {game}: the game that was being edited
+    # {arena}: the arena that was being edited 
+    changes-ignored: Edit mode quit
+  # Messages relating to '/bm game force' 
+  force:
+    name: force
+    description: Force actions on a game
+  # Commands relating to '/bm game force reset'
+  reset:
+    name: reset
+    description: Forcibly reset a game to its starting point
+    usage: /{command|path} <game>
+    example: ''
+    extra: ''
+    # The game's arena rebuild has started
+    # {game}: the game being reset
+    started: Game {game} resetting
+    # The game's arena has finished being rebuilt 
+    # {game}: the game 
+    finished: Game {game} reset
+  # Commands relating to '/bm game force start'
+  start:
+    name: start
+    description: Forcibly start a game
+    usage: /{command|path} <game>
+    example: ''
+    extra: ''
+    # Message when a player starts an already started arena
+    # {game}: the game attempted to be started
+    already-started: Game {game} already started
+    # The game has been started
+    # {game}: the game that has been started
+    success: Game {game} starting...
+    # The game cannot be started because there is not enough players
+    # {game}: the game
+    more-players: There needs to be {game|minplayers} players
+  # Messages relating to '/bm game force stop'
+  stop:
+    name: stop
+    description: Forcibly stop a game
+    usage: /{command|path} <game>
+    example: ''
+    extra: ''
+    # The game hasn't been started so the game cannot be stopped
+    # {game}: the game
+    not-started: Game {game} hasn't started
+    # The game has stopped
+    # {game}: the game
+    success: Game {game} stopped
+  # Messages relating to '/bm game set arena'
+  setarena:
+    name: arena
+    description: Change a game's arena
+    usage: /{command|path} <game> <arena>
+    example: ''
+    extra: ''
+    # The arena cannot be changed because the game is being played
+    # {game}: the game
+    game-in-progress: Game {game} in progress. Cannot change arena
+    # The arena switch has been started
+    # {game}: the game
+    # {arena1}: the old (current) arena
+    # {arena2}: the new arena 
+    started: '{game}''s arena is switching from {arena1} to {arena2} '
+    # The game's arena has finished being switched
+    # {game}: the game
+    # {arena1}: the old arena
+    # {arena2}: the new (current) arena
+    success: '{game}''s arena changed'
+  # Messages relating to '/bm game set autostart'
+  autostart:
+    name: autostart
+    description: Set if the game should autostart
+    usage: '/{command|path} <game> <true|false>'
+    example: ''
+    extra: ''
+    # autostart has been enabled
+    # {game}: the game
+    enabled: Autostart enabled in game {game}
+    # Autostart has been disabled
+    # {game}: the game
+    disabled: Autostart disabled in game {game}
+  # Messages relating to '/bm game set autostartdelay'
+  start-delay:
+    name: autostartdelay
+    description: Change the delay on a game's automated start
+    usage: /{command|path} <game> <seconds>
+    example: ''
+    extra: ''
+    # the game has had its autostart delay set
+    # {game}: the game that has had the autostart set
+    set: Autostart delay set to {game|autostart} seconds
+  # Messages relating to '/bm game set bombs'
+  bombs:
+    name: bombs
+    description: Sets players' initial bombs
+    usage: /{command|path} <game> <number>
+    example: ''
+    extra: ''
+    # The bomb amount has been set
+    # {game}: the game
+    set: Bombs set to {game|bombs}
+  # Messages relating to '/bm game set fare'
+  fare:
+    name: fare
+    description: Change a game's fare
+    usage: /{command|path} <game> <material|xp|inhand|money|none> [amount]
+    example: ''
+    extra: material must be the name in bukkit's code
+    # the fare has been set (or removed)
+    # {game}: the game
+    set: 'Fare set to {game|fare}'
+    # these all have the same meaning as command.prize.xxx
+    none: none
+    xp: xp
+    money: money
+    inhand: inhand
+  # Messages relating to '/bm game set handicap'
+  handicap:
+    name: handicap
+    description: Gives a handicap/advantage to a player
+    usage: /{command|path} <game> <player> <level>
+    example: ''
+    extra: Negative levels give an advantage
+    # The handicap has been set for a specific player
+    # {game}: the game set for
+    # {player}: the player handicapped/advantaged
+    set: '{switch|{=|sign({player|handicap})}|0|Handicap removed from {player}|-1|{player}''s
+      advantage set to level {=|abs({player|handicap})}|{player}''s handicap set to
+      level {player|handicap}}'
+  # Messages relating to '/bm game set lives'
+  lives:
+    name: lives
+    description: Sets players' initial lives
+    usage: /{command|path} <game> <number>
+    example: ''
+    extra: ''
+    # The amount of lives has been set
+    # {game}: the game
+    set: Lives set to {game|lives}
+  # Messages relating to '/bm game set minplayers'
+  minplayers:
+    name: minplayers
+    description: Sets the min players before game can start
+    usage: /{command|path} <game> <number>
+    example: ''
+    extra: ''
+    # The min players has been set
+    # {game}: the game that was set
+    set: Min players set to {game|minplayers}
+    # Shown when a player tries to set the minplayers to <= 1 player
+    # {game}: the game
+    # {amount}: the amount that they tried to use
+    more-than-zero: Min players cannot be less than one
+  # Messages relating to '/bm game set power'
+  power:
+    name: power
+    description: Sets players' initial power
+    usage: /{command|path} <game> <number>
+    example: ''
+    extra: ''
+    # The power has been set
+    # {game}: the game
+    set: Power set to {game|power}
+  # Messages relating to '/bm game set prize'
+  prize:
+    name: prize
+    description: Change a game's prize
+    usage: /{command|path} <game> <material|pot|xp|inhand|money|none> [amount]
+    example: ''
+    extra: ''
+    # The word meaning "what is paid is what is received"
+    # this command does not have the {command} argument
+    pot: pot
+    # A word meaning "no prize"
+    # this command does not have the {command} argument
+    none: none
+    # A word meaning "experience"
+    # this command does not have the {command} argument
+    xp: xp
+    # A word for vault economy system
+    # this command does not have the {command} argument
+    money: money
+    # A word for the item that the player is holding
+    # this command does not have the {command} argument
+    inhand: inhand
+    # The pot has been set/removed
+    # {game}: the game that had the pot set
+    set: 'Prize set to {game|prize}'
+  # Messages relating to '/bm game set'
+  set:
+    name: set
+    description: Change a game's settings
+  # Messages relating to '/bm game set suddendeath'
+  suddendeath:
+    name: suddendeath
+    description: Sets when sudden death should happen
+    usage: /{command|path} <game> <seconds>
+    example: ''
+    extra: ''
+    # A word meaning 'disable sudden death'
+    # this command does not have the {command} argument
+    'off': 'off'
+    # Sudden death has been removed
+    # {game}: the game
+    removed: Sudden death removed from {game}
+    # Sudden death time was set
+    # {game}: the game
+    set: Sudden death set to {game|suddendeath} seconds
+  # Messages relating to '/bm game set timeout'
+  timeout:
+    name: timeout
+    description: Sets a maximum game time
+    usage: /{command|path} <game> <seconds>
+    example: ''
+    extra: ''
+    # A word meaning 'disable time out'
+    # this command does not have the {command} argument
+    'off': 'off'
+    # Time out has been removed
+    # {game}: the game time out was removed from
+    removed: Time out removed for game {game}
+    # Time out was set
+    # {game}: the game time out was set in
+    set: Time out set to {game|timeout} seconds
+  # Messages relating to '/bm game convert'
+  convert:
+    name: convert
+    description: Converts the structure under the cursor into a Bomberman game
+    usage: /{command|path} <game>
+    example: ''
+    extra: Natural blocks are ignored when detecting structures
+    # Player tried to make a game with an already existing name
+    # {game}: the game that stopped the action from happening
+    game-exists: Game {game} already exists
+    # The arena detection algorithm has started
+    # {game}: the name of the game being converted (not a valid game)
+    started: Conversion in progress...
+    # The game was converted successfully
+    # {game}: the created game
+    success: Game {game} created
+  # Messages relating to '/bm game create'
+  create:
+    name: create
+    description: Builds a Bomberman game
+    usage: /{command|path} <game> [arena]
+    example: ''
+    extra: ''
+    # The game's name is already used
+    # {game}: the game that has the shared name 
+    game-exists: Game {game} already exists
+    # The arena has stated being built
+    # The game that construction has started in
+    # {game}: the name of the game started (not a valid name)
+    started: Creation started...
+    # The game has finished being built
+    # {game}: the game that was built
+    success: Game {game} created
+    # The game was asked to be built with the default arena but it is not a valid arena
+    default-missing: The default arena {arena} is missing!
+  # Messages relating to ''/bm game destroy
+  destroy:
+    name: destroy
+    description: Destroy a game and revert the land to its previous state
+    usage: /{command|path} <game>
+    example: ''
+    extra: 'See also: {aqua|/bm game forget <game>}'
+    # The game has been destroyed
+    # {game}: the game that was destroyed (this is a valid game)
+    success: Game {game} destroyed
+  # Messages relating to '/bm game forget'
+  forget:
+    name: forget
+    description: Forgets about a game but does not destroy/reset the arena
+    usage: /{command|path} <game>
+    example: ''
+    extra: 'See also: {aqua|/bm game destroy <game>}'
+    # The game has been forgotten
+    # {game}: the forgotten game (this is a valid game)
+    success: Game {game} forgotten
+  # Messages relating to '/bm game'
+  game:
+    name: game
+    description: All commands related to game configuration
+  # Messages relating to '/bm game list'
+  gamelist:
+    name: list
+    description: Shows all existing games
+    usage: /{command|path}
+    example: ''
+    extra: ''
+    # There are no games created
+    no-games: No games
+    # What to put in the keys of the returned map
+    # {game}: the game that this entry is about
+    key: '{game}'
+    # The value to show for this entry
+    # {game}: the game that this entry is about
+    value: '{game|status}'
+  # Messages relating to '/bm game ignore'
+  ignore:
+    name: ignore
+    description: Ignore all further messages from a game
+    usage: /{command|path} <game>
+    example: ''
+    extra: ''
+    # The game is not longer being listened to
+    # {game}: the ignored game
+    success: Game {game} ignored
+    # The player was not watching that game
+    # {game}: the game that was not being watched
+    not-watched: You where not observing {game}
+  # Messages relating to '/bm game info'
+  info:
+    name: info
+    description: Show information about a game
+    usage: /{command|path} <game>
+    example: ''
+    extra: ''
+    # There can be up to 15 key-value pairs. Default bomberman only uses the first 12.
+    # The pattern for adding a key-value pair should be very obvious.
+    # All pairs have a {game} argument  
+
+    1-key: Status
+    1-value: '{switch|{game|state}|waiting|Waiting|playing|In progress|starting|Starting|ending|Ending|unknown}'
+    2-key: Players
+    2-value: '{game|players}'
+    3-key: Min players
+    3-value: '{game|minplayers}'
+    4-key: Max players
+    4-value: '{game|maxplayers}'
+    5-key: Init bombs
+    5-value: '{game|bombs}'
+    6-key: Init lives
+    6-value: '{game|lives}'
+    7-key: Init power
+    7-value: '{game|power}'
+    8-key: Entry fee
+    8-value: '{game|fare}'
+    9-key: Prize
+    9-value: '{game|prize}'
+    10-key: Sudden death
+    10-value: '{switch|{game|suddendeath}|0,-1|Off|{game|suddendeath} seconds}'
+    11-key: Timeout
+    11-value: '{switch|{game|timeout}|0,-1|Off|{game|timeout} seconds}'
+    12-key: Arena
+    12-value: '{game|arena}'
+    13-key: ''
+    13-value: ''
+    14-key: ''
+    14-value: ''
+    15-key: ''
+    15-value: ''
+  # Commands relating to '/bm game join'. Also see 'join.xxx' messages
+  join:
+    name: join
+    description: Join a game
+    usage: /{command|path} <game>
+    example: ''
+    extra: ''
+    # Cannot join because the game has already started
+    # {game}: the game that couldn't be joined
+    game-started: Game has already started
+  # Messages relating to '/bm game leave'
+  leave:
+    name: leave
+    description: Leave the game
+    usage: /{command|path}
+    example: ''
+    extra: ''
+    # The player is not part of any game
+    not-joined: You're not part of a game
+  # Messages relating to '/bm game protect'
+  protect:
+    name: protect
+    description: Protects the arena from griefing
+    usage: /{command|path} <game> [protection-type] <on|off>
+    example: ''
+    extra: ''
+    # a word for "enable protections"
+    # do not assume any arguments (not even sender)
+    enabled: enabled
+    # a word for "protection against placing blocks"
+    # do not assume any arguments (not even sender)
+    placing: placing
+    # a word for "protection against players attacking other players"
+    # do not assume any arguments (not even sender)
+    pvp: pvp
+    # a word for "protection against players destroying blocks"
+    # do not assume any arguments (not even sender)
+    destroying: destroy
+    # a word for "protection against players being damaged"
+    # do not assume any arguments (not even sender)
+    damage: damage
+    # a word for "protection against blocks burning"
+    # do not assume any arguments (not even sender)
+    fire: fire
+    # a word for "protection against tnt/creepers/other explosions"
+    # do not assume any arguments (not even sender)
+    explosion: explosion
+    # displayed when a protection has been enabled in a game
+    # {game}: the game that was enabled
+    # {protection}: the protection that was enabled (one of the words defined above)
+    'on': Game {game} enabled {protection} protection
+    # Displayed when a protection has been disabled
+    # {game}: the game that the protection was disabled in
+    # {protection}: the protection that was disabled
+    'off': Game {game} removed {protection} protection
+  # Messages relating to '/bm language'
+  language:
+    name: language
+    description: The language commands
+    # An invalid language has been asked for
+    # {lang}: the name of the language that was asked for
+    invalid: Unknown language {lang}
+  # Messages relating to '/bm language set'
+  languageset:
+    name: set
+    description: Sets what language to use
+    usage: /{command|path} <lang>
+    example: ''
+    extra: ''
+    # The language was set successfully
+    # {lang}: the language changed to
+    success: Language set to {lang}
+  # Messages relating to '/bm language tolua'
+  tolua:
+    name: tolua
+    description: Converts a luguage to a lua file (for uploading to the bukkit repo)
+    usage: /{command|path} <lang> <exportfile>
+    example: ''
+    extra: Exported file will be in 'additive lua dictionary-style table' format
+    # Exporting the language was a success
+    # {file}: the file exported to
+    # {lang}: the language exported
+    success: lua file created
+    # Exporting the language failed
+    # {file}: where the file was attempted to be placed
+    # {lang}: the language being exported
+    failed: Failed to create file {aqua|{file}}. Was the filename legal?
+  # Messages relating to '/bm language fromlua'
+  fromlua:
+    name: fromlua
+    description: Converts a lua file into a yaml file
+    usage: /{command|path} <importfile> <langname>
+    example: ''
+    extra: Lua languages must be in 'lua table additions' format
+    # The language file was imported successfully
+    # {file}: the file imported from'
+    # {lang}: the language created
+    success: language {lang} created
+    # There was no file found
+    # {file}: the file asked for
+    file-not-found: File {file} was not found
+    # The language failed to import
+    # {lang}: the language being imported
+    # {file}: where it was being imported from
+    failed: Failed to import language {lang}
+  # Messages relating to command signs
+  signs:
+    # Shown when a player breaks a sign or a block that a sign is attached to
+    # {block}: the block tried to be broken
+    # {signblock}: the block that the sign was on (might be the same as {block})
+    cant_break: Command blocks cannot be broken. Use {aqua|/bm sign remove}
+    # Messages relating to '/bm sign'
+    sign:
+      name: sign
+      description: Configures sign behaviour
+    # Messages relating to '/bm sign add'
+    add:
+      name: add
+      description: Adds a command to a sign
+      usage: /{command|path} <command>
+      example: ''
+      extra: ''
+      # Message to ask the player to add the command to a block
+      # {command}: the command that will get added
+      prompt-click: Right click on the block to add the command to
+      # The command was successfully added
+      # {command}: the command that was added
+      # {block}: the block that the sign was added to
+      added: Command added
+    # Messages relating to '/bm sign remove'
+    remove:
+      name: remove
+      description: Removes all commands from a sign
+      usage: /{command|path}
+      example: ''
+      extra: ''
+      # Message to ask the player for block to remove commands from
+      prompt-click: Right click on the block to remove commands from
+      # Command removal was successful
+      # {block}: the block the signs were removed from
+      success: Commands removed
+      # There were no commands on this block
+      # {block}: the block there were no commands on
+      no-commands: No commands found on this block
+  # Messages relating to '/bm resethealth'.
+  # Note: this command is a hacky quick fix bug and will be removed when the bug is fixed
+  sethealth:
+    name: resethealth
+    description: Resets the players health to the default health forever
+    usage: /{command|path} <player> [health]
+    extra: "This command is here due to a bug where bomberman doesn't reset a players health to the normal 20. If this happens to you, just run this command."
