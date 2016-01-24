@@ -719,6 +719,19 @@ command:
     extra: ''
     # All languages have been reloaded
     success: All languages reloaded
+  # Messages relating to '/bm language newlang'
+  newlang:
+    name: newlang
+    description: Creates a new language file with comments ready for translation
+    usage: /{command|path} <langname>
+    example: '/{command|path} jargon'
+    extra: 'Any old language will be overwritten'
+    # Language file created successfully
+    # {lang}: The name of the language created
+    success: Language {lang} created
+    # Error while creating the new language file
+    # {lang}: The name of the language being created
+    fail: Error creating file. See stacktrace for details.
   # Messages relating to '/bm language tolua'
   tolua:
     name: tolua
