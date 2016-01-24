@@ -38,6 +38,7 @@ public abstract class Save extends YamlConfiguration {
 		V0_1_0d( "0.1.0d" ),
 		V0_1_0e( "0.1.0e" ),
 		V0_2_0( "0.2.0" ),
+		V0_2_1( "0.2.1" ),
 		FUTURE(	"future" );
 
 		Version( String name ) {

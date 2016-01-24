@@ -1,6 +1,6 @@
 name: Bomberman
 main: io.github.mdsimmo.bomberman.Bomberman
-version: 0.2.0
+version: 0.2.1
 
 commands:
   bomberman:
