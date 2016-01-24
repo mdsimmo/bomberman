@@ -67,9 +67,8 @@ public abstract class Chat {
 	 */
 	public static Message getMessage( Phrase phrase, Language lang, CommandSender sender ) {
 		if ( lang == null )
-			return new Message( sender, phrase.getDefault() );
-		else
-			return new Message( sender, lang.translate( phrase ) );
+			lang = Language.getLanguage( "english" );
+		return new Message( sender, lang.translate( phrase ) );
 	}
 	
 	/**

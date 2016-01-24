@@ -42,8 +42,7 @@ public class PlayerRep implements Formattable {
 	private final Player player;
 	private Game game;
 
-	private Language lang = Language.getLanguage( (String)Config.LANGUAGE
-			.getValue() );
+	private Language lang = Language.getLanguage( (String)Config.LANGUAGE.getValue() );
 	private PlayerState state = null;
 
 	public PlayerRep( Player player ) {

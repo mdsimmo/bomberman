@@ -24,16 +24,21 @@ public class Language implements Formattable {
 	public static Language getLanguage( String lang ) {
 		if ( lang == null )
 			return getLanguage( "english" );
+		// case insensitive match
 		lang = lang.toLowerCase();
+		
+		// first, look in the cache
 		Language language = langs.get( lang );
 		if ( language != null ) {
 			return language;
 		} else {
+			// try to load it from a file
 			if ( getFile( lang ).exists() ) {
 				language = new Language( lang );
 				langs.put( lang, language );
 				return language;
 			} else {
+				// if asking for English
 				if ( lang.isEmpty() ) {
 					language = getLanguage( "english" );
 					langs.put( lang, language );
@@ -43,6 +48,7 @@ public class Language implements Formattable {
 					langs.put( "english", language );
 					return language;
 				} else {
+					// no language
 					return null;
 				}
 			}
