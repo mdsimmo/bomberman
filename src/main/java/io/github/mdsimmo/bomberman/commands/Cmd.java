@@ -17,20 +17,14 @@ public abstract class Cmd implements Formattable {
 
 	public enum Permission {
 
-		OBSERVER(
-				"bomberman.observer" ),
-		PLAYER(
-				"bomberman.player" ),
-		GAME_OPERATE(
-				"bomberman.operator" ),
-		GAME_DICTATE(
-				"bomberman.dictator" ),
-		ARENA_EDITING(
-				"bomberman.arena" ),
-		PROTECTION_VOID(
-				"bomberman.void-protection" ), 
-		SIGN_MAKER(
-				"bomberman.sign-maker");
+		OBSERVER(        "bomberman.observer" ),
+		PLAYER(          "bomberman.player"   ),
+		GAME_OPERATE(    "bomberman.operator" ),
+		GAME_DICTATE(    "bomberman.dictator" ),
+		ARENA_EDITING(   "bomberman.arena"    ),
+		PROTECTION_VOID( "bomberman.void-protection" ), 
+		SIGN_MAKER(      "bomberman.sign-maker" ),
+		OVERLORD(        "bomberman.overlord" );
 
 		public final String	permission;
 

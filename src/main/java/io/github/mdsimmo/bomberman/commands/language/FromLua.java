@@ -15,7 +15,6 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.bukkit.command.CommandSender;
-import org.bukkit.command.ConsoleCommandSender;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.plugin.Plugin;
 
@@ -103,13 +102,8 @@ public class FromLua extends Cmd {
 	}
 
 	@Override
-	public boolean isAllowedBy( CommandSender sender ) {
-		return sender instanceof ConsoleCommandSender;
-	}
-	
-	@Override
 	public Permission permission() {
-		return Permission.GAME_DICTATE;
+		return Permission.OVERLORD;
 	}
 
 }

@@ -10,7 +10,6 @@ import java.util.List;
 
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
-import org.bukkit.command.ConsoleCommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
 
@@ -93,12 +92,7 @@ public class SetHealth extends Cmd {
 
 	@Override
 	public Permission permission() {
-		return Permission.GAME_DICTATE;
+		return Permission.OVERLORD;
 	}
 	
-	@Override
-	public boolean isAllowedBy( CommandSender sender ) {
-		return sender instanceof ConsoleCommandSender;
-	}
-
 }

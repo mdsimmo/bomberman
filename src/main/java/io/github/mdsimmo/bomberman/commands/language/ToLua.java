@@ -14,7 +14,6 @@ import java.io.IOException;
 import java.util.List;
 
 import org.bukkit.command.CommandSender;
-import org.bukkit.command.ConsoleCommandSender;
 import org.bukkit.plugin.Plugin;
 
 public class ToLua extends Cmd {
@@ -114,15 +113,10 @@ public class ToLua extends Cmd {
 	public Message usage( CommandSender sender ) {
 		return getMessage( Text.TOLUA_USAGE, sender );
 	}
-
-	@Override
-	public boolean isAllowedBy( CommandSender sender ) {
-		return sender instanceof ConsoleCommandSender;
-	}
 	
 	@Override
 	public Permission permission() {
-		return Permission.GAME_DICTATE;
+		return Permission.OVERLORD;
 	}
 
 }

@@ -3,7 +3,6 @@ package io.github.mdsimmo.bomberman.commands.language;
 import java.util.List;
 
 import org.bukkit.command.CommandSender;
-import org.bukkit.command.ConsoleCommandSender;
 
 import io.github.mdsimmo.bomberman.commands.Cmd;
 import io.github.mdsimmo.bomberman.messaging.Chat;
@@ -55,13 +54,8 @@ public class Reload extends Cmd {
 
 
 	@Override
-	public boolean isAllowedBy( CommandSender sender ) {
-		return sender instanceof ConsoleCommandSender;
-	}
-	
-	@Override
 	public Permission permission() {
-		return Permission.GAME_DICTATE;
+		return Permission.OVERLORD;
 	}
 	
 	
