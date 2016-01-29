@@ -6,7 +6,9 @@ import io.github.mdsimmo.bomberman.utils.BlockLocation;
 import java.io.File;
 import java.io.FilenameFilter;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 
 import org.bukkit.Bukkit;
 import org.bukkit.World;
@@ -31,8 +33,6 @@ public class DynamicSigns {
 			this.game = game;
 			this.messageCache = new Message( null, text ).put( "game", game );
 		}
-		
-		
 	}
 	
 	private static Plugin plugin = Bomberman.instance;
@@ -44,8 +44,11 @@ public class DynamicSigns {
 			
 			@Override
 			public void run() {
+				List<DynamicSign> deleteBuffer = new ArrayList<DynamicSigns.DynamicSign>();
+				
 				for ( HashMap<Integer, DynamicSign> lines : signs.values() ) {
 					for ( DynamicSign sign : lines.values() ) {
+						
 						// ensure the block is still a sign
 						BlockLocation l = sign.loc;
 						BlockState state = l.getBlock().getState();
@@ -53,14 +56,24 @@ public class DynamicSigns {
 						if ( state instanceof Sign )
 							signState = (Sign)state;
 						else {
-							disable( l, sign.line );
-							return;
+							deleteBuffer.add( sign );
+							continue;
+						}
+						
+						// ensure the game hasn't been destroyed
+						if ( sign.game.destroyed ) {
+							deleteBuffer.add( sign );
+							continue;
 						}
 						
 						// update the sign's text
 						signState.setLine( sign.line, sign.messageCache.toString() );
 						signState.update();
 					}
+				}
+				
+				for ( DynamicSign sign : deleteBuffer ) {
+					disable( sign.loc, sign.line );
 				}
 			}
 		}, 20, 20 );
@@ -127,12 +140,14 @@ public class DynamicSigns {
 				World world = plugin.getServer().getWorld( save.getString( "world" ) );
 				BlockLocation l = BlockLocation.getLocation( world, x, y, z );
 				String text = save.getString( "text" );
-				String gameName = save.getString( "game" );
-				Game game = Game.findGame( gameName );
 				int line = save.getInt( "line" );
 				
-				DynamicSign sign = new DynamicSign( l, line, text, game );
-				enable( sign );
+				String gameName = save.getString( "game" );
+				Game game = Game.findGame( gameName );
+				if ( game != null ) {	
+					DynamicSign sign = new DynamicSign( l, line, text, game );
+					enable( sign );
+				}
 				
 				file.delete();
 			} catch( Exception e ) {
