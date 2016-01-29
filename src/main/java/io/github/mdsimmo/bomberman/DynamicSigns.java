@@ -80,12 +80,20 @@ public class DynamicSigns {
 	}
 	
 	public static boolean disable( BlockLocation l, int line ) {
+		// remove any text on the sign first
+		BlockState state = l.getBlock().getState();
+		if ( state instanceof Sign ) {
+			( (Sign)state ).setLine( line, "" );
+			state.update();
+		}
+		
+		// remove the dynamic sign
 		HashMap<Integer, DynamicSign> lines = signs.get( l );
 		if ( lines == null )
 			return false;
 		boolean removed = lines.remove( line ) != null;
 		if ( lines.size() == 0 )
-			signs.remove( l );
+			signs.remove( l );		
 		return removed;
 	}
 	
@@ -94,6 +102,13 @@ public class DynamicSigns {
 	}
 	
 	public static void enable( DynamicSign sign ) {
+		// if the text is "[delete]", then remove the sign
+		System.out.println( "'" + sign.text + "'" );
+		if ( sign.text.equalsIgnoreCase( "[delete]" ) ) {
+			disable( sign.loc, sign.line  );
+			return;
+		}
+		
 		HashMap<Integer, DynamicSign> lines = signs.get( sign.loc );
 		if ( lines == null )
 			signs.put( sign.loc, lines = new HashMap<Integer, DynamicSigns.DynamicSign>( 2 ) );
