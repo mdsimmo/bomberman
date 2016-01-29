@@ -464,10 +464,20 @@ public enum Text implements Phrase {
 	SIGN_REMOVE_SUCCESS ( "command.signs.remove.success" ),
 	SIGN_REMOVE_NO_COMMANDS ( "command.signs.remove.no-commands" ),
 			
+	SIGN_DYNAMIC_NAME ( "command.signs.dynamic.name" ),
+	SIGN_DYNAMIC_DESCRIPTION ( "command.signs.dynamic.description" ),
+	SIGN_DYNAMIC_USAGE ( "command.signs.dynamic.usage" ),
+	SIGN_DYNAMIC_EXAMPLE ( "command.signs.dynamic.example" ),
+	SIGN_DYNAMIC_EXTRA ( "command.signs.dynamic.extra" ),
+	SIGN_DYNAMIC_PROMT_CLICK ( "command.signs.dynamic.prompt-click" ),
+	SIGN_DYNAMIC_SUCCESS ( "command.signs.dynamic.success" ),
+	SIGN_DYNAMIC_ERROR ( "command.signs.dynamic.error" ),
+	SIGN_DYNAMIC_NOT_SIGN ( "command.signs.dynamic.not-sign" ),
+	
 	SET_HEALTH_NAME ( "command.sethealth.name" ),
 	SET_HEALTH_DESCRIPTION ( "command.sethealth.description" ),
 	SET_HEALTH_USAGE ( "command.sethealth.usage" ),
-	SET_HEALTH_EXAMPLE ( "command.signs.remove.example" ),
+	SET_HEALTH_EXAMPLE ( "command.sethealth.example" ),
 	SET_HEALTH_EXTRA ( "command.sethealth.extra" );
 
 	private final String path;

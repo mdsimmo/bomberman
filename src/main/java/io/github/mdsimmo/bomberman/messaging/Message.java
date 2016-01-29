@@ -63,10 +63,12 @@ public class Message implements Formattable {
 		try {
 			return expand( text );
 		} catch ( Exception e ) {
-			//Bomberman.instance.getLogger().warning( "Faulty message: " + text );
-			e.printStackTrace();
-			return ChatColor.RED + "Internal format error";
+			return ChatColor.RED + "Formatting error!";
 		}
+	}
+	
+	public void validate() {
+		expand( text );
 	}
 
 	private String expand( String text ) {

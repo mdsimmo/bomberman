@@ -804,10 +804,27 @@ command:
       # There were no commands on this block
       # {block}: the block there were no commands on
       no-commands: No commands found on this block
+    # Messages relating to '/bm sign dynamic'
+    dynamic:
+      name: dynamic
+      description: Makes a line of text dynamicly update its text with info about a game
+      usage: /{command|path} <game> <line> <dynamic message>
+      example: '/{command|path} mygame 2 {game|players} joined'
+      extra: 'Destroy the sign to remove dynamic updating'
+      # Message to ask the player for sign to make dynamic
+      prompt-click: Right click the sign to make dynamic
+      # Sign was successfully made dynamic
+      success: Sign is now dynamic
+      # User clicked on something that was not a sign. The action gets cancelled 
+      not-sign: You must click on a sign. Action cancelled
+      # Format error
+      # {error}: the error that caused the problem (in english only)
+      error: 'Invalid message: {Red|{error}}'
   # Messages relating to '/bm resethealth'.
   # Note: this command is a hacky quick fix bug and will be removed when the bug is fixed
   sethealth:
     name: resethealth
     description: Resets the players health to the default health forever
     usage: /{command|path} <player> [health]
+    example: ''
     extra: "This command is here due to a bug where bomberman doesn't reset a players health to the normal 20. If this happens to you, just run this command."

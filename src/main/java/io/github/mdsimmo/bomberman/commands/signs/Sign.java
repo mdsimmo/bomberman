@@ -16,7 +16,7 @@ public class Sign extends CommandGroup {
 	@Override
 	public void setChildren() {
 		addChildren( 
-				new Add( this ), new Remove( this ) );
+				new Add( this ), new Remove( this ), new Dynamic( this ) );
 	}
 
 	@Override

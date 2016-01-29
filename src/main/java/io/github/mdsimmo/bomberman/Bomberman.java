@@ -35,6 +35,7 @@ public class Bomberman extends JavaPlugin {
 		new BaseCommand();
 		Game.loadGames();
 		CommandSign.load();
+		DynamicSigns.load();
 		SignHandler.load();
 		
 		// make sure the default language is enabled
@@ -50,6 +51,7 @@ public class Bomberman extends JavaPlugin {
 	@Override
 	public void onDisable() {
 		CommandSign.save();
+		DynamicSigns.save();
 		for (String game : Game.allGames()) {
 			Game.findGame(game).stop();
 			Game.findGame(game).saveGame();
