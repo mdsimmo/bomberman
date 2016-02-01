@@ -1,11 +1,12 @@
 package io.github.mdsimmo.bomberman.messaging;
 
+import java.util.ArrayDeque;
 import java.util.ArrayList;
+import java.util.Deque;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.Stack;
 
 import org.bukkit.ChatColor;
 import org.bukkit.command.CommandSender;
@@ -14,7 +15,7 @@ import org.bukkit.inventory.ItemStack;
 public class Message implements Formattable {
 
 	private final String text;
-	private Stack<ChatColor> colors = new Stack<>();
+	private Deque<ChatColor> colors = new ArrayDeque<>( 2 );
 	private HashMap<String, Object> values = new HashMap<>();
 	private static final Equation equationExpander = new Equation();
 	private static final Switch switchExpander = new Switch();
@@ -25,6 +26,7 @@ public class Message implements Formattable {
 		values.put( "=", equationExpander );
 		values.put( "switch", switchExpander );
 		colors.push( ChatColor.RESET );
+		System.out.println( "Created: " + " " + colors );
 	}
 	
 	private Object get( String key ) {
@@ -113,8 +115,10 @@ public class Message implements Formattable {
 		String key = buffer.toString();
 		buffer.delete( 0, buffer.length() );
 		Object value = get( key );
-		if ( value instanceof ChatColor )
-			colors.push( (ChatColor)value );
+		if ( value instanceof ChatColor ) {
+			colors.addLast( (ChatColor)value );
+			System.out.println( "Pushed: " + " " + colors );
+		}
 
 		List<String> args = new ArrayList<String>();
 		if ( text.charAt( i ) != '}' ) {
@@ -164,8 +168,41 @@ public class Message implements Formattable {
 		if ( obj instanceof ChatColor ) {
 			if ( args.size() != 1 )
 				throw new RuntimeException( "Colors must have exactly one argument" );
-			colors.pop();
-			return obj.toString() + args.get( 0 ) + colors.peek();
+			ChatColor color = colors.removeLast(); // == obj;
+			
+			String startText; // colors/formats before message
+			String endText;   // colors/formats after message
+			
+			String formats = ""; // the formats that were applied
+			ChatColor lastColor = ChatColor.RESET; // the previous color
+			for ( ChatColor c : colors ) {
+				if ( c.isColor() )
+					lastColor = c;
+				if ( c.isFormat() )
+					formats += c;
+			}
+			
+			if ( color.isFormat() ) {
+				// formats will keep things before it active. So start is simple
+				startText = color.toString();
+				// to remove a format, we need to reset and re-do everything else
+				endText = lastColor + formats;
+			} else if ( color.isColor() ) {
+				// colors destroy format codes so we need to re apply them
+				startText = color + formats;
+				
+				// to end, we switch across to the previous color and re-apply formats
+				endText = lastColor + formats;
+			} else {
+				// color = Color.RESET
+				
+				// override everything
+				startText = ChatColor.RESET.toString();
+				
+				// re-apply everything
+				endText = lastColor + formats;
+			}
+			return startText + args.get( 0 ) + endText;
 		}
 		if ( obj instanceof CommandSender )
 			return new SenderWrapper( (CommandSender)obj ).format( this, args );
@@ -180,7 +217,7 @@ public class Message implements Formattable {
 
 	@Override
 	public String format( Message message, List<String> args ) {
-		colors.push( message.colors.peek() );
+		colors.addAll( message.colors );
 		return this.toString();
 	}
 }
