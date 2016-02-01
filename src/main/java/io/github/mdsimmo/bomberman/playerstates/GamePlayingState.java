@@ -1,8 +1,5 @@
 package io.github.mdsimmo.bomberman.playerstates;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import io.github.mdsimmo.bomberman.BlockRep;
 import io.github.mdsimmo.bomberman.Bomb;
 import io.github.mdsimmo.bomberman.Game;
@@ -12,6 +9,9 @@ import io.github.mdsimmo.bomberman.PlayerRep;
 import io.github.mdsimmo.bomberman.messaging.Chat;
 import io.github.mdsimmo.bomberman.messaging.Message;
 import io.github.mdsimmo.bomberman.messaging.Text;
+
+import java.util.HashMap;
+import java.util.Map;
 
 import org.bukkit.DyeColor;
 import org.bukkit.GameMode;
@@ -369,7 +369,7 @@ public class GamePlayingState extends PlayerState implements Listener {
 		if ( dead )
 			kill();
 	}
-
+	
 	private class Immunity implements Runnable {
 
 		public Immunity() {
@@ -381,6 +381,9 @@ public class GamePlayingState extends PlayerState implements Listener {
 		@Override
 		public void run() {
 			immunity--;
+			// remove the fire
+			if ( immunity == 0 )
+				player.setFireTicks( 0 );
 		}
 	}
 }
