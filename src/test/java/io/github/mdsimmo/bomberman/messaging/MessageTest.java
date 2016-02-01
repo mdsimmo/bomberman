@@ -23,10 +23,8 @@ public class MessageTest {
 	
 	@Test
 	public void imbeddedColorsHandled() {
-		System.out.println( "Starting embeded" );
 		Message message = new Message( null, "{green|hello, {yellow|fred}.} You Stink" );
 		assertEquals( ChatColor.GREEN +  "hello, " + ChatColor.YELLOW + "fred" + ChatColor.GREEN + "." + ChatColor.RESET + " You Stink", message.toString() );
-		System.out.println( "Finished embeded" );
 	}
 	
 	@Test

@@ -26,7 +26,6 @@ public class Message implements Formattable {
 		values.put( "=", equationExpander );
 		values.put( "switch", switchExpander );
 		colors.push( ChatColor.RESET );
-		System.out.println( "Created: " + " " + colors );
 	}
 	
 	private Object get( String key ) {
@@ -117,7 +116,6 @@ public class Message implements Formattable {
 		Object value = get( key );
 		if ( value instanceof ChatColor ) {
 			colors.addLast( (ChatColor)value );
-			System.out.println( "Pushed: " + " " + colors );
 		}
 
 		List<String> args = new ArrayList<String>();
