@@ -103,7 +103,6 @@ public class DynamicSigns {
 	
 	public static void enable( DynamicSign sign ) {
 		// if the text is "[delete]", then remove the sign
-		System.out.println( "'" + sign.text + "'" );
 		if ( sign.text.equalsIgnoreCase( "[delete]" ) ) {
 			disable( sign.loc, sign.line  );
 			return;
