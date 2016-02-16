@@ -23,7 +23,7 @@ public final class ItemPayment implements Payment {
      * Creates a payment from a collection of items. The passed collection is
      * cloned before being used
      *
-     * @param items the items to create the collection from
+     * @param item the items to create the collection from
      * @return the created payment
      * @throws NullPointerException if any ItemStack is null
      */
@@ -93,7 +93,7 @@ public final class ItemPayment implements Payment {
     }
 
     /**
-     * Creates a deep clone of {@link #stacks}. Cloning all the items is needed as adding/removing stacks
+     * Creates a deep clone of {@link #stack}. Cloning all the items is needed as adding/removing stacks
      * to/from players can alter the stacks amount if the item stacks don't fit completely
      *
      * @return the cloned items stacks

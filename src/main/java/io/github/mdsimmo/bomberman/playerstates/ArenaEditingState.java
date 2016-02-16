@@ -20,13 +20,13 @@ import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.util.Vector;
 
-public class ArenaEdittingState extends PlayerState implements Listener {
+public class ArenaEditingState extends PlayerState implements Listener {
 
 	private final Game game;
 	private LinkedHashMap<Block, BlockRep> changes;
 	private boolean finished;
 
-	public ArenaEdittingState( PlayerRep rep ) {
+	public ArenaEditingState( PlayerRep rep ) {
 		super( rep );
 		this.game = rep.getActiveGame();
 	}

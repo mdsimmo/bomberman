@@ -7,7 +7,7 @@ import io.github.mdsimmo.bomberman.commands.Cmd;
 import io.github.mdsimmo.bomberman.messaging.Chat;
 import io.github.mdsimmo.bomberman.messaging.Message;
 import io.github.mdsimmo.bomberman.messaging.Text;
-import io.github.mdsimmo.bomberman.playerstates.ArenaEdittingState;
+import io.github.mdsimmo.bomberman.playerstates.ArenaEditingState;
 import io.github.mdsimmo.bomberman.utils.BlockLocation;
 
 import java.util.List;
@@ -79,8 +79,8 @@ public class Remove extends Cmd {
 				Chat.sendMessage( getMessage( Text.SIGN_REMOVE_NO_COMMANDS, player ).put( "block", b ) );
 			}
 			PlayerRep rep = PlayerRep.getPlayerRep( e.getPlayer() );
-			if ( rep.getState() instanceof ArenaEdittingState ) {
-				ArenaEdittingState state = (ArenaEdittingState)rep.getState();
+			if ( rep.getState() instanceof ArenaEditingState ) {
+				ArenaEditingState state = (ArenaEditingState)rep.getState();
 				state.update( e.getClickedBlock() );
 			}
 			HandlerList.unregisterAll( this );

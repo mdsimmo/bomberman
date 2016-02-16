@@ -7,7 +7,7 @@ import io.github.mdsimmo.bomberman.commands.Cmd;
 import io.github.mdsimmo.bomberman.messaging.Chat;
 import io.github.mdsimmo.bomberman.messaging.Message;
 import io.github.mdsimmo.bomberman.messaging.Text;
-import io.github.mdsimmo.bomberman.playerstates.ArenaEdittingState;
+import io.github.mdsimmo.bomberman.playerstates.ArenaEditingState;
 import io.github.mdsimmo.bomberman.playerstates.PlayerState;
 import io.github.mdsimmo.bomberman.utils.Utils;
 
@@ -34,7 +34,7 @@ public class EditArena extends Cmd {
 			return null;
 		PlayerRep rep = PlayerRep.getPlayerRep( (Player)sender );
 		if ( args.size() == 1 ) {
-			if ( rep.getState() instanceof ArenaEdittingState ) {
+			if ( rep.getState() instanceof ArenaEditingState ) {
 				List<String> list = new ArrayList<>();
 				list.add( getMessage( Text.EDIT_SAVE, sender ).toString() );
 				list.add( getMessage( Text.EDIT_DISCARD, sender ).toString() );
@@ -61,8 +61,8 @@ public class EditArena extends Cmd {
 		PlayerRep rep = PlayerRep.getPlayerRep( player );
 		PlayerState state = rep.getState();
 		Game game;
-		if ( state instanceof ArenaEdittingState )
-			game = ( (ArenaEdittingState)state ).getGame();
+		if ( state instanceof ArenaEditingState )
+			game = ( (ArenaEditingState)state ).getGame();
 		else
 			game = rep.getActiveGame();
 		Board board = null;
@@ -74,11 +74,11 @@ public class EditArena extends Cmd {
 			if ( game == null ) {
 				Chat.sendMessage( getMessage( Text.SPECIFY_GAME, sender ) );
 			} else {
-				if (rep.switchStates( new ArenaEdittingState( rep ) ) ) {
+				if (rep.switchStates( new ArenaEditingState( rep ) ) ) {
 					Chat.sendMessage( getMessage( Text.EDIT_STARTED, sender ).put(
 							"game", game ).put( "arena", board ) );
 				} else {
-					if ( state instanceof ArenaEdittingState ) {
+					if ( state instanceof ArenaEditingState ) {
 						Chat.sendMessage( getMessage( Text.EDIT_ALREADY_STARTED, sender )
 								.put( "game", game ).put( "arena", board ) );
 					} else {
@@ -101,9 +101,9 @@ public class EditArena extends Cmd {
 				return run( sender, args );
 			}
 			
-			ArenaEdittingState editState = null;
-			if ( state instanceof ArenaEdittingState ) {
-				editState = (ArenaEdittingState)state;
+			ArenaEditingState editState = null;
+			if ( state instanceof ArenaEditingState ) {
+				editState = (ArenaEditingState)state;
 			} else {
 				Chat.sendMessage( getMessage( Text.EDIT_PROMPT_START, sender )
 						.put( "game", game ).put( "arena", board ) );

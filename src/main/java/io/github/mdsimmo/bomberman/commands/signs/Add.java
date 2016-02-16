@@ -7,7 +7,7 @@ import io.github.mdsimmo.bomberman.commands.Cmd;
 import io.github.mdsimmo.bomberman.messaging.Chat;
 import io.github.mdsimmo.bomberman.messaging.Message;
 import io.github.mdsimmo.bomberman.messaging.Text;
-import io.github.mdsimmo.bomberman.playerstates.ArenaEdittingState;
+import io.github.mdsimmo.bomberman.playerstates.ArenaEditingState;
 import io.github.mdsimmo.bomberman.utils.BlockLocation;
 import io.github.mdsimmo.bomberman.utils.Utils;
 
@@ -82,8 +82,8 @@ public class Add extends Cmd {
 			if (command.charAt( 0 ) == '\\' || command.charAt( 0 ) == '/' )
 				command = command.substring( 1 );
 			PlayerRep rep = PlayerRep.getPlayerRep( e.getPlayer() );
-			if ( rep.getState() instanceof ArenaEdittingState ) {
-				ArenaEdittingState state = (ArenaEdittingState)rep.getState();
+			if ( rep.getState() instanceof ArenaEditingState ) {
+				ArenaEditingState state = (ArenaEditingState)rep.getState();
 				state.update( e.getClickedBlock() );
 			}
 			CommandSign.addCommand( BlockLocation.getLocation( b ), command );
