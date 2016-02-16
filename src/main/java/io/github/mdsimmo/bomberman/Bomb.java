@@ -69,21 +69,17 @@ public class Bomb implements Runnable {
 		/**
 		 * creates a line of fire in the given x, z direction;
 		 * 
-		 * @param x
+		 * @param xstep
 		 *            the unit to step in the x direction
-		 * @param z
+		 * @param zstep
 		 *            the unit to step in the z direction
 		 */
-		private void createFire( int x, int z ) {
-			boolean stoppedAbove = false, stoppedBelow = false;
+		private void createFire( int xstep, int zstep ) {
 			for ( int i = 0; i <= strength; i++ ) {
-				if ( !stoppedAbove )
-					stoppedAbove = createFire( i * x, 1, i * z );
-				if ( !stoppedBelow )
-					stoppedBelow = createFire( i * x, -1, i * z );
-				if ( createFire( i * x, 0, i * z ) ) {
+				createFire( i * xstep, 1, i * zstep );
+				createFire( i * xstep, -1, i * zstep );
+				if ( createFire( i * xstep, 0, i * zstep ) )
 					return;
-				}
 			}
 		}
 
