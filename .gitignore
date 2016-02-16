@@ -1,7 +1,11 @@
 /target/*
 /target
-/dependency-reduced-pom.xml
-/.settings
-/.settings/*
-.classpath
-.project
+/build/*
+/build
+/.gradle
+/.gradle/*
+.idea
+.idea/*
+*.iml
+*.ipr
+*.iws

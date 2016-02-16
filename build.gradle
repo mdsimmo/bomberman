@@ -1,0 +1,84 @@
+apply plugin: 'java'
+apply plugin: 'idea'
+
+sourceCompatibility = 1.7
+
+group = 'com.github.mdsimmo'
+version = '0.2.0'
+
+repositories {
+    mavenCentral()
+    jcenter()
+    maven {
+        // bukkits repo
+        url "https://hub.spigotmc.org/nexus/content/repositories/snapshots/"
+    }
+    maven {
+        // vaults repo
+        url "http://nexus.theyeticave.net/content/repositories/pub_releases"
+    }
+}
+
+configurations {
+    provided
+}
+
+sourceSets {
+    // make provided files available during compile
+    main.compileClasspath += configurations.provided
+    test.compileClasspath += configurations.provided
+    test.runtimeClasspath += configurations.provided
+}
+
+dependencies {
+    provided "org.bukkit:bukkit:1.8.8-R0.1-SNAPSHOT"
+    provided "net.milkbowl.vault:VaultAPI:1.5"
+    compile "net.objecthunter:exp4j:0.4.5"
+    testCompile "junit:junit:4.+"
+    testCompile "org.mockito:mockito-core:1.+"
+}
+
+processResources  {
+    // auto assign values in the plugin.yml
+    filter {
+        line ->
+            line
+                .replace('${name}', project.name)
+                .replace('${version}', project.version)
+    }
+}
+
+task clearOldPluginJar( type: Delete ) {
+    description 'Deletes any old bomberman plugins from the server'
+    if ( project.hasProperty("serverLocation" ) ) {
+        delete project.fileTree( "$serverLocation/plugins" ) {
+            include '*omberman*.jar'
+        }
+    }
+}
+
+task copyToServer(type: Copy, dependsOn: clearOldPluginJar ) {
+    description 'Copies the plugin to the server'
+    if ( project.hasProperty("serverLocation" ) ) {
+        from jar
+        into "$serverLocation/plugins"
+    }
+}
+
+task install( dependsOn: [build, copyToServer] ) {
+    description 'Compiles, tests and copies the code to the server'
+}
+
+idea {
+    module {
+        scopes.PROVIDED.plus += [ configurations.provided ]
+    }
+}
+
+jar {
+    from {
+        configurations.compile.collect {
+            it.isDirectory() ? it : zipTree(it)
+        }
+    }
+}
