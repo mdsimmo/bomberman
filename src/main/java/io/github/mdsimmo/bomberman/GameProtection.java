@@ -9,10 +9,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
-import org.bukkit.event.block.BlockBreakEvent;
-import org.bukkit.event.block.BlockBurnEvent;
-import org.bukkit.event.block.BlockIgniteEvent;
-import org.bukkit.event.block.BlockPlaceEvent;
+import org.bukkit.event.block.*;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityExplodeEvent;
@@ -45,7 +42,7 @@ public class GameProtection implements Listener {
 		if ( game.getProtected( Config.PROTECT_PLACING )
 				&& game.box.contains( e.getBlock().getLocation() )
 				&& !Permission.PROTECTION_VOID.isAllowedBy( e.getPlayer() )
-				&& PlayerRep.getPlayerRep( e.getPlayer() ).getState() instanceof GamePlayingState == false )
+				&& !(PlayerRep.getPlayerRep( e.getPlayer() ).getState() instanceof GamePlayingState) )
 			e.setCancelled( true );
 	}
 
@@ -72,6 +69,14 @@ public class GameProtection implements Listener {
 					e.setCancelled( true );
 			}
 		}
+	}
+
+	@EventHandler
+	public void onFireSpread( BlockSpreadEvent e ) {
+		if ( e.isCancelled() )
+			return;
+		if ( game.state == State.PLAYING && game.box.contains( e.getBlock().getLocation() ) )
+			e.setCancelled( true );
 	}
 
 	@EventHandler( priority = EventPriority.LOWEST )
