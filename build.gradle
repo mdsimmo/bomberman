@@ -3,8 +3,8 @@ apply plugin: 'idea'
 
 sourceCompatibility = 1.7
 
-group = 'com.github.mdsimmo'
-version = '0.2.0'
+group = 'io.github.mdsimmo'
+version = '0.2.3'
 
 repositories {
     mavenCentral()
@@ -31,7 +31,7 @@ sourceSets {
 }
 
 dependencies {
-    provided "org.bukkit:bukkit:1.8.8-R0.1-SNAPSHOT"
+    provided "org.bukkit:bukkit:1.9-R0.1-SNAPSHOT"
     provided "net.milkbowl.vault:VaultAPI:1.5"
     compile "net.objecthunter:exp4j:0.4.5"
     testCompile "junit:junit:4.+"

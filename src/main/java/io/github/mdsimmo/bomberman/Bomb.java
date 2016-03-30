@@ -51,7 +51,7 @@ public class Bomb implements Runnable {
 			plugin.getServer().getPluginManager().registerEvents( this, plugin );
 			plugin.getServer().getScheduler()
 					.scheduleSyncDelayedTask( plugin, this, 20 );
-			spawn.getWorld().playSound( spawn, Sound.EXPLODE, 1,
+			spawn.getWorld().playSound( spawn, Sound.ENTITY_GENERIC_EXPLODE, 1,
 					(float)Math.random() + 0.5f );
 			createFire();
 		}
