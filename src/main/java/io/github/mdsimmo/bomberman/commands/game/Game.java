@@ -2,7 +2,6 @@ package io.github.mdsimmo.bomberman.commands.game;
 
 import io.github.mdsimmo.bomberman.commands.Cmd;
 import io.github.mdsimmo.bomberman.commands.CommandGroup;
-import io.github.mdsimmo.bomberman.commands.game.force.Force;
 import io.github.mdsimmo.bomberman.commands.game.set.Set;
 import io.github.mdsimmo.bomberman.messaging.Message;
 import io.github.mdsimmo.bomberman.messaging.Text;
@@ -18,8 +17,10 @@ public class Game extends CommandGroup {
 	@Override
 	public void setChildren() {
 		addChildren(
+				new Start(this),
+				new Stop(this),
+				new Reset(this),
 				new Set(this),
-				new Force(this),
 				new Create(this),
 				new Convert(this),
 				new Destroy(this),

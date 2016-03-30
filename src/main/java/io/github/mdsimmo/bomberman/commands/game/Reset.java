@@ -1,4 +1,4 @@
-package io.github.mdsimmo.bomberman.commands.game.force;
+package io.github.mdsimmo.bomberman.commands.game;
 
 import io.github.mdsimmo.bomberman.Game;
 import io.github.mdsimmo.bomberman.arenabuilder.ArenaGenerator;
