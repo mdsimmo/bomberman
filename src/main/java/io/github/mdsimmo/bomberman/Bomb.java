@@ -120,7 +120,7 @@ public class Bomb implements Runnable {
 		@Override
 		public void run() {
 			// check that the player is still playing
-			if ( rep.isPlaying() && ((GamePlayingState)rep.getState()).getGame() == game )
+			if ( rep.isPlaying() && rep.getState().getGame() == game )
 				rep.getPlayer().getInventory().addItem(
 						new ItemStack( game.getBombMaterial() ) );
 		}
@@ -157,7 +157,7 @@ public class Bomb implements Runnable {
 		public void run() {
 			for ( PlayerRep rep : new ArrayList<PlayerRep>( game.players ) ) {
 				if ( touching( rep.getPlayer() ) ) {
-					if ( rep.getState() instanceof GamePlayingState == false )
+					if (!(rep.getState() instanceof GamePlayingState))
 						return;
 					GamePlayingState state = (GamePlayingState)rep.getState();
 					state.damage( cause );
