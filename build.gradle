@@ -4,7 +4,7 @@ apply plugin: 'idea'
 sourceCompatibility = 1.7
 
 group = 'io.github.mdsimmo'
-version = '0.2.3'
+version = '0.3.0'
 
 repositories {
     mavenCentral()
@@ -44,7 +44,7 @@ processResources  {
         line ->
             line
                 .replace('${name}', project.name)
-                .replace('${version}', project.version)
+                .replace('${version}', version)
     }
 }
 
