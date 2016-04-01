@@ -467,7 +467,7 @@ public class Game implements Formattable {
 		autostart = Config.AUTOSTART.getValue( save );
 		autostartDelay = Config.AUTOSTART_DELAY.getValue( save );
 		drops = Config.DROPS_ITEMS.getValue( save );
-		dropChance = Config.DROPS_CHANCE.getValue( save );
+		dropChance = Config.DROPS_CHANCE.<Number>getValue( save ).doubleValue();
 		protection = Config.PROTECT.getValue( save );
 		protectBreak = Config.PROTECT_DESTROYING.getValue( save );
 		protectPlace = Config.PROTECT_PLACING.getValue( save );
