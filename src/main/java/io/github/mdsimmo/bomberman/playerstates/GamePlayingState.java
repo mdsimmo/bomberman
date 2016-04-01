@@ -18,6 +18,7 @@ import org.bukkit.GameMode;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
+import org.bukkit.entity.Item;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -33,7 +34,10 @@ import org.bukkit.event.player.PlayerItemConsumeEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.event.player.PlayerTeleportEvent;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.potion.Potion;
+import org.bukkit.inventory.PlayerInventory;
+import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.inventory.meta.PotionMeta;
+import org.bukkit.potion.PotionData;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionType;
 import org.bukkit.util.Vector;
@@ -163,8 +167,6 @@ public class GamePlayingState extends PlayerState implements Listener {
 
     /**
      * Kills the player and notifies the joined game
-     * 
-     * @return true if killed successfully
      */
     public void kill() {
         isPlaying = false;
@@ -222,40 +224,40 @@ public class GamePlayingState extends PlayerState implements Listener {
 
     // an attempt at making potion effects shorter
     @EventHandler( priority = EventPriority.LOWEST )
-    public void onPlayerDrinkPotion( PlayerItemConsumeEvent e ) {
+    public void onPlayerDrinkPotion(final PlayerItemConsumeEvent e ) {
         if ( e.isCancelled() || !enabled || e.getPlayer() != player )
             return;
 
-        if ( e.getItem().getType() == Material.POTION ) {
-            Potion potion = Potion.fromItemStack( e.getItem() );
-            if ( potion.getType() == PotionType.INSTANT_HEAL
-                    || potion.getType() == PotionType.INSTANT_DAMAGE ) {
+        e.getPlayer().getInventory().setItemInMainHand(null);
+        if ( e.getItem().getItemMeta() instanceof PotionMeta) {
+            PotionMeta potion = (PotionMeta)e.getItem().getItemMeta();
+            PotionData data = potion.getBasePotionData();
+            if ( data.getType() == PotionType.INSTANT_HEAL
+                    || data.getType() == PotionType.INSTANT_DAMAGE ) {
                 // instant potions don't need the duration changed
             } else {
                 e.setCancelled( true );
-                // hack to fix bug that creates a ghost bottle
-                plugin.getServer().getScheduler()
-                        .scheduleSyncDelayedTask( plugin, new Runnable() {
-                            @SuppressWarnings( "deprecation" )
-                            @Override
-                            public void run() {
-                                player.updateInventory();
-                            }
-                        } );
 
-                player.addPotionEffect( new PotionEffect( potion.getType()
-                        .getEffectType(), 20 * game.getPotionDuration(), 1 ),
-                        true );
+                player.addPotionEffect(
+                        new PotionEffect( data.getType().getEffectType(),
+                                20*game.getPotionDuration(), 1 ) );
+                // don't need to change custom effects since they are manually changeable
+                player.addPotionEffects(potion.getCustomEffects());
             }
 
-            // remove the bottle
+
             plugin.getServer().getScheduler()
-                    .scheduleSyncDelayedTask( plugin, new Runnable() {
+                    .scheduleSyncDelayedTask(plugin, new Runnable() {
                         @Override
-                        public void run() {
-                            player.setItemInHand( null );
+                        public void run(){
+                            ItemStack item = player.getInventory().getItemInMainHand();
+                            // hacky way to detect what hand was used
+                            if ( item.getItemMeta() instanceof PotionMeta || item.getType() == Material.GLASS_BOTTLE)
+                                player.getInventory().setItemInMainHand(null);
+                            else
+                                player.getInventory().setItemInOffHand(null);
                         }
-                    } );
+                    });
         }
     }
 
@@ -287,7 +289,7 @@ public class GamePlayingState extends PlayerState implements Listener {
     public void onPlayerDamaged( EntityDamageEvent e ) {
         if ( e.isCancelled() || !enabled )
             return;
-        if ( e.getEntity() instanceof Player && (Player)e.getEntity() == player ) {
+        if ( e.getEntity() instanceof Player && e.getEntity() == player ) {
             player.setFireTicks( 0 );
             e.setCancelled( true );
         }
