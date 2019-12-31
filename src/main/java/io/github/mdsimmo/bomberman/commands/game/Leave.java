@@ -1,11 +1,11 @@
 package io.github.mdsimmo.bomberman.commands.game;
 
-import io.github.mdsimmo.bomberman.PlayerRep;
+import io.github.mdsimmo.bomberman.game.GamePlayer;
 import io.github.mdsimmo.bomberman.commands.Cmd;
 import io.github.mdsimmo.bomberman.messaging.Chat;
 import io.github.mdsimmo.bomberman.messaging.Message;
 import io.github.mdsimmo.bomberman.messaging.Text;
-import io.github.mdsimmo.bomberman.playerstates.GamePlayingState;
+import io.github.mdsimmo.bomberman.game.playerstates.GamePlayingState;
 
 import java.util.List;
 
@@ -33,7 +33,7 @@ public class Leave extends Cmd {
 		if (args.size() != 0)
 			return false;
 		if (sender instanceof Player) {
-			PlayerRep rep = PlayerRep.getPlayerRep((Player) sender);
+			GamePlayer rep = GamePlayer.getPlayerRep((Player) sender);
 			if ( rep.getState() instanceof GamePlayingState ) {
 				GamePlayingState state = (GamePlayingState)rep.getState();
 				state.kill();

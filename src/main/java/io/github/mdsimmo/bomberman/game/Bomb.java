@@ -1,6 +1,7 @@
-package io.github.mdsimmo.bomberman;
+package io.github.mdsimmo.bomberman.game;
 
-import io.github.mdsimmo.bomberman.playerstates.GamePlayingState;
+import io.github.mdsimmo.bomberman.Bomberman;
+import io.github.mdsimmo.bomberman.game.playerstates.GamePlayingState;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -16,19 +17,19 @@ import org.bukkit.plugin.Plugin;
 
 public class Bomb implements Runnable {
 
-	private Plugin plugin = Bomberman.instance;
-	private PlayerRep rep;
-	private Block tnt;
-	private Location spawn;
-	private Game game;
-	private int strength;
-	private int eTaskId;
+	private final Plugin plugin = Bomberman.instance;
+	private final Game game;
+	private final GamePlayer player;
+	private final Block tnt;
+	private final Location spawn;
+	private final int strength;
+	private final int eTaskId;
 
-	public Bomb( Game game, PlayerRep rep, Block tnt ) {
+	public Bomb(Game game, GamePlayer player, Block tnt) {
 		this.game = game;
-		this.rep = rep;
+		this.player = player;
 		this.tnt = tnt;
-		strength = ((GamePlayingState)rep.getState()).bombStrength();
+		strength = player.bombStrength();
 		spawn = tnt.getLocation();
 		eTaskId = plugin.getServer().getScheduler()
 				.scheduleSyncDelayedTask( plugin, this, 60 );
@@ -40,9 +41,9 @@ public class Bomb implements Runnable {
 		new Explosion();
 	}
 
-	public class Explosion implements Listener, Runnable {
+	private static class Explosion implements Listener, Runnable {
 
-		public Explosion() {
+		public Explosion(Game game ) {
 			game.explosions.remove( tnt );
 			// avoid bombs going off after game has finished
 			if ( game.state != Game.State.PLAYING )
@@ -92,14 +93,14 @@ public class Bomb implements Runnable {
 			Block b = l.getBlock();
 
 			// destroy dirt (or other blocks that can be blown up)
-			if ( game.board.isDestructable( b.getType() ) ) {
-				new DeathBlock( b, rep );
+			if ( game.getArena().isDestructable( b.getType() ) ) {
+				new DeathBlock( b, player);
 				return true;
 			}
 
 			// create fire on non solid blocks
 			if ( !b.getType().isSolid() ) {
-				new DeathBlock( b, rep );
+				new DeathBlock( b, player);
 				return false;
 			}
 
@@ -120,22 +121,22 @@ public class Bomb implements Runnable {
 		@Override
 		public void run() {
 			// check that the player is still playing
-			if ( rep.isPlaying() && rep.getState().getGame() == game )
-				rep.getPlayer().getInventory().addItem(
+			if ( player.isPlaying() && player.getState().getGame() == game )
+				player.getPlayer().getInventory().addItem(
 						new ItemStack( game.getBombMaterial() ) );
 		}
 
 	}
 
-	public class DeathBlock implements Runnable {
+	static class DeathBlock implements Runnable {
 
-		public PlayerRep cause;
+		private GamePlayer cause;
 		private Block block;
 		private int duration = 20;
 		private int dbTaskId;
 		private Material original;
 
-		public DeathBlock( Block block, PlayerRep cause ) {
+		DeathBlock(Block block, GamePlayer cause) {
 			this.block = block;
 			this.cause = cause;
 
@@ -155,8 +156,8 @@ public class Bomb implements Runnable {
 
 		@Override
 		public void run() {
-			for ( PlayerRep rep : new ArrayList<PlayerRep>( game.players ) ) {
-				if ( touching( rep.getPlayer() ) ) {
+			for ( GamePlayer player : new ArrayList<>( game.players ) ) {
+				if ( touching( player.getPlayer() ) ) {
 					if (!(rep.getState() instanceof GamePlayingState))
 						return;
 					GamePlayingState state = (GamePlayingState)rep.getState();
@@ -172,21 +173,18 @@ public class Bomb implements Runnable {
 			}
 		}
 
-		public boolean touching( Player player ) {
+		private boolean touching(Player player) {
 			double margin = 0.295; // magical value that seems to be how far
 									// fire burns
 			Location l = player.getLocation();
 			Location min = block.getLocation().add( 0, -1, 0 );
 			Location max = block.getLocation().add( 1, 2, 1 );
-			if ( l.getX() >= min.getX() - margin
+			return l.getX() >= min.getX() - margin
 					&& l.getX() <= max.getX() + margin
 					&& l.getY() >= min.getY() - margin
 					&& l.getY() <= max.getY() + margin
 					&& l.getZ() >= min.getZ() - margin
-					&& l.getZ() <= max.getZ() + margin )
-				return true;
-			else
-				return false;
+					&& l.getZ() <= max.getZ() + margin;
 
 		}
 	}

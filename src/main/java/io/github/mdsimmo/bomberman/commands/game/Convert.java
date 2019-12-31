@@ -1,11 +1,11 @@
 package io.github.mdsimmo.bomberman.commands.game;
 
-import io.github.mdsimmo.bomberman.Board;
+import io.github.mdsimmo.bomberman.arena.ArenaTemplate;
 import io.github.mdsimmo.bomberman.Config;
-import io.github.mdsimmo.bomberman.Game;
-import io.github.mdsimmo.bomberman.PlayerRep;
-import io.github.mdsimmo.bomberman.arenabuilder.ArenaDetector.BoundingListener;
-import io.github.mdsimmo.bomberman.arenabuilder.ArenaGenerator;
+import io.github.mdsimmo.bomberman.game.Game;
+import io.github.mdsimmo.bomberman.game.GamePlayer;
+import io.github.mdsimmo.bomberman.arena.ArenaDetector.BoundingListener;
+import io.github.mdsimmo.bomberman.arena.ArenaGenerator;
 import io.github.mdsimmo.bomberman.commands.Cmd;
 import io.github.mdsimmo.bomberman.messaging.Chat;
 import io.github.mdsimmo.bomberman.messaging.Message;
@@ -87,17 +87,17 @@ public class Convert extends Cmd {
 				return;
 			}
 
-			Board board = ArenaGenerator.createArena( name + ".old", box );
+			ArenaTemplate arena = ArenaGenerator.createArena( name + ".old", box );
 			if ( box.xSize < 2 && box.ySize < 2 && box.zSize < 2 ) {
 				Chat.sendMessage( getMessage( Text.ARENA_CREATE_VERY_SMALL,
-						sender ).put( "arena", board ) );
+						sender ).put( "arena", arena) );
 			}
-			ArenaGenerator.saveBoard( board );
+			ArenaGenerator.saveBoard(arena);
 			Game game = new Game( name, box );
-			game.board = board;
-			game.oldBoard = board;
+			game.setArena(arena);
+			game.oldArena = arena;
 			Game.register( game );
-			PlayerRep.getPlayerRep( (Player)sender ).setActiveGame( game );
+			GamePlayer.getPlayerRep( (Player)sender ).setActiveGame( game );
 			Message message = getMessage( Text.CONVERT_SUCCESS, sender );
 			message.put( "game", game );
 			Chat.sendMessage( message );

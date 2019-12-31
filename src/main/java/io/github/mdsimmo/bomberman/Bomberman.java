@@ -1,19 +1,16 @@
 package io.github.mdsimmo.bomberman;
 
-import io.github.mdsimmo.bomberman.arenabuilder.ArenaGenerator;
+import io.github.mdsimmo.bomberman.arena.ArenaGenerator;
 import io.github.mdsimmo.bomberman.commands.BaseCommand;
+import io.github.mdsimmo.bomberman.game.Game;
 import io.github.mdsimmo.bomberman.messaging.Language;
-import io.github.mdsimmo.bomberman.prizes.EmptyPayment;
-import io.github.mdsimmo.bomberman.prizes.ItemPayment;
-import io.github.mdsimmo.bomberman.prizes.PotPayment;
-import io.github.mdsimmo.bomberman.prizes.VaultPayment;
-import io.github.mdsimmo.bomberman.prizes.XpPayment;
+import io.github.mdsimmo.bomberman.prizes.*;
 import io.github.mdsimmo.bomberman.save.BoardSaver;
-
 import org.bukkit.configuration.serialization.ConfigurationSerialization;
+import org.bukkit.event.Listener;
 import org.bukkit.plugin.java.JavaPlugin;
 
-public class Bomberman extends JavaPlugin {
+public class Bomberman extends JavaPlugin implements Listener {
 	
 	public static Bomberman instance;
 	
@@ -26,7 +23,7 @@ public class Bomberman extends JavaPlugin {
 		ConfigurationSerialization.registerClass( EmptyPayment.class );
 		ConfigurationSerialization.registerClass( XpPayment.class );
 		ConfigurationSerialization.registerClass( PotPayment.class );
-		ConfigurationSerialization.registerClass( VaultPayment.class );
+		ConfigurationSerialization.registerClass(VaultPayment.class );
 
 		
 		getDataFolder().mkdirs();

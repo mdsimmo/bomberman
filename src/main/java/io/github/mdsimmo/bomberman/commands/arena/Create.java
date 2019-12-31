@@ -1,10 +1,10 @@
 package io.github.mdsimmo.bomberman.commands.arena;
 
-import io.github.mdsimmo.bomberman.Board;
+import io.github.mdsimmo.bomberman.arena.ArenaTemplate;
 import io.github.mdsimmo.bomberman.Config;
-import io.github.mdsimmo.bomberman.Game;
-import io.github.mdsimmo.bomberman.arenabuilder.ArenaDetector.BoundingListener;
-import io.github.mdsimmo.bomberman.arenabuilder.ArenaGenerator;
+import io.github.mdsimmo.bomberman.game.Game;
+import io.github.mdsimmo.bomberman.arena.ArenaDetector.BoundingListener;
+import io.github.mdsimmo.bomberman.arena.ArenaGenerator;
 import io.github.mdsimmo.bomberman.commands.Cmd;
 import io.github.mdsimmo.bomberman.messaging.Chat;
 import io.github.mdsimmo.bomberman.messaging.Message;
@@ -48,9 +48,9 @@ public class Create extends Cmd {
 		String name = args.get( 0 );
 		for ( String gameName : Game.allGames() ) { 
 			Game game = Game.findGame( gameName );
-			if ( game.board.name.equalsIgnoreCase( name ) ) {
+			if ( game.getArena().name.equalsIgnoreCase( name ) ) {
 				Message message = getMessage( Text.ARENA_CREATE_IN_USE, sender );
-				message.put( "game", game ).put( "arena", game.board );
+				message.put( "game", game ).put( "arena", game.getArena());
 				Chat.sendMessage( message );
 				return true;
 			}
@@ -87,14 +87,14 @@ public class Create extends Cmd {
 				return;
 			}
 
-			Board board = ArenaGenerator.createArena( name, box );
+			ArenaTemplate arena = ArenaGenerator.createArena( name, box );
 			if ( box.xSize < 2 && box.ySize < 2 && box.zSize < 2 ) {
 				Chat.sendMessage( getMessage( Text.ARENA_CREATE_VERY_SMALL,
-						sender ).put( "arena", board ) );
+						sender ).put( "arena", arena) );
 			}
-			ArenaGenerator.saveBoard( board );
+			ArenaGenerator.saveBoard(arena);
 			Chat.sendMessage( getMessage( Text.ARENA_CREATED, sender ).put(
-					"arena", board ) );
+					"arena", arena) );
 		}
 	}
 

@@ -1,10 +1,10 @@
 package io.github.mdsimmo.bomberman.commands.game.set;
 
-import io.github.mdsimmo.bomberman.Board;
-import io.github.mdsimmo.bomberman.Game;
-import io.github.mdsimmo.bomberman.Game.State;
-import io.github.mdsimmo.bomberman.arenabuilder.ArenaGenerator;
-import io.github.mdsimmo.bomberman.arenabuilder.ArenaGenerator.BuildListener;
+import io.github.mdsimmo.bomberman.arena.ArenaTemplate;
+import io.github.mdsimmo.bomberman.game.Game;
+import io.github.mdsimmo.bomberman.game.Game.State;
+import io.github.mdsimmo.bomberman.arena.ArenaGenerator;
+import io.github.mdsimmo.bomberman.arena.ArenaGenerator.BuildListener;
 import io.github.mdsimmo.bomberman.commands.Cmd;
 import io.github.mdsimmo.bomberman.commands.GameCommand;
 import io.github.mdsimmo.bomberman.messaging.Chat;
@@ -52,7 +52,7 @@ public class Arena extends GameCommand {
 			return true;
 		}
 
-		final Board newboard = ArenaGenerator
+		final ArenaTemplate newboard = ArenaGenerator
 				.loadBoard( args
 						.get( 0 ) );
 		if ( newboard == null ) {
@@ -64,17 +64,17 @@ public class Arena extends GameCommand {
 
 		game.stop();
 
-		final Board oldboard = game.board;
+		final ArenaTemplate oldboard = game.getArena();
 
 		BuildListener l = new BuildListener() {
 			@Override
 			public void onContructionComplete() {
-				game.board = newboard;
-				Box box = game.box;
+				game.setArena(newboard);
+				Box box = game.getBox();
 				box.xSize = newboard.xSize;
 				box.ySize = newboard.ySize;
 				box.zSize = newboard.zSize;
-				game.oldBoard = ArenaGenerator.createArena(	game.name + ".old", game.box );
+				game.oldArena = ArenaGenerator.createArena(	game.getName() + ".old", game.getBox());
 				BuildListener l2 = new BuildListener() {
 					@Override
 					public void onContructionComplete() {
@@ -86,10 +86,10 @@ public class Arena extends GameCommand {
 						Chat.sendMessage( message );
 					}
 				};
-				ArenaGenerator.switchBoard(	game.oldBoard, newboard, game.box, l2 );
+				ArenaGenerator.switchBoard(	game.oldArena, newboard, game.getBox(), l2 );
 			}
 		};
-		ArenaGenerator.switchBoard( game.board, game.oldBoard, game.box, l );
+		ArenaGenerator.switchBoard(game.getArena(), game.oldArena, game.getBox(), l );
 		Message message = getMessage(
 				Text.SETARENA_STARTED, sender )
 				.put( "game", game )

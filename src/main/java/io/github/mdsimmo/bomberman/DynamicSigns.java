@@ -1,5 +1,6 @@
 package io.github.mdsimmo.bomberman;
 
+import io.github.mdsimmo.bomberman.game.Game;
 import io.github.mdsimmo.bomberman.messaging.Message;
 import io.github.mdsimmo.bomberman.utils.BlockLocation;
 
@@ -127,7 +128,7 @@ public class DynamicSigns {
 				save.set( "z", l.z );
 				save.set( "line", sign.line );
 				save.set( "text", sign.text );
-				save.set( "game", sign.game.name );
+				save.set( "game", sign.game.getName());
 				File saveFile = new File( dir, "sign-" + id++ + ".dyn" );
 				try {
 					save.save( saveFile );

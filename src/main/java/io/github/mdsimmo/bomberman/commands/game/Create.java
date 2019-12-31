@@ -1,11 +1,11 @@
 package io.github.mdsimmo.bomberman.commands.game;
 
-import io.github.mdsimmo.bomberman.Board;
+import io.github.mdsimmo.bomberman.arena.ArenaTemplate;
 import io.github.mdsimmo.bomberman.Config;
-import io.github.mdsimmo.bomberman.Game;
-import io.github.mdsimmo.bomberman.PlayerRep;
-import io.github.mdsimmo.bomberman.arenabuilder.ArenaGenerator;
-import io.github.mdsimmo.bomberman.arenabuilder.ArenaGenerator.BuildListener;
+import io.github.mdsimmo.bomberman.game.Game;
+import io.github.mdsimmo.bomberman.game.GamePlayer;
+import io.github.mdsimmo.bomberman.arena.ArenaGenerator;
+import io.github.mdsimmo.bomberman.arena.ArenaGenerator.BuildListener;
 import io.github.mdsimmo.bomberman.commands.Cmd;
 import io.github.mdsimmo.bomberman.messaging.Chat;
 import io.github.mdsimmo.bomberman.messaging.Message;
@@ -51,7 +51,7 @@ public class Create extends Cmd {
 						getMessage( Text.CREATE_GAME_EXISTS, sender ).put(
 								"game", args.get( 0 ) ) );
 			} else {
-				Board arena;
+				ArenaTemplate arena;
 				if ( args.size() == 2 ) {
 					arena = ArenaGenerator.loadBoard( args.get( 1 ) );
 				} else {
@@ -75,7 +75,7 @@ public class Create extends Cmd {
 				Location l = ( (Player)sender ).getLocation().getBlock()
 						.getLocation();
 				Game game = createGame( args.get( 0 ), l, arena, sender );
-				PlayerRep.getPlayerRep( (Player)sender ).setActiveGame( game );
+				GamePlayer.getPlayerRep( (Player)sender ).setActiveGame( game );
 			}
 		} else {
 			Chat.sendMessage( getMessage( Text.MUST_BE_PLAYER, sender ) );
@@ -83,12 +83,12 @@ public class Create extends Cmd {
 		return true;
 	}
 
-	private Game createGame( String name, Location l, Board arena, final CommandSender sender ) {
+	private Game createGame(String name, Location l, ArenaTemplate arena, final CommandSender sender ) {
 		final Game game = new Game( name, new Box( l, arena.xSize, arena.ySize,
 				arena.zSize ) );
-		game.board = arena;
-		game.oldBoard = ArenaGenerator.createArena( name + ".old", game.box );
-		ArenaGenerator.switchBoard( game.oldBoard, game.board, game.box, new BuildListener() {
+		game.setArena(arena);
+		game.oldArena = ArenaGenerator.createArena( name + ".old", game.getBox());
+		ArenaGenerator.switchBoard( game.oldArena, game.getArena(), game.getBox(), new BuildListener() {
 			@Override
 			public void onContructionComplete() {
 				Message message = getMessage( Text.CREATE_SUCCESS, sender );

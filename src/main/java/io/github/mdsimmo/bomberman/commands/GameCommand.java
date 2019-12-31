@@ -1,7 +1,7 @@
 package io.github.mdsimmo.bomberman.commands;
 
-import io.github.mdsimmo.bomberman.Game;
-import io.github.mdsimmo.bomberman.PlayerRep;
+import io.github.mdsimmo.bomberman.game.Game;
+import io.github.mdsimmo.bomberman.game.GamePlayer;
 import io.github.mdsimmo.bomberman.messaging.Message;
 import io.github.mdsimmo.bomberman.messaging.Phrase;
 import io.github.mdsimmo.bomberman.utils.Utils;
@@ -29,7 +29,7 @@ public abstract class GameCommand extends Cmd {
         if ( args.size() <= 1 ) {
             List<String> list = new ArrayList<>( Game.allGames() );
             if ( sender instanceof Player
-                    && PlayerRep.getPlayerRep( (Player)sender ).getActiveGame() != null ) {
+                    && GamePlayer.getPlayerRep( (Player)sender ).getActiveGame() != null ) {
                 List<String> options = shortOptions( sender, args );
                 if ( options != null )
                     list.addAll( options );
@@ -51,12 +51,12 @@ public abstract class GameCommand extends Cmd {
             // game was specified so use that
             game = Game.findGame( args.get( 0 ) );
             if ( sender instanceof Player )
-                PlayerRep.getPlayerRep( (Player)sender ).setActiveGame( game );
+                GamePlayer.getPlayerRep( (Player)sender ).setActiveGame( game );
             args.remove( 0 );
         } else {
             // try to get the game from what the user last did
             if ( sender instanceof Player ) {
-                game = PlayerRep.getPlayerRep( (Player) sender ).getActiveGame( );
+                game = GamePlayer.getPlayerRep( (Player) sender ).getActiveGame( );
                 if ( game == null )
                     return false;
             } else

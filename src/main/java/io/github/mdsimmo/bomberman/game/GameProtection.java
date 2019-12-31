@@ -1,8 +1,10 @@
-package io.github.mdsimmo.bomberman;
+package io.github.mdsimmo.bomberman.game;
 
-import io.github.mdsimmo.bomberman.Game.State;
+import io.github.mdsimmo.bomberman.Bomberman;
+import io.github.mdsimmo.bomberman.Config;
+import io.github.mdsimmo.bomberman.game.Game.State;
 import io.github.mdsimmo.bomberman.commands.Cmd.Permission;
-import io.github.mdsimmo.bomberman.playerstates.GamePlayingState;
+import io.github.mdsimmo.bomberman.game.playerstates.GamePlayingState;
 
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
@@ -31,7 +33,7 @@ public class GameProtection implements Listener {
 	@EventHandler( priority = EventPriority.LOWEST )
 	public void onBlockBreak( BlockBreakEvent e ) {
 		if ( game.getProtected( Config.PROTECT_DESTROYING )
-				&& game.box.contains( e.getBlock().getLocation() )
+				&& game.getBox().contains( e.getBlock().getLocation() )
 				&& !Permission.PROTECTION_VOID.isAllowedBy( e.getPlayer() ) )
 			e.setCancelled( true );
 	}
@@ -40,15 +42,15 @@ public class GameProtection implements Listener {
 	public void onPlaceBlock( BlockPlaceEvent e ) {
 		// protect from players placing blocks
 		if ( game.getProtected( Config.PROTECT_PLACING )
-				&& game.box.contains( e.getBlock().getLocation() )
+				&& game.getBox().contains( e.getBlock().getLocation() )
 				&& !Permission.PROTECTION_VOID.isAllowedBy( e.getPlayer() )
-				&& !(PlayerRep.getPlayerRep( e.getPlayer() ).getState() instanceof GamePlayingState) )
+				&& !(GamePlayer.getPlayerRep( e.getPlayer() ).getState() instanceof GamePlayingState) )
 			e.setCancelled( true );
 	}
 
 	@EventHandler( priority = EventPriority.LOWEST )
 	public void onBlockCobust( BlockBurnEvent e ) {
-		if ( game.box.contains( e.getBlock().getLocation() ) ) {
+		if ( game.getBox().contains( e.getBlock().getLocation() ) ) {
 			if ( game.state == State.PLAYING )
 				e.setCancelled( true );
 			if ( game.getProtected( Config.PROTECT_FIRE ) ) {
@@ -59,7 +61,7 @@ public class GameProtection implements Listener {
 
 	@EventHandler( priority = EventPriority.LOWEST)
 	public void onBlockIgnite( BlockIgniteEvent e ) {
-		if ( game.box.contains( e.getBlock().getLocation() ) ) {
+		if ( game.getBox().contains( e.getBlock().getLocation() ) ) {
 			if ( game.state == State.PLAYING )
 				e.setCancelled( true );
 			if ( game.getProtected( Config.PROTECT_FIRE ) ) {
@@ -75,7 +77,7 @@ public class GameProtection implements Listener {
 	public void onFireSpread( BlockSpreadEvent e ) {
 		if ( e.isCancelled() )
 			return;
-		if ( game.state == State.PLAYING && game.box.contains( e.getBlock().getLocation() ) )
+		if ( game.state == State.PLAYING && game.getBox().contains( e.getBlock().getLocation() ) )
 			e.setCancelled( true );
 	}
 
@@ -86,7 +88,7 @@ public class GameProtection implements Listener {
 		Entity entity = e.getEntity();
 		if ( entity instanceof Player ) {
 			if ( game.getProtected( Config.PROTECT_DAMAGE ) ) {
-				if ( game.box.contains( entity.getLocation() ) ) {
+				if ( game.getBox().contains( entity.getLocation() ) ) {
 					e.setCancelled( true );
 				}
 			}
@@ -100,7 +102,7 @@ public class GameProtection implements Listener {
 		if ( e.getDamager() instanceof Player ) {
 			Player player = (Player)e.getDamager();
 			if ( game.getProtected( Config.PROTECT_PVP )
-					&& game.box.contains( e.getDamager().getLocation() )
+					&& game.getBox().contains( e.getDamager().getLocation() )
 					&& !Permission.PROTECTION_VOID.isAllowedBy( player ) )
 				e.setCancelled( true );
 		}
@@ -111,7 +113,7 @@ public class GameProtection implements Listener {
 		if ( e.isCancelled() )
 			return;
 		if ( game.getProtected( Config.PROTECT_EXPLOSIONS ) ) {
-			if ( game.box.contains( e.getLocation() ) ) {
+			if ( game.getBox().contains( e.getLocation() ) ) {
 				e.setCancelled( true );
 			}
 		}

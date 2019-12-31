@@ -1,8 +1,8 @@
 package io.github.mdsimmo.bomberman.commands.game;
 
-import io.github.mdsimmo.bomberman.Game;
-import io.github.mdsimmo.bomberman.arenabuilder.ArenaGenerator;
-import io.github.mdsimmo.bomberman.arenabuilder.ArenaGenerator.BuildListener;
+import io.github.mdsimmo.bomberman.game.Game;
+import io.github.mdsimmo.bomberman.arena.ArenaGenerator;
+import io.github.mdsimmo.bomberman.arena.ArenaGenerator.BuildListener;
 import io.github.mdsimmo.bomberman.commands.Cmd;
 import io.github.mdsimmo.bomberman.commands.GameCommand;
 import io.github.mdsimmo.bomberman.messaging.Chat;
@@ -39,7 +39,7 @@ public class Reset extends GameCommand {
 				game ) );
 
 		game.stop();
-		ArenaGenerator.switchBoard( game.board, game.board, game.box,
+		ArenaGenerator.switchBoard(game.getArena(), game.getArena(), game.getBox(),
 				new BuildListener() {
 					@Override
 					public void onContructionComplete() {

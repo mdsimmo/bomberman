@@ -1,7 +1,7 @@
 package io.github.mdsimmo.bomberman.commands.arena;
 
-import io.github.mdsimmo.bomberman.Game;
-import io.github.mdsimmo.bomberman.arenabuilder.ArenaGenerator;
+import io.github.mdsimmo.bomberman.game.Game;
+import io.github.mdsimmo.bomberman.arena.ArenaGenerator;
 import io.github.mdsimmo.bomberman.commands.Cmd;
 import io.github.mdsimmo.bomberman.messaging.Chat;
 import io.github.mdsimmo.bomberman.messaging.Message;
@@ -45,8 +45,8 @@ public class Delete extends Cmd {
 		}
 		for ( String name : Game.allGames() ) {
 			Game game = Game.findGame( name );
-			if ( game.board.name.equalsIgnoreCase( args.get( 0 ) )
-					|| game.oldBoard.name.equalsIgnoreCase( args.get( 0 ) ) ) {
+			if ( game.getArena().name.equalsIgnoreCase( args.get( 0 ) )
+					|| game.oldArena.name.equalsIgnoreCase( args.get( 0 ) ) ) {
 				Chat.sendMessage(
 						getMessage( Text.DELETE_ARENA_USED, sender ).put(
 								"arena", arena ).put( "game", game ) );

@@ -1,6 +1,6 @@
 package io.github.mdsimmo.bomberman.commands.language;
 
-import io.github.mdsimmo.bomberman.PlayerRep;
+import io.github.mdsimmo.bomberman.game.GamePlayer;
 import io.github.mdsimmo.bomberman.commands.Cmd;
 import io.github.mdsimmo.bomberman.messaging.Chat;
 import io.github.mdsimmo.bomberman.messaging.Language;
@@ -42,7 +42,7 @@ public class LangSet extends Cmd {
 		Language lang = Language.getLanguage( args.get( 0 ) );
 		if ( lang == null ) {
 			if ( args.get( 0 ).equalsIgnoreCase( "english" ) ) {
-				PlayerRep.getPlayerRep( (Player)sender ).setLanguage( null );
+				GamePlayer.getPlayerRep( (Player)sender ).setLanguage( null );
 				Chat.sendMessage(
 						getMessage( Text.LANGUAGE_SUCCESS, sender ).put(
 								"lang", args.get( 0 ) ) );
@@ -50,7 +50,7 @@ public class LangSet extends Cmd {
 				Chat.sendMessage(
 						getMessage( Text.LANGUAGE_UNKNOWN, sender ).put( "lang" , args.get( 0 ) ) );
 		} else {
-			PlayerRep.getPlayerRep( (Player)sender ).setLanguage( lang );
+			GamePlayer.getPlayerRep( (Player)sender ).setLanguage( lang );
 			Chat.sendMessage( getMessage( Text.LANGUAGE_SUCCESS, sender ).put( "lang", lang ) );
 		}
 		return true;

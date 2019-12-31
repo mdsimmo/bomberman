@@ -6,7 +6,7 @@ import java.util.Map;
 
 import org.bukkit.entity.Player;
 
-import io.github.mdsimmo.bomberman.Game;
+import io.github.mdsimmo.bomberman.game.Game;
 import io.github.mdsimmo.bomberman.messaging.Message;
 
 public class PotPayment implements Payment {
@@ -15,7 +15,7 @@ public class PotPayment implements Payment {
 	private Game game;
 	
 	public PotPayment( Game game ) {
-		this( game.name );
+		this(game.getName());
 		this.game = game;
 	}
 	

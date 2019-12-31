@@ -1,6 +1,7 @@
-package io.github.mdsimmo.bomberman;
+package io.github.mdsimmo.bomberman.game;
 
-import io.github.mdsimmo.bomberman.Game.State;
+import io.github.mdsimmo.bomberman.Bomberman;
+import io.github.mdsimmo.bomberman.game.Game.State;
 import io.github.mdsimmo.bomberman.messaging.Text;
 
 import java.util.HashMap;
@@ -12,9 +13,9 @@ public class SuddenDeathCounter {
 
 	private static Plugin plugin = Bomberman.instance;
 	private Game game;
-	int sdID, toID;
-	SuddenDeath sd = new SuddenDeath();
-	Timeout to = new Timeout();
+	private int sdID, toID;
+	private SuddenDeath sd = new SuddenDeath();
+	private Timeout to = new Timeout();
 
 	public SuddenDeathCounter(Game game) {
 		if (game == null)
@@ -49,12 +50,12 @@ public class SuddenDeathCounter {
 					|| (suddenDeath <= 5 && suddenDeath > 0)) {
 				Map<String, Object> values = new HashMap<>();
 				values.put( "time", suddenDeath );
-				game.sendMessages(
+				game.messagePlayers(
 						Text.SUDDENDEATH_COUNT_P,
 						Text.SUDDENDEATH_COUNT_O,
 						Text.SUDDENDEATH_COUNT_A, values );
 			} else if (suddenDeath == 0) {
-				game.sendMessages(
+				game.messagePlayers(
 						Text.SUDDENDEATH_P,
 						Text.SUDDENDEATH_O,
 						Text.SUDDENDEATH_A, null );
@@ -88,26 +89,13 @@ public class SuddenDeathCounter {
 					|| (timeout <= 5 && timeout > 0)) {
 				Map<String, Object> values = new HashMap<>();
 				values.put( "time", timeout );
-				game.sendMessages(
-						Text.TIMEOUT_COUNT_P,
-						Text.TIMEOUT_COUNT_O,
-						Text.TIMEOUT_COUNT_A, values );
+				game.messagePlayers(
+						Text.TIMEOUT_COUNT, values);
 			} else if (timeout == 0) {
-				game.sendMessages(
-						Text.TIMEOUT_P,
-						Text.TIMEOUT_O,
-						Text.TIMEOUT_A, null );
+				game.messagePlayers(Text.TIMEOUT,null);
 				game.stop();
 				plugin.getServer().getScheduler().cancelTask(toID);
 			}
 		}
-	}
-	
-	public int getSuddenDeath() {
-		return sd.suddenDeath;
-	}
-	
-	public int getTimeOut() {
-		return to.timeout;
 	}
 }

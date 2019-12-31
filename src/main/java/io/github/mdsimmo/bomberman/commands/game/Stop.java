@@ -1,8 +1,8 @@
 package io.github.mdsimmo.bomberman.commands.game;
 
-import io.github.mdsimmo.bomberman.Game;
-import io.github.mdsimmo.bomberman.PlayerRep;
-import io.github.mdsimmo.bomberman.Game.State;
+import io.github.mdsimmo.bomberman.game.Game;
+import io.github.mdsimmo.bomberman.game.GamePlayer;
+import io.github.mdsimmo.bomberman.game.Game.State;
 import io.github.mdsimmo.bomberman.commands.Cmd;
 import io.github.mdsimmo.bomberman.commands.GameCommand;
 import io.github.mdsimmo.bomberman.messaging.Chat;
@@ -35,7 +35,7 @@ public class Stop extends GameCommand {
         	game.stop();
             if (!game.players.contains(sender))
             	Chat.sendMessage(getMessage(Text.STOP_SUCCESS, sender).put( "game", game));
-            for (PlayerRep rep : game.players) {
+            for (GamePlayer rep : game.players) {
             	Chat.sendMessage(getMessage(Text.STOP_SUCCESS, rep.getPlayer()).put( "game", game));
             }
             

@@ -2,12 +2,12 @@ package io.github.mdsimmo.bomberman.commands.signs;
 
 import io.github.mdsimmo.bomberman.Bomberman;
 import io.github.mdsimmo.bomberman.CommandSign;
-import io.github.mdsimmo.bomberman.PlayerRep;
+import io.github.mdsimmo.bomberman.game.GamePlayer;
 import io.github.mdsimmo.bomberman.commands.Cmd;
 import io.github.mdsimmo.bomberman.messaging.Chat;
 import io.github.mdsimmo.bomberman.messaging.Message;
 import io.github.mdsimmo.bomberman.messaging.Text;
-import io.github.mdsimmo.bomberman.playerstates.ArenaEditingState;
+import io.github.mdsimmo.bomberman.arena.ArenaEditingState;
 import io.github.mdsimmo.bomberman.utils.BlockLocation;
 import io.github.mdsimmo.bomberman.utils.Utils;
 
@@ -81,7 +81,7 @@ public class Add extends Cmd {
 					.put( "block", b ));
 			if (command.charAt( 0 ) == '\\' || command.charAt( 0 ) == '/' )
 				command = command.substring( 1 );
-			PlayerRep rep = PlayerRep.getPlayerRep( e.getPlayer() );
+			GamePlayer rep = GamePlayer.getPlayerRep( e.getPlayer() );
 			if ( rep.getState() instanceof ArenaEditingState ) {
 				ArenaEditingState state = (ArenaEditingState)rep.getState();
 				state.update( e.getClickedBlock() );

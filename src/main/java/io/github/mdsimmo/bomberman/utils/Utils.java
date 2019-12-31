@@ -45,15 +45,6 @@ public class Utils {
 		}
 		return buffer.toString();
 	}
-	
-	public static Object[] insert(Object[] initial, Object ... inserts) {
-		Object[] fin = new Object[initial.length + inserts.length];
-		for (int i = 0; i < inserts.length; i++)
-			fin[i] = inserts[i];
-		for (int i = 0; i < initial.length; i++)
-			fin[inserts.length + i] = initial[i];
-		return fin;
-	}
 
 	/**
 	 * Gets the block that the player is looking at
@@ -72,15 +63,7 @@ public class Utils {
 		}
 		return null;
 	}
-	
-	public static <T> ArrayList<T> asList(T[] array) {
-		ArrayList<T> list = new ArrayList<T>(array.length);
-		for (T element : array) {
-			list.add(element);
-		}
-		return list;
-	}
-	
+
 	/**
 	 * Gets the title of the file. Eg, "readme.txt" will return "readme"
 	 * @param file the file's name

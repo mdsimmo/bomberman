@@ -1,6 +1,6 @@
 package io.github.mdsimmo.bomberman.messaging;
 
-import io.github.mdsimmo.bomberman.PlayerRep;
+import io.github.mdsimmo.bomberman.game.GamePlayer;
 import io.github.mdsimmo.bomberman.commands.Cmd.Permission;
 
 import java.util.List;
@@ -50,10 +50,10 @@ public abstract class Chat {
 	/**
 	 * Converts a phrase into being a Message which is in the player's language
 	 * @param phrase the phrase to convert
-	 * @param rep the {@link PlayerRep} receiving the message
+	 * @param rep the {@link GamePlayer} receiving the message
 	 * @return The created message
 	 */
-	public static Message getMessage( Phrase phrase, PlayerRep rep ) {
+	public static Message getMessage( Phrase phrase, GamePlayer rep ) {
 		return getMessage( phrase, rep.getLanguage(), rep.getPlayer() );
 	}
 
@@ -65,7 +65,7 @@ public abstract class Chat {
 	 * @param sender the {@link CommandSender} receiving to message
 	 * @return the created message
 	 */
-	public static Message getMessage( Phrase phrase, Language lang, CommandSender sender ) {
+	public static Message getMessage(Phrase phrase, Language lang, CommandSender sender) {
 		if ( lang == null )
 			lang = Language.getLanguage( "english" );
 		return new Message( sender, lang.translate( phrase ) );
@@ -77,7 +77,7 @@ public abstract class Chat {
 	 * @param sender the {@link CommandSender} receiving to message
 	 * @return the created message
 	 */
-	public static Message getMessage( Phrase phrase, CommandSender sender ) {
-		return getMessage( phrase, PlayerRep.getLanguage( sender ), sender );
+	public static Message getMessage(Phrase phrase, CommandSender sender ) {
+		return getMessage( phrase, GamePlayer.getLanguage( sender ), sender );
 	}
 }

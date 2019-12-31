@@ -1,14 +1,14 @@
 package io.github.mdsimmo.bomberman.commands.arena;
 
-import io.github.mdsimmo.bomberman.Board;
-import io.github.mdsimmo.bomberman.Game;
-import io.github.mdsimmo.bomberman.PlayerRep;
+import io.github.mdsimmo.bomberman.arena.ArenaTemplate;
+import io.github.mdsimmo.bomberman.game.Game;
+import io.github.mdsimmo.bomberman.game.GamePlayer;
 import io.github.mdsimmo.bomberman.commands.Cmd;
 import io.github.mdsimmo.bomberman.messaging.Chat;
 import io.github.mdsimmo.bomberman.messaging.Message;
 import io.github.mdsimmo.bomberman.messaging.Text;
-import io.github.mdsimmo.bomberman.playerstates.ArenaEditingState;
-import io.github.mdsimmo.bomberman.playerstates.PlayerState;
+import io.github.mdsimmo.bomberman.arena.ArenaEditingState;
+import io.github.mdsimmo.bomberman.game.playerstates.PlayerState;
 import io.github.mdsimmo.bomberman.utils.Utils;
 
 import java.util.ArrayList;
@@ -32,7 +32,7 @@ public class EditArena extends Cmd {
 	public List<String> options( CommandSender sender, List<String> args ) {
 		if ( sender instanceof Player == false )
 			return null;
-		PlayerRep rep = PlayerRep.getPlayerRep( (Player)sender );
+		GamePlayer rep = GamePlayer.getPlayerRep( (Player)sender );
 		if ( args.size() == 1 ) {
 			if ( rep.getState() instanceof ArenaEditingState ) {
 				List<String> list = new ArrayList<>();
@@ -58,16 +58,16 @@ public class EditArena extends Cmd {
 			return true;
 		}
 		Player player = (Player)sender;
-		PlayerRep rep = PlayerRep.getPlayerRep( player );
+		GamePlayer rep = GamePlayer.getPlayerRep( player );
 		PlayerState state = rep.getState();
 		Game game;
 		if ( state instanceof ArenaEditingState )
 			game = ( (ArenaEditingState)state ).getGame();
 		else
 			game = rep.getActiveGame();
-		Board board = null;
+		ArenaTemplate arena = null;
 		if ( game != null )
-			board = game.board;
+			arena = game.getArena();
 
 		if ( args.size() == 0 ) {
 			// asking to start edit mode
@@ -76,14 +76,14 @@ public class EditArena extends Cmd {
 			} else {
 				if (rep.switchStates( new ArenaEditingState( rep ) ) ) {
 					Chat.sendMessage( getMessage( Text.EDIT_STARTED, sender ).put(
-							"game", game ).put( "arena", board ) );
+							"game", game ).put( "arena", arena) );
 				} else {
 					if ( state instanceof ArenaEditingState ) {
 						Chat.sendMessage( getMessage( Text.EDIT_ALREADY_STARTED, sender )
-								.put( "game", game ).put( "arena", board ) );
+								.put( "game", game ).put( "arena", arena) );
 					} else {
 						Chat.sendMessage( getMessage( Text.PLAYER_BUSY, sender ).put(
-								"game", game ).put( "arena", board ) );
+								"game", game ).put( "arena", arena) );
 					}
 				}
 			}
@@ -106,7 +106,7 @@ public class EditArena extends Cmd {
 				editState = (ArenaEditingState)state;
 			} else {
 				Chat.sendMessage( getMessage( Text.EDIT_PROMPT_START, sender )
-						.put( "game", game ).put( "arena", board ) );
+						.put( "game", game ).put( "arena", arena) );
 				return true;
 			}
 			String save = getMessage( Text.EDIT_SAVE, sender ).toString();
@@ -116,15 +116,15 @@ public class EditArena extends Cmd {
 			if ( save.equalsIgnoreCase( arg ) ) {
 				editState.saveChanges();
 				Chat.sendMessage( getMessage( Text.EDIT_CHANGES_SAVED, sender )
-						.put( "game", game ).put( "arena", board ) );
+						.put( "game", game ).put( "arena", arena) );
 			} else if ( discard.equalsIgnoreCase( arg ) ) {
 				editState.discardChanges( true );
 				Chat.sendMessage( getMessage( Text.EDIT_CANGES_REMOVED, sender )
-						.put( "game", game ).put( "arena", board ) );
+						.put( "game", game ).put( "arena", arena) );
 			} else if ( ignore.equalsIgnoreCase( arg ) ) {
 				editState.discardChanges( false );
 				Chat.sendMessage( getMessage( Text.EDIT_MODE_QUIT, sender )
-						.put( "game", game ).put( "arena", board ) );
+						.put( "game", game ).put( "arena", arena) );
 			} else {
 				return false;
 			}

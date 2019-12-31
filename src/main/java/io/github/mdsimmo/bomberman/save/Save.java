@@ -7,8 +7,10 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.HashMap;
 
+import io.github.mdsimmo.bomberman.utils.CompressedList;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.plugin.Plugin;
+
 
 public abstract class Save extends YamlConfiguration {
 
@@ -43,6 +45,7 @@ public abstract class Save extends YamlConfiguration {
 		V0_2_2( "0.2.2" ),
 		V0_3_0( "0.3.0" ),
 		V0_3_0a( "0.3.0a" ),
+		V0_4_0( "0.4.0" ),
 		FUTURE(	"future" );
 
 		Version( String name ) {
@@ -115,7 +118,7 @@ public abstract class Save extends YamlConfiguration {
 		super.save( file );
 	}
 
-	public void setCompressedSection( String path, CompressedSection value ) {
+	public void setCompressedSection( String path, CompressedList value ) {
 		super.set( path, value.toString() );
 	}
 

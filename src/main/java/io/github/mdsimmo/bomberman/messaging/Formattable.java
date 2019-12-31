@@ -4,7 +4,7 @@ import java.math.BigDecimal;
 import java.util.Arrays;
 import java.util.List;
 
-import io.github.mdsimmo.bomberman.PlayerRep;
+import io.github.mdsimmo.bomberman.game.GamePlayer;
 import net.objecthunter.exp4j.ExpressionBuilder;
 import net.objecthunter.exp4j.function.Function;
 
@@ -44,12 +44,12 @@ public interface Formattable {
 	public static class SenderWrapper implements Formattable {
 
 		private final CommandSender sender;
-		private final PlayerRep rep;
+		private final GamePlayer rep;
 		
 		public SenderWrapper( CommandSender sender ) {
 			this.sender = sender;
 			if ( sender instanceof Player )
-				this.rep = PlayerRep.getPlayerRep( (Player)sender );
+				this.rep = GamePlayer.getPlayerRep( (Player)sender );
 			else
 				this.rep = null;
 		}

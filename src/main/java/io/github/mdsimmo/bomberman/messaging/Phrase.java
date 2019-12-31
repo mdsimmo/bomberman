@@ -3,8 +3,8 @@ package io.github.mdsimmo.bomberman.messaging;
 
 public interface Phrase {
 
-	public String getDefault();
+	String getDefault();
 
-	public String getPath();
+	String getPath();
 
 }

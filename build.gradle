@@ -1,10 +1,11 @@
 apply plugin: 'java'
+apply plugin: 'kotlin'
 apply plugin: 'idea'
 
-sourceCompatibility = 1.7
+sourceCompatibility = 1.8
 
 group = 'io.github.mdsimmo'
-version = '0.3.0a'
+version = '0.4.0'
 
 repositories {
     mavenCentral()
@@ -15,27 +16,20 @@ repositories {
     }
     maven {
         // vaults repo
-        url "http://nexus.theyeticave.net/content/repositories/pub_releases"
+        url "https://jitpack.io"
     }
 }
 
-configurations {
-    provided
-}
-
-sourceSets {
-    // make provided files available during compile
-    main.compileClasspath += configurations.provided
-    test.compileClasspath += configurations.provided
-    test.runtimeClasspath += configurations.provided
-}
-
 dependencies {
-    provided "org.bukkit:bukkit:1.9-R0.1-SNAPSHOT"
-    provided "net.milkbowl.vault:VaultAPI:1.5"
-    compile "net.objecthunter:exp4j:0.4.5"
+    compileOnly "org.bukkit:bukkit:1.14.4-R0.1-SNAPSHOT"
+    testCompile "org.bukkit:bukkit:1.14.4-R0.1-SNAPSHOT"
+    
+    compileOnly "com.github.MilkBowl:VaultAPI:1.7"
+    compile "net.objecthunter:exp4j:0.4.8"
+    
     testCompile "junit:junit:4.+"
     testCompile "org.mockito:mockito-core:1.+"
+    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version"
 }
 
 processResources  {
@@ -69,16 +63,29 @@ task install( dependsOn: [build, copyToServer] ) {
     description 'Compiles, tests and copies the code to the server'
 }
 
-idea {
-    module {
-        scopes.PROVIDED.plus += [ configurations.provided ]
-    }
-}
-
 jar {
     from {
         configurations.compile.collect {
             it.isDirectory() ? it : zipTree(it)
         }
+    }
+}
+buildscript {
+    ext.kotlin_version = '1.3.50'
+    repositories {
+        mavenCentral()
+    }
+    dependencies {
+        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
+    }
+}
+compileKotlin {
+    kotlinOptions {
+        jvmTarget = "1.8"
+    }
+}
+compileTestKotlin {
+    kotlinOptions {
+        jvmTarget = "1.8"
     }
 }

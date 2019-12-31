@@ -7,7 +7,7 @@ import java.io.InputStreamReader;
 import java.io.Reader;
 
 import io.github.mdsimmo.bomberman.Bomberman;
-import io.github.mdsimmo.bomberman.PlayerRep;
+import io.github.mdsimmo.bomberman.game.GamePlayer;
 
 import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.InvalidConfigurationException;
@@ -34,7 +34,6 @@ public enum Text implements Phrase {
 	TRUE ( "word.true" ),
 	FALSE ( "word.false" ),
 
-	SPECIFY_GAME ( "join.specify-game" ),
 	GAME_FULL ( "join.game-full" ),
 	TOO_POOR ( "join.poor-man" ),
 	PLAYER_JOINED ( "join.player-joined" ),
@@ -51,41 +50,19 @@ public enum Text implements Phrase {
 	KILL_OPPONENT ( "game-play.kill-opponent" ),
 	KILL_SUICIDE ( "game-play.kill-suicide" ),
 	KILLED_BY ( "game-play.killed-by" ),
-	PLAYER_KILLED_PLAYERS ( "game-play.player-killed.players" ),
-	PLAYER_KILLED_OBSERVERS ( "game-play.player-killed.observers" ),
-	PLAYER_KILLED_ALL ( "game-play.player-killed.all" ),
-	PLAYER_LEFT_PLAYERS ( "game-play.player-left.players" ),
-	PLAYER_LEFT_OBSERVERS ( "game-play.player-left.observers" ),
-	PLAYER_LEFT_ALL ( "game-play.player-left.all" ),
+	PLAYER_KILLED( "game-play.player-killed" ),
+	PLAYER_LEFT( "game-play.player-left" ),
 	NO_REGEN ( "game-play.no-regen" ),
-	GAME_STARTING_PLAYERS ( "game-play.starting.players" ),
-	GAME_STARTING_OBSERVERS ( "game-play.starting.observers" ),
-	GAME_STARTING_ALL ( "game-play.starting.all" ),
-	GAME_COUNT_PLAYERS ( "game-play.count.players" ),
-	GAME_COUNT_OBSERVERS ( "game-play.count.observers" ),
-	GAME_COUNT_ALL ( "game-play.count.all" ),
-	GAME_STARTED_PLAYERS ( "game-play.started.players" ),
-	GAME_STARTED_OBSERVERS ( "game-play.started.observers" ),
-	GAME_STARTED_ALL ( "game-play.started.all" ),
-	COUNT_STOPPED_PLAYERS ( "game-play.stopped-count.players" ),
-	COUNT_STOPPED_OBSERVERS ( "game-play.stopped-count.observers" ),
-	COUNT_STOPPED_ALL ( "game-play.stopped-count.all" ),
-	GAME_OVER_PLAYERS ( "game-play.game-over.players" ),
-	GAME_OVER_OBSERVERS ( "game-play.game-over.observers" ),
-	GAME_OVER_ALL ( "game-play.game-over.all" ),
+	GAME_STARTING ( "game-play.starting" ),
+	GAME_COUNT ( "game-play.count" ),
+	GAME_STARTED( "game-play.started" ),
+	COUNT_STOPPED ( "game-play.stopped-count" ),
+	GAME_OVER ( "game-play.game-over" ),
 
-	SUDDENDEATH_COUNT_P ( "suddendeath.count.players" ),
-	SUDDENDEATH_COUNT_O ( "suddendeath.count.observers" ),
-	SUDDENDEATH_COUNT_A ( "suddendeath.count.all" ),
-	SUDDENDEATH_P ( "suddendeath.start.players" ),
-	SUDDENDEATH_O ( "suddendeath.start.observers" ),
-	SUDDENDEATH_A ( "suddendeath.start.all" ),
-	TIMEOUT_COUNT_P ( "timeout.count.players" ),
-	TIMEOUT_COUNT_O ( "timeout.count.observers" ),
-	TIMEOUT_COUNT_A ( "timeout.count.all" ),
-	TIMEOUT_P ( "timeout.start.players" ),
-	TIMEOUT_O ( "timeout.start.observers" ),
-	TIMEOUT_A ( "timeout.start.all" ),
+	SUDDENDEATH_COUNT ( "suddendeath.count" ),
+	SUDDENDEATH ( "suddendeath.start" ),
+	TIMEOUT_COUNT ( "timeout.count" ),
+	TIMEOUT ( "timeout.start" ),
 
 	SCORE_ANNOUNCE ( "scores.announce" ),
 	WINNERS_LIST ( "scores.winners" ),
@@ -521,9 +498,9 @@ public enum Text implements Phrase {
 	/**
 	 * Convenience method. {@code|Exact same as Chat.getMessage( this, rep )}
 	 * 
-	 * @see {@link Chat#getMessage(Phrase, PlayerRep)}
+	 * @see {@link Chat#getMessage(Phrase, GamePlayer)}
 	 */
-	public Message getMessage( PlayerRep rep ) {
+	public Message getMessage( GamePlayer rep ) {
 		return Chat.getMessage( this, rep );
 	}
 

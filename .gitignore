@@ -6,6 +6,9 @@
 /.gradle/*
 .idea
 .idea/*
+/out
+.out/*
 *.iml
 *.ipr
 *.iws
+

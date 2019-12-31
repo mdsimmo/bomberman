@@ -1,7 +1,7 @@
 package io.github.mdsimmo.bomberman.commands.game;
 
-import io.github.mdsimmo.bomberman.Game;
-import io.github.mdsimmo.bomberman.PlayerRep;
+import io.github.mdsimmo.bomberman.game.Game;
+import io.github.mdsimmo.bomberman.game.GamePlayer;
 import io.github.mdsimmo.bomberman.commands.Cmd;
 import io.github.mdsimmo.bomberman.commands.GameCommand;
 import io.github.mdsimmo.bomberman.messaging.Chat;
@@ -34,7 +34,7 @@ public class Ignore extends GameCommand {
 			return true;
 		}
 		
-		if (game.observers.remove(PlayerRep.getPlayerRep((Player)sender))) {
+		if (game.observers.remove(GamePlayer.getPlayerRep((Player)sender))) {
 			Chat.sendMessage(getMessage(Text.IGNORE_SUCCESS, sender).put( "game", game));
 		} else {
 			Chat.sendMessage(getMessage(Text.IGNORE_NOT_WATCHED, sender).put( "game", game));

@@ -20,7 +20,7 @@ public class Message implements Formattable {
 	private static final Equation equationExpander = new Equation();
 	private static final Switch switchExpander = new Switch();
 
-	public Message( CommandSender sender, String text ) {
+	public Message(CommandSender sender, String text ) {
 		this.text = text;
 		values.put( "sender", sender );
 		values.put( "=", equationExpander );
@@ -73,7 +73,7 @@ public class Message implements Formattable {
 	}
 
 	private String expand( String text ) {
-		StringBuffer expanded = new StringBuffer();
+		StringBuilder expanded = new StringBuilder();
 		for ( int i = 0; i < text.length(); i++ ) {
 			char c = text.charAt( i );
 			if ( c == '{' ) {
@@ -91,7 +91,7 @@ public class Message implements Formattable {
 		if ( text.charAt( 0 ) != '{' || text.charAt( text.length() - 1 ) != '}' )
 			throw new RuntimeException(
 					"expandBrace() must start and end with a brace" );
-		StringBuffer buffer = new StringBuffer();
+		StringBuilder buffer = new StringBuilder();
 		int i = 1;
 		char c = text.charAt( i );
 		// skip whitespace
@@ -209,7 +209,7 @@ public class Message implements Formattable {
 		return String.valueOf( obj );
 	}
 
-	public boolean isBlank() {
+	boolean isBlank() {
 		return text.isEmpty();
 	}
 

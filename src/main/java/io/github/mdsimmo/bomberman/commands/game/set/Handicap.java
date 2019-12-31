@@ -1,7 +1,7 @@
 package io.github.mdsimmo.bomberman.commands.game.set;
 
-import io.github.mdsimmo.bomberman.Game;
-import io.github.mdsimmo.bomberman.PlayerRep;
+import io.github.mdsimmo.bomberman.game.Game;
+import io.github.mdsimmo.bomberman.game.GamePlayer;
 import io.github.mdsimmo.bomberman.commands.Cmd;
 import io.github.mdsimmo.bomberman.commands.GameCommand;
 import io.github.mdsimmo.bomberman.messaging.Chat;
@@ -45,7 +45,7 @@ public class Handicap extends GameCommand {
 			return false;
 		
 		@SuppressWarnings("deprecation")
-		PlayerRep rep = PlayerRep.getPlayerRep(Bukkit.getPlayer(args.get(0)));
+        GamePlayer rep = GamePlayer.getPlayerRep(Bukkit.getPlayer(args.get(0)));
 		if (rep == null) {
 			Chat.sendMessage(getMessage(Text.INVALID_PLAYER, sender).put( "player", args.get(0)));
 			return true;
