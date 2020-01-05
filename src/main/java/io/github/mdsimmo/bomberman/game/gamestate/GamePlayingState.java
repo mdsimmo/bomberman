@@ -1,87 +1,74 @@
 package io.github.mdsimmo.bomberman.game.gamestate;
 
-import io.github.mdsimmo.bomberman.arena.ArenaGenerator;
+import io.github.mdsimmo.bomberman.Bomberman;
+import io.github.mdsimmo.bomberman.events.GameStoppedEvent;
+import io.github.mdsimmo.bomberman.events.PlayerLeaveGameEvent;
 import io.github.mdsimmo.bomberman.game.Bomb;
 import io.github.mdsimmo.bomberman.game.Game;
 import io.github.mdsimmo.bomberman.game.GamePlayer;
-import io.github.mdsimmo.bomberman.messaging.Text;
+import org.bukkit.Bukkit;
+import org.bukkit.Location;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
 
-import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 public class GamePlayingState implements GameState {
 
     private final Game game;
-    private Game.GameStarter countdownTimer = null;
-    List<Bomb.DeathBlock> deathBlocks = new ArrayList<>();
+    private final Set<GamePlayer> players;
+    private final int runningId;
+    HashMap<Location, List<Bomb.DeathBlock>> deathBlocks = new HashMap<>();
     Map<Block, Bomb> explosions = new HashMap<>();
 
-    public GamePlayingState(GameStartingState startingState) {
-        this.game = startingState.game;
-    }
+    public GamePlayingState(Game game, Set<GamePlayer> players) {
+        this.game = game;
+        this.players = players;
 
-    /**
-     * updates the status of the game.
-     *
-     * @return true if the game has finished;
-     */
-    private boolean checkFinish() {
-        if ( players.size() <= 1 && state == State.PLAYING ) {
-
-            state = State.ENDING;
-
-            // kill the survivors
-            for ( GamePlayer rep : new ArrayList<>( players ) ) {
-                ( (GamePlayingState)rep.getState() ).kill();
+        runningId = Bukkit.getScheduler().scheduleSyncRepeatingTask(Bomberman.instance, () -> {
+            for (GamePlayer p : players) {
+                for (Location d : deathBlocks.keySet()) {
+                    if (Bomb.DeathBlock.touching(p.player, d)) {
+                        p.damageFrom(deathBlocks.get(d).get(0).cause);
+                    }
+                }
             }
-
-            // to avoid the above kill loop executing this method twice
-            if ( state != State.ENDING )
-                return true;
-
-            // get the total winnings
-            final Player topPlayer = winners.get( 0 ).getPlayer();
-            prize.giveTo( topPlayer );
-
-            // display the scores
-            sendMessages( Text.GAME_OVER_PLAYERS, Text.GAME_OVER_OBSERVERS,
-                    Text.GAME_COUNT_ALL, null );
-            winnersDisplay();
-
-            // reset the game
-            ArenaGenerator.switchBoard( this.arena, this.arena, box, null );
-            stop();
-
-            return true;
-        }
-        return state == State.ENDING || state == State.WAITING;
+        }, 1, 1);
     }
 
-    /**
-     * call when a player dies
-     */
-    public void alertRemoval(GamePlayer rep) {
-        players.remove(rep);
-        HashMap<String, Object> map = new HashMap<>();
-        map.put( "player", rep );
-        if (state == State.PLAYING || state == State.ENDING) {
-            if ( !checkFinish() )
-                messagePlayers(Text.PLAYER_KILLED, Text.PLAYER_KILLED_OBSERVERS, Text.PLAYER_KILLED_ALL,
-                        map );
-        } else {
-            messagePlayers( Text.PLAYER_LEFT_PLAYERS, Text.PLAYER_LEFT_OBSERVERS,
-                    Text.PLAYER_LEFT_ALL, map );
+    @Override
+    public void terminate() {
+        while (!players.isEmpty()) {
+            players.iterator().next().removeFromGame();
         }
-        if (players.size() < minPlayers && getCountdownTimer() != null) {
-            map.put( "time", getCountdownTimer().count );
-            getCountdownTimer().destroy();
-            state = State.WAITING;
-            messagePlayers( Text.COUNT_STOPPED_PLAYERS,
-                    Text.COUNT_STOPPED_OBSERVERS, Text.COUNT_STOPPED_ALL, map );
+        // The PlayerLeaveGameHandler will notice the last player leaving and stop the game
+    }
+
+    @EventHandler
+    public void OnPlayerLeave(PlayerLeaveGameEvent e) {
+        if (e.getGame() != game)
+            return;
+
+        players.removeIf(g -> g.player == e.getPlayer());
+
+        if (players.size() == 1) {
+            GamePlayer winner = players.iterator().next();
+            winner.removeFromGame();
+
+            Bukkit.getPluginManager().callEvent(new GameStoppedEvent(game));
         }
     }
 
+    @EventHandler
+    public void OnGameStopped(GameStoppedEvent e) {
+        if (e.getGame() != game)
+            return;
+
+        Bukkit.getScheduler().cancelTask(runningId);
+    }
 }

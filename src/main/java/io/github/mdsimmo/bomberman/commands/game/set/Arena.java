@@ -1,6 +1,5 @@
 package io.github.mdsimmo.bomberman.commands.game.set;
 
-import io.github.mdsimmo.bomberman.arena.ArenaTemplate;
 import io.github.mdsimmo.bomberman.game.Game;
 import io.github.mdsimmo.bomberman.game.Game.State;
 import io.github.mdsimmo.bomberman.arena.ArenaGenerator;
@@ -52,7 +51,7 @@ public class Arena extends GameCommand {
 			return true;
 		}
 
-		final ArenaTemplate newboard = ArenaGenerator
+		final io.github.mdsimmo.bomberman.arena.Arena newboard = ArenaGenerator
 				.loadBoard( args
 						.get( 0 ) );
 		if ( newboard == null ) {
@@ -64,7 +63,7 @@ public class Arena extends GameCommand {
 
 		game.stop();
 
-		final ArenaTemplate oldboard = game.getArena();
+		final io.github.mdsimmo.bomberman.arena.Arena oldboard = game.getArena();
 
 		BuildListener l = new BuildListener() {
 			@Override

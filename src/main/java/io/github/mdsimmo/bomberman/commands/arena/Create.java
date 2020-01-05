@@ -1,6 +1,6 @@
 package io.github.mdsimmo.bomberman.commands.arena;
 
-import io.github.mdsimmo.bomberman.arena.ArenaTemplate;
+import io.github.mdsimmo.bomberman.arena.Arena;
 import io.github.mdsimmo.bomberman.Config;
 import io.github.mdsimmo.bomberman.game.Game;
 import io.github.mdsimmo.bomberman.arena.ArenaDetector.BoundingListener;
@@ -87,7 +87,7 @@ public class Create extends Cmd {
 				return;
 			}
 
-			ArenaTemplate arena = ArenaGenerator.createArena( name, box );
+			Arena arena = ArenaGenerator.createArena( name, box );
 			if ( box.xSize < 2 && box.ySize < 2 && box.zSize < 2 ) {
 				Chat.sendMessage( getMessage( Text.ARENA_CREATE_VERY_SMALL,
 						sender ).put( "arena", arena) );

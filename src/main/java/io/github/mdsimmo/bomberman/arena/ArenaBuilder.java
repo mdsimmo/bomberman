@@ -14,11 +14,11 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 final class ArenaBuilder {
 	private static int buildRate = Config.BUILD_RATE.getValue();
-	private final ArenaTemplate arena;
+	private final Arena arena;
 	private final Location location;
 	private final Runnable listener;
 		
-	ArenaBuilder(ArenaTemplate arena, Location location, Runnable l) {
+	ArenaBuilder(Arena arena, Location location, Runnable l) {
 		this.arena = arena;
 		this.location = location;
 		this.listener = l;

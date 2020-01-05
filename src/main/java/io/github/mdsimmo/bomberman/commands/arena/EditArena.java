@@ -1,6 +1,6 @@
 package io.github.mdsimmo.bomberman.commands.arena;
 
-import io.github.mdsimmo.bomberman.arena.ArenaTemplate;
+import io.github.mdsimmo.bomberman.arena.Arena;
 import io.github.mdsimmo.bomberman.game.Game;
 import io.github.mdsimmo.bomberman.game.GamePlayer;
 import io.github.mdsimmo.bomberman.commands.Cmd;
@@ -65,7 +65,7 @@ public class EditArena extends Cmd {
 			game = ( (ArenaEditingState)state ).getGame();
 		else
 			game = rep.getActiveGame();
-		ArenaTemplate arena = null;
+		Arena arena = null;
 		if ( game != null )
 			arena = game.getArena();
 

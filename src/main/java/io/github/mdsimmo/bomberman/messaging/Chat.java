@@ -10,7 +10,7 @@ import org.bukkit.command.CommandSender;
 
 public abstract class Chat {
 
-	public static void sendMessage( Message message  ) {
+	public static void sendMessage(Message message) {
 		if ( message.isBlank() )
 			return;
 		messageRaw( getMessage( Text.MESSAGE_FORMAT, message.getSender() ).put( "message",
@@ -45,16 +45,6 @@ public abstract class Chat {
 	public static void sendHeading( Message type , Message title  ) {
 		messageRaw( getMessage( Text.HEADING_FORMAT, title.getSender() ).put( "type", type )
 				.put( "title", title ) );
-	}
-	
-	/**
-	 * Converts a phrase into being a Message which is in the player's language
-	 * @param phrase the phrase to convert
-	 * @param rep the {@link GamePlayer} receiving the message
-	 * @return The created message
-	 */
-	public static Message getMessage( Phrase phrase, GamePlayer rep ) {
-		return getMessage( phrase, rep.getLanguage(), rep.getPlayer() );
 	}
 
 	/**

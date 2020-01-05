@@ -20,7 +20,7 @@ import java.util.function.Consumer;
  */
 public class ArenaGenerator {
 
-	private static HashMap<String, ArenaTemplate> loadedBoards = new HashMap<>();
+	private static HashMap<String, Arena> loadedBoards = new HashMap<>();
 	private static Plugin plugin = Bomberman.instance;
 
 	/**
@@ -95,7 +95,7 @@ public class ArenaGenerator {
 	 *            the arena name
 	 * @return the loaded arena
 	 */
-	public static ArenaTemplate loadBoard(String name) {
+	public static Arena loadBoard(String name) {
 		try {
 			if (loadedBoards.containsKey(name))
 				return loadedBoards.get(name);
@@ -139,7 +139,7 @@ public class ArenaGenerator {
 	 * Saves a arena to its file
 	 * @param arena the arena to save
 	 */
-	public static void saveBoard( ArenaTemplate arena) {
+	public static void saveBoard( Arena arena) {
 		loadedBoards.put( arena.name, arena);
 		new BoardSaver(arena).save();
 	}

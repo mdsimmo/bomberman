@@ -13,29 +13,29 @@ import java.util.Map;
 public class GameSettings implements ConfigurationSerializable {
 
     public Material bombMaterial;
-    boolean autostart;
-    int autostartDelay;
-    ItemStack bombItem;
-    int bombs;
-    double dropChance;
-    List<ItemStack> drops;
-    Payment fare;
-    int lives;
-    int minPlayers;
-    int power;
-    Material powerMaterial;
-    Payment prize;
-    boolean protection;
-    boolean protectFire;
-    boolean protectPlace;
-    boolean protectBreak;
-    boolean protectExplosion;
-    boolean protectDamage;
-    boolean protectPVP;
-    int potionDuration;
-    int suddenDeath;
-    int timeout;
-    List<ItemStack> initialitems;
+    public boolean autostart;
+    public int autostartDelay;
+    public ItemStack bombItem;
+    public int bombs;
+    public double dropChance;
+    public List<ItemStack> drops;
+    public Payment fare;
+    public int lives;
+    public int minPlayers;
+    public int power;
+    public Material powerMaterial;
+    public Payment prize;
+    public boolean protection;
+    public boolean protectFire;
+    public boolean protectPlace;
+    public boolean protectBreak;
+    public boolean protectExplosion;
+    public boolean protectDamage;
+    public boolean protectPVP;
+    public int potionDuration;
+    public int suddenDeath;
+    public int timeout;
+    public List<ItemStack> initialitems;
 
     {
         try {

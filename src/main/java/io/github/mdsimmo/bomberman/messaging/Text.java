@@ -496,15 +496,6 @@ public enum Text implements Phrase {
 	}
 
 	/**
-	 * Convenience method. {@code|Exact same as Chat.getMessage( this, rep )}
-	 * 
-	 * @see {@link Chat#getMessage(Phrase, GamePlayer)}
-	 */
-	public Message getMessage( GamePlayer rep ) {
-		return Chat.getMessage( this, rep );
-	}
-
-	/**
 	 * Convenience method. {@code|Exact same as Chat.getMessage( this, lang,
 	 * sender )}
 	 * 

@@ -1,6 +1,6 @@
 package io.github.mdsimmo.bomberman.commands.game;
 
-import io.github.mdsimmo.bomberman.arena.ArenaTemplate;
+import io.github.mdsimmo.bomberman.arena.Arena;
 import io.github.mdsimmo.bomberman.Config;
 import io.github.mdsimmo.bomberman.game.Game;
 import io.github.mdsimmo.bomberman.game.GamePlayer;
@@ -51,7 +51,7 @@ public class Create extends Cmd {
 						getMessage( Text.CREATE_GAME_EXISTS, sender ).put(
 								"game", args.get( 0 ) ) );
 			} else {
-				ArenaTemplate arena;
+				Arena arena;
 				if ( args.size() == 2 ) {
 					arena = ArenaGenerator.loadBoard( args.get( 1 ) );
 				} else {
@@ -83,7 +83,7 @@ public class Create extends Cmd {
 		return true;
 	}
 
-	private Game createGame(String name, Location l, ArenaTemplate arena, final CommandSender sender ) {
+	private Game createGame(String name, Location l, Arena arena, final CommandSender sender ) {
 		final Game game = new Game( name, new Box( l, arena.xSize, arena.ySize,
 				arena.zSize ) );
 		game.setArena(arena);

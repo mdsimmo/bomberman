@@ -1,6 +1,6 @@
 package io.github.mdsimmo.bomberman.commands.game;
 
-import io.github.mdsimmo.bomberman.arena.ArenaTemplate;
+import io.github.mdsimmo.bomberman.arena.Arena;
 import io.github.mdsimmo.bomberman.Config;
 import io.github.mdsimmo.bomberman.game.Game;
 import io.github.mdsimmo.bomberman.game.GamePlayer;
@@ -87,7 +87,7 @@ public class Convert extends Cmd {
 				return;
 			}
 
-			ArenaTemplate arena = ArenaGenerator.createArena( name + ".old", box );
+			Arena arena = ArenaGenerator.createArena( name + ".old", box );
 			if ( box.xSize < 2 && box.ySize < 2 && box.zSize < 2 ) {
 				Chat.sendMessage( getMessage( Text.ARENA_CREATE_VERY_SMALL,
 						sender ).put( "arena", arena) );

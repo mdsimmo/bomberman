@@ -1,8 +1,7 @@
 package io.github.mdsimmo.bomberman.game
 
 import io.github.mdsimmo.bomberman.Bomberman
-import io.github.mdsimmo.bomberman.Config
-import io.github.mdsimmo.bomberman.arena.ArenaTemplate
+import io.github.mdsimmo.bomberman.arena.Arena
 import io.github.mdsimmo.bomberman.arena.ArenaGenerator
 import io.github.mdsimmo.bomberman.game.gamestate.GameRun
 import io.github.mdsimmo.bomberman.game.gamestate.GameWaitingState
@@ -12,25 +11,29 @@ import io.github.mdsimmo.bomberman.utils.Box
 import org.bukkit.Location
 import org.bukkit.Material
 import org.bukkit.command.CommandSender
-import org.bukkit.entity.Player
 
 import java.io.File
 import java.util.*
 
 class Game : Formattable {
     private var name: String
-    private var box: Box
-    private var arena: ArenaTemplate
-    private val settings = GameSettings()
-    private val oldArena: ArenaTemplate
+    val loc: Location
+    val arena: Arena
+    val settings = GameSettings()
+    private val oldArena: Arena
     private val protector: GameProtection
     private var run: GameRun
 
+    private var box: Box get() = Box(loc, arena.size)
+
     constructor(name: String, box: Box) {
-        name = name
+        this.name = name
+        this.box = box
         protector = GameProtection(this)
         oldArena = ArenaGenerator.from(box)
+        arena = oldArena
         run = GameRun()
+        loc = box.corner()
     }
 
     /**
