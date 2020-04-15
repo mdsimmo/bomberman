@@ -1,6 +1,8 @@
 name: Bomberman
 main: io.github.mdsimmo.bomberman.Bomberman
 version: ${version}
+api-version: 1.15
+load: POSTWORLD
 
 commands:
   bomberman:
@@ -8,24 +10,17 @@ commands:
     usage: bomberman <more commands>
     aliases: bm
     permission: bomberman.observer
-  
+
+depend: [WorldEdit]
 softdepend: [Multiverse-Core, Vault]
   
 permissions:
   bomberman.*:
     description: Gives access to all Bomberman commands
     children:
-      bomberman.observer: true
       bomberman.player: true
       bomberman.operator: true
       bomberman.dictator: true
-      bomberman.arena: true
-      bomberman.sign-maker: true
-      bomberman.void-protection: true
-      bomberman.overlord: true
-  bomberman.observer:
-    description: Allows viewing of Bomberman information
-    default: true
   bomberman.player:
     description: Allows you to join/leave bomberman games
     default: true
@@ -34,16 +29,4 @@ permissions:
     default: op
   bomberman.dictator:
     description: Complete control over a bomberman game settings
-    default: op
-  bomberman.arena:
-    description: Create and edit arenas 
-    default: op
-  bomberman.void-protection:
-    description: Protections placed on the game don't effect you
-    default: op
-  bomberman.sign-maker:
-    description: Allows players to add commands to signs
-    default: op
-  bomberman.overlord:
-    description: Commands for configuring bomberman
     default: op

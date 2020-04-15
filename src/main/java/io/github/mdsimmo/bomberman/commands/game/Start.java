@@ -1,16 +1,14 @@
 package io.github.mdsimmo.bomberman.commands.game;
 
-import io.github.mdsimmo.bomberman.game.Game;
-import io.github.mdsimmo.bomberman.game.Game.State;
 import io.github.mdsimmo.bomberman.commands.Cmd;
 import io.github.mdsimmo.bomberman.commands.GameCommand;
-import io.github.mdsimmo.bomberman.messaging.Chat;
-import io.github.mdsimmo.bomberman.messaging.Phrase;
+import io.github.mdsimmo.bomberman.events.BmRunStartCountDownIntent;
+import io.github.mdsimmo.bomberman.game.Game;
+import io.github.mdsimmo.bomberman.messaging.Message;
 import io.github.mdsimmo.bomberman.messaging.Text;
+import org.bukkit.command.CommandSender;
 
 import java.util.List;
-
-import org.bukkit.command.CommandSender;
 
 public class Start extends GameCommand {
 
@@ -19,27 +17,28 @@ public class Start extends GameCommand {
 	}
 
 	@Override
-	public Phrase nameShort() {
-		return Text.START_NAME;
+	public Message name() {
+		return context(Text.START_NAME).format();
 	}
 
 	@Override
-	public List<String> shortOptions(CommandSender sender, List<String> args) {
+	public List<String> gameOptions(List<String> args) {
 		return null;
 	}
 	
 	@Override
-	public boolean runShort(CommandSender sender, List<String> args, Game game) {
+	public boolean gameRun(CommandSender sender, List<String> args, Game game) {
 		if (args.size() != 0)
 			return false;
-		
-		if ( game.state == State.PLAYING || game.state == State.ENDING )
-			Chat.sendMessage(getMessage(Text.GAME_ALREADY_STARTED, sender).put( "game", game));
-		else {
-			if (game.startGame())
-				Chat.sendMessage(getMessage(Text.GAME_START_SUCCESS, sender).put( "game", game));
-			else
-				Chat.sendMessage(getMessage(Text.GAME_MORE_PLAYERS, sender).put( "game", game));
+
+		var e = BmRunStartCountDownIntent.startGame(game, 3);
+		if (e.isCancelled()) {
+			e.getCancelledReason().ifPresentOrElse(
+					reason -> reason.sendTo(sender),
+					() -> Text.GAME_START_CANCELLED.with("game", game).sendTo(sender)
+			);
+		} else {
+			Text.GAME_START_SUCCESS.with("game", game).sendTo(sender);
 		}
 		return true;
 	}
@@ -50,22 +49,22 @@ public class Start extends GameCommand {
 	}
 
 	@Override
-	public Phrase extraShort() {
-		return Text.START_EXTRA;
+	public Message extra() {
+		return context(Text.START_EXTRA).format();
 	}
 
 	@Override
-	public Phrase exampleShort() {
-		return Text.START_EXAMPLE;		
+	public Message example() {
+		return context(Text.START_EXAMPLE).format();
 	}
 
 	@Override
-	public Phrase descriptionShort() {
-		return Text.START_DESCRIPTION;
+	public Message description() {
+		return context(Text.START_DESCRIPTION).format();
 	}
 
 	@Override
-	public Phrase usageShort() {
-		return Text.START_USAGE;
+	public Message usage() {
+		return context(Text.START_USAGE).format();
 	}
 }

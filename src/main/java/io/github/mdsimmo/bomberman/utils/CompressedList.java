@@ -1,5 +1,6 @@
 package io.github.mdsimmo.bomberman.utils;
 
+import javax.annotation.CheckReturnValue;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -10,7 +11,7 @@ import java.util.function.Function;
  *
  * <p>
  * Data format example:
- * 	"<code>!2;aaa;bbb;!3;ccc</code>"
+ * 	"<code>aaa!2;bbb;ccc!3</code>"
  *
  * 	expands to:
  *
@@ -21,7 +22,7 @@ public final class CompressedList {
 
 	private static final char separator = ';';
 	private static final char multiple = '!';
-	private static final char escape = '/';
+	private static final char escape = '\\';
 
 	/**
 	 * Given a string that was created with {@link #encode(Iterator, Function)}, this will restore the original stream
@@ -30,20 +31,18 @@ public final class CompressedList {
 	 * @param <T> the type of object being restored
 	 * @return the decoded stream
 	 */
+	@CheckReturnValue
 	public static <T> List<T> decode(String data, Function<String, ? extends T> decoder) {
 		List<T> parts = new ArrayList<>();
-
-		// Split the string into parts
 		StringBuilder section = new StringBuilder();
-		boolean ignoreNext = false;
-		boolean firstChar = true;
+		boolean ignoreNextSpecial = false; // caused by backslash
 		int repeats = 1;
 
 		for (int i = 0; i < data.length(); i++) {
 			char c = data.charAt(i);
-			if (ignoreNext) {
+			if (ignoreNextSpecial) {
 				section.append(c);
-				firstChar = false;
+				ignoreNextSpecial = false;
 			} else {
 				switch (c) {
 					case separator:
@@ -53,65 +52,77 @@ public final class CompressedList {
 						}
 						section.setLength(0);
 						repeats = 1;
-						firstChar = true;
 						break;
 
 					case escape:
-						ignoreNext = true;
+						ignoreNextSpecial = true;
 						break;
 
 					case multiple:
-						// only apply at the start of a string
-						if (firstChar) {
-							// Read out the number
-							StringBuilder number = new StringBuilder();
-							for (++i; i < data.length(); ++i) {
-								char c2 = data.charAt(i);
-								if (c2 == separator)
-									break;
-								else
-									number.append(c2);
+						// Read out the number
+						StringBuilder number = new StringBuilder();
+						for (++i; i < data.length(); ++i) {
+							char c2 = data.charAt(i);
+							if (c2 == separator) {
+								--i; // place cursor before semi-colen
+								break;
+							} else {
+								number.append(c2);
 							}
-							repeats = Integer.parseInt(number.toString());
-							break;
 						}
+						repeats = Integer.parseInt(number.toString());
+						break;
 					default:
 						section.append(c);
-						firstChar = true;
 				}
 			}
 		}
 
-		// Add the final element
-		T lastPart = decoder.apply(section.toString());
-		for (int i = 0; i < repeats; i++)
-			parts.add(lastPart);
-
-		// TODO CompressedList stores all elements when reading string
 		return parts;
 	}
 
-	public static <T> String encode(Iterator<T> objects, Function<T, String> encoder) {
+	/**
+	 * Converts each element to a string (through the encoder) and combines them into a string. Compresses duplications
+	 * into the output. The exact format of the output is not guaranteed.
+	 * @param objects A collection of objects to compress. Equal objects are tested or by the "equals" method
+	 * @param encoder a function to convert an individual object into a string. A matching decoder must be provided to
+	 *                   the {@link #decode(String, Function)} method. All characters are valid for use
+	 * @param <T> The type of object being converted
+	 * @return A string encoding the objects
+	 */
+	@CheckReturnValue
+	public static <T> String encode(Iterator<T> objects, Function<? super T, String> encoder) {
+
 		StringBuilder result = new StringBuilder();
 		T prev = null;
-		int duplicates = 0;
+		int quantity = 0;
 		while (objects.hasNext()) {
 			T next = objects.next();
 			if (next.equals(prev)) {
-				++duplicates;
+				++quantity;
 			} else {
-				if (prev != null && duplicates != 0) {
-					String encoded = encoder.apply(prev);
-					if (duplicates > 1) {
-						result.append(multiple).append(duplicates).append(separator);
-					}
-					result.append(encoded);
-				}
-				duplicates = 0;
+				appendEncode(result, encoder, prev, quantity);
 				prev = next;
+				quantity = 1;
 			}
 		}
+
+		appendEncode(result, encoder, prev, quantity);
 		return result.toString();
+	}
+
+	private static <T> void appendEncode(StringBuilder output, Function<T, String> encoder, T value, int amount) {
+		if (amount <= 0)
+			return;
+		String encoded = encoder.apply(value)
+				.replace(String.valueOf(escape), escape + "" + escape)
+				.replace(String.valueOf(separator), escape + "" + separator)
+				.replace(String.valueOf(multiple), escape + "" + multiple);
+		output.append(encoded);
+		if (amount > 1) {
+			output.append(multiple).append(amount);
+		}
+		output.append(separator);
 	}
 
 }

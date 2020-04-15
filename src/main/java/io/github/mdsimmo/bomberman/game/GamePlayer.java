@@ -1,11 +1,7 @@
 package io.github.mdsimmo.bomberman.game;
 
 import io.github.mdsimmo.bomberman.Bomberman;
-import io.github.mdsimmo.bomberman.events.PlayerHurtEvent;
-import io.github.mdsimmo.bomberman.events.PlayerKilledEvent;
-import io.github.mdsimmo.bomberman.events.PlayerLeaveGameEvent;
-import io.github.mdsimmo.bomberman.events.PlayerOnBombEvent;
-import io.github.mdsimmo.bomberman.messaging.Chat;
+import io.github.mdsimmo.bomberman.events.*;
 import io.github.mdsimmo.bomberman.messaging.Formattable;
 import io.github.mdsimmo.bomberman.messaging.Message;
 import io.github.mdsimmo.bomberman.messaging.Text;
@@ -13,15 +9,12 @@ import org.bukkit.*;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
-import org.bukkit.event.EventHandler;
-import org.bukkit.event.EventPriority;
-import org.bukkit.event.HandlerList;
-import org.bukkit.event.Listener;
+import org.bukkit.event.*;
+import org.bukkit.event.block.Action;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityRegainHealthEvent;
-import org.bukkit.event.player.PlayerItemConsumeEvent;
-import org.bukkit.event.player.PlayerQuitEvent;
+import org.bukkit.event.player.*;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.PotionMeta;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -29,267 +22,366 @@ import org.bukkit.potion.PotionData;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.potion.PotionType;
+import org.jetbrains.annotations.NotNull;
 
+import javax.annotation.Nonnull;
 import java.util.List;
 
 public class GamePlayer implements Formattable, Listener {
 
-	private static JavaPlugin plugin = Bomberman.instance;
+    private static JavaPlugin plugin = Bomberman.instance;
 
-	public final Player player;
-	private final Game game;
+    public static void spawnGamePlayer(@NotNull Player player, @NotNull  Game game, @NotNull Location start) {
 
-	private int immunity = 0;
+        GamePlayer gamePlayer = new GamePlayer(player, game);
 
-	private final ItemStack[] spawnInventory;
-	private final Location spawn;
-	private final int spawnHunger;
-	private final GameMode spawnGameMode;
-	private final double spawnHealth;
-	private final double spawnMaxHealth;
-	private final double spawnHealthScale;
+        player.getServer().getPluginManager().registerEvents(gamePlayer, plugin);
 
-	/**
-	 * Starts the given in the given game at the given starting point.
-	 *
-	 * This constructor will move the player into the start location, build walls around the player and remember
-	 * all the details about the player
-	 * @param player the player to move
-	 * @param game the game to join
-	 * @param start where to put the player
-	 */
-	public GamePlayer(Player player, Game game, Location start) {
-		this.player = player;
-		this.game = game;
+        // Initialise the player for the game
+        player.teleport(start.clone().add(0.5, 0.5, 0.5));
+        player.setGameMode(GameMode.SURVIVAL);
+        player.setHealth(game.getSettings().lives);
+        player.getAttribute(Attribute.GENERIC_MAX_HEALTH).setBaseValue(game.getSettings().lives);
+        // if setHealthScale is not delayed, it can sometimes cause the client side to think they died?!?!?
+        Bukkit.getScheduler().scheduleSyncDelayedTask(plugin, () ->player.setHealthScale(game.getSettings().lives * 2));
+        player.setExhaustion(0);
+        player.setFoodLevel(100000); // just a big number
+        player.getInventory().clear();
+        for (ItemStack stack : game.getSettings().initialItems) {
+            ItemStack s = stack.clone();
+            player.getInventory().addItem(s);
+        }
 
-		// remember the player stats
-		spawnHealth = player.getHealth();
-		spawnGameMode = player.getGameMode();
-		spawnHealthScale = player.getHealthScale();
-		spawnMaxHealth = player.getAttribute(Attribute.GENERIC_MAX_HEALTH).getBaseValue();
-		spawn = player.getLocation();
-		spawnHunger = player.getFoodLevel();
-		spawnInventory = player.getInventory().getContents();
+        gamePlayer.removePotionEffects();
+        player.addScoreboardTag("bm_player");
+    }
 
-		player.getServer().getPluginManager().registerEvents(this, plugin);
+    private final Player player;
+    private final Game game;
 
-		// Initialise the player for the game
-		player.teleport(start);
-		player.setGameMode(GameMode.ADVENTURE);
-		player.setHealth(game.getSettings().lives);
-		player.getAttribute(Attribute.GENERIC_MAX_HEALTH).setBaseValue(game.getSettings().lives);
-		player.setHealthScale(game.getSettings().lives * 2);
-		player.setExhaustion(0);
-		player.setFoodLevel(100000); // just a big number
-		player.getInventory().clear();
-		for (ItemStack stack : game.getSettings().initialitems) {
-			ItemStack s = stack.clone();
-			player.getInventory().addItem(s);
-		}
-		removePotionEffects();
-	}
+    private boolean immunity = false;
 
-	/**
-	 * Removes the player from the game and removes any hooks to this player. Treats the player like they disconnected
-	 * from the server.
-	 */
-	public void removeFromGame() {
-		player.getAttribute(Attribute.GENERIC_MAX_HEALTH).setBaseValue(spawnMaxHealth);
-		player.setHealthScale(spawnHealthScale);
-		player.setHealth(spawnHealth);
-		player.teleport(spawn);
-		player.setGameMode(spawnGameMode);
-		player.getInventory().setContents(spawnInventory);
-		player.setFoodLevel(spawnHunger);
+    private final ItemStack[] spawnInventory;
+    private final Location spawn;
+    private final int spawnHunger;
+    private final GameMode spawnGameMode;
+    private final double spawnHealth;
+    private final double spawnMaxHealth;
+    private final double spawnHealthScale;
 
+    /**
+     * Starts the given in the given game at the given starting point.
+     * <p>
+     * This constructor will move the player into the start location, build walls around the player and remember
+     * all the details about the player
+     *
+     * @param player the player to move
+     * @param game   the game to join
+     */
+    private GamePlayer(Player player, Game game) {
+        this.player = player;
+        this.game = game;
 
-		removePotionEffects();
-		HandlerList.unregisterAll(this);
+        // remember the player stats
+        spawnHealth = player.getHealth();
+        spawnGameMode = player.getGameMode();
+        spawnHealthScale = player.getHealthScale();
+        spawnMaxHealth = player.getAttribute(Attribute.GENERIC_MAX_HEALTH).getBaseValue();
+        spawn = player.getLocation();
+        spawnHunger = player.getFoodLevel();
+        spawnInventory = player.getInventory().getContents();
+    }
 
-		Bukkit.getPluginManager().callEvent(new PlayerLeaveGameEvent(game, player));
-	}
+    /**
+     * Removes the player from the game and removes any hooks to this player. Treats the player like they disconnected
+     * from the server.
+     */
+    private void resetStuffAndUnregister() {
+        reset();
+        HandlerList.unregisterAll(this);
+    }
 
+    private void reset() {
+        player.getAttribute(Attribute.GENERIC_MAX_HEALTH).setBaseValue(spawnMaxHealth);
+        player.setHealthScale(spawnHealthScale);
+        player.setHealth(spawnHealth);
+        player.teleport(spawn);
+        player.setGameMode(spawnGameMode);
+        player.getInventory().setContents(spawnInventory);
+        player.setFoodLevel(spawnHunger);
 
-	public void damageFrom(Player attacker) {
-		Bukkit.getPluginManager().callEvent(new PlayerHurtEvent(game, player, attacker));
-	}
+        player.removeScoreboardTag("bm_player");
 
-	@EventHandler(ignoreCancelled = true, priority = EventPriority.HIGH)
-	public void onPlayerWalkedIntoBomb(PlayerOnBombEvent e) {
-		if (e.getPlayer() != this.player)
-			return;
+        removePotionEffects();
+    }
 
-		Bukkit.getPluginManager().callEvent(new PlayerHurtEvent(game, player, e.getCause()));
-	}
+    @EventHandler(ignoreCancelled = true, priority = EventPriority.HIGH)
+    public void onPlayerLeaveGameEvent(BmPlayerLeaveGameIntent e) {
+        if (e.getPlayer() != player)
+            return;
+        if (player.isDead()) {
+            // Give player their stuff back when they respawn
+            // Attempting to do this when player is dead causes very strange bugs
+            Bukkit.getPluginManager().registerEvents(new Listener() {
+                @EventHandler
+                public void onPlayerRespawn(PlayerRespawnEvent e) {
+                    e.setRespawnLocation(spawn);
+                    reset();
+                    HandlerList.unregisterAll(this);
+                }
+            }, plugin);
+            HandlerList.unregisterAll(this);
+        } else {
+            resetStuffAndUnregister();
+        }
+        e.setHandled();
+    }
 
-	@EventHandler(ignoreCancelled = true, priority = EventPriority.LOW)
-	public void onPlayerDamageWithImmunity(PlayerHurtEvent e) {
-		if (e.getPlayer() != player)
-			return;
+    @EventHandler(ignoreCancelled = true, priority = EventPriority.HIGH)
+    public void onGameTerminated(BmGameTerminatedIntent e) {
+        if (e.getGame() != this.game)
+            return;
+        resetStuffAndUnregister();
+    }
 
-		if (immunity > 0 )
-			e.setCancelled(true);
-	}
+    @EventHandler(ignoreCancelled = true, priority = EventPriority.LOW)
+    public void onPlayerMoved(PlayerMoveEvent e) {
+        if (e.getPlayer() != player)
+            return;
+        BmPlayerMovedEvent bmEvent = new BmPlayerMovedEvent(game, player, e.getFrom(), e.getTo());
+        Bukkit.getPluginManager().callEvent(bmEvent);
+    }
 
-	@EventHandler(ignoreCancelled = true, priority = EventPriority.HIGH)
-	public void onPlayerDamaged(PlayerHurtEvent e) {
-		if (e.getPlayer() != player)
-			return;
+    @EventHandler(ignoreCancelled = true, priority = EventPriority.HIGH)
+    public void onExplosion(BmExplosionEvent e) {
+        if (Explosion.isTouching(player, e.getIgnited())) {
+            BmPlayerHitIntent.hit(player, e.getCause());
+        }
+    }
 
-		if (player.getHealth() > 1)
-			player.damage(1); // TODO player.damage(int) call the damage event?
-		else {
-			PlayerKilledEvent killedEvent = new PlayerKilledEvent(game, player, e.getAttacker());
-			Bukkit.getPluginManager().callEvent(killedEvent);
-			removeFromGame();
-		}
-	}
+    @EventHandler(ignoreCancelled = true, priority = EventPriority.HIGH)
+    public void onPlayerHit(BmPlayerHitIntent e) {
+        if (e.getPlayer() != this.player)
+            return;
 
-	@EventHandler(ignoreCancelled = true, priority = EventPriority.HIGHEST)
-	public void onPlayerPlaceBlock( BlockPlaceEvent e ) {
-		if (e.getPlayer() != player)
-			return;
-		Block b = e.getBlock();
-		// create a bomb when placing tnt
-		if (b.getType() == game.getSettings().bombMaterial) {
-			new Bomb(game, this, b);
-		}
-	}
+        BmPlayerHurtIntent.run(game, player, e.getCause());
+        e.setHandled();
+    }
 
-	@EventHandler( priority = EventPriority.LOWEST )
-	public void onPlayerDrinkPotion(final PlayerItemConsumeEvent e ) {
-		if ( e.isCancelled() || e.getPlayer() != player )
-			return;
+    @EventHandler(ignoreCancelled = true, priority = EventPriority.LOW)
+    public void onPlayerHurtWithImmunity(BmPlayerHurtIntent e) {
+        if (e.getPlayer() != player)
+            return;
 
-		// make potion effects the correct duration
-		if ( e.getItem().getItemMeta() instanceof PotionMeta) {
-			PotionMeta potion = (PotionMeta)e.getItem().getItemMeta();
-			PotionData data = potion.getBasePotionData();
+        if (immunity)
+            e.setCancelled(true);
+    }
 
-			PotionEffectType effects = data.getType().getEffectType();
-			if (effects != null) {
-				// Set the potion to do nothing
-				potion.setBasePotionData(new PotionData(PotionType.WATER));
+    @EventHandler(ignoreCancelled = true, priority = EventPriority.HIGH)
+    public void onPlayerDamaged(BmPlayerHurtIntent e) {
+        if (e.getPlayer() != player)
+            return;
 
-				// Add the effect that we want
-				potion.addCustomEffect(
-						new PotionEffect( effects,
-								20* game.getSettings().potionDuration * (data.isExtended() ? 2 : 1),
-								data.isUpgraded() ? 1 : 2),
-						false );
-				// don't need to change custom effects since they are manually changeable
-				player.addPotionEffects(potion.getCustomEffects());
-			}
+        if (player.getHealth() > 1) {
+            player.damage(1);
+            immunity = true;
+            Bukkit.getScheduler().scheduleSyncDelayedTask(plugin, () -> {
+                immunity = false;
+                // Call the player move event to recheck damage required
+                Bukkit.getPluginManager().callEvent(new BmPlayerMovedEvent(game, player, player.getLocation(), player.getLocation()));
+            }, 22); // 22 is slightly longer than 20 ticks a bomb is active for
+        } else {
+            BmPlayerKilledIntent.kill(game, player, e.getAttacker());
+        }
+        e.setHandled();
+    }
 
-			// delete the glass bottle left over (we don't know if it was consumed from right/left hand)
-			plugin.getServer().getScheduler()
-					.scheduleSyncDelayedTask(plugin, () -> {
-						if (player.getInventory().getItemInMainHand().getType() == Material.GLASS_BOTTLE)
-							player.getInventory().setItemInMainHand(null);
-						if (player.getInventory().getItemInOffHand().getType() == Material.GLASS_BOTTLE)
-							player.getInventory().setItemInOffHand(null);
-					});
-		}
-	}
+    @EventHandler(ignoreCancelled = true, priority = EventPriority.HIGH)
+    public void onPlayerKilledInGame(BmPlayerKilledIntent e) {
+        if (e.getPlayer() != player)
+            return;
+        player.setHealth(0);
+        BmPlayerLeaveGameIntent.leave(player);
+        e.setHandled();
+    }
 
-	@EventHandler(priority = EventPriority.HIGH)
-	public void onPlayerLeave(PlayerQuitEvent e) {
-		if (e.getPlayer() == player) {
-			removeFromGame();
-		}
-	}
+    @EventHandler(ignoreCancelled = true, priority = EventPriority.HIGHEST)
+    public void onPlayerPlaceBlock(BlockPlaceEvent e) {
+        if (e.getPlayer() != player)
+            return;
+        Block b = e.getBlock();
+        // create a bomb when placing tnt
+        if (b.getType() == game.getSettings().bombItem) {
+            if (!Bomb.spawnBomb(game, player, b)) {
+                e.setCancelled(true);
+            }
+        }
+    }
 
-	@EventHandler(priority = EventPriority.LOWEST)
-	public void onPlayerRegen(EntityRegainHealthEvent e) {
-		if (e.getEntity() == player) {
-			if (e.getRegainReason() == EntityRegainHealthEvent.RegainReason.MAGIC)
-				if (game.isSuddenDeath()) {
-					Message message = Text.NO_REGEN.getMessage(player);
-					message.put("game", game);
-					Chat.sendMessage(message);
-				} else {
-					player.setHealth(Math.min(player.getHealth() + 1, player.getMaxHealth()));
-				}
-			e.setCancelled( true );
-		}
-	}
+    @EventHandler(priority = EventPriority.LOWEST)
+    public void onPlayerDrinkPotion(final PlayerItemConsumeEvent e) {
+        if (e.isCancelled() || e.getPlayer() != player)
+            return;
 
-	@EventHandler( priority = EventPriority.LOWEST )
-	public void onPlayerDamaged(EntityDamageEvent e) {
-		if (e.isCancelled() || e.getEntity() != player)
-			return;
-		// Player cannot be burnt during game play
-		player.setFireTicks(0);
-		e.setCancelled(true);
-	}
+        // make potion effects the correct duration
+        if (e.getItem().getItemMeta() instanceof PotionMeta) {
+            PotionMeta potion = (PotionMeta) e.getItem().getItemMeta();
+            PotionData data = potion.getBasePotionData();
 
-	public int bombStrength() {
-		int strength = 0;
-		for (ItemStack stack : player.getInventory().getContents()) {
-			if (stack != null && stack.getType() == game.getSettings().powerMaterial) {
-				strength += stack.getAmount();
-			}
-		}
-		return Math.max( strength, 1 );
-	}
+            PotionEffectType effects = data.getType().getEffectType();
+            if (effects != null) {
+                // Set the potion to do nothing
+                potion.setBasePotionData(new PotionData(PotionType.WATER));
 
-	public int bombAmount() {
-		int strength = 0;
-		for ( ItemStack stack : player.getInventory().getContents() ) {
-			if (stack != null && stack.getType() == game.getSettings().bombMaterial) {
-				strength += stack.getAmount();
-			}
-		}
-		return Math.max( strength, 1 );
-	}
+                // Add the effect that we want
+                potion.addCustomEffect(
+                        new PotionEffect(effects,
+                                20 * game.getSettings().potionDuration * (data.isExtended() ? 2 : 1),
+                                data.isUpgraded() ? 1 : 2),
+                        false);
+                // don't need to change custom effects since they are manually changeable
+                player.addPotionEffects(potion.getCustomEffects());
+            }
 
-	private void removePotionEffects() {
-		Server server = player.getServer();
-		if (plugin.isEnabled())
-			server.getScheduler()
-					.scheduleSyncDelayedTask(plugin, () -> {
-						player.setFireTicks(0);
-						for (PotionEffect effect : player.getActivePotionEffects()) {
-							player.removePotionEffect(effect.getType());
-						}
-					});
-	}
+            // delete the glass bottle left over (we don't know if it was consumed from right/left hand)
+            plugin.getServer().getScheduler()
+                    .scheduleSyncDelayedTask(plugin, () -> {
+                        if (player.getInventory().getItemInMainHand().getType() == Material.GLASS_BOTTLE)
+                            player.getInventory().setItemInMainHand(null);
+                        if (player.getInventory().getItemInOffHand().getType() == Material.GLASS_BOTTLE)
+                            player.getInventory().setItemInOffHand(null);
+                    });
+        }
+    }
 
-	@Override
-	public String format(Message message, List<String> args) {
-		if ( args.size() == 0 )
-			return player.getName();
-		if ( args.size() != 1 )
-			throw new RuntimeException( "Players can have at most one argument" );
-		switch ( args.get( 0 ) ) {
-			case "name":
-				return player.getName();
-			case "lives":
-				return Integer.toString((int)player.getHealth() );
-			case "power":
-				return Integer.toString(bombStrength());
-			case "bombs":
-					return Integer.toString(bombAmount());
-			default:
-				return null;
-		}
-	}
+    @EventHandler(priority = EventPriority.HIGH)
+    public void onPlayerLogout(PlayerQuitEvent e) {
+        if (e.getPlayer() == player) {
+            BmPlayerLeaveGameIntent.leave(player);
+        }
+    }
 
-	private static class Immunity {
+    @EventHandler(priority = EventPriority.LOWEST)
+    public void onPlayerRegen(EntityRegainHealthEvent e) {
+        if (e.getEntity() == player) {
+            if (e.getRegainReason() == EntityRegainHealthEvent.RegainReason.MAGIC) {
+                player.setHealth(Math.min(player.getHealth() + 1, player.getAttribute(Attribute.GENERIC_MAX_HEALTH).getValue()));
+            }
+            e.setCancelled(true);
+        }
+    }
 
-		private final GamePlayer player;
+    @EventHandler(ignoreCancelled = true, priority = EventPriority.LOWEST)
+    public void onPlayerDamaged(EntityDamageEvent e) {
+        if (e.getEntity() != player)
+            return;
+        // Allow custom damage events (ie. from plugin)
+        if (e.getCause() == EntityDamageEvent.DamageCause.CUSTOM)
+            return;
+        // Player cannot be burnt or hurt during game play
+        player.setFireTicks(0);
+        e.setCancelled(true);
+    }
 
-		Immunity(GamePlayer player) {
-			this.player = player;
-		}
+    @EventHandler(ignoreCancelled = true, priority = EventPriority.LOW)
+    public void onPlayerJoinGame(BmPlayerJoinGameIntent e) {
+        // Cannot join two games at once
+        if (e.getPlayer() == player) {
+            e.cancelFor(Text.JOIN_ALREADY_JOINED
+                    .with("game", e.getGame())
+                    .with("player", player)
+                    .format());
+        }
+    }
 
-		public void start(int duration) {
-			++player.immunity;
-			player.player.getServer().getScheduler().scheduleSyncDelayedTask( plugin, () -> {
-					// remove the fire
-					if ( --player.immunity == 0 )
-						player.player.setFireTicks( 0 );
-				}, duration);
-		}
-	}
+    @EventHandler(ignoreCancelled = true, priority = EventPriority.HIGH)
+    public void onGameStopped(BmRunStoppedIntent e) {
+        BmPlayerLeaveGameIntent.leave(player);
+    }
+
+    @EventHandler(ignoreCancelled = true, priority = EventPriority.LOW)
+    public void onPlayerBreakBlockWithWrongTool(PlayerInteractEvent e) {
+        // Disable player from breaking a block
+        if (e.getPlayer() != player)
+            return;
+        if (e.getAction() != Action.LEFT_CLICK_BLOCK || !e.hasBlock()) {
+            // Only care about block breaking events
+            return;
+        }
+
+        // TODO only let player break block if they have used the correct tool
+        // Maybe use CanDestroy tag? - That requires NBT though...
+
+        // Cannot break things with hand
+        e.setCancelled(true);
+        e.setUseInteractedBlock(Event.Result.DENY);
+        e.setUseItemInHand(Event.Result.DENY);
+        // apply mining fatigue so player doesn't see block breaking
+        e.getPlayer().addPotionEffect(new PotionEffect(PotionEffectType.SLOW_DIGGING, 20, 1));
+    }
+
+    @EventHandler(ignoreCancelled = true, priority = EventPriority.HIGH)
+    public void onPlayerWon(BmPlayerWon e) {
+        if (e.getPlayer() != player)
+            return;
+        Text.PLAYER_WON.with("player", player).sendTo(player);
+        // Let player walk around like a boss
+        immunity = true;
+    }
+
+    public static int bombStrength(Game game, Player player) {
+        int strength = 0;
+        for (ItemStack stack : player.getInventory().getContents()) {
+            if (stack != null && stack.getType() == game.getSettings().powerItem) {
+                strength += stack.getAmount();
+            }
+        }
+        return Math.max(strength, 1);
+    }
+
+    private int bombStrength() {
+        return bombStrength(game, player);
+    }
+
+    private int bombAmount() {
+        int strength = 0;
+        for (ItemStack stack : player.getInventory().getContents()) {
+            if (stack != null && stack.getType() == game.getSettings().bombItem) {
+                strength += stack.getAmount();
+            }
+        }
+        return Math.max(strength, 1);
+    }
+
+    private void removePotionEffects() {
+        Server server = player.getServer();
+        if (plugin.isEnabled())
+            server.getScheduler()
+                    .scheduleSyncDelayedTask(plugin, () -> {
+                        player.setFireTicks(0);
+                        for (PotionEffect effect : player.getActivePotionEffects()) {
+                            player.removePotionEffect(effect.getType());
+                        }
+                    });
+    }
+
+    @Override
+    public Message format(@Nonnull List<Message> args) {
+        if (args.size() == 0)
+            return Message.of(player.getName());
+        if (args.size() != 1)
+            throw new RuntimeException("Players can have at most one argument");
+        switch (args.get(0).toString()) {
+            case "name":
+                return Message.of(player.getName());
+            case "lives":
+                return Message.of((int) player.getHealth());
+            case "power":
+                return Message.of(bombStrength());
+            case "bombs":
+                return Message.of(bombAmount());
+            default:
+                return null;
+        }
+    }
 }

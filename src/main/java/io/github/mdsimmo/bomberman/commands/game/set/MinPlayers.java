@@ -3,8 +3,7 @@ package io.github.mdsimmo.bomberman.commands.game.set;
 import io.github.mdsimmo.bomberman.game.Game;
 import io.github.mdsimmo.bomberman.commands.Cmd;
 import io.github.mdsimmo.bomberman.commands.GameCommand;
-import io.github.mdsimmo.bomberman.messaging.Chat;
-import io.github.mdsimmo.bomberman.messaging.Phrase;
+import io.github.mdsimmo.bomberman.messaging.Message;
 import io.github.mdsimmo.bomberman.messaging.Text;
 
 import java.util.List;
@@ -18,17 +17,17 @@ public class MinPlayers extends GameCommand {
 	}
 
 	@Override
-	public Phrase nameShort() {
-		return Text.MINPLAYERS_NAME;
+	public Message name() {
+		return context(Text.MINPLAYERS_NAME).format();
 	}
 
 	@Override
-	public List<String> shortOptions(CommandSender sender, List<String> args) {
+	public List<String> gameOptions(List<String> args) {
 		return null;
 	}
 
 	@Override
-	public boolean runShort(CommandSender sender, List<String> args, Game game) {
+	public boolean gameRun(CommandSender sender, List<String> args, Game game) {
 		if (args.size() != 1)
 			return false;
 
@@ -39,13 +38,16 @@ public class MinPlayers extends GameCommand {
 			return false;
 		}
 		if ( amount <= 0 ) {
-			Chat.sendMessage( getMessage(Text.MINPLAYERS_LESS_THAN_ONE, sender)
-					.put( "game", game )
-					.put("amount", amount) );
+			context(Text.MINPLAYERS_LESS_THAN_ONE)
+					.with("game", game )
+					.with("amount", amount)
+					.sendTo(sender);
 			return true;
 		}
-		game.setMinPlayers(amount);	
-		Chat.sendMessage(getMessage(Text.MINPLAYERS_SET, sender).put( "game", game ));
+		game.getSettings().minPlayers = amount;
+		context(Text.MINPLAYERS_SET)
+				.with("game", game )
+				.sendTo(sender);
 		return true;
 	}
 
@@ -55,22 +57,22 @@ public class MinPlayers extends GameCommand {
 	}
 
 	@Override
-	public Phrase extraShort() {
-		return Text.MINPLAYERS_EXTRA;
+	public Message extra() {
+		return context(Text.MINPLAYERS_EXTRA).format();
 	}
 
 	@Override
-	public Phrase exampleShort() {
-		return Text.MINPLAYERS_EXAMPLE;
+	public Message example() {
+		return context(Text.MINPLAYERS_EXAMPLE).format();
 	}
 
 	@Override
-	public Phrase descriptionShort() {
-		return Text.MINPLAYERS_DESCRIPTION;
+	public Message description() {
+		return context(Text.MINPLAYERS_DESCRIPTION).format();
 	}
 
 	@Override
-	public Phrase usageShort() {
-		return Text.MINPLAYERS_USAGE;
+	public Message usage() {
+		return context(Text.MINPLAYERS_USAGE).format();
 	}
 }

@@ -2,6 +2,7 @@ package io.github.mdsimmo.bomberman;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 import org.bukkit.Material;
@@ -33,18 +34,14 @@ public enum Config {
 			new Potion(PotionType.INSTANT_HEAL, 1).toItemStack(1),
 			new Potion(PotionType.SPEED, 2).toItemStack(1))),
 	DROPS_CHANCE ("drops.chance", 0.1d),
-	BLOCKS_DROPPING ("blocks.drop", Arrays.asList(
+	BLOCKS_DROPPING ("blocks.drop", Collections.singletonList(
 			Material.DIRT), Material.class),
-	BLOCKS_DESTRUCTABLE ("blocks.destructable", Arrays.asList(
+	BLOCKS_DESTRUCTABLE ("blocks.destructable", Collections.singletonList(
 			Material.DIRT), Material.class),
 	SUDDEN_DEATH ("timeout.suddendeath", 60*5),
 	TIME_OUT ("timeout.gameover", 60*8),
 	PROTECT ("protection.enabled", true),
 	PROTECT_EXPLOSIONS ("protection.explosion", true),
-	PROTECT_PLACING ("protection.blockplacing", true),
-	PROTECT_DESTROYING ("protection.blockdestroy", true),
-	PROTECT_FIRE ("protection.fire", true),
-	PROTECT_PVP ("protection.pvp", true),
 	PROTECT_DAMAGE ("protection.damage", true),
 	INITIAL_ITEMS("initialitems", Arrays.asList(
 			new ItemStack(Material.TNT, 3),

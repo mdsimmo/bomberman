@@ -1,102 +1,39 @@
 package io.github.mdsimmo.bomberman.commands;
 
 import io.github.mdsimmo.bomberman.game.Game;
-import io.github.mdsimmo.bomberman.game.GamePlayer;
-import io.github.mdsimmo.bomberman.messaging.Message;
-import io.github.mdsimmo.bomberman.messaging.Phrase;
-import io.github.mdsimmo.bomberman.utils.Utils;
-
-import java.util.ArrayList;
-import java.util.List;
-
+import io.github.mdsimmo.bomberman.game.GameRegestry;
 import org.bukkit.command.CommandSender;
-import org.bukkit.entity.Player;
+
+import java.util.List;
+import java.util.stream.Collectors;
 
 public abstract class GameCommand extends Cmd {
 
-    @Override
-    public Message name( CommandSender sender ) {
-        return getMessage( nameShort(), sender );
-    }
-    
-    public abstract Phrase nameShort();
-    
-    public GameCommand( Cmd parent ) {
-        super( parent );
+    public GameCommand(Cmd parent) {
+        super(parent);
     }
 
-    public final List<String> options( CommandSender sender, List<String> args ) {
-        if ( args.size() <= 1 ) {
-            List<String> list = new ArrayList<>( Game.allGames() );
-            if ( sender instanceof Player
-                    && GamePlayer.getPlayerRep( (Player)sender ).getActiveGame() != null ) {
-                List<String> options = shortOptions( sender, args );
-                if ( options != null )
-                    list.addAll( options );
-            }
-            return list;
+    @Override
+    public final List<String> options(CommandSender sender, List<String> args) {
+        if (args.size() <= 1) {
+            return GameRegestry.allGames().stream().map(Game::getName).collect(Collectors.toList());
         } else {
-            args.remove( 0 );
-            return shortOptions( sender, args );
+            args.remove(0);
+            return gameOptions(args);
         }
     }
 
-    public abstract List<String> shortOptions( CommandSender sender,
-            List<String> args );
+    public abstract List<String> gameOptions(List<String> args);
 
     @Override
-    public final boolean run( CommandSender sender, List<String> args ) {
-        Game game;
-        if ( args.size() >= 1 && Game.allGames().contains( args.get( 0 ) ) ) {
-            // game was specified so use that
-            game = Game.findGame( args.get( 0 ) );
-            if ( sender instanceof Player )
-                GamePlayer.getPlayerRep( (Player)sender ).setActiveGame( game );
-            args.remove( 0 );
-        } else {
-            // try to get the game from what the user last did
-            if ( sender instanceof Player ) {
-                game = GamePlayer.getPlayerRep( (Player) sender ).getActiveGame( );
-                if ( game == null )
-                    return false;
-            } else
-                return false;
-        }
-        return runShort( sender, args, game );
+    public final boolean run(CommandSender sender, List<String> args) {
+        if (args.size() <= 0)
+            return false;
+        return GameRegestry.byName(args.get(0)).map(game -> {
+            args.remove(0);
+            return gameRun(sender, args, game);
+        }).orElse(false);
     }
 
-    public abstract boolean runShort( CommandSender sender, List<String> args,
-            Game game );
-
-    @Override
-    public Message extra( CommandSender sender ) {
-        return getMessage( extraShort(), sender );
-    }
-
-    public abstract Phrase extraShort();
-
-    @Override
-    public Message example( CommandSender sender ) {
-        String game = Utils.random( Game.allGames() );
-        if ( game == null )
-            game = "mygame";
-        return getMessage( exampleShort(), sender ).put( "example", game );
-    }
-
-    public abstract Phrase exampleShort();
-
-    @Override
-    public Message description( CommandSender sender ) {
-        return getMessage( descriptionShort(), sender );
-    }
-
-    public abstract Phrase descriptionShort();
-
-    @Override
-    public Message usage( CommandSender sender ) {
-        return getMessage( usageShort(), sender );
-    }
-
-    public abstract Phrase usageShort();
-
+    public abstract boolean gameRun(CommandSender sender, List<String> args, Game game);
 }

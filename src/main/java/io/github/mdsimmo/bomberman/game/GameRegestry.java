@@ -4,24 +4,22 @@ import io.github.mdsimmo.bomberman.Bomberman;
 import org.bukkit.plugin.Plugin;
 
 import java.io.File;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
+import java.util.*;
 
 public class GameRegestry {
 
     private static Plugin plugin = Bomberman.instance;
     private static final HashMap<String, Game> gameRegistry = new HashMap<>();
 
-    public static List<String> allGames() {
-        return new ArrayList<>(gameRegistry.keySet());
+    public static Set<Game> allGames() {
+        return new HashSet<>(gameRegistry.values());
     }
 
     /**
      * finds the game associated with the given name
      */
-    public static Game findGame( String name ) {
-        return gameRegistry.get( name.toLowerCase() );
+    public static Optional<Game> byName(String name ) {
+        return Optional.ofNullable(gameRegistry.get( name.toLowerCase()));
     }
 
     public static void loadGames() {
@@ -30,7 +28,8 @@ public class GameRegestry {
             data.mkdirs();
         File[] files = data.listFiles((dir, name) -> ( name.endsWith( ".game" ) ));
         for ( File f : files ) {
-            GameSaver.loadGame( f );
+            // TODO load games
+            //GameSaver.loadGame( f );
         }
     }
 

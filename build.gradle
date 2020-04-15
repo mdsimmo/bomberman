@@ -1,8 +1,10 @@
-apply plugin: 'java'
-apply plugin: 'kotlin'
-apply plugin: 'idea'
+plugins {
+    id 'java'
+    id "org.jetbrains.kotlin.jvm" version "1.3.71"
+    id 'idea'
+}
 
-sourceCompatibility = 1.8
+sourceCompatibility = 1.11
 
 group = 'io.github.mdsimmo'
 version = '0.4.0'
@@ -18,18 +20,25 @@ repositories {
         // vaults repo
         url "https://jitpack.io"
     }
+    maven {
+        // world edit repo
+        url "http://maven.enginehub.org/repo"
+    }
 }
 
 dependencies {
-    compileOnly "org.bukkit:bukkit:1.14.4-R0.1-SNAPSHOT"
-    testCompile "org.bukkit:bukkit:1.14.4-R0.1-SNAPSHOT"
-    
+    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.3.71"
+
+    compileOnly "org.bukkit:bukkit:1.15.2-R0.1-SNAPSHOT"
+    testImplementation "org.bukkit:bukkit:1.15.2-R0.1-SNAPSHOT"
+
     compileOnly "com.github.MilkBowl:VaultAPI:1.7"
-    compile "net.objecthunter:exp4j:0.4.8"
-    
+    compileOnly "com.sk89q.worldedit:worldedit-bukkit:7.1.0"
+    testImplementation "com.sk89q.worldedit:worldedit-bukkit:7.1.0"
+    implementation "net.objecthunter:exp4j:0.4.8"
+
     testCompile "junit:junit:4.+"
-    testCompile "org.mockito:mockito-core:1.+"
-    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version"
+    testImplementation "org.mockito:mockito-core:3.3.+"
 }
 
 processResources  {
@@ -45,7 +54,7 @@ processResources  {
 task clearOldPluginJar( type: Delete ) {
     description 'Deletes any old bomberman plugins from the server'
     if ( project.hasProperty("serverLocation" ) ) {
-        delete project.fileTree( "$serverLocation/plugins" ) {
+        delete project.fileTree( "$serverLocation/plugins/update" ) {
             include '*omberman*.jar'
         }
     }
@@ -55,7 +64,7 @@ task copyToServer(type: Copy, dependsOn: clearOldPluginJar ) {
     description 'Copies the plugin to the server'
     if ( project.hasProperty("serverLocation" ) ) {
         from jar
-        into "$serverLocation/plugins"
+        into "$serverLocation/plugins/update"
     }
 }
 
@@ -65,27 +74,21 @@ task install( dependsOn: [build, copyToServer] ) {
 
 jar {
     from {
-        configurations.compile.collect {
+        configurations.runtimeClasspath.collect {
             it.isDirectory() ? it : zipTree(it)
         }
     }
 }
-buildscript {
-    ext.kotlin_version = '1.3.50'
-    repositories {
-        mavenCentral()
-    }
-    dependencies {
-        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
-    }
-}
+
 compileKotlin {
     kotlinOptions {
-        jvmTarget = "1.8"
+        jvmTarget = "11"
+        freeCompilerArgs = ["-Xallow-result-return-type"]
     }
 }
 compileTestKotlin {
     kotlinOptions {
-        jvmTarget = "1.8"
+        jvmTarget = "11"
+        freeCompilerArgs = ["-Xallow-result-return-type"]
     }
 }

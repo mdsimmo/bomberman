@@ -13,10 +13,13 @@ import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 import org.bukkit.util.BlockIterator;
 
+import javax.annotation.CheckReturnValue;
+
 public class Utils {
 
-	private static StringBuffer buffer = new StringBuffer(); 
-	
+	private static StringBuffer buffer = new StringBuffer();
+
+	@CheckReturnValue
 	public static <T> T random(Collection<T> collection) {
 		int random = (int) (Math.random() * collection.size());
 		Iterator<T> iterator = collection.iterator();
@@ -36,6 +39,7 @@ public class Utils {
 	 * @param list the list to become a string
 	 * @return the string list
 	 */
+	@CheckReturnValue
 	public static String listToString(List<String> list) {
 		buffer.setLength(0);
 		for (String s : list) {
@@ -52,7 +56,8 @@ public class Utils {
 	 * @param range the range that the block must be in
 	 * @return the block found. null if no block found in the range
 	 */
-	public static final Block getTarget(Player player, int range) {
+	@CheckReturnValue
+	public static Block getTarget(Player player, int range) {
 		BlockIterator iter = new BlockIterator(player, range);
 		Block lastBlock = iter.next();
 		while (iter.hasNext()) {
@@ -69,6 +74,7 @@ public class Utils {
 	 * @param file the file's name
 	 * @return the files title
 	 */
+	@CheckReturnValue
 	public static String getFileTitle(String file) {
 		String[] parts = file.split("\\.");
 		if (parts.length == 0)
@@ -76,7 +82,8 @@ public class Utils {
 		else
 			return parts[0];
 	}
-	
+
+	@CheckReturnValue
 	public static String readFile( File file ) throws IOException {
 		try {
 			return new String( Files.readAllBytes( file.toPath() ) );

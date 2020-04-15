@@ -3,8 +3,7 @@ package io.github.mdsimmo.bomberman.commands.game.set;
 import io.github.mdsimmo.bomberman.game.Game;
 import io.github.mdsimmo.bomberman.commands.Cmd;
 import io.github.mdsimmo.bomberman.commands.GameCommand;
-import io.github.mdsimmo.bomberman.messaging.Chat;
-import io.github.mdsimmo.bomberman.messaging.Phrase;
+import io.github.mdsimmo.bomberman.messaging.Message;
 import io.github.mdsimmo.bomberman.messaging.Text;
 
 import java.util.List;
@@ -18,17 +17,17 @@ public class Lives extends GameCommand {
 	}
 
 	@Override
-	public Phrase nameShort() {
-		return Text.LIVES_NAME;
+	public Message name() {
+		return context(Text.LIVES_NAME).format();
 	}
 
 	@Override
-	public List<String> shortOptions(CommandSender sender, List<String> args) {
+	public List<String> gameOptions(List<String> args) {
 		return null;
 	}
 
 	@Override
-	public boolean runShort(CommandSender sender, List<String> args, Game game) {
+	public boolean gameRun(CommandSender sender, List<String> args, Game game) {
 		if (args.size() != 1)
 			return false;
 		int amount;
@@ -37,11 +36,15 @@ public class Lives extends GameCommand {
 			if (amount <= 0)
 				throw new Exception();
 		} catch (Exception e) {
-			Chat.sendMessage(getMessage(Text.INVALID_NUMBER, sender).put( "number", args.get(0)));
+			context(Text.INVALID_NUMBER)
+					.with("number", args.get(0))
+					.sendTo(sender);
 			return true;
 		}
-		game.setLives(amount);
-		Chat.sendMessage(getMessage(Text.LIVES_SET, sender).put( "game", game) );
+		game.getSettings().lives = amount;
+		context(Text.LIVES_SET)
+				.with("game", game)
+				.sendTo(sender);
 		return true;
 	}
 
@@ -51,23 +54,23 @@ public class Lives extends GameCommand {
 	}
 
 	@Override
-	public Phrase extraShort() {
-		return Text.LIVES_EXTRA;
+	public Message extra() {
+		return context(Text.LIVES_EXTRA).format();
 	}
 
 	@Override
-	public Phrase exampleShort() {
-		return Text.LIVES_EXAMPLE;
+	public Message example() {
+		return context(Text.LIVES_EXAMPLE).format();
 	}
 
 	@Override
-	public Phrase descriptionShort() {
-		return Text.LIVES_DESCRIPTION;
+	public Message description() {
+		return context(Text.LIVES_DESCRIPTION).format();
 	}
 
 	@Override
-	public Phrase usageShort() {
-		return Text.LIVES_USAGE;
+	public Message usage() {
+		return context(Text.LIVES_USAGE).format();
 	}
 
 }

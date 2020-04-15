@@ -1,7 +1,8 @@
 package io.github.mdsimmo.bomberman.utils;
 
-import java.util.stream.Stream;
+import javax.annotation.CheckReturnValue;
 
+@CheckReturnValue
 public final class Dim {
     public final int x, y, z;
 
@@ -30,9 +31,9 @@ public final class Dim {
         }
     }
 
-    public Stream<Dim> stream() {
-        int i = 0;
-        return Stream.generate(() -> new Dim( i % x, i % y, i % z)).limit(x * y * z);
+    @Override
+    public String toString() {
+        return "Dim{" + x + ", " + y + ", " + z + '}';
     }
 
     public int volume() {

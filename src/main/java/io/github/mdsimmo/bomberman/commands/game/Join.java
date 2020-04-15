@@ -1,23 +1,16 @@
 package io.github.mdsimmo.bomberman.commands.game;
 
-import io.github.mdsimmo.bomberman.game.Game;
-import io.github.mdsimmo.bomberman.game.Game.State;
-import io.github.mdsimmo.bomberman.game.GamePlayer;
 import io.github.mdsimmo.bomberman.commands.Cmd;
 import io.github.mdsimmo.bomberman.commands.GameCommand;
-import io.github.mdsimmo.bomberman.messaging.Chat;
+import io.github.mdsimmo.bomberman.events.BmPlayerJoinGameIntent;
+import io.github.mdsimmo.bomberman.game.Game;
 import io.github.mdsimmo.bomberman.messaging.Message;
-import io.github.mdsimmo.bomberman.messaging.Phrase;
 import io.github.mdsimmo.bomberman.messaging.Text;
-import io.github.mdsimmo.bomberman.game.playerstates.GamePlayingState;
-import io.github.mdsimmo.bomberman.game.playerstates.PlayerState;
-
-import java.util.ArrayList;
-import java.util.List;
-
-import org.bukkit.DyeColor;
+import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
+
+import java.util.List;
 
 public class Join extends GameCommand {
 
@@ -26,39 +19,43 @@ public class Join extends GameCommand {
 	}
 
 	@Override
-	public Phrase nameShort() {
-		return Text.JOIN_NAME;
+	public Message name() {
+		return context(Text.JOIN_NAME).format();
 	}
 
 	@Override
-	public List<String> shortOptions( CommandSender sender, List<String> args ) {
-		if (args.size() == 1) {
-			List<String> values = new ArrayList<String>();
-			for ( DyeColor color : DyeColor.values() )
-				values.add( color.toString() );
-			//return values;
-			return null;
-		}
+	public List<String> gameOptions(List<String> args ) {
 		return null;
 	}
 
 	@Override
-	public boolean runShort( CommandSender sender, List<String> args, Game game ) {
+	public boolean gameRun(CommandSender sender, List<String> args, Game game ) {
 		if ( args.size() != 0 )
 			return false;
 
 		if (!(sender instanceof Player)) {
-			Chat.sendMessage( getMessage( Text.MUST_BE_PLAYER, sender ) );
+			context(Text.MUST_BE_PLAYER).sendTo(sender);
 			return true;
 		}
 
-		game.tryJoin((Player)sender,
-				(rep) -> {
-				},
-				err -> {
-					Chat.sendMessage(err);
-				}
-		);
+		var e = new BmPlayerJoinGameIntent(game, (Player) sender);
+		Bukkit.getPluginManager().callEvent(e);
+		e.verifyHandled();
+
+		if (e.isCancelled()) {
+			e.cancelledReason().ifPresentOrElse(
+					reason -> reason.sendTo(sender),
+					() -> context(Text.CANT_JOIN)
+							.with("game", game)
+							.with("player", sender)
+							.sendTo(sender));
+		} else {
+			context(Text.PLAYER_JOINED)
+					.with("game", game)
+					.with("player", sender)
+					.sendTo(sender);
+		}
+
 		return true;
 	}
 
@@ -68,23 +65,23 @@ public class Join extends GameCommand {
 	}
 
 	@Override
-	public Phrase extraShort() {
-		return Text.JOIN_EXTRA;
+	public Message extra() {
+		return context(Text.JOIN_EXTRA).format();
 	}
 
 	@Override
-	public Phrase exampleShort() {
-		return Text.JOIN_EXAMPLE;
+	public Message example() {
+		return context(Text.JOIN_EXAMPLE).format();
 	}
 
 	@Override
-	public Phrase descriptionShort() {
-		return Text.JOIN_DESCRIPTION;
+	public Message description() {
+		return context(Text.JOIN_DESCRIPTION).format();
 	}
 
 	@Override
-	public Phrase usageShort() {
-		return Text.JOIN_USAGE;
+	public Message usage() {
+		return context(Text.JOIN_USAGE).format();
 	}
 
 }
