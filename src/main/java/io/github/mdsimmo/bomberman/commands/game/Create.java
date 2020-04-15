@@ -6,6 +6,7 @@ import com.sk89q.worldedit.WorldEdit;
 import com.sk89q.worldedit.bukkit.BukkitAdapter;
 import com.sk89q.worldedit.regions.Region;
 import com.sk89q.worldedit.session.SessionOwner;
+import io.github.mdsimmo.bomberman.Bomberman;
 import io.github.mdsimmo.bomberman.commands.Cmd;
 import io.github.mdsimmo.bomberman.game.Game;
 import io.github.mdsimmo.bomberman.game.GameRegestry;
@@ -17,8 +18,6 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
 import java.io.File;
-import java.net.URISyntaxException;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
@@ -26,6 +25,9 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 public class Create extends Cmd {
+
+    private static Bomberman bm = Bomberman.instance;
+    private static WorldEdit we = WorldEdit.getInstance();
 
     public Create(Cmd parent) {
         super(parent);
@@ -42,38 +44,30 @@ public class Create extends Cmd {
             case 1:
                 return GameRegestry.allGames().stream().map(Game::getName).collect(Collectors.toList());
             case 2:
-                return List.of("default", "schema", "wand");
+                return List.of("worldedit", "bomberman", "wand");
             case 3:
-                switch (args.get(1).toLowerCase()) {
-                    case "default":
-                        return List.of("purple"); // TODO auto-generate list of default schematics
-                    case "schema":
-                        WorldEdit worldEdit = WorldEdit.getInstance();
-                        String root = worldEdit.getConfiguration().saveDir;
-                        File schemas = worldEdit.getWorkingDirectoryFile(root);
-                        String schemasPath = schemas.getPath();
-                        List<File> allFiles = allFiles(schemas);
-                        return allFiles.stream()
-                                .map(File::getPath)
-                                .map(path -> {
-                                    if (!path.toLowerCase().startsWith(schemas.getPath().toLowerCase()))
-                                        throw new RuntimeException("SubFile isn't in parent? " +
-                                                "\nSchemas: '" + schemasPath.toLowerCase() + "'" +
-                                                "\nPath: '" + path + "'");
-                                    return path.substring(schemasPath.length());
-                                }).collect(Collectors.toList());
-                    default:
-                        return null;
-                }
-            case 4:
-                if (args.get(1).equalsIgnoreCase("schema")) {
-                    return List.of("skipair");
-                } else {
+                File root = root(args.get(1));
+                if (root == null)
                     return null;
-                }
+
+                List<File> allFiles = allFiles(root);
+                return allFiles.stream()
+                        .map(File::getPath)
+                        .map(path -> path.substring(root.getPath().length()+1)).collect(Collectors.toList());
+            case 4:
+                return List.of("skipAir");
             default:
                 return null;
         }
+    }
+
+    private static File root(String plugin) {
+        if (plugin.equalsIgnoreCase("bomberman") || plugin.equalsIgnoreCase("bm")) {
+            return bm.schematics();
+        }
+        if (plugin.equalsIgnoreCase("worldedit") || plugin.equalsIgnoreCase("we"))
+            return we.getWorkingDirectoryFile(we.getConfiguration().saveDir);
+        return null;
     }
 
     private static List<File> allFiles(File root) {
@@ -109,39 +103,29 @@ public class Create extends Cmd {
                     return true;
                 })
                 .orElseGet(() -> {
-                    if (args.size() < 2)
-                        args.add("default");
-                    switch (args.get(1).toLowerCase()) {
-                        case "wand":
-                            if (args.size() == 2) {
-                                makeFromSelection(gameName, sender);
-                                return true;
-                            } else {
-                                return false;
-                            }
-                        case "schema":
-                            boolean skipAir = args.stream().skip(3).anyMatch("skipAir"::equalsIgnoreCase);
-                            if (args.size() >= 3) {
-                                makeFromFile(gameName, args.get(2), (Player) sender, skipAir);
-                                return true;
-                            } else {
-                                return false;
-                            }
-                        case "default":
-                            if (args.size() < 3) {
-                                args.add("purple");
-                                args.add("skipAir");
-                            }
-                            boolean skipAir_ = args.stream().skip(3).anyMatch("skipAir"::equalsIgnoreCase);
-                            if (args.size() >= 3) {
-                                makeFromDefault(gameName, args.get(2), (Player) sender, skipAir_);
-                                return true;
-                            } else {
-                                return false;
-                            }
-                        default:
-                            sender.sendMessage("'" + args.get(1) + "'");
+                    if (args.size() < 2) {
+                        args.add("bm");
+                        args.add("purple");
+                        args.add("skipair");
+                    }
+                    if ("wand".equals(args.get(1).toLowerCase())) {
+                        if (args.size() == 2) {
+                            makeFromSelection(gameName, sender);
+                            return true;
+                        } else {
                             return false;
+                        }
+                    } else {
+                        boolean skipAir = args.stream().skip(3).anyMatch("skipair"::equalsIgnoreCase);
+                        if (args.size() >= 3) {
+                            File saveDir = root(args.get(1));
+                            if (saveDir == null)
+                                return false;
+                            makeFromFile(gameName, args.get(2), saveDir, (Player) sender, skipAir);
+                            return true;
+                        } else {
+                            return false;
+                        }
                     }
                 });
     }
@@ -164,32 +148,14 @@ public class Create extends Cmd {
         }
     }
 
-    private void makeFromDefault(String gameName, String schemaName, Player player, boolean skipAir) {
-        try {
-            URL schemaURL = ClassLoader.getSystemResource(schemaName);
-            File schemaFile = new File(schemaURL.toURI());
-            if (schemaFile.exists())
-                Game.Companion.BuildGameFromSchema(gameName, player.getLocation(), schemaFile, skipAir, player);
-            else
-                context(Text.CREATE_SCHEMA_NOT_FOUND.with("schema", Message.of(schemaName))).sendTo(player);
-        } catch (URISyntaxException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    private void makeFromFile(String gameName, String schemaName, Player player, boolean skipAir) {
-        WorldEdit we = WorldEdit.getInstance();
-        File saveDir = we.getWorkingDirectoryFile(we.getConfiguration().saveDir);
-        var matches = saveDir.listFiles(dir -> {
-            System.out.println(dir);
-            return dir.getPath().contains(schemaName);
-        });
+    private void makeFromFile(String gameName, String schemaName, File saveDir, Player player, boolean skipAir) {
+        var matches = saveDir.listFiles(dir -> dir.getPath().contains(schemaName));
         Arrays.stream(matches == null ? new File[] {} : matches)
                 // The minimum length path will be the closest match
                 .min(Comparator.comparing(it -> it.getName().length()))
                 .ifPresentOrElse(
                         file ->
-                            Game.Companion.BuildGameFromSchema(gameName, player.getLocation(), file, skipAir, player),
+                            Game.Companion.BuildGameFromSchema(gameName, player.getLocation(), file, skipAir),
                         () ->
                             context(Text.CREATE_SCHEMA_NOT_FOUND.with("schema", Message.of(schemaName))).sendTo(player)
                 );

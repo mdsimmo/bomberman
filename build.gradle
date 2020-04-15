@@ -42,12 +42,15 @@ dependencies {
 }
 
 processResources  {
-    // auto assign values in the plugin.yml
-    filter {
-        line ->
-            line
-                .replace('${name}', project.name)
-                .replace('${version}', version)
+     // auto assign values in the plugin.yml
+    // Do not filter schematics as they get corrupted when trying to be read as text
+    filesNotMatching("**.schem") {
+        filter {
+            line ->
+                line
+                        .replace('${name}', project.name)
+                        .replace('${version}', version)
+        }
     }
 }
 

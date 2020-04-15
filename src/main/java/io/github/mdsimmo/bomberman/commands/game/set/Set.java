@@ -10,7 +10,7 @@ public class Set extends CommandGroup {
     public Set(Cmd parent) {
         super(parent);
         addChildren(
-                new Schema(this),
+                //new Schema(this),
                 new Lives(this),
                 new MinPlayers(this)
         );

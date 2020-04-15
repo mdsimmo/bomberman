@@ -33,6 +33,7 @@ import java.io.File
 import java.io.FileInputStream
 import java.io.FileOutputStream
 import java.lang.ref.WeakReference
+import kotlin.collections.HashSet
 import kotlin.math.min
 
 class Game private constructor(val name: String, private var schema: Arena) : Formattable, Listener {
@@ -54,7 +55,7 @@ class Game private constructor(val name: String, private var schema: Arena) : Fo
                     }
 
             // Write the clipboard to a schematic file
-            val file = File(plugin.dataFolder, "schemas/$name.schematic")
+            val file = File(plugin.schematics(), "$name.schematic")
             file.parentFile!!.mkdirs()
             BuiltInClipboardFormat.SPONGE_SCHEMATIC.getWriter(FileOutputStream(file)).use {
                 writer -> writer.write(clipboard)
@@ -64,9 +65,9 @@ class Game private constructor(val name: String, private var schema: Arena) : Fo
             return Game(name, Arena(file, BukkitUtils.boxLoc1(box), clipboard))
         }
 
-        fun BuildGameFromSchema(name: String, loc: Location, schema: File, skipAir: Boolean, player: Player): Game {
-            val arena = Arena(schema, loc)
-            arena.build(skipAir, player)
+        fun BuildGameFromSchema(name: String, loc: Location, file: File, skipAir: Boolean): Game {
+            val arena = Arena(file, loc)
+            arena.build(skipAir)
             return Game(name, arena)
         }
     }
@@ -81,7 +82,6 @@ class Game private constructor(val name: String, private var schema: Arena) : Fo
             this.file = file
             this.box = Box(loc, 1, 1, 1)
             loadClipboard() // will set box size correctly
-            System.out.println("Box: " + box)
         }
 
         constructor(file: File, loc: Location, clipboard: Clipboard) {
@@ -93,8 +93,10 @@ class Game private constructor(val name: String, private var schema: Arena) : Fo
         private fun loadClipboard() : Clipboard =
             clipboard?.get() ?: {
                 // Load the schematic
-                val format = ClipboardFormats.findByFile(file)!!
-                val c = format.getReader(FileInputStream(file)).use { it.read() }
+                val format = ClipboardFormats.findByFile(file)
+                System.out.println(file)
+                System.out.println(format)
+                val c = format!!.getReader(FileInputStream(file)).use { it.read() }
 
                 // cache the schematic
                 clipboard = WeakReference(c)
@@ -102,7 +104,7 @@ class Game private constructor(val name: String, private var schema: Arena) : Fo
                 c
             }()
 
-        fun build(skipAir: Boolean, user: Player? = null) {
+        fun build(skipAir: Boolean) {
 
             val clip = loadClipboard()
 
@@ -133,13 +135,10 @@ class Game private constructor(val name: String, private var schema: Arena) : Fo
     private var spawnCache: Set<Location>? = null
     private val spawns: Set<Location> get() = {
         val spawnCache = this.spawnCache
-        System.out.println("Asked spawns")
         if (spawnCache == null) {
-            System.out.println("Generating spawn cache")
             val spawns = HashSet<Location>()
             for (l in schema.box.stream()) {
                 val state = l.block.state
-                System.out.println("Search: " + l + " is " + state.type)
                 if (state is org.bukkit.block.Sign) {
                     val lines = state.lines
                     if (lines.any { it.toLowerCase().contains("[spawn]") }) {
@@ -189,13 +188,13 @@ class Game private constructor(val name: String, private var schema: Arena) : Fo
         for (player in players)
             message.sendTo(player)
     }
-
-    fun switchSchema(newSchema: File) {
-        BmRunStoppedIntent.stopGame(this)
-        spawnCache = null
-        schema = Arena(newSchema, BukkitUtils.boxLoc1(schema.box))
-        schema.build(false)
-    }
+//
+//    fun switchSchema(newSchema: File) {
+//        BmRunStoppedIntent.stopGame(this)
+//        spawnCache = null
+//        schema = Arena(newSchema, BukkitUtils.boxLoc1(schema.box))
+//        schema.build(false)
+//    }
 
     private fun findSpareSpawn(): Location? {
         return spawns.firstOrNull { spawn ->

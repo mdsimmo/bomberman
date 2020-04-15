@@ -43,7 +43,8 @@ public class Schema extends GameCommand {
             return true;
         }*/
 
-        game.switchSchema(newSchema);
+        //game.switchSchema(newSchema);
+        sender.sendMessage("Not implemented yet");
         return true;
     }
 
