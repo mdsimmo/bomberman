@@ -32,7 +32,7 @@ public class GameSettings implements ConfigurationSerializable {
             ));
     public Set<Material> destructable = Set.of(
             Material.TNT,
-            Material.SNOW
+            Material.SNOW_BLOCK
     );
     public List<ItemStack> initialItems = List.of(
             new ItemStack(bombItem, 3),
