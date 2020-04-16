@@ -36,7 +36,6 @@ import java.io.File
 import java.io.FileInputStream
 import java.io.FileOutputStream
 import java.lang.ref.WeakReference
-import kotlin.collections.HashSet
 
 class Game private constructor(val name: String, private var schema: Arena, val settings: GameSettings = GameSettings())
     : Formattable, Listener, ConfigurationSerializable {

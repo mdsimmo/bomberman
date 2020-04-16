@@ -236,7 +236,7 @@ command:
     already-started: Game {game} already started
     # The game has been started
     # {game}: the game that has been started
-    success: Game {game} starting...
+    success: Game {game} starting
     # The game cannot be started because there is not enough players
     # {game}: the game
     more-players: There needs to be {game|minplayers} players

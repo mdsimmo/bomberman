@@ -6,6 +6,7 @@ import io.github.mdsimmo.bomberman.events.BmRunStartCountDownIntent;
 import io.github.mdsimmo.bomberman.game.Game;
 import io.github.mdsimmo.bomberman.messaging.Message;
 import io.github.mdsimmo.bomberman.messaging.Text;
+import io.github.mdsimmo.bomberman.utils.NumberUtils;
 import org.bukkit.command.CommandSender;
 
 import java.util.List;
@@ -28,10 +29,25 @@ public class RunStart extends GameCommand {
 	
 	@Override
 	public boolean gameRun(CommandSender sender, List<String> args, Game game) {
-		if (args.size() != 0)
+		if (args.size() > 1)
 			return false;
 
-		var e = BmRunStartCountDownIntent.startGame(game, 3);
+		// get the delay
+		var delay = 3;
+		if (args.size() == 1) {
+			var parsed = NumberUtils.tryParseInt(args.get(0));
+			if (parsed.isPresent()) {
+				delay = parsed.getAsInt();
+				if (delay < 0) {
+					Text.INVALID_NUMBER.with("number", delay).sendTo(sender);
+					return true;
+				}
+			} else {
+				return false;
+			}
+		}
+
+		var e = BmRunStartCountDownIntent.startGame(game, delay);
 		if (e.isCancelled()) {
 			e.getCancelledReason().ifPresentOrElse(
 					reason -> reason.sendTo(sender),
