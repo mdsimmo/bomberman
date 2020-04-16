@@ -3,8 +3,8 @@ package io.github.mdsimmo.bomberman;
 import io.github.mdsimmo.bomberman.game.GameSettings;
 import io.github.mdsimmo.bomberman.utils.RefectAccess;
 import org.bukkit.configuration.serialization.ConfigurationSerializable;
-import org.jetbrains.annotations.NotNull;
 
+import javax.annotation.Nonnull;
 import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
@@ -38,7 +38,7 @@ public class BmSetting implements ConfigurationSerializable {
 		return file;
 	}
 
-	@NotNull
+	@Nonnull
 	@Override
 	public Map<String, Object> serialize() {
 		return new HashMap<>(Map.of(

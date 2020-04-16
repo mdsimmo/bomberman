@@ -41,7 +41,7 @@ public class ExplosionTest {
             got.forEach(AtomicInteger::incrementAndGet);
         }
 
-        assertEquals(diamonds.get(), 250, 20);
-        assertEquals(dirt.get(), 750, 20);
+        assertEquals(diamonds.get(), 250, 30);
+        assertEquals(dirt.get(), 750, 30);
     }
 }

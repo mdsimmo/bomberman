@@ -7,9 +7,11 @@ import io.github.mdsimmo.bomberman.game.GameSettings;
 import org.bukkit.configuration.serialization.ConfigurationSerialization;
 import org.bukkit.event.Listener;
 import org.bukkit.plugin.java.JavaPlugin;
-import org.jetbrains.annotations.NotNull;
 
-import java.io.*;
+import javax.annotation.Nonnull;
+import java.io.BufferedInputStream;
+import java.io.File;
+import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
@@ -17,7 +19,8 @@ import java.util.Objects;
 
 public class Bomberman extends JavaPlugin implements Listener {
 
-	@NotNull
+	@SuppressWarnings("NotNullFieldNotInitialized")
+	@Nonnull
 	public static Bomberman instance;
 
 	private BmSetting settings;

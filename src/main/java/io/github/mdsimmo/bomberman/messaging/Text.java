@@ -1,16 +1,14 @@
 package io.github.mdsimmo.bomberman.messaging;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.Reader;
-import java.util.HashMap;
-import java.util.Map;
-
 import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.jetbrains.annotations.NotNull;
+
+import javax.annotation.Nonnull;
+import java.io.*;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Objects;
 
 /**
  * A list of Contexteds that are defined in english.yml in the resource folder.
@@ -303,13 +301,14 @@ public enum Text implements Contexted {
 		return new Contexted() {
 			Map<String, Formattable> things = new HashMap<>();
 
+			@Nonnull
 			@Override
 			public Contexted with(String key, Formattable arg) {
 				things.put(key, arg);
 				return this;
 			}
 
-			@NotNull
+			@Nonnull
 			@Override
 			public Message format() {
 				return Expander.expand(text, things);
@@ -327,7 +326,7 @@ public enum Text implements Contexted {
 		static final YamlConfiguration lang;
 		static {
 			InputStream in = Text.class.getClassLoader().getResourceAsStream("english.yml");
-			Reader reader = new BufferedReader( new InputStreamReader( in ) );
+			Reader reader = new BufferedReader(new InputStreamReader(Objects.requireNonNull(in)) );
 			lang = new YamlConfiguration();
 			try {
 				lang.load( reader );

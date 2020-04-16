@@ -127,6 +127,7 @@ class Game private constructor(val name: String, private var schema: Arena, val 
                         val operation: Operation = ClipboardHolder(clip)
                                 .createPaste(editSession)
                                 .to(BlockVector3.at(origin.blockX, origin.blockY, origin.blockZ))
+                                .copyEntities(true)
                                 .ignoreAirBlocks(skipAir)
                                 .build()
                         Operations.complete(operation)
@@ -398,6 +399,7 @@ class Game private constructor(val name: String, private var schema: Arena, val 
         if (e.game != this)
             return
         schema.build(false)
+        makeCages()
         e.setHandled()
     }
 

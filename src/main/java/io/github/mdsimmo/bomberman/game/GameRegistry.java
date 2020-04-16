@@ -45,13 +45,14 @@ public class GameRegistry {
         }
     }
 
-    private static void loadGame(File file) {
+    private static Game loadGame(File file) {
         YamlConfiguration configuration = YamlConfiguration.loadConfiguration(file);
         Game game = (Game)configuration.get("data");
         if (game != null)
             Bomberman.instance.getLogger().info("Loaded " + game.getName());
         else
             Bomberman.instance.getLogger().info("Cannot load " + file.getName());
+        return game;
     }
 
     public static void saveGame(Game game) {
@@ -80,8 +81,8 @@ public class GameRegistry {
             fileOf(game).delete();
     }
 
-    public static void reload(Game game) {
+    public static Game reload(Game game) {
         BmGameDeletedIntent.delete(game, false);
-        loadGame(fileOf(game));
+        return loadGame(fileOf(game));
     }
 }

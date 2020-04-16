@@ -26,9 +26,9 @@ public class GameReload extends GameCommand {
 	public boolean gameRun(CommandSender sender, List<String> args, Game game) {
 		if (args.size() != 0)
             return false;
-		GameRegistry.reload(game);
-		BmGameRebuildIntent.rebuild(game);
-		Text.RELOAD_SUCCESS.with("game", game).sendTo(sender);
+		Game newgame = GameRegistry.reload(game);
+		BmGameRebuildIntent.rebuild(newgame);
+		Text.RELOAD_SUCCESS.with("game", newgame).sendTo(sender);
         return true;
 	}
 

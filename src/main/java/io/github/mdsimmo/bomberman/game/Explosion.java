@@ -138,7 +138,7 @@ public class Explosion implements Listener {
 		}
 
 		// If hit dirt, blow up one block and then stop
-		if (game.getSettings().destructable.contains(b.getType()))
+		if (game.getSettings().getDestructable().contains(b.getType()))
 			blocks.add(b);
 		return true;
 	}
@@ -166,7 +166,7 @@ public class Explosion implements Listener {
 			// Give player back their TNT
 			// Check for tag in case they have left the game already
 			if (cause.getScoreboardTags().contains("bm_player"))
-				cause.getInventory().addItem(new ItemStack(game.getSettings().bombItem, 1));
+				cause.getInventory().addItem(new ItemStack(game.getSettings().getBombItem(), 1));
 
 			// Drop loot
 			var dropsPlaned = planDrops();
@@ -174,8 +174,10 @@ public class Explosion implements Listener {
 			Bukkit.getPluginManager().callEvent(lootEvent);
 			if (!lootEvent.isCancelled()) {
 				lootEvent.getDrops().forEach((location, items) -> items.forEach(item -> {
-					if (item.getAmount() > 0)
-						Objects.requireNonNull(location.getWorld()).dropItemNaturally(location, item);
+					if (item.getAmount() > 0) {
+						Objects.requireNonNull(location.getWorld())
+								.dropItem(location.clone().add(0.5, 0.5, 0.5), item);
+					}
 				}));
 			}
 
@@ -186,7 +188,7 @@ public class Explosion implements Listener {
 	}
 
 	private Map<Location, Set<ItemStack>> planDrops() {
-		Map<Material, Map<ItemStack, Number>> loot = game.getSettings().blockLoot;
+		Map<Material, Map<ItemStack, Number>> loot = game.getSettings().getBlockLoot();
 		return blocks.stream()
 				.map(b -> new AbstractMap.SimpleEntry<>(
 						b.block.getLocation(),

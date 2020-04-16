@@ -11,6 +11,7 @@ import org.bukkit.Location;
 import org.bukkit.Server;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.block.Block;
+import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.*;
 import org.bukkit.event.block.Action;
@@ -25,7 +26,6 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
-import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nonnull;
 import java.util.List;
@@ -35,7 +35,7 @@ public class GamePlayer implements Formattable, Listener {
 
     private static JavaPlugin plugin = Bomberman.instance;
 
-    public static void spawnGamePlayer(@NotNull Player player, @NotNull  Game game, @NotNull Location start) {
+    public static void spawnGamePlayer(@Nonnull Player player, @Nonnull  Game game, @Nonnull Location start) {
 
         GamePlayer gamePlayer = new GamePlayer(player, game);
 
@@ -44,14 +44,14 @@ public class GamePlayer implements Formattable, Listener {
         // Initialise the player for the game
         player.teleport(start.clone().add(0.5, 0.5, 0.5));
         player.setGameMode(GameMode.SURVIVAL);
-        player.setHealth(game.getSettings().lives);
-        player.getAttribute(Attribute.GENERIC_MAX_HEALTH).setBaseValue(game.getSettings().lives);
+        player.setHealth(game.getSettings().getLives());
+        player.getAttribute(Attribute.GENERIC_MAX_HEALTH).setBaseValue(game.getSettings().getLives());
         // if setHealthScale is not delayed, it can sometimes cause the client side to think they died?!?!?
-        Bukkit.getScheduler().scheduleSyncDelayedTask(plugin, () ->player.setHealthScale(game.getSettings().lives * 2));
+        Bukkit.getScheduler().scheduleSyncDelayedTask(plugin, () ->player.setHealthScale(game.getSettings().getLives() * 2));
         player.setExhaustion(0);
         player.setFoodLevel(100000); // just a big number
         player.getInventory().clear();
-        for (ItemStack stack : game.getSettings().initialItems) {
+        for (ItemStack stack : game.getSettings().getInitialItems()) {
             ItemStack s = stack.clone();
             player.getInventory().addItem(s);
         }
@@ -97,6 +97,11 @@ public class GamePlayer implements Formattable, Listener {
     }
 
     private void reset() {
+        // remove items in the direct vicinity (prevents player dropping items at spawn)
+        player.getWorld().getNearbyEntities(player.getLocation(), 1, 2, 1).stream()
+                .filter(it -> it instanceof ItemStack)
+                .forEach(Entity::remove);
+
         player.getAttribute(Attribute.GENERIC_MAX_HEALTH).setBaseValue(spawnMaxHealth);
         player.setHealthScale(spawnHealthScale);
         player.setHealth(spawnHealth);
@@ -209,7 +214,7 @@ public class GamePlayer implements Formattable, Listener {
             return;
         Block b = e.getBlock();
         // create a bomb when placing tnt
-        if (b.getType() == game.getSettings().bombItem) {
+        if (b.getType() == game.getSettings().getBombItem()) {
             if (!Bomb.spawnBomb(game, player, b)) {
                 e.setCancelled(true);
             }
@@ -294,7 +299,7 @@ public class GamePlayer implements Formattable, Listener {
     public static int bombStrength(Game game, Player player) {
         int strength = 0;
         for (ItemStack stack : player.getInventory().getContents()) {
-            if (stack != null && stack.getType() == game.getSettings().powerItem) {
+            if (stack != null && stack.getType() == game.getSettings().getPowerItem()) {
                 strength += stack.getAmount();
             }
         }
@@ -308,7 +313,7 @@ public class GamePlayer implements Formattable, Listener {
     private int bombAmount() {
         int strength = 0;
         for (ItemStack stack : player.getInventory().getContents()) {
-            if (stack != null && stack.getType() == game.getSettings().bombItem) {
+            if (stack != null && stack.getType() == game.getSettings().getBombItem()) {
                 strength += stack.getAmount();
             }
         }
