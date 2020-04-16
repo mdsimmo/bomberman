@@ -3,6 +3,7 @@ package io.github.mdsimmo.bomberman.game;
 import io.github.mdsimmo.bomberman.Bomberman;
 import io.github.mdsimmo.bomberman.events.BmExplosionEvent;
 import io.github.mdsimmo.bomberman.events.BmPlayerPlacedBombEvent;
+import io.github.mdsimmo.bomberman.events.BmRunStoppedIntent;
 import org.bukkit.Bukkit;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
@@ -33,7 +34,7 @@ public final class Bomb implements Listener {
     private final Block block;
     private final int strength;
     private int taskId;
-    private boolean ran = false;
+    private boolean noExplode = false;
 
     private Bomb(Game game, Player player, Block block, int strength) {
         this.game = game;
@@ -45,18 +46,28 @@ public final class Bomb implements Listener {
 
     @EventHandler(ignoreCancelled = true, priority = EventPriority.HIGH)
     public void onExplosion(BmExplosionEvent e) {
-        if (!ran && e.getIgniting().stream().anyMatch(b -> b.block.equals(block))) {
+        if (e.getGame() != game)
+            return;
+        if (!noExplode && e.getIgniting().stream().anyMatch(b -> b.block.equals(block))) {
             // explode one tick latter
             Bukkit.getScheduler().cancelTask(taskId);
             taskId = Bukkit.getScheduler().scheduleSyncDelayedTask(Bomberman.instance, this::explode);
         }
     }
 
+    @EventHandler(ignoreCancelled = true, priority = EventPriority.HIGH)
+    public void onRunStopped(BmRunStoppedIntent e) {
+        if (e.getGame() != game)
+            return;
+        Bukkit.getScheduler().cancelTask(taskId);
+        noExplode = true;
+    }
+
     private void explode() {
         // The ran flag prevents the tnt from exploding itself twice
-        if (ran)
+        if (noExplode)
             return;
-        ran = true;
+        noExplode = true;
         if (Explosion.spawnExplosion(game, block.getLocation(), player, strength)) {
             HandlerList.unregisterAll(this);
         }

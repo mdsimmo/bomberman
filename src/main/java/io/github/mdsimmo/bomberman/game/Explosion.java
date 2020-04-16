@@ -1,10 +1,7 @@
 package io.github.mdsimmo.bomberman.game;
 
 import io.github.mdsimmo.bomberman.Bomberman;
-import io.github.mdsimmo.bomberman.events.BmDropLootEvent;
-import io.github.mdsimmo.bomberman.events.BmExplosionEvent;
-import io.github.mdsimmo.bomberman.events.BmPlayerHitIntent;
-import io.github.mdsimmo.bomberman.events.BmPlayerMovedEvent;
+import io.github.mdsimmo.bomberman.events.*;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -146,13 +143,14 @@ public class Explosion implements Listener {
 	private final Game game;
 	private final Player cause;
 	private final Set<BlockPlan> blocks;
+	private final int taskId;
 
 	private Explosion(Game game, Set<BlockPlan> blocks, Player cause) {
 		this.game = game;
 		this.cause = cause;
 		this.blocks = blocks;
 
-		Bukkit.getScheduler().scheduleSyncDelayedTask(plugin, () -> {
+		this.taskId = Bukkit.getScheduler().scheduleSyncDelayedTask(plugin, () -> {
 			// Replace fire with air.
 			// Note: Check if fire first because a player may have placed a block onto the space.
 			// We cannot just use state.update(false) because the state was captured taken BEFORE the block was
@@ -229,5 +227,12 @@ public class Explosion implements Listener {
 		// Don't double remove blocks
 		blocks.removeIf(thisBlock -> e.getIgniting().stream()
 				.anyMatch(eventBlock -> eventBlock.block.equals(thisBlock.block)));
+	}
+
+	@EventHandler(ignoreCancelled = true, priority = EventPriority.HIGH)
+	public void onRunStopped(BmRunStoppedIntent e) {
+		if (e.getGame() != game)
+			return;
+		Bukkit.getScheduler().cancelTask(taskId);
 	}
 }
