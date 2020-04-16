@@ -9,7 +9,7 @@ import com.sk89q.worldedit.session.SessionOwner;
 import io.github.mdsimmo.bomberman.Bomberman;
 import io.github.mdsimmo.bomberman.commands.Cmd;
 import io.github.mdsimmo.bomberman.game.Game;
-import io.github.mdsimmo.bomberman.game.GameRegestry;
+import io.github.mdsimmo.bomberman.game.GameRegistry;
 import io.github.mdsimmo.bomberman.messaging.Message;
 import io.github.mdsimmo.bomberman.messaging.Text;
 import io.github.mdsimmo.bomberman.utils.Box;
@@ -24,12 +24,12 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class Create extends Cmd {
+public class GameCreate extends Cmd {
 
     private static Bomberman bm = Bomberman.instance;
     private static WorldEdit we = WorldEdit.getInstance();
 
-    public Create(Cmd parent) {
+    public GameCreate(Cmd parent) {
         super(parent);
     }
 
@@ -42,7 +42,7 @@ public class Create extends Cmd {
     public List<String> options(CommandSender sender, List<String> args) {
         switch (args.size()) {
             case 1:
-                return GameRegestry.allGames().stream().map(Game::getName).collect(Collectors.toList());
+                return GameRegistry.allGames().stream().map(Game::getName).collect(Collectors.toList());
             case 2:
                 return List.of("worldedit", "bomberman", "wand");
             case 3:
@@ -63,7 +63,7 @@ public class Create extends Cmd {
 
     private static File root(String plugin) {
         if (plugin.equalsIgnoreCase("bomberman") || plugin.equalsIgnoreCase("bm")) {
-            return bm.schematics();
+            return bm.getSettings().builtinSaves();
         }
         if (plugin.equalsIgnoreCase("worldedit") || plugin.equalsIgnoreCase("we"))
             return we.getWorkingDirectoryFile(we.getConfiguration().saveDir);
@@ -95,7 +95,7 @@ public class Create extends Cmd {
             return true;
         }
         var gameName = args.get(0);
-        return GameRegestry.byName(gameName)
+        return GameRegistry.byName(gameName)
                 .map(game -> {
                     context(Text.CREATE_GAME_EXISTS)
                             .with("game", game)
@@ -154,8 +154,10 @@ public class Create extends Cmd {
                 // The minimum length path will be the closest match
                 .min(Comparator.comparing(it -> it.getName().length()))
                 .ifPresentOrElse(
-                        file ->
-                            Game.Companion.BuildGameFromSchema(gameName, player.getLocation(), file, skipAir),
+                        file -> {
+                            Game game = Game.Companion.BuildGameFromSchema(gameName, player.getLocation(), file, skipAir);
+                            GameRegistry.saveGame(game);
+                        },
                         () ->
                             context(Text.CREATE_SCHEMA_NOT_FOUND.with("schema", Message.of(schemaName))).sendTo(player)
                 );

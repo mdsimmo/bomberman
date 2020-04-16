@@ -2,7 +2,7 @@ package io.github.mdsimmo.bomberman.commands.game;
 
 import io.github.mdsimmo.bomberman.commands.Cmd;
 import io.github.mdsimmo.bomberman.game.Game;
-import io.github.mdsimmo.bomberman.game.GameRegestry;
+import io.github.mdsimmo.bomberman.game.GameRegistry;
 import io.github.mdsimmo.bomberman.messaging.Message;
 import io.github.mdsimmo.bomberman.messaging.Text;
 import org.bukkit.command.CommandSender;
@@ -30,7 +30,7 @@ public class GameList extends Cmd {
     public boolean run(CommandSender sender, List<String> args) {
         if (args.size() != 0)
             return false;
-        Set<Game> games = GameRegestry.allGames();
+        Set<Game> games = GameRegistry.allGames();
         context(Text.GAMELIST_GAMES)
                 .with("games", games)
                 .sendTo(sender);

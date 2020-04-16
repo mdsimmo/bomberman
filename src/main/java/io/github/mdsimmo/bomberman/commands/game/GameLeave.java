@@ -10,9 +10,9 @@ import org.bukkit.entity.Player;
 
 import java.util.List;
 
-public class Leave extends Cmd {
+public class GameLeave extends Cmd {
 
-    public Leave(Cmd parent) {
+    public GameLeave(Cmd parent) {
         super(parent);
     }
 

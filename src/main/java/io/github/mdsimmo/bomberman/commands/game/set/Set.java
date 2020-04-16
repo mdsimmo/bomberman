@@ -11,8 +11,7 @@ public class Set extends CommandGroup {
         super(parent);
         addChildren(
                 //new Schema(this),
-                new Lives(this),
-                new MinPlayers(this)
+                new SetLives(this)
         );
     }
 

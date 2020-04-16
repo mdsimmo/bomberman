@@ -9,9 +9,9 @@ import org.bukkit.command.CommandSender;
 
 import java.util.List;
 
-public class Info extends GameCommand {
+public class GameInfo extends GameCommand {
 
-	public Info( Cmd parent ) {
+	public GameInfo(Cmd parent ) {
 		super( parent );
 	}
 

@@ -3,6 +3,7 @@ package io.github.mdsimmo.bomberman.commands.game.set;
 import io.github.mdsimmo.bomberman.game.Game;
 import io.github.mdsimmo.bomberman.commands.Cmd;
 import io.github.mdsimmo.bomberman.commands.GameCommand;
+import io.github.mdsimmo.bomberman.game.GameRegistry;
 import io.github.mdsimmo.bomberman.messaging.Message;
 import io.github.mdsimmo.bomberman.messaging.Text;
 
@@ -10,9 +11,9 @@ import java.util.List;
 
 import org.bukkit.command.CommandSender;
 
-public class Lives extends GameCommand {
+public class SetLives extends GameCommand {
 
-	public Lives(Cmd parent) {
+	public SetLives(Cmd parent) {
 		super(parent);
 	}
 
@@ -42,6 +43,7 @@ public class Lives extends GameCommand {
 			return true;
 		}
 		game.getSettings().lives = amount;
+		GameRegistry.saveGame(game);
 		context(Text.LIVES_SET)
 				.with("game", game)
 				.sendTo(sender);

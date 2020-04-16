@@ -7,20 +7,18 @@ import org.bukkit.event.HandlerList;
 /**
  * Called when a game is completely deleted from the server
  */
-public class BmGameDeletedIntent extends BmIntent {
+public class BmGameRebuildIntent extends BmIntent {
 
-    public static void delete(Game game, boolean deleteSave) {
-        var e = new BmGameDeletedIntent(game);
-        e.setDeletingSave(deleteSave);
+    public static void rebuild(Game game) {
+        var e = new BmGameRebuildIntent(game);
         Bukkit.getPluginManager().callEvent(e);
         e.verifyHandled();
     }
 
     private static final HandlerList HANDLERS_LIST = new HandlerList();
     private Game game;
-    private boolean deleteSave;
 
-    private BmGameDeletedIntent(Game game) {
+    private BmGameRebuildIntent(Game game) {
         this.game = game;
     }
 
@@ -37,11 +35,4 @@ public class BmGameDeletedIntent extends BmIntent {
         return game;
     }
 
-    public boolean isDeletingSave() {
-        return deleteSave;
-    }
-
-    public void setDeletingSave(boolean delete) {
-        deleteSave = delete;
-    }
 }

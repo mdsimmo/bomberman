@@ -69,15 +69,6 @@ public class GamePlayer implements Formattable, Listener {
     private final double spawnMaxHealth;
     private final double spawnHealthScale;
 
-    /**
-     * Starts the given in the given game at the given starting point.
-     * <p>
-     * This constructor will move the player into the start location, build walls around the player and remember
-     * all the details about the player
-     *
-     * @param player the player to move
-     * @param game   the game to join
-     */
     private GamePlayer(Player player, Game game) {
         this.player = player;
         this.game = game;
@@ -218,42 +209,6 @@ public class GamePlayer implements Formattable, Listener {
         }
     }
 
-    @EventHandler(priority = EventPriority.LOWEST)
-    public void onPlayerDrinkPotion(final PlayerItemConsumeEvent e) {
-        if (e.isCancelled() || e.getPlayer() != player)
-            return;
-
-        // make potion effects the correct duration
-        if (e.getItem().getItemMeta() instanceof PotionMeta) {
-            PotionMeta potion = (PotionMeta) e.getItem().getItemMeta();
-            PotionData data = potion.getBasePotionData();
-
-            PotionEffectType effects = data.getType().getEffectType();
-            if (effects != null) {
-                // Set the potion to do nothing
-                potion.setBasePotionData(new PotionData(PotionType.WATER));
-
-                // Add the effect that we want
-                potion.addCustomEffect(
-                        new PotionEffect(effects,
-                                20 * game.getSettings().potionDuration * (data.isExtended() ? 2 : 1),
-                                data.isUpgraded() ? 1 : 2),
-                        false);
-                // don't need to change custom effects since they are manually changeable
-                player.addPotionEffects(potion.getCustomEffects());
-            }
-
-            // delete the glass bottle left over (we don't know if it was consumed from right/left hand)
-            plugin.getServer().getScheduler()
-                    .scheduleSyncDelayedTask(plugin, () -> {
-                        if (player.getInventory().getItemInMainHand().getType() == Material.GLASS_BOTTLE)
-                            player.getInventory().setItemInMainHand(null);
-                        if (player.getInventory().getItemInOffHand().getType() == Material.GLASS_BOTTLE)
-                            player.getInventory().setItemInOffHand(null);
-                    });
-        }
-    }
-
     @EventHandler(priority = EventPriority.HIGH)
     public void onPlayerLogout(PlayerQuitEvent e) {
         if (e.getPlayer() == player) {
@@ -265,9 +220,10 @@ public class GamePlayer implements Formattable, Listener {
     public void onPlayerRegen(EntityRegainHealthEvent e) {
         if (e.getEntity() == player) {
             if (e.getRegainReason() == EntityRegainHealthEvent.RegainReason.MAGIC) {
-                player.setHealth(Math.min(player.getHealth() + 1, player.getAttribute(Attribute.GENERIC_MAX_HEALTH).getValue()));
+                e.setAmount(1);
+            } else {
+                e.setCancelled(true);
             }
-            e.setCancelled(true);
         }
     }
 

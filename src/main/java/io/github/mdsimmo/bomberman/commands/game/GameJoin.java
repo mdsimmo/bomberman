@@ -12,9 +12,9 @@ import org.bukkit.entity.Player;
 
 import java.util.List;
 
-public class Join extends GameCommand {
+public class GameJoin extends GameCommand {
 
-	public Join( Cmd parent ) {
+	public GameJoin(Cmd parent ) {
 		super( parent );
 	}
 

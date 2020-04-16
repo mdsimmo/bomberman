@@ -169,6 +169,8 @@ command:
   # Shown when an invalid game is passed to a command
   # {game}: the game that was typed (not a valid game)
   invalid-game: Game {game} not found
+  # Called when a command is cancelled for an unknown reason
+  cancelled: Operation cancelled
   # The base command details
   bomberman:
     description: Main command for Bomberman
@@ -255,6 +257,15 @@ command:
     # The game has stopped
     # {game}: the game
     success: Game {game} stopped
+  reload:
+    name: reload
+    description: Reloads the config file and resets the arena
+    usage: /{command|path} <game>
+    example: ''
+    extra: ''
+    # The game has been reloaded
+    # {game}: the game
+    success: Game {game} reloaded
   # Messages relating to '/bm game set schema'
   set-schema:
     name: schema
@@ -529,7 +540,7 @@ command:
     # {game}: the game
     details: |+
       {heading|Info: {game|name}}
-      {map|Status|{switch|{game|running}|true|Playing|false|Waiting|{Red|error}}|Players|{game|players}|Min players|{game|minplayers}|Max players|{game|maxplayers}|Init bombs|{game|bombs}|Init lives|{game|lives}|Init power|{game|power}}
+      {map|Status|{switch|{game|running}|true|Playing|false|Waiting|{Red|error}}|Players|{game|players}|Max players|{game|maxplayers}|Init bombs|{game|bombs}|Init lives|{game|lives}|Init power|{game|power}|Location|[{game|x},{game|y},{game|z}]}
 
   # Commands relating to '/bm game join'. Also see 'join.xxx' messages
   join:

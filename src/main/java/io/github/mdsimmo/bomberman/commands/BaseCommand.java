@@ -28,14 +28,15 @@ public class BaseCommand extends CommandGroup implements TabCompleter, CommandEx
 
         addChildren(
                 new Set(this),
-                new Create(this),
-                new Info(this),
-                new Join(this),
-                new Leave(this),
-                new Delete(this),
-                new Start(this),
-                new Stop(this),
-                new GameList(this)
+                new GameCreate(this),
+                new GameInfo(this),
+                new GameJoin(this),
+                new GameLeave(this),
+                new GameDelete(this),
+                new RunStart(this),
+                new RunStop(this),
+                new GameList(this),
+                new GameReload(this)
         );
     }
 

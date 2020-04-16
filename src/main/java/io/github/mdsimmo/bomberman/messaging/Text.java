@@ -69,6 +69,7 @@ public enum Text implements Contexted {
 	COMMAND_GROUP_EXAMPLE("command.group.example"),
 	COMMAND_GROUP_EXTRA("command.group.extra"),
 	COMMAND_FORMAT("command.format"),
+	COMMAND_CANCELLED("command.cancelled"),
 
 	// no Bomberman name as it must not be changed
 	BOMBERMAN_DESCRIPTION ( "command.bomberman.description" ),
@@ -102,6 +103,13 @@ public enum Text implements Contexted {
 	STOP_EXTRA ( "command.stop.extra" ),
 	STOP_NOT_STARTED ( "command.stop.not-started" ),
 	STOP_SUCCESS ( "command.stop.success" ),
+
+	RELOAD_NAME ( "command.reload.name" ),
+	RELOAD_DESCRIPTION ( "command.reload.description" ),
+	RELOAD_USAGE ( "command.reload.usage" ),
+	RELOAD_EXAMPLE ( "command.reload.example" ),
+	RELOAD_EXTRA ( "command.reload.extra" ),
+	RELOAD_SUCCESS ( "command.reload.success" ),
 
 	SET_SCHEMA_NAME ( "command.set-schema.name" ),
 	SET_SCHEMA_DESCRIPTION ( "command.set-schema.description" ),
@@ -280,7 +288,7 @@ public enum Text implements Contexted {
 	LEAVE_SUCCESS ( "command.leave.success" ),
 	LEAVE_NOT_JOINED ( "command.leave.not-joined" );
 
-	private final String text;
+    private final String text;
 	
 	Text( String path ) {
 		this.text = YAMLLanguage.lang.getString( path );

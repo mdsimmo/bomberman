@@ -10,9 +10,9 @@ import org.bukkit.command.CommandSender;
 import java.io.File;
 import java.util.List;
 
-public class Schema extends GameCommand {
+public class SetSchema extends GameCommand {
 
-    public Schema(Cmd parent) {
+    public SetSchema(Cmd parent) {
         super(parent);
     }
 

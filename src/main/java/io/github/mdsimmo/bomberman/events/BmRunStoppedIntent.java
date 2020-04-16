@@ -1,23 +1,27 @@
 package io.github.mdsimmo.bomberman.events;
 
 import io.github.mdsimmo.bomberman.game.Game;
+import io.github.mdsimmo.bomberman.messaging.Message;
 import org.bukkit.Bukkit;
-import org.bukkit.event.Event;
 import org.bukkit.event.HandlerList;
+
+import java.util.Optional;
 
 /**
  * Called whenever a game run is stopped. May be due to game finishing, game forcefully stoped, server shutdown, etc.
  */
-public class BmRunStoppedIntent extends BmIntent {
+public class BmRunStoppedIntent extends BmIntentCancellable {
 
-    public static void stopGame(Game game) {
+    public static BmRunStoppedIntent stopGame(Game game) {
         var e = new BmRunStoppedIntent(game);
         Bukkit.getPluginManager().callEvent(e);
         e.verifyHandled();
+        return e;
     }
 
     private static final HandlerList HANDLERS_LIST = new HandlerList();
     private Game game;
+    private Message cancelReason;
 
     private BmRunStoppedIntent(Game game) {
         this.game = game;
@@ -34,5 +38,14 @@ public class BmRunStoppedIntent extends BmIntent {
 
     public Game getGame() {
         return game;
+    }
+
+    public void cancelFor(Message reason) {
+        setCancelled(true);
+        this.cancelReason = reason;
+    }
+
+    public Optional<Message> cancelledReason() {
+        return Optional.ofNullable(cancelReason);
     }
 }
