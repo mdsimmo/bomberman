@@ -3,30 +3,35 @@ package io.github.mdsimmo.bomberman.events;
 import io.github.mdsimmo.bomberman.game.Explosion;
 import io.github.mdsimmo.bomberman.game.Game;
 import io.github.mdsimmo.bomberman.utils.RefectAccess;
+import org.bukkit.Location;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Cancellable;
 import org.bukkit.event.Event;
 import org.bukkit.event.HandlerList;
+import org.bukkit.inventory.ItemStack;
 
 import javax.annotation.Nonnull;
-import java.util.HashSet;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Set;
 
 /**
  * Called when a bomb turns from a tnt block into a fire '+'
  */
-public class BmExplosionEvent extends Event implements Cancellable {
+public class BmDropLootEvent extends Event implements Cancellable {
 
     private static final HandlerList HANDLERS_LIST = new HandlerList();
     private boolean isCancelled = false;
     private final Game game;
     private final Player cause;
-    private final Set<Explosion.BlockPlan> igniting;
+    private final Set<Explosion.BlockPlan> ignited;
+    private final Map<Location, Set<ItemStack>> drops;
 
-    public BmExplosionEvent(Game game, Player cause, Set<Explosion.BlockPlan> igniting) {
+    public BmDropLootEvent(Game game, Player cause, Set<Explosion.BlockPlan> ignited, Map<Location, Set<ItemStack>> drops) {
         this.game = game;
         this.cause = cause;
-        this.igniting = new HashSet<>(igniting);
+        this.ignited = ignited;
+        this.drops = new HashMap<>(drops);
     }
 
     @Override
@@ -49,12 +54,11 @@ public class BmExplosionEvent extends Event implements Cancellable {
     }
 
     /**
-     * Gets a mutable map of the blocks that will be ignited.
-     * Blocks can be added/removed from this list.
-     * @return the list of blocks to be ignited.
+     * Gets a immutable list of the blocks that were ignited and thus in the drop check
+     * @return the list of blocks ignited.
      */
-    public Set<Explosion.BlockPlan> getIgniting() {
-        return igniting;
+    public Set<Explosion.BlockPlan> getIgnited() {
+        return ignited;
     }
 
     @Override
@@ -65,5 +69,13 @@ public class BmExplosionEvent extends Event implements Cancellable {
     @Override
     public void setCancelled(boolean cancel) {
         isCancelled = cancel;
+    }
+
+    /**
+     * Gets mutable list of blocks dropping. Adding/removing will alter the block drops
+     * @return blocks to drop
+     */
+    public Map<Location, Set<ItemStack>> getDrops() {
+        return drops;
     }
 }

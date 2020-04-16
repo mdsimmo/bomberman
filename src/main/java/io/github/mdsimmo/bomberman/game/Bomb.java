@@ -45,7 +45,7 @@ public final class Bomb implements Listener {
 
     @EventHandler(ignoreCancelled = true, priority = EventPriority.HIGH)
     public void onExplosion(BmExplosionEvent e) {
-        if (!ran && e.getIgnited().contains(block)) {
+        if (!ran && e.getIgniting().stream().anyMatch(b -> b.block.equals(block))) {
             // explode one tick latter
             Bukkit.getScheduler().cancelTask(taskId);
             taskId = Bukkit.getScheduler().scheduleSyncDelayedTask(Bomberman.instance, this::explode);

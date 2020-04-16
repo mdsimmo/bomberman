@@ -29,6 +29,7 @@ import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nonnull;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class GamePlayer implements Formattable, Listener {
 
@@ -148,7 +149,8 @@ public class GamePlayer implements Formattable, Listener {
 
     @EventHandler(ignoreCancelled = true, priority = EventPriority.HIGH)
     public void onExplosion(BmExplosionEvent e) {
-        if (Explosion.isTouching(player, e.getIgnited())) {
+        // TODO duplicate code: both GamePlayer and Explosion do touching checks
+        if (Explosion.isTouching(player, e.getIgniting().stream().map(b->b.block).collect(Collectors.toSet()))) {
             BmPlayerHitIntent.hit(player, e.getCause());
         }
     }

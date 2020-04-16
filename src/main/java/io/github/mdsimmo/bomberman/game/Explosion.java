@@ -1,6 +1,7 @@
 package io.github.mdsimmo.bomberman.game;
 
 import io.github.mdsimmo.bomberman.Bomberman;
+import io.github.mdsimmo.bomberman.events.BmDropLootEvent;
 import io.github.mdsimmo.bomberman.events.BmExplosionEvent;
 import io.github.mdsimmo.bomberman.events.BmPlayerHitIntent;
 import io.github.mdsimmo.bomberman.events.BmPlayerMovedEvent;
@@ -9,6 +10,7 @@ import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.Sound;
 import org.bukkit.block.Block;
+import org.bukkit.block.BlockState;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -17,36 +19,55 @@ import org.bukkit.event.Listener;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.Plugin;
 
-import java.util.HashSet;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
+import java.util.stream.Collectors;
 
 public class Explosion implements Listener {
+
+	public static class BlockPlan {
+		public final Block block;
+		public final BlockState prior, ignited, destroyed;
+
+		public BlockPlan(Block block, BlockState prior, BlockState ignited, BlockState destroyed) {
+			this.block = block;
+			this.prior = prior;
+			this.ignited = ignited;
+			this.destroyed = destroyed;
+		}
+	}
 
 	private static final Plugin plugin = Bomberman.instance;
 
 	public static boolean spawnExplosion(Game game, Location center, Player cause, int strength) {
 
 		// Find where the explosion should expand to
-		Set<Block> fire = planFire(center, game, strength);
+		Set<Block> firePlanned = planFire(center, game, strength);
+		Set<BlockPlan> plannedTypes = firePlanned.stream()
+				.map(b -> {
+					BlockState prior = b.getState();
+					BlockState ignited = b.getState();
+					ignited.setType(Material.FIRE);
+					BlockState converted = b.getState();
+					converted.setType(Material.AIR);
+					return new BlockPlan(b, prior, ignited, converted);
+				})
+				.collect(Collectors.toSet());
 
 		// Let others know
-		BmExplosionEvent event = new BmExplosionEvent(game, cause, fire);
+		BmExplosionEvent event = new BmExplosionEvent(game, cause, plannedTypes);
 		Bukkit.getPluginManager().callEvent(event);
 		if (event.isCancelled())
 			return false;
 
-		// Make the boom
-		Set<Block> exploding = new HashSet<>(event.getIgnited());
-		for (Block b : fire) {
-			b.setType(Material.FIRE);
-		}
+		// Save the current state of all exploding blocks (for drops generation latter)
+		var igniting = event.getIgniting();
+		igniting.forEach(b -> b.ignited.update(true));
 		Objects.requireNonNull(center.getWorld())
-				.playSound( center, Sound.ENTITY_GENERIC_EXPLODE, 1,
+				.playSound(center, Sound.ENTITY_GENERIC_EXPLODE, 1,
 				(float)Math.random() + 0.5f );
 
 		// Add an explosion obj to handle cleanup/watching for kills
-		Explosion explosion = new Explosion(game, exploding, cause);
+		Explosion explosion = new Explosion(game, igniting, cause);
 		Bukkit.getPluginManager().registerEvents(explosion, plugin);
 		return true;
 	}
@@ -124,19 +145,22 @@ public class Explosion implements Listener {
 
 	private final Game game;
 	private final Player cause;
-	private final Set<Block> blocks;
+	private final Set<BlockPlan> blocks;
 
-	private Explosion(Game game, Set<Block> blocks, Player cause) {
+	private Explosion(Game game, Set<BlockPlan> blocks, Player cause) {
 		this.game = game;
 		this.cause = cause;
 		this.blocks = blocks;
 
 		Bukkit.getScheduler().scheduleSyncDelayedTask(plugin, () -> {
 			// Replace fire with air.
-			// Check if fire first because a player may have placed a block onto the space
+			// Note: Check if fire first because a player may have placed a block onto the space.
+			// We cannot just use state.update(false) because the state was captured taken BEFORE the block was
+			// converted into fire, so that would always do nothing
 			blocks.forEach(b -> {
-				if (b.getType() == Material.FIRE)
-					b.setType(Material.AIR);
+				if (b.ignited.getType() == b.block.getType()) {
+					b.destroyed.update(true);
+				}
 			});
 
 			// Give player back their TNT
@@ -144,46 +168,64 @@ public class Explosion implements Listener {
 			if (cause.getScoreboardTags().contains("bm_player"))
 				cause.getInventory().addItem(new ItemStack(game.getSettings().bombItem, 1));
 
+			// Drop loot
+			var dropsPlaned = planDrops();
+			var lootEvent = new BmDropLootEvent(game, cause, blocks, dropsPlaned);
+			Bukkit.getPluginManager().callEvent(lootEvent);
+			if (!lootEvent.isCancelled()) {
+				lootEvent.getDrops().forEach((location, items) -> items.forEach(item -> {
+					if (item.getAmount() > 0)
+						Objects.requireNonNull(location.getWorld()).dropItemNaturally(location, item);
+				}));
+			}
+
 			// Delete ths obj from memory
 			HandlerList.unregisterAll(this);
 		}, 20);
 
 	}
 
-	public ItemStack drop(Material original) {
-		/*if (Math.random() < dropChance && schema.isDropping(type)) {
-			var sum = 0
-			for (stack in drops)
-				sum += stack.getAmount()
-			var rand = Math.random() * sum
-			for (stack in drops) {
-				rand -= stack.getAmount().toDouble()
-				if (rand <= 0) {
-					val drop = stack.clone()
-					drop.setAmount(1)
-					l.world!!.dropItem(l, drop)
-					return
-				}
+	private Map<Location, Set<ItemStack>> planDrops() {
+		Map<Material, Map<ItemStack, Number>> loot = game.getSettings().blockLoot;
+		return blocks.stream()
+				.map(b -> new AbstractMap.SimpleEntry<>(
+						b.block.getLocation(),
+						lootSelect(loot.getOrDefault(b.prior.getType(), Collections.emptyMap()))))
+				.collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+	}
+
+	static <T> Set<T> lootSelect(Map<? extends T, ? extends Number> loot) {
+		double sum = loot.values().stream()
+				.map(Number::doubleValue)
+				.reduce(0.0, Double::sum);
+		for (var entry : loot.entrySet()) {
+			var item = entry.getKey();
+			var weight = entry.getValue().doubleValue();
+			if (sum * Math.random() <= weight) {
+				return new HashSet<>(Set.of(item));
 			}
-		}*/
-		// TODO loot tables
-		return new ItemStack(Material.AIR, 0);
+			sum -= weight;
+		}
+
+		if (sum == 0)
+			return new HashSet<>();
+		else
+			throw new RuntimeException("Explosion.drop didn't select (should never happen)");
 	}
 
 	@EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = true)
 	public void onPlayerMove(BmPlayerMovedEvent e) {
 		if (e.getGame() != game)
 			return;
-		if (isTouching(e.getPlayer(), blocks)) {
+		if (isTouching(e.getPlayer(), blocks.stream().map(b -> b.block).collect(Collectors.toSet()))) {
 			BmPlayerHitIntent.hit(e.getPlayer(), cause);
 		}
-		// FIXME players only burnt on movement (should be every tick)
 	}
 
 	@EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
 	public void onAnotherExplosion(BmExplosionEvent e) {
 		// Don't double remove blocks
-		blocks.removeAll(e.getIgnited());
+		blocks.removeIf(thisBlock -> e.getIgniting().stream()
+				.anyMatch(eventBlock -> eventBlock.block.equals(thisBlock.block)));
 	}
-
 }
