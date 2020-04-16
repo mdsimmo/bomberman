@@ -1,7 +1,6 @@
 package io.github.mdsimmo.bomberman.messaging;
 
 import net.objecthunter.exp4j.ExpressionBuilder;
-import net.objecthunter.exp4j.function.Function;
 import org.bukkit.ChatColor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.inventory.ItemStack;
@@ -240,36 +239,11 @@ public interface Formattable {
                 throw new RuntimeException("Equation must have exactly one argument");
             try {
                 double answer = new ExpressionBuilder(args.get(0).toString())
-                        .function(Signum.instance)
                         .build().evaluate();
                 return Message.of(BigDecimal.valueOf(answer).stripTrailingZeros().toPlainString());
             } catch (Exception e) {
                 throw new RuntimeException("Expression has invalid numerical inputs: " + args.get(0), e);
             }
-        }
-    }
-
-    class Signum extends Function {
-
-        public static Signum instance = new Signum();
-
-        public Signum() {
-            super("sign", 1);
-        }
-
-        @Override
-        public double apply(double... args) {
-            if (args.length != 1)
-                throw new IllegalArgumentException("Sign function can only have one argument");
-            double val = args[0];
-            if (val > 0)
-                return 1;
-            else if (val < 0)
-                return -1;
-            else if (val == 0)
-                return 0;
-            else
-                return Double.NaN;
         }
     }
 

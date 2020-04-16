@@ -1,6 +1,6 @@
 name: Bomberman
 main: io.github.mdsimmo.bomberman.Bomberman
-version: 0.4.0
+version: 0.4.1
 api-version: 1.15
 load: POSTWORLD
 
@@ -12,8 +12,9 @@ commands:
     permission: bomberman.observer
 
 depend: [WorldEdit]
-softdepend: [Multiverse-Core, Vault]
-  
+# SoftDepend Multiverse so Bomberman is loaded after the Multiverse worlds get loaded
+softdepend: [Multiverse-Core]
+
 permissions:
   bomberman.*:
     description: Gives access to all Bomberman commands

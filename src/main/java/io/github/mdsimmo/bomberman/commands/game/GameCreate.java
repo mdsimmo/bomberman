@@ -131,7 +131,11 @@ public class GameCreate extends Cmd {
     }
 
     private void makeFromSelection(String gameName, CommandSender sender) {
-        SessionOwner owner = BukkitAdapter.adapt(sender);
+        if (!(sender instanceof Player)) {
+            context(Text.MUST_BE_PLAYER).sendTo(sender);
+            return;
+        }
+        SessionOwner owner = BukkitAdapter.adapt((Player) sender);
         LocalSession session = WorldEdit.getInstance().getSessionManager().getIfPresent(owner);
         if (session == null || session.getSelectionWorld() == null) {
             context(Text.CREATE_NEED_SELECTION).sendTo(sender);
