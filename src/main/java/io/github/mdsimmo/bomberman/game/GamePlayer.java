@@ -181,8 +181,10 @@ public class GamePlayer implements Formattable, Listener {
         if (player.getHealth() > 1) {
             player.damage(1);
             immunity = true;
+            player.setFireTicks(22);
             Bukkit.getScheduler().scheduleSyncDelayedTask(plugin, () -> {
                 immunity = false;
+                player.setFireTicks(0);
                 // Call the player move event to recheck damage required
                 Bukkit.getPluginManager().callEvent(new BmPlayerMovedEvent(game, player, player.getLocation(), player.getLocation()));
             }, 22); // 22 is slightly longer than 20 ticks a bomb is active for
@@ -240,7 +242,6 @@ public class GamePlayer implements Formattable, Listener {
         if (e.getCause() == EntityDamageEvent.DamageCause.CUSTOM)
             return;
         // Player cannot be burnt or hurt during game play
-        player.setFireTicks(0);
         e.setCancelled(true);
     }
 
