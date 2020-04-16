@@ -259,7 +259,7 @@ class Game private constructor(val name: String, private var schema: Arena, val 
 
         if (players.size <= 1) {
             players.forEach {
-                Bukkit.getPluginManager().callEvent(BmPlayerWon(this, it))
+                Bukkit.getPluginManager().callEvent(BmPlayerWonEvent(this, it))
             }
             Bukkit.getScheduler().scheduleSyncDelayedTask(plugin, { BmRunStoppedIntent.stopGame(this) }, players.size * 20*5L)
         }

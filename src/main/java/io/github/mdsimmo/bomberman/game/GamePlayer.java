@@ -280,7 +280,7 @@ public class GamePlayer implements Formattable, Listener {
     }
 
     @EventHandler(ignoreCancelled = true, priority = EventPriority.HIGH)
-    public void onPlayerWon(BmPlayerWon e) {
+    public void onPlayerWon(BmPlayerWonEvent e) {
         if (e.getPlayer() != player)
             return;
         Text.PLAYER_WON.with("player", player).sendTo(player);

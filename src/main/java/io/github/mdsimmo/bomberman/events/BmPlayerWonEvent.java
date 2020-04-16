@@ -7,13 +7,13 @@ import org.bukkit.event.HandlerList;
 
 import javax.annotation.Nonnull;
 
-public class BmPlayerWon extends BmEvent {
+public class BmPlayerWonEvent extends BmEvent {
 
     private static final HandlerList HANDLERS_LIST = new HandlerList();
     private final Game game;
     private final Player player;
 
-    public BmPlayerWon(Game game, Player player) {
+    public BmPlayerWonEvent(Game game, Player player) {
         this.game = game;
         this.player = player;
     }
