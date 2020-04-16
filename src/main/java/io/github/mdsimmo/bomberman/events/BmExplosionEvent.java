@@ -1,12 +1,14 @@
 package io.github.mdsimmo.bomberman.events;
 
 import io.github.mdsimmo.bomberman.game.Game;
+import io.github.mdsimmo.bomberman.utils.RefectAccess;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Cancellable;
 import org.bukkit.event.Event;
 import org.bukkit.event.HandlerList;
 
+import javax.annotation.Nonnull;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -28,6 +30,8 @@ public class BmExplosionEvent extends Event implements Cancellable {
     }
 
     @Override
+    @RefectAccess
+    @Nonnull
     public HandlerList getHandlers() {
         return HANDLERS_LIST;
     }

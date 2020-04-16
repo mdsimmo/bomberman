@@ -1,8 +1,10 @@
 package io.github.mdsimmo.bomberman.events;
 
 import io.github.mdsimmo.bomberman.game.Game;
-import org.bukkit.Bukkit;
+import io.github.mdsimmo.bomberman.utils.RefectAccess;
 import org.bukkit.event.HandlerList;
+
+import javax.annotation.Nonnull;
 
 /**
  * Called whenever a game run is stopped. May be due to game finishing, game forcefully stoped, server shutdown, etc.
@@ -19,6 +21,8 @@ public class BmTimerCountedEvent extends BmEvent {
     }
 
     @Override
+    @RefectAccess
+    @Nonnull
     public HandlerList getHandlers() {
         return HANDLERS_LIST;
     }

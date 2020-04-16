@@ -1,23 +1,15 @@
 package io.github.mdsimmo.bomberman.game;
 
-import io.github.mdsimmo.bomberman.Bomberman;
 import io.github.mdsimmo.bomberman.utils.RefectAccess;
-import org.bukkit.Bukkit;
 import org.bukkit.Material;
-import org.bukkit.NamespacedKey;
-import org.bukkit.block.data.type.TNT;
 import org.bukkit.configuration.serialization.ConfigurationSerializable;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.PotionMeta;
-import org.bukkit.loot.LootTable;
-import org.bukkit.potion.Potion;
 import org.bukkit.potion.PotionData;
 import org.bukkit.potion.PotionType;
 
 import javax.annotation.Nonnull;
 import java.util.*;
-import java.util.stream.Collector;
 import java.util.stream.Collectors;
 
 public class GameSettings implements ConfigurationSerializable {

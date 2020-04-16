@@ -1,12 +1,15 @@
 package io.github.mdsimmo.bomberman.commands;
 
-import io.github.mdsimmo.bomberman.messaging.*;
-import io.github.mdsimmo.bomberman.utils.Utils;
+import io.github.mdsimmo.bomberman.messaging.Contexted;
+import io.github.mdsimmo.bomberman.messaging.Formattable;
+import io.github.mdsimmo.bomberman.messaging.Message;
+import io.github.mdsimmo.bomberman.messaging.Text;
 import org.bukkit.command.CommandSender;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public abstract class Cmd implements Formattable {
 
@@ -134,7 +137,11 @@ public abstract class Cmd implements Formattable {
 
     public void incorrectUsage(CommandSender sender, List<String> args) {
         context(Text.INCORRECT_USAGE)
-				.with("attempt", Utils.listToString(args))
+				.with("attempt", new Formattable.CollectionWrapper<>(
+				        args.stream()
+                                .map(Message::of)
+                                .collect(Collectors.toList())
+                ))
                 .sendTo(sender);
     }
 

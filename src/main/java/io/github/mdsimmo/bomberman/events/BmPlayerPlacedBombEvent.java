@@ -2,11 +2,13 @@ package io.github.mdsimmo.bomberman.events;
 
 import io.github.mdsimmo.bomberman.game.Game;
 import io.github.mdsimmo.bomberman.game.GamePlayer;
+import io.github.mdsimmo.bomberman.utils.RefectAccess;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Cancellable;
-import org.bukkit.event.Event;
 import org.bukkit.event.HandlerList;
+
+import javax.annotation.Nonnull;
 
 /**
  * Called when a player places down a block of TNT (or whatever the game configured as the tnt block). Cancelling the
@@ -29,6 +31,8 @@ public class BmPlayerPlacedBombEvent extends BmEvent implements Cancellable {
     }
 
     @Override
+    @RefectAccess
+    @Nonnull
     public HandlerList getHandlers() {
         return HANDLERS_LIST;
     }

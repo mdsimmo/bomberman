@@ -1,8 +1,11 @@
 package io.github.mdsimmo.bomberman.events;
 
 import io.github.mdsimmo.bomberman.game.Game;
+import io.github.mdsimmo.bomberman.utils.RefectAccess;
 import org.bukkit.entity.Player;
 import org.bukkit.event.HandlerList;
+
+import javax.annotation.Nonnull;
 
 public class BmPlayerWon extends BmEvent {
 
@@ -16,6 +19,8 @@ public class BmPlayerWon extends BmEvent {
     }
 
     @Override
+    @RefectAccess
+    @Nonnull
     public HandlerList getHandlers() {
         return HANDLERS_LIST;
     }

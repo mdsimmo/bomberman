@@ -4,7 +4,6 @@ import io.github.mdsimmo.bomberman.commands.Cmd;
 import io.github.mdsimmo.bomberman.events.BmPlayerLeaveGameIntent;
 import io.github.mdsimmo.bomberman.messaging.Message;
 import io.github.mdsimmo.bomberman.messaging.Text;
-import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 

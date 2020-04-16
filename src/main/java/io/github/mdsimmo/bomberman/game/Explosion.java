@@ -2,8 +2,8 @@ package io.github.mdsimmo.bomberman.game;
 
 import io.github.mdsimmo.bomberman.Bomberman;
 import io.github.mdsimmo.bomberman.events.BmExplosionEvent;
-import io.github.mdsimmo.bomberman.events.BmPlayerMovedEvent;
 import io.github.mdsimmo.bomberman.events.BmPlayerHitIntent;
+import io.github.mdsimmo.bomberman.events.BmPlayerMovedEvent;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -14,8 +14,6 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.HandlerList;
 import org.bukkit.event.Listener;
-import org.bukkit.event.entity.EntityDamageEvent;
-import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.Plugin;
 

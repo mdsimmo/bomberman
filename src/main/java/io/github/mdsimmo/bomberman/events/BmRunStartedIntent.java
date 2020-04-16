@@ -1,10 +1,11 @@
 package io.github.mdsimmo.bomberman.events;
 
 import io.github.mdsimmo.bomberman.game.Game;
+import io.github.mdsimmo.bomberman.utils.RefectAccess;
 import org.bukkit.Bukkit;
-import org.bukkit.event.Cancellable;
-import org.bukkit.event.Event;
 import org.bukkit.event.HandlerList;
+
+import javax.annotation.Nonnull;
 
 /**
  * Called whenever a run is attempted to be started
@@ -25,6 +26,8 @@ public class BmRunStartedIntent extends BmIntent {
     }
 
     @Override
+    @RefectAccess
+    @Nonnull
     public HandlerList getHandlers() {
         return HANDLERS_LIST;
     }

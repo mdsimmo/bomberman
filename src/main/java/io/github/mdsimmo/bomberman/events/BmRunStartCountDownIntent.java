@@ -2,9 +2,11 @@ package io.github.mdsimmo.bomberman.events;
 
 import io.github.mdsimmo.bomberman.game.Game;
 import io.github.mdsimmo.bomberman.messaging.Message;
+import io.github.mdsimmo.bomberman.utils.RefectAccess;
 import org.bukkit.Bukkit;
 import org.bukkit.event.HandlerList;
 
+import javax.annotation.Nonnull;
 import java.util.Optional;
 
 /**
@@ -31,6 +33,8 @@ public class BmRunStartCountDownIntent extends BmIntentCancellable {
     }
 
     @Override
+    @RefectAccess
+    @Nonnull
     public HandlerList getHandlers() {
         return HANDLERS_LIST;
     }

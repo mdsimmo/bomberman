@@ -2,11 +2,11 @@ package io.github.mdsimmo.bomberman.events;
 
 import io.github.mdsimmo.bomberman.game.Game;
 import io.github.mdsimmo.bomberman.messaging.Message;
+import io.github.mdsimmo.bomberman.utils.RefectAccess;
 import org.bukkit.entity.Player;
-import org.bukkit.event.Cancellable;
-import org.bukkit.event.Event;
 import org.bukkit.event.HandlerList;
 
+import javax.annotation.Nonnull;
 import java.util.Optional;
 
 /**
@@ -35,6 +35,8 @@ public class BmPlayerJoinGameIntent extends BmIntentCancellable {
     }
 
     @Override
+    @RefectAccess
+    @Nonnull
     public HandlerList getHandlers() {
         return HANDLERS_LIST;
     }

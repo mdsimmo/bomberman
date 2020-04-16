@@ -1,5 +1,6 @@
 package io.github.mdsimmo.bomberman.events;
 
+import io.github.mdsimmo.bomberman.utils.RefectAccess;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.HandlerList;
@@ -23,6 +24,8 @@ public class BmPlayerLeaveGameIntent extends BmIntent {
     }
 
     @Override
+    @RefectAccess
+    @Nonnull
     public HandlerList getHandlers() {
         return HANDLERS_LIST;
     }

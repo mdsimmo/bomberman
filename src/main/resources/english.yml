@@ -147,10 +147,10 @@ command:
   # Shown when a player tries to run a command they do not have permission to use
   deny-permission: '{RED|You do not have permission to use /{command|path}!}'
   # Shown when the player uses a command incorrectly
-  # {attempt}: the string that the player typed
+  # {attempt}: the list of arguments that the player typed
   incorrect-usage: '{RED|Incorrect usage: {command|usage}}'
   # Shown when a player types a command that does not exist
-  # {attempt}: the string that the player typed
+  # {attempt}: the cmd that the player typed
   unknown-command: '{RED|Unknown command: {attempt}}'
   # Shown to the console when it tries to run a command that needs to be done as a player 
   must-be-player: You must be a player

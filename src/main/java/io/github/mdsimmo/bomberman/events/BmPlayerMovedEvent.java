@@ -1,10 +1,13 @@
 package io.github.mdsimmo.bomberman.events;
 
 import io.github.mdsimmo.bomberman.game.Game;
+import io.github.mdsimmo.bomberman.utils.RefectAccess;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Event;
 import org.bukkit.event.HandlerList;
+
+import javax.annotation.Nonnull;
 
 /**
  * Called whenever a bm player moves. Cannot modify the event.
@@ -24,6 +27,8 @@ public class BmPlayerMovedEvent extends Event {
     }
 
     @Override
+    @RefectAccess
+    @Nonnull
     public HandlerList getHandlers() {
         return HANDLERS_LIST;
     }

@@ -1,6 +1,5 @@
 package io.github.mdsimmo.bomberman;
 
-import io.github.mdsimmo.bomberman.game.Bomb;
 import io.github.mdsimmo.bomberman.game.GameSettings;
 import io.github.mdsimmo.bomberman.utils.RefectAccess;
 import org.bukkit.configuration.serialization.ConfigurationSerializable;

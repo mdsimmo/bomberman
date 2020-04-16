@@ -1,6 +1,5 @@
 package io.github.mdsimmo.bomberman.events;
 
-import jdk.jfr.Event;
 import org.bukkit.event.Cancellable;
 
 public abstract class BmIntentCancellable extends BmIntent implements Cancellable {

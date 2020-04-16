@@ -1,8 +1,5 @@
 package io.github.mdsimmo.bomberman.messaging;
 
-import io.github.mdsimmo.bomberman.Bomberman;
-import io.github.mdsimmo.bomberman.game.Bomb;
-import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;

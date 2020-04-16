@@ -2,14 +2,15 @@ package io.github.mdsimmo.bomberman.game;
 
 import io.github.mdsimmo.bomberman.Bomberman;
 import io.github.mdsimmo.bomberman.events.BmGameDeletedIntent;
-import io.github.mdsimmo.bomberman.events.BmGameRebuildIntent;
 import org.bukkit.configuration.file.YamlConfiguration;
-import org.bukkit.plugin.Plugin;
 
 import javax.annotation.CheckReturnValue;
 import java.io.File;
 import java.io.IOException;
-import java.util.*;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Optional;
+import java.util.Set;
 
 public class GameRegistry {
 
@@ -46,7 +47,7 @@ public class GameRegistry {
 
     private static void loadGame(File file) {
         YamlConfiguration configuration = YamlConfiguration.loadConfiguration(file);
-        Game game = (Game) configuration.get("data");
+        configuration.get("data");
     }
 
     public static void saveGame(Game game) {

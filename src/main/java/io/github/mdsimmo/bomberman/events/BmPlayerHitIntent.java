@@ -1,8 +1,11 @@
 package io.github.mdsimmo.bomberman.events;
 
+import io.github.mdsimmo.bomberman.utils.RefectAccess;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.HandlerList;
+
+import javax.annotation.Nonnull;
 
 /**
  * Event that occurs whenever a player is standing on a bomb. Will be called every tick that the player remains on the
@@ -27,6 +30,8 @@ public class BmPlayerHitIntent extends BmIntentCancellable {
     }
 
     @Override
+    @RefectAccess
+    @Nonnull
     public HandlerList getHandlers() {
         return HANDLERS_LIST;
     }

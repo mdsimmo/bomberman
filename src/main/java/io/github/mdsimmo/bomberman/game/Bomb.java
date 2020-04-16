@@ -4,7 +4,6 @@ import io.github.mdsimmo.bomberman.Bomberman;
 import io.github.mdsimmo.bomberman.events.BmExplosionEvent;
 import io.github.mdsimmo.bomberman.events.BmPlayerPlacedBombEvent;
 import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
