@@ -47,7 +47,11 @@ public class GameRegistry {
 
     private static void loadGame(File file) {
         YamlConfiguration configuration = YamlConfiguration.loadConfiguration(file);
-        configuration.get("data");
+        Game game = (Game)configuration.get("data");
+        if (game != null)
+            Bomberman.instance.getLogger().info("Loaded " + game.getName());
+        else
+            Bomberman.instance.getLogger().info("Cannot load " + file.getName());
     }
 
     public static void saveGame(Game game) {
