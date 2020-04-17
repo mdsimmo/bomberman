@@ -67,46 +67,6 @@ class CollectionWrapper<T : Formattable>(private val list: Collection<T>) : Form
     }
 }
 
-class MapExpander : Formattable {
-    override fun format(args: List<Message>): Message {
-        val size = args.size
-        require (size % 2 == 0) { "map needs an even amount of arguments" }
-        var text: Message = Message.empty()
-        var i = 0
-        while (i < size) {
-            val row = Text.MAP_FORMAT
-                    .with("key", args[i])
-                    .with("value", args[i + 1])
-                    .format()
-            text = text.append(row)
-            i += 2
-        }
-        return text
-    }
-}
-
-class ListExpander : Formattable {
-    override fun format(args: List<Message>): Message {
-        var text: Message = Message.empty()
-        for (arg in args) {
-            val row = Text.LIST_FORMAT
-                    .with("value", arg)
-                    .format()
-            text = text.append(row)
-        }
-        return text
-    }
-}
-
-class HeadingExpander : Formattable {
-    override fun format(args: List<Message>): Message {
-        require(args.size == 1) { "Header must have one argument" }
-        return Text.HEADING_FORMAT
-                .with("value", args[0])
-                .format()
-    }
-}
-
 class RawExpander : Formattable {
     override fun format(args: List<Message>): Message {
         require(args.isEmpty()) { "{raw} cannot be used with arguments" }
@@ -162,7 +122,19 @@ class Equation : Formattable {
             val answer = ExpressionBuilder(args[0].toString()).build().evaluate()
             Message.of(BigDecimal.valueOf(answer).stripTrailingZeros().toPlainString())
         } catch (e: Exception) {
-            throw RuntimeException("Expression has invalid numerical inputs: " + args[0], e)
+            Message.error("{${args[0]}}")
         }
+    }
+}
+
+class CustomPath : Formattable {
+    override fun format(args: List<Message>): Message {
+        require(args.isNotEmpty()) { "Custom message needs path" }
+        val text = Text.getSection(args[0].toString())
+        return args.drop(1)
+                .foldIndexed(text) { i, acc, iArg ->
+                    acc.with("arg$i", iArg)
+                }
+                .format()
     }
 }

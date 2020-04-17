@@ -56,7 +56,7 @@ enum class Text(path: String) : Contexted {
     COMMAND_GROUP_USAGE("command.group.usage"),
     COMMAND_GROUP_EXAMPLE("command.group.example"),
     COMMAND_GROUP_EXTRA("command.group.extra"),
-    COMMAND_FORMAT("command.format"),
+    COMMAND_HELP("command.help"),
     COMMAND_CANCELLED("command.cancelled"),  // no Bomberman name as it must not be changed
     BOMBERMAN_DESCRIPTION("command.bomberman.description"),
     ARENA_CREATE_NAME("command.arenacreate.name"),
@@ -271,6 +271,28 @@ enum class Text(path: String) : Contexted {
 
     override fun format(): Message {
         return Expander.expand(text, mapOf())
+    }
+
+    companion object {
+        fun getSection(path: String): Contexted {
+            val text = YAMLLanguage.lang.getString(path)
+            val things = mutableMapOf<String, Formattable>()
+            return object : Contexted {
+                override fun with(key: String, thing: Formattable): Contexted {
+                    things[key] = thing
+                    return this
+                }
+
+                override fun format(): Message {
+                    return if (text == null) {
+                        Message.error("{${path}}")
+                    } else {
+                        Expander.expand(text, things)
+                    }
+                }
+
+            }
+        }
     }
 
     // class to read the English language text from

@@ -5,14 +5,14 @@ format:
   message: '{switch|{message}|||{green|[Bomberman]} {message}}'
   # How to format a heading
   # {heading}: The title
-  heading: '{raw}{yellow|--------} {value} {yellow|---------------}'
+  heading: '{raw}{yellow|--------} {arg0} {yellow|---------------}'
   # How to format a list of key-value pairs
   # {key}: the maps key
-  # {value} the map's value 
-  map: "{raw}{switch|{value}||| {gold|{key}:} {value}\n}"
+  # {value} the map's value
+  map: "{raw}{switch|{arg1}||| {gold|{arg0}:} {arg1}}"
   # How to display a list
   # {value}: the value of the list
-  list: "{raw}{switch|{value}||| {gold|*} {value}\n}"
+  list: "{raw}{switch|{arg0}||| {gold|*} {arg0}}"
   # How to format an item by default
   # {item}: the item to format
   item: '{item|amount}x{item|type}'
@@ -143,7 +143,11 @@ scores:
 command:
   # How to display command help
   # {command}: The command
-  format: "{heading|Help: {command|name}}\n{map|Description|{command|description}|Usage|{command|usage}|Example|{command|example}}"
+  help: |+
+    {c|format.heading|Help: {command|name}}
+    {c|format.map|Description|{command|description}}
+    {c|format.map|Usage|{command|usage}}
+    {c|format.map|Example|{command|example}}
   # Shown when a player tries to run a command they do not have permission to use
   deny-permission: '{RED|You do not have permission to use /{command|path}!}'
   # Shown when the player uses a command incorrectly
@@ -515,7 +519,10 @@ command:
     extra: ''
     # What to show when games are present
     # {games}: a list of games
-    games: "{heading|Games}\n{Switch|{games|length}|0|{Red|No games present}|{games|foreach|{map|\\{value\\|name\\}|\\{value\\|state\\}}|}}"
+    games: |+
+      {c|format.heading|Games}
+      {Switch|{games|length}|0|{Red|No games present}|{games|foreach|{c|format.map|\{value\|name\}|\{value\|players\}/\{value\|maxplayers\} (\{switch\|\{value\|running\}\|true\|Running\|false\|Waiting\|\{Red\|?\}\})}|
+      }}
   # Messages relating to '/bm game ignore'
   ignore:
     name: ignore
@@ -539,8 +546,16 @@ command:
     # What info to display about a game
     # {game}: the game
     details: |+
-      {heading|Info: {game|name}}
-      {map|Status|{switch|{game|running}|true|Playing|false|Waiting|{Red|error}}|Players|{game|players}|Max players|{game|maxplayers}|Init bombs|{game|bombs}|Init lives|{game|lives}|Init power|{game|power}|Location|[{game|x},{game|y},{game|z}]|Schema|{game|schema|file}|Size|[{game|schema|xsize},{game|schema|ysize},{game|schema|zsize}]}
+      {c|format.heading|Info: {game|name}}
+      {c|format.map|Status|{switch|{game|running}|true|Playing|false|Waiting|{Red|?}}}
+      {c|format.map|Players|{game|players}}
+      {c|format.map|Max players|{game|maxplayers}}
+      {c|format.map|Init lives|{game|lives}}
+      {c|format.map|Init bombs|{game|bombs}}
+      {c|format.map|Init power|{game|power}}
+      {c|format.map|Location|({game|x}, {game|y}, {game|z})}
+      {c|format.map|Schema|{game|schema|name}}
+      {c|format.map|Size|[{game|schema|xsize}x{game|schema|ysize}x{game|schema|zsize}]}
 
   # Commands relating to '/bm game join'. Also see 'join.xxx' messages
   join:

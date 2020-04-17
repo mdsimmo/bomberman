@@ -7,11 +7,9 @@ object Expander {
     private val functions = mapOf(
             Pair("=", Equation()),
             Pair("switch", Switch()),
-            Pair("map", MapExpander()),
-            Pair("list", ListExpander()),
-            Pair("heading", HeadingExpander()),
             Pair("title", TitleExpander()),
-            Pair("raw", RawExpander())
+            Pair("raw", RawExpander()),
+            Pair("c", CustomPath())
     )
 
     /**

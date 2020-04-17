@@ -14,27 +14,18 @@ import org.mockito.Mockito.*
 
 class FormattingTest {
     @Test
-    fun testAllEnglishStatementsExist() { 
-        // Load one text message will cause initialisers of all Texts to verify they exist in english.yml
-        assertNotNull(Text.TRUE.format())
+    fun testAllEnglishStatementsExistAndHaveNoErrors() {
+        for (t in Text.values()) {
+            // We should be able to evaluate every message without throwing an exception
+            // Missing arguments should just be formatted red
+            assertNotNull(t.format())
+        }
     }
 
     @Test
-    fun testExpandMap() {
-        val a = expand("A simple map \n{map|a|1|b|2}", mapOf())
-        assertEquals("A simple map \n a: 1\n b: 2\n", ChatColor.stripColor(a.toString()))
-    }
-
-    @Test
-    fun textExpandHeading() {
-        val a = expand("{heading|hello}", mapOf())
-        assertEquals("-------- hello ---------------", ChatColor.stripColor(a.toString()))
-    }
-
-    @Test
-    fun textExpandList() {
-        val a = expand("{list|1|2|3|4}", mapOf())
-        assertEquals(" * 1\n * 2\n * 3\n * 4\n", ChatColor.stripColor(a.toString()))
+    fun testCustomFormat() {
+        val a = expand("A map: \n{c|format.map|key|value}\nWow!", mapOf())
+        assertEquals("A map: \n key: value\nWow!", ChatColor.stripColor(a.toString()))
     }
 
     @Test
