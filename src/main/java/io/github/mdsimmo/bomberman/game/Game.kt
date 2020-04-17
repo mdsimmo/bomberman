@@ -424,8 +424,10 @@ class Game private constructor(val name: String, private var schema: Arena, val 
             "maxplayers" -> Message.of(spawns.size)
             "schema" -> schema.format(args.drop(1))
             "players" -> Message.of(players.size.toString())
-            "power" -> Message.of("n/a") // FIXME initial power startup
-            "bombs" -> Message.of("n/a") // FIXME initial bombs startup
+            "power" -> Message.of(settings.initialItems.sumBy {
+                if (it.type == settings.bombItem) { it.amount } else { 0 }})
+            "bombs" -> Message.of(settings.initialItems.sumBy {
+                if (it.type == settings.powerItem) { it.amount } else { 0 }})
             "lives" -> Message.of(settings.lives.toString())
             "x" -> Message.of(schema.origin.x.toInt())
             "y" -> Message.of(schema.origin.y.toInt())
