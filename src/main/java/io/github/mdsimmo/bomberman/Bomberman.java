@@ -12,9 +12,9 @@ import javax.annotation.Nonnull;
 import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.List;
 import java.util.Objects;
 
 public class Bomberman extends JavaPlugin implements Listener {
@@ -46,16 +46,18 @@ public class Bomberman extends JavaPlugin implements Listener {
 	}
 
 	private void extractResources() {
-		List.of("purple.schem")
-				.forEach(it -> {
-					try (var input = new BufferedInputStream(
-							Objects.requireNonNull(getClassLoader().getResourceAsStream(it)))) {
-						Path output = new File(settings.builtinSaves(), it).toPath();
-						Files.deleteIfExists(output);
-						Files.copy(input, output);
-					} catch (IOException e) {
-						e.printStackTrace();
-					}
-				});
+		String[] schematics = new String[] {
+		        "purple.schem"
+        };
+	    for (String schem : schematics) {
+			try (InputStream input = new BufferedInputStream(
+					Objects.requireNonNull(getClassLoader().getResourceAsStream(schem)))) {
+				Path output = new File(settings.builtinSaves(), schem).toPath();
+				Files.deleteIfExists(output);
+				Files.copy(input, output);
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
 	}
 }

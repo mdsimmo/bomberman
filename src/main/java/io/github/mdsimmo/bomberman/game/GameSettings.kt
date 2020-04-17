@@ -6,7 +6,6 @@ import org.bukkit.Material
 import org.bukkit.configuration.serialization.ConfigurationSerializable
 import org.bukkit.inventory.ItemStack
 import org.bukkit.potion.PotionType
-import javax.annotation.Nonnull
 
 class GameSettings : ConfigurationSerializable {
     companion object {
@@ -49,7 +48,6 @@ class GameSettings : ConfigurationSerializable {
     )
     var lives = 3
 
-    @Nonnull
     override fun serialize(): Map<String, Any> {
         val objs: MutableMap<String, Any> = HashMap()
         objs["bomb"] = bombItem.key.toString()

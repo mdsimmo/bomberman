@@ -344,7 +344,7 @@ command:
     # The handicap has been set for a specific player
     # {game}: the game set for
     # {player}: the player handicapped/advantaged
-    set: '{switch|{=|sign({player|handicap})}|0|Handicap removed from {player}|-1|{player}''s
+    set: '{switch|{=|signum({player|handicap})}|0|Handicap removed from {player}|-1|{player}''s
       advantage set to level {=|abs({player|handicap})}|{player}''s handicap set to
       level {player|handicap}}'
   # Messages relating to '/bm game set lives'
@@ -540,7 +540,7 @@ command:
     # {game}: the game
     details: |+
       {heading|Info: {game|name}}
-      {map|Status|{switch|{game|running}|true|Playing|false|Waiting|{Red|error}}|Players|{game|players}|Max players|{game|maxplayers}|Init bombs|{game|bombs}|Init lives|{game|lives}|Init power|{game|power}|Location|[{game|x},{game|y},{game|z}]}
+      {map|Status|{switch|{game|running}|true|Playing|false|Waiting|{Red|error}}|Players|{game|players}|Max players|{game|maxplayers}|Init bombs|{game|bombs}|Init lives|{game|lives}|Init power|{game|power}|Location|[{game|x},{game|y},{game|z}]|Schema|{game|schema|file}|Size|[{game|schema|xsize},{game|schema|ysize},{game|schema|zsize}]}
 
   # Commands relating to '/bm game join'. Also see 'join.xxx' messages
   join:

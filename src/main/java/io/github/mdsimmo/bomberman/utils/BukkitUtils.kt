@@ -33,4 +33,10 @@ object BukkitUtils {
             it.itemMeta = meta
         }
     }
+
+    @CheckReturnValue
+    fun blockLoc(loc: Location): Location {
+        return Location(loc.world,
+                loc.blockX.toDouble(), loc.blockY.toDouble(), loc.blockZ.toDouble())
+    }
 }

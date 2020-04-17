@@ -83,7 +83,7 @@ class Game private constructor(val name: String, private var schema: Arena, val 
         }
     }
 
-    private class Arena {
+    private class Arena : Formattable {
 
         val origin: Location
         val file: File
@@ -92,14 +92,14 @@ class Game private constructor(val name: String, private var schema: Arena, val 
 
         constructor(file: File, origin: Location) {
             this.file = file
-            this.origin = origin.clone()
+            this.origin = BukkitUtils.blockLoc(origin)
             this.box = Box(origin, 1, 1, 1)
             loadClipboard() // will set box size correctly
         }
 
         constructor(file: File, origin: Location, clipboard: Clipboard) {
             this.file = file
-            this.origin = origin.clone()
+            this.origin = BukkitUtils.blockLoc(origin)
             this.box =  WorldEditUtils.pastedBounds(origin, clipboard)
             this.clipboard = WeakReference(clipboard)
         }
@@ -137,6 +137,19 @@ class Game private constructor(val name: String, private var schema: Arena, val 
                         //    WorldEdit.getInstance().sessionManager.get(BukkitAdapter.adapt(user))?.remember(editSession)
                     }
             plugin.logger.info("Rebuild done")
+        }
+
+        override fun format(args: List<Message>): Message {
+            return when (args.firstOrNull()?.toString()?.toLowerCase() ?: "name") {
+                "name" -> Message.of(file.nameWithoutExtension)
+                "file" -> Message.of(file.path)
+                "filename" -> Message.of(file.name)
+                "parent" -> Message.of(file.parent ?: "")
+                "xsize" -> Message.of(box.size.x)
+                "ysize" -> Message.of(box.size.y)
+                "zsize" -> Message.of(box.size.z)
+                else -> Message.empty()
+            }
         }
     }
 
@@ -403,20 +416,20 @@ class Game private constructor(val name: String, private var schema: Arena, val 
         e.setHandled()
     }
 
-    override fun format(args: MutableList<Message>): Message {
-        if (args.size == 0)
+    override fun format(args: List<Message>): Message {
+        if (args.isEmpty())
             return Message.of(name)
         return when (args[0].toString()) {
             "name" -> Message.of(name)
             "maxplayers" -> Message.of(spawns.size)
-            "arena" -> Message.of(schema.file.name)
+            "schema" -> schema.format(args.drop(1))
             "players" -> Message.of(players.size.toString())
             "power" -> Message.of("n/a") // FIXME initial power startup
             "bombs" -> Message.of("n/a") // FIXME initial bombs startup
             "lives" -> Message.of(settings.lives.toString())
-            "x" -> Message.of(schema.origin.x.toString())
-            "y" -> Message.of(schema.origin.y.toString())
-            "z" -> Message.of(schema.origin.z.toString())
+            "x" -> Message.of(schema.origin.x.toInt())
+            "y" -> Message.of(schema.origin.y.toInt())
+            "z" -> Message.of(schema.origin.z.toInt())
             "running" -> Message.of(if (running) { "true" } else { "false" })
             else -> Message.empty()
         }
