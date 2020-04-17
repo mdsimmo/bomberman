@@ -49,7 +49,8 @@ abstract class CommandGroup(parent: Cmd?) : Cmd(parent) {
         } else {
             for (c in children) {
                 if (c.name().toString().equals(args[0], ignoreCase = true)) {
-                    return c.execute(sender, args.drop(1))
+                    c.execute(sender, args.drop(1))
+                    return true
                 }
             }
             context(Text.UNKNOWN_COMMAND)

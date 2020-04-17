@@ -36,9 +36,8 @@ class CommandGroupTest {
         val sender = mock(CommandSender::class.java, "sender")
         `when`(sender.hasPermission(anyString())).thenReturn(true)
 
-        val result = group.execute(sender, listOf("chIlD", "hello", "world"))
+        group.execute(sender, listOf("chIlD", "hello", "world"))
 
-        assert(result)
         verify(child).run(sender, listOf("hello", "world"))
 
         // child2 should not be touched
@@ -86,5 +85,4 @@ class CommandGroupTest {
         // Nothing should be sent to player
         verify(sender, never()).sendMessage(anyString())
     }
-
 }

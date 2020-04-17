@@ -46,23 +46,14 @@ abstract class Cmd(protected var parent: Cmd?) : Formattable {
      * Execute the command. Checks for permissions
      * @return true if success. false to show usage
      */
-    fun execute(sender: CommandSender, args: List<String>): Boolean {
-        return if (isAllowedBy(sender)) {
-            if (run(sender, args)) {
-                true
-            } else {
-                if (args.isEmpty()) { // assume asking for help
-                    help(sender)
-                    true
-                } else {
-                    incorrectUsage(sender, args)
-                    help(sender)
-                    false
-                }
+    fun execute(sender: CommandSender, args: List<String>) {
+        if (isAllowedBy(sender)) {
+            if (!run(sender, args)) {
+                incorrectUsage(sender, args)
+                help(sender)
             }
         } else {
             context(Text.DENY_PERMISSION).sendTo(sender)
-            true
         }
     }
 
