@@ -34,6 +34,13 @@ class GamePlayer private constructor(private val player: Player, private val gam
             val gamePlayer = GamePlayer(player, game)
             plugin.server.pluginManager.registerEvents(gamePlayer, plugin)
 
+
+            // Clear the landing area of items (there should never be any, but we don't want no cheating)
+            start.world!!.getNearbyEntities(start, 2.0, 3.0, 2.0)
+                    .filterIsInstance<Item>()
+                    .forEach{ it.remove() }
+
+
             // Initialise the player for the game
             player.teleport(start.clone().add(0.5, 0.5, 0.5))
             player.gameMode = GameMode.SURVIVAL
