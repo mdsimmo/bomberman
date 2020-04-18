@@ -337,7 +337,9 @@ class Game private constructor(val name: String, private var schema: Arena, val 
             players.forEach {
                 Bukkit.getPluginManager().callEvent(BmPlayerWonEvent(this, it))
             }
-            Bukkit.getScheduler().scheduleSyncDelayedTask(plugin, { BmRunStoppedIntent.stopGame(this) }, players.size * 20*5L)
+            Bukkit.getScheduler().scheduleSyncDelayedTask(plugin, {
+                BmRunStoppedIntent.stopGame(this)
+            }, players.size * 20*5L)
         }
     }
 
@@ -418,6 +420,8 @@ class Game private constructor(val name: String, private var schema: Arena, val 
 
     @EventHandler(ignoreCancelled = true, priority = EventPriority.HIGHEST)
     fun onPlayerLeave(e: BmPlayerLeaveGameIntent) {
+        if (!running)
+            return
         if (players.contains(e.player))
             playerDeadOrGone(e.player)
     }

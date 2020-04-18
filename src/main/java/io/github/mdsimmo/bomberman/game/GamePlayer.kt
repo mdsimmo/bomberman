@@ -291,7 +291,7 @@ class GamePlayer private constructor(private val player: Player, private val gam
         }
     }
 
-    @EventHandler(ignoreCancelled = true, priority = EventPriority.HIGH)
+    @EventHandler(ignoreCancelled = true, priority = EventPriority.HIGHEST)
     fun onGameStopped(e: BmRunStoppedIntent) {
         if (e.game != game)
             return
