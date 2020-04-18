@@ -9,6 +9,32 @@ import javax.annotation.CheckReturnValue
 @CheckReturnValue
 class Message private constructor(private val contents: TreeNode) : Formattable {
 
+    companion object {
+        fun of(text: String): Message {
+            return Message(StringNode(text))
+        }
+
+        fun of(num: Int): Message {
+            return of(num.toString())
+        }
+
+        val empty = of("")
+
+        fun title(text: Message, subtitle: Message, fadeIn: Int, duration: Int, fadeOut: Int): Message {
+            return Message(TitleNode(text, subtitle, fadeIn, duration, fadeOut))
+        }
+
+        val rawFlag = Message(RawNode())
+
+        fun error(s: String): Message {
+            return of(s).color(ChatColor.RED)
+        }
+
+        fun lazyExpand(text: String, context: Map<String, Formattable>): Message {
+            return Message(LazyNode(text, context))
+        }
+    }
+
     private data class Style constructor(
             val color: ChatColor,
             val formats: Set<ChatColor>
@@ -120,7 +146,7 @@ class Message private constructor(private val contents: TreeNode) : Formattable 
             for (part in parts) {
                 if (part is Joined) {
                     this.parts.addAll(part.parts)
-                } else if (part !== emptyMessage.contents) {
+                } else if (part !== empty.contents) {
                     this.parts.add(part)
                 }
             }
@@ -169,7 +195,7 @@ class Message private constructor(private val contents: TreeNode) : Formattable 
         }
     }
 
-    private class TitleNode constructor(
+    private class TitleNode (
             private val title: Message,
             private val subtitle: Message,
             private val fadeIn: Int,
@@ -192,6 +218,23 @@ class Message private constructor(private val contents: TreeNode) : Formattable 
             return Title(titleString, subtitleString, fadeIn, stay, fadeOut)
         }
 
+    }
+
+    private class LazyNode (val text: String, val context: Map<String, Formattable>) : TreeNode {
+        val content: TreeNode by lazy {
+            Expander.expand(text, context).contents
+        }
+
+        override fun expand(cursor: Cursor) {
+            content.expand(cursor)
+        }
+
+        override val isRaw: Boolean
+            get() = content.isRaw
+
+        override fun expandTitle(): Title? {
+            return content.expandTitle()
+        }
     }
 
     fun color(color: ChatColor): Message {
@@ -235,34 +278,6 @@ class Message private constructor(private val contents: TreeNode) : Formattable 
         val cursor = Cursor()
         contents.expand(cursor)
         return cursor.toString()
-    }
-
-    companion object {
-        fun of(text: String): Message {
-            return Message(StringNode(text))
-        }
-
-        fun of(num: Int): Message {
-            return of(num.toString())
-        }
-
-        private val emptyMessage = of("")
-        fun empty(): Message {
-            return emptyMessage
-        }
-
-        fun title(text: Message, subtitle: Message, fadeIn: Int, duration: Int, fadeOut: Int): Message {
-            return Message(TitleNode(text, subtitle, fadeIn, duration, fadeOut))
-        }
-
-        private val rawMessage = Message(RawNode())
-        fun rawFlag(): Message {
-            return rawMessage
-        }
-
-        fun error(s: String): Message {
-            return of(s).color(ChatColor.RED)
-        }
     }
 
 }

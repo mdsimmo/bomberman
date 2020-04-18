@@ -20,7 +20,7 @@ object Expander {
      */
     @JvmStatic
     fun expand(text: String, things: Map<String, Formattable>): Message {
-        var expanded: Message = Message.empty()
+        var expanded: Message = Message.empty
         val building = StringBuilder()
         var ignoreNextSpecial = false
         var i = 0
@@ -72,7 +72,7 @@ object Expander {
         val args = mutableListOf<Message>()
         generateSequence { toNext(text, '|', i.get()) }
                 .forEach { subArg ->
-                    args.add(expand(subArg.substring(1, subArg.length - 1), things))
+                    args.add(Message.lazyExpand(subArg.substring(1, subArg.length - 1), things))
                     // -1 because the first '|' would get counted twice
                     i.addAndGet(subArg.length - 1)
                 }

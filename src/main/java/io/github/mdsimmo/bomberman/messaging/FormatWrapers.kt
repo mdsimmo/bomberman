@@ -24,7 +24,7 @@ class ItemWrapper(private val item: ItemStack) : Formattable {
         } else when (args[0].toString()) {
             "amount" -> Message.of(item.amount)
             "type" -> Message.of(item.type.key.toString())
-            else -> Message.empty()
+            else -> Message.empty
         }
     }
 
@@ -58,7 +58,7 @@ class CollectionWrapper<T : Formattable>(private val list: Collection<T>) : Form
                                     Pair("i", Message.of(i))
                             ))
                         }
-                        .ifEmpty { listOf(Message.empty()) }
+                        .ifEmpty { listOf(Message.empty) }
                         .reduce { a, b -> a.append(separator).append(b) }
             }
             "length" -> Message.of(list.size)
@@ -70,7 +70,7 @@ class CollectionWrapper<T : Formattable>(private val list: Collection<T>) : Form
 class RawExpander : Formattable {
     override fun format(args: List<Message>): Message {
         require(args.isEmpty()) { "{raw} cannot be used with arguments" }
-        return Message.rawFlag()
+        return Message.rawFlag
     }
 }
 
@@ -78,7 +78,7 @@ class TitleExpander : Formattable {
     override fun format(args: List<Message>): Message {
         require(args.isNotEmpty()) { "{title} needs at least one argument" }
         val text = args[0]
-        val subtitle = if (args.size >= 2) args[1] else Message.empty()
+        val subtitle = if (args.size >= 2) args[1] else Message.empty
         val fadein = if (args.size >= 3) args[2].toString().toInt() else 0
         val duration = if (args.size >= 4) args[3].toString().toInt() else 20
         val fadeout = if (args.size >= 5) args[4].toString().toInt() else 0
@@ -103,7 +103,7 @@ class Switch : Formattable {
             i += 2
         }
         // no default supplied
-        return Message.empty()
+        return Message.empty
     }
 
     private fun equal(start: String, arg: String): Boolean {

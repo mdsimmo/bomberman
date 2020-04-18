@@ -20,7 +20,7 @@ class MessageTest {
 
     @Test
     fun empty() {
-        val msg = Message.empty()
+        val msg = Message.empty
         assertEquals("", msg.toString())
     }
 

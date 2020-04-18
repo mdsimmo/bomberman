@@ -2,7 +2,6 @@ package io.github.mdsimmo.bomberman.messaging
 
 import io.github.mdsimmo.bomberman.messaging.Expander.expand
 import io.github.mdsimmo.bomberman.messaging.Message.Companion.of
-import io.github.mdsimmo.bomberman.messaging.Message.Companion.rawFlag
 import org.bukkit.ChatColor
 import org.bukkit.command.CommandSender
 import org.bukkit.entity.Player
@@ -42,7 +41,7 @@ class FormattingTest {
     @Test
     fun testNoWrapperMessageAppendedWithRaw() {
         val sender = mock(CommandSender::class.java)
-        val message = of("Hello World").color(ChatColor.AQUA).append(rawFlag())
+        val message = of("Hello World").color(ChatColor.AQUA).append(Message.rawFlag)
 
         message.sendTo(sender)
 
@@ -88,6 +87,47 @@ class FormattingTest {
     fun testSwitchNoMatchReturnsEmpty() {
         val a = expand("{switch|c|a|1|b|2}", mapOf())
         assertEquals("", a.toString())
+    }
+
+    @Test
+    fun testSwitchEvaluatesOnlyTheSelectedArgument() {
+        val no = mock(Formattable::class.java)
+        val yes = mock(Formattable::class.java)
+        `when`(no.format(anyList())).thenReturn(of("No"))
+        `when`(yes.format(anyList())).thenReturn(of("Yes"))
+
+        val a = expand("{switch|1|0|{no}|1|{yes}|2|{no}|{no}}", mapOf(
+                Pair("no", no),
+                Pair("yes", yes)
+        ))
+
+        assertEquals("Yes", a.toString())
+        verify(yes).format(emptyList())
+        verifyNoMoreInteractions(yes)
+        verifyNoInteractions(no)
+    }
+
+    @Test
+    fun testSwitchEvaluatesArgmentsInOrder() {
+        val one = mock(Formattable::class.java)
+        val two = mock(Formattable::class.java)
+        val three = mock(Formattable::class.java)
+        `when`(one.format(anyList())).thenReturn(of("1"))
+        `when`(two.format(anyList())).thenReturn(of("2"))
+        `when`(three.format(anyList())).thenReturn(of("3"))
+
+        val a = expand("{switch|2|{one}|One|{two}|Two|{three}|Three|Four+}", mapOf(
+                Pair("one", one),
+                Pair("two", two),
+                Pair("three", three)
+        ))
+
+        assertEquals("Two", a.toString())
+        verify(one).format(emptyList())
+        verifyNoMoreInteractions(one)
+        verify(two).format(emptyList())
+        verifyNoMoreInteractions(two)
+        verifyNoInteractions(three)
     }
 
     @Test

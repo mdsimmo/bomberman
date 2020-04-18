@@ -213,7 +213,7 @@ class Game private constructor(val name: String, private var schema: Arena, val 
                 "xsize" -> Message.of(box.size.x)
                 "ysize" -> Message.of(box.size.y)
                 "zsize" -> Message.of(box.size.z)
-                else -> Message.empty()
+                else -> Message.empty
             }
         }
     }
@@ -499,7 +499,7 @@ class Game private constructor(val name: String, private var schema: Arena, val 
             "y" -> Message.of(schema.origin.y.toInt())
             "z" -> Message.of(schema.origin.z.toInt())
             "running" -> Message.of(if (running) { "true" } else { "false" })
-            else -> Message.empty()
+            else -> Message.empty
         }
     }
 

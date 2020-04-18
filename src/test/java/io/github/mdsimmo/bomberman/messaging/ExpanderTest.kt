@@ -4,6 +4,7 @@ import io.github.mdsimmo.bomberman.messaging.Expander.expand
 import org.bukkit.ChatColor
 import org.junit.Assert.assertEquals
 import org.junit.Test
+import org.mockito.Mockito.*
 
 class ExpanderTest {
     @Test
@@ -153,4 +154,16 @@ class ExpanderTest {
     }
 
     // TODO formatting error highlights in correct spot (no crash)
+
+
+    @Test
+    fun testMessagesLazyExpanded() {
+        val badExpand = mock(Formattable::class.java)
+        `when`(badExpand.format(anyList())).thenReturn(Message.of("no no"))
+
+        val a = expand("{switch|0|0|choose me|{bad}}", mapOf(Pair("bad", badExpand)))
+
+        assertEquals("choose me", a.toString())
+        verifyNoInteractions(badExpand)
+    }
 }
