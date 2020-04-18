@@ -1,5 +1,6 @@
 package io.github.mdsimmo.bomberman.messaging
 
+import io.github.mdsimmo.bomberman.Bomberman
 import org.bukkit.configuration.InvalidConfigurationException
 import org.bukkit.configuration.file.YamlConfiguration
 import java.io.BufferedReader
@@ -251,7 +252,9 @@ enum class Text(path: String) : Contexted {
 
     init {
         // any error's here should always get caught during development
-        text = YAMLLanguage.lang.getString(path) ?: throw RuntimeException("No default message for text: $path")
+        text = YAMLLanguage.server?.getString(path)
+                ?: YAMLLanguage.builtin.getString(path)
+                ?: throw RuntimeException("No default message for text: $path")
     }
 
     override fun with(key: String, thing: Formattable): Contexted {
@@ -275,7 +278,8 @@ enum class Text(path: String) : Contexted {
 
     companion object {
         fun getSection(path: String): Contexted {
-            val text = YAMLLanguage.lang.getString(path)
+            val text = YAMLLanguage.server?.getString(path)
+                    ?: YAMLLanguage.builtin.getString(path)
             val things = mutableMapOf<String, Formattable>()
             return object : Contexted {
                 override fun with(key: String, thing: Formattable): Contexted {
@@ -297,15 +301,22 @@ enum class Text(path: String) : Contexted {
 
     // class to read the English language text from
     private object YAMLLanguage {
-        var lang: YamlConfiguration
+        val builtin: YamlConfiguration
+        val server: YamlConfiguration?
 
         init {
             val input = Text::class.java.classLoader.getResourceAsStream("english.yml")!!
             val reader: Reader =
                     BufferedReader(InputStreamReader(input))
-            lang = YamlConfiguration()
+            builtin = YamlConfiguration()
+            server = YamlConfiguration()
             try {
-                lang.load(reader)
+                builtin.load(reader)
+                Bomberman.instance?.let {
+                    val custom = it.settings.language()
+                    if (custom.exists())
+                        server.load(custom)
+                }
             } catch (e: IOException) {
                 e.printStackTrace()
             } catch (e: InvalidConfigurationException) {

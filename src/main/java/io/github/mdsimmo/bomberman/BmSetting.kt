@@ -30,7 +30,7 @@ class BmSetting private constructor() {
     private var tempGameData: String = "temp/game"
     private var tempPlayerData: String = "temp/player"
     private var defaultGameSettings: GameSettings = GameSettings()
-    private var language: String = "builtin"
+    private var language: String = "messages.yml    "
 
     fun gameSaves(): File {
         val file = File(Bomberman.instance.dataFolder, gameSaves)
@@ -71,5 +71,9 @@ class BmSetting private constructor() {
             file.mkdirs()
         }
         return file
+    }
+
+    fun language(): File {
+        return File(Bomberman.instance.dataFolder, language)
     }
 }
