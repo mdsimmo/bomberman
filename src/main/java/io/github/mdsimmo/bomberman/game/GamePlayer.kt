@@ -42,7 +42,7 @@ class GamePlayer private constructor(private val player: Player, private val gam
 
 
             // Initialise the player for the game
-            player.teleport(start.clone().add(0.5, 0.5, 0.5))
+            player.teleport(start.clone().add(0.5, 0.01, 0.5))
             player.gameMode = GameMode.SURVIVAL
             player.health = game.settings.lives.toDouble()
             player.getAttribute(Attribute.GENERIC_MAX_HEALTH)!!.baseValue = game.settings.lives.toDouble()
