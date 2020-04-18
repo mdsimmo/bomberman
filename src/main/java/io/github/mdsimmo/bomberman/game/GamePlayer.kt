@@ -2,14 +2,6 @@ package io.github.mdsimmo.bomberman.game
 
 import io.github.mdsimmo.bomberman.Bomberman
 import io.github.mdsimmo.bomberman.events.*
-import io.github.mdsimmo.bomberman.events.BmPlayerHitIntent.Companion.hit
-import io.github.mdsimmo.bomberman.events.BmPlayerHurtIntent.Companion.run
-import io.github.mdsimmo.bomberman.events.BmPlayerKilledIntent.Companion.kill
-import io.github.mdsimmo.bomberman.events.BmPlayerLeaveGameIntent.Companion.leave
-import io.github.mdsimmo.bomberman.game.Bomb.Companion.spawnBomb
-import io.github.mdsimmo.bomberman.game.Explosion.Companion.isTouching
-import io.github.mdsimmo.bomberman.messaging.Formattable
-import io.github.mdsimmo.bomberman.messaging.Message
 import io.github.mdsimmo.bomberman.messaging.Text
 import org.bukkit.Bukkit
 import org.bukkit.GameMode
@@ -30,7 +22,51 @@ import org.bukkit.plugin.Plugin
 import org.bukkit.potion.PotionEffect
 import org.bukkit.potion.PotionEffectType
 
-class GamePlayer private constructor(private val player: Player, private val game: Game) : Formattable, Listener {
+class GamePlayer private constructor(private val player: Player, private val game: Game) : Listener {
+
+    companion object {
+        private val plugin: Plugin = Bomberman.instance
+
+        @JvmStatic
+        fun spawnGamePlayer(player: Player, game: Game, start: Location) {
+            // Create the player to store data
+            val gamePlayer = GamePlayer(player, game)
+            plugin.server.pluginManager.registerEvents(gamePlayer, plugin)
+
+            // Initialise the player for the game
+            player.teleport(start.clone().add(0.5, 0.5, 0.5))
+            player.gameMode = GameMode.SURVIVAL
+            player.health = game.settings.lives.toDouble()
+            player.getAttribute(Attribute.GENERIC_MAX_HEALTH)!!.baseValue = game.settings.lives.toDouble()
+
+            // if setHealthScale is not delayed, it can sometimes cause the client side to think they died?!?!?
+            Bukkit.getScheduler().scheduleSyncDelayedTask(plugin) {
+                player.healthScale = game.settings.lives * 2.toDouble()
+            }
+            player.exhaustion = 0f
+            player.foodLevel = 100000 // just a big number
+            player.isFlying = false
+            player.inventory.clear()
+            for (stack in game.settings.initialItems) {
+                val s = stack.clone()
+                player.inventory.addItem(s)
+            }
+            gamePlayer.removePotionEffects()
+
+            // Add tag for customisation
+            player.addScoreboardTag("bm_player")
+        }
+
+        fun bombStrength(game: Game, player: Player): Int {
+            var strength = 0
+            for (stack in player.inventory.contents) {
+                if (stack != null && stack.type == game.settings.powerItem) {
+                    strength += stack.amount
+                }
+            }
+            return strength.coerceAtLeast(1)
+        }
+    }
 
     private var immunity = false
     private val spawnInventory: Array<ItemStack>  = player.inventory.contents
@@ -40,6 +76,7 @@ class GamePlayer private constructor(private val player: Player, private val gam
     private val spawnHealth: Double = player.health
     private val spawnMaxHealth: Double = player.getAttribute(Attribute.GENERIC_MAX_HEALTH)!!.baseValue
     private val spawnHealthScale: Double = player.healthScale
+    private val isFlying = player.isFlying
 
     /**
      * Removes the player from the game and removes any hooks to this player. Treats the player like they disconnected
@@ -64,38 +101,80 @@ class GamePlayer private constructor(private val player: Player, private val gam
         player.gameMode = spawnGameMode
         player.inventory.contents = spawnInventory
         player.foodLevel = spawnHunger
+        player.isFlying = isFlying
         player.removeScoreboardTag("bm_player")
         removePotionEffects()
     }
 
-    @EventHandler(ignoreCancelled = true, priority = EventPriority.HIGH)
-    fun onPlayerLeaveGameEvent(e: BmPlayerLeaveGameIntent) {
-        if (e.player !== player)
-            return
-
-        // Give player their stuff back
-        if (player.isDead) {
-            // Attempting reset player health when dead causes very strange bugs. So wait to respawned
-            Bukkit.getPluginManager().registerEvents(object: Listener {
-                @EventHandler(ignoreCancelled = true, priority = EventPriority.HIGH)
-                fun onPlayerRespawn(e: PlayerRespawnEvent) {
-                    e.respawnLocation = spawn
-                    reset()
-                    HandlerList.unregisterAll(this)
-                }
-            }, plugin)
-            HandlerList.unregisterAll(this)
-        } else {
-            resetStuffAndUnregister()
+    @EventHandler(ignoreCancelled = true, priority = EventPriority.LOW)
+    fun onPlayerJoinGame(e: BmPlayerJoinGameIntent) { // Cannot join two games at once
+        if (e.player === player) {
+            e.cancelFor(Text.JOIN_ALREADY_JOINED
+                    .with("game", e.game)
+                    .with("player", player)
+                    .format())
         }
-        e.setHandled()
     }
 
     @EventHandler(ignoreCancelled = true, priority = EventPriority.HIGH)
-    fun onGameTerminated(e: BmGameTerminatedIntent) {
+    fun onCount(e: BmTimerCountedEvent) {
         if (e.game != game)
             return
-        resetStuffAndUnregister()
+        Text.GAME_COUNT
+                .with("time", e.count)
+                .with("game", game)
+                .sendTo(player)
+    }
+
+    @EventHandler(ignoreCancelled = true, priority = EventPriority.HIGH)
+    fun onRunStarted(e: BmRunStartedIntent) {
+        if (e.game != game)
+            return
+        Text.GAME_STARTED
+                .with("game", game)
+                .sendTo(player)
+        e.setHandled()
+    }
+
+    @EventHandler(priority = EventPriority.LOWEST)
+    fun onPlayerRegen(e: EntityRegainHealthEvent) {
+        if (e.entity != player)
+            return
+        if (e.regainReason == EntityRegainHealthEvent.RegainReason.MAGIC) {
+            e.amount = 1.0
+        } else {
+            e.isCancelled = true
+        }
+    }
+
+    @EventHandler(ignoreCancelled = true, priority = EventPriority.LOW)
+    fun onPlayerBreakBlockWithWrongTool(e: PlayerInteractEvent) {
+        if (e.player !== player)
+            return
+        if (e.action != Action.LEFT_CLICK_BLOCK || !e.hasBlock()) {
+            // Only care about block breaking events
+            return
+        }
+        // TODO only let player break block if they have used the correct tool
+        // Maybe use CanDestroy tag? - That requires NBT though...
+        // Cannot break things with hand
+        e.isCancelled = true
+        e.setUseInteractedBlock(Event.Result.DENY)
+        e.setUseItemInHand(Event.Result.DENY)
+        // apply mining fatigue so player doesn't see block breaking
+        e.player.addPotionEffect(PotionEffect(PotionEffectType.SLOW_DIGGING, 20, 1))
+    }
+
+    @EventHandler(ignoreCancelled = true, priority = EventPriority.HIGHEST)
+    fun onPlayerPlaceBlock(e: BlockPlaceEvent) {
+        if (e.player !== player) return
+        val b = e.block
+        // create a bomb when placing tnt
+        if (b.type == game.settings.bombItem) {
+            if (!Bomb.spawnBomb(game, player, b)) {
+                e.isCancelled = true
+            }
+        }
     }
 
     @EventHandler(ignoreCancelled = true, priority = EventPriority.LOW)
@@ -111,8 +190,8 @@ class GamePlayer private constructor(private val player: Player, private val gam
         if (e.game != game)
             return
         // TODO duplicate code: both GamePlayer and Explosion do touching checks
-        if (isTouching(player, e.igniting.map(Explosion.BlockPlan::block).toSet())) {
-            hit(player, e.cause)
+        if (Explosion.isTouching(player, e.igniting.map(Explosion.BlockPlan::block).toSet())) {
+            BmPlayerHitIntent.hit(player, e.cause)
         }
     }
 
@@ -120,7 +199,7 @@ class GamePlayer private constructor(private val player: Player, private val gam
     fun onPlayerHit(e: BmPlayerHitIntent) {
         if (e.player !== player)
             return
-        run(game, player, e.cause)
+        BmPlayerHurtIntent.run(game, player, e.cause)
         e.setHandled()
     }
 
@@ -148,93 +227,28 @@ class GamePlayer private constructor(private val player: Player, private val gam
                         BmPlayerMovedEvent(game, player, player.location, player.location))
             }, 22) // 22 is slightly longer than 20 ticks a bomb is active for
         } else {
-            kill(game, player, e.attacker)
+            BmPlayerKilledIntent.kill(game, player, e.attacker)
         }
         e.setHandled()
     }
 
-    @EventHandler(ignoreCancelled = true, priority = EventPriority.HIGH)
-    fun onPlayerKilledInGame(e: BmPlayerKilledIntent) {
-        if (e.player !== player) return
-        player.health = 0.0
-        leave(player)
-        e.setHandled()
-    }
-
-    @EventHandler(ignoreCancelled = true, priority = EventPriority.HIGHEST)
-    fun onPlayerPlaceBlock(e: BlockPlaceEvent) {
-        if (e.player !== player) return
-        val b = e.block
-        // create a bomb when placing tnt
-        if (b.type == game.settings.bombItem) {
-            if (!spawnBomb(game, player, b)) {
-                e.isCancelled = true
-            }
-        }
-    }
-
-    @EventHandler(priority = EventPriority.HIGH)
-    fun onPlayerLogout(e: PlayerQuitEvent) {
-        if (e.player === player) {
-            leave(player)
-        }
-    }
-
-    @EventHandler(priority = EventPriority.LOWEST)
-    fun onPlayerRegen(e: EntityRegainHealthEvent) {
-        if (e.entity != player)
-            return
-        if (e.regainReason == EntityRegainHealthEvent.RegainReason.MAGIC) {
-            e.amount = 1.0
-        } else {
-            e.isCancelled = true
-        }
-    }
-    
     @EventHandler(ignoreCancelled = true, priority = EventPriority.LOWEST)
     fun onPlayerDamaged(e: EntityDamageEvent) {
         if (e.entity !== player)
             return
-        // Allow custom damage events (ie. from plugin)
+        // Allow custom damage events (ie. from our plugin)
         if (e.cause == EntityDamageEvent.DamageCause.CUSTOM)
             return
         // Player cannot be burnt or hurt during game play
         e.isCancelled = true
     }
 
-    @EventHandler(ignoreCancelled = true, priority = EventPriority.LOW)
-    fun onPlayerJoinGame(e: BmPlayerJoinGameIntent) { // Cannot join two games at once
-        if (e.player === player) {
-            e.cancelFor(Text.JOIN_ALREADY_JOINED
-                    .with("game", e.game)
-                    .with("player", player)
-                    .format())
-        }
-    }
-
     @EventHandler(ignoreCancelled = true, priority = EventPriority.HIGH)
-    fun onGameStopped(e: BmRunStoppedIntent) {
-        if (e.game != game)
-            return
-        leave(player)
-    }
-
-    @EventHandler(ignoreCancelled = true, priority = EventPriority.LOW)
-    fun onPlayerBreakBlockWithWrongTool(e: PlayerInteractEvent) { 
-        if (e.player !== player) 
-            return
-        if (e.action != Action.LEFT_CLICK_BLOCK || !e.hasBlock()) { 
-            // Only care about block breaking events
-            return
-        }
-        // TODO only let player break block if they have used the correct tool
-        // Maybe use CanDestroy tag? - That requires NBT though...
-        // Cannot break things with hand
-        e.isCancelled = true
-        e.setUseInteractedBlock(Event.Result.DENY)
-        e.setUseItemInHand(Event.Result.DENY)
-        // apply mining fatigue so player doesn't see block breaking
-        e.player.addPotionEffect(PotionEffect(PotionEffectType.SLOW_DIGGING, 20, 1))
+    fun onPlayerKilledInGame(e: BmPlayerKilledIntent) {
+        if (e.player !== player) return
+        player.health = 0.0
+        BmPlayerLeaveGameIntent.leave(player)
+        e.setHandled()
     }
 
     @EventHandler(ignoreCancelled = true, priority = EventPriority.HIGH)
@@ -243,42 +257,45 @@ class GamePlayer private constructor(private val player: Player, private val gam
         Text.PLAYER_WON
                 .with("player", player)
                 .sendTo(player)
-        // Let player walk around like a boss
+        // Let player walk around like a boss until the game stops
         immunity = true
     }
 
     @EventHandler(ignoreCancelled = true, priority = EventPriority.HIGH)
-    fun onCount(e: BmTimerCountedEvent) {
-        if (e.game != game)
+    fun onPlayerLeaveGameEvent(e: BmPlayerLeaveGameIntent) {
+        if (e.player !== player)
             return
-        Text.GAME_COUNT
-                .with("time", e.count)
-                .with("game", game)
-                .sendTo(player)
-    }
 
-    @EventHandler(ignoreCancelled = true, priority = EventPriority.HIGH)
-    fun onRunStarted(e: BmRunStartedIntent) {
-        if (e.game != game)
-            return
-        Text.GAME_STARTED
-                .with("game", game)
-                .sendTo(player)
+        // Give player their stuff back
+        if (player.isDead) {
+            // Attempting reset player health when dead causes very strange bugs. So wait to respawned
+            Bukkit.getPluginManager().registerEvents(object: Listener {
+                @EventHandler(ignoreCancelled = true, priority = EventPriority.HIGH)
+                fun onPlayerRespawn(e: PlayerRespawnEvent) {
+                    e.respawnLocation = spawn
+                    reset()
+                    HandlerList.unregisterAll(this)
+                }
+            }, plugin)
+            HandlerList.unregisterAll(this)
+        } else {
+            resetStuffAndUnregister()
+        }
         e.setHandled()
     }
 
-    private fun bombStrength(): Int {
-        return bombStrength(game, player)
+    @EventHandler(priority = EventPriority.HIGH)
+    fun onPlayerLogout(e: PlayerQuitEvent) {
+        if (e.player === player) {
+            BmPlayerLeaveGameIntent.leave(player)
+        }
     }
 
-    private fun bombAmount(): Int {
-        var strength = 0
-        for (stack in player.inventory.contents) {
-            if (stack != null && stack.type == game.settings.bombItem) {
-                strength += stack.amount
-            }
-        }
-        return strength.coerceAtLeast(1)
+    @EventHandler(ignoreCancelled = true, priority = EventPriority.HIGH)
+    fun onGameStopped(e: BmRunStoppedIntent) {
+        if (e.game != game)
+            return
+        BmPlayerLeaveGameIntent.leave(player)
     }
 
     private fun removePotionEffects() {
@@ -290,62 +307,5 @@ class GamePlayer private constructor(private val player: Player, private val gam
                         player.removePotionEffect(effect.type)
                     }
                 }
-    }
-
-    override fun format(args: List<Message>): Message {
-        if (args.isEmpty()) 
-            return Message.of(player.name)
-        if (args.size != 1) 
-            throw RuntimeException("Players can have at most one argument")
-        return when (args[0].toString()) {
-            "name" -> Message.of(player.name)
-            "lives" -> Message.of(player.health.toInt())
-            "power" -> Message.of(bombStrength())
-            "bombs" -> Message.of(bombAmount())
-            else -> Message.error(args[0].toString())
-        }
-    }
-
-    companion object {
-        private val plugin: Plugin = Bomberman.instance
-
-        @JvmStatic
-        fun spawnGamePlayer(player: Player, game: Game, start: Location) {
-            // Create the player to store data
-            val gamePlayer = GamePlayer(player, game)
-            plugin.server.pluginManager.registerEvents(gamePlayer, plugin)
-
-            // Initialise the player for the game
-            player.teleport(start.clone().add(0.5, 0.5, 0.5))
-            player.gameMode = GameMode.SURVIVAL
-            player.health = game.settings.lives.toDouble()
-            player.getAttribute(Attribute.GENERIC_MAX_HEALTH)!!.baseValue = game.settings.lives.toDouble()
-
-            // if setHealthScale is not delayed, it can sometimes cause the client side to think they died?!?!?
-            Bukkit.getScheduler().scheduleSyncDelayedTask(plugin) {
-                player.healthScale = game.settings.lives * 2.toDouble()
-            }
-            player.exhaustion = 0f
-            player.foodLevel = 100000 // just a big number
-            player.inventory.clear()
-            for (stack in game.settings.initialItems) {
-                val s = stack.clone()
-                player.inventory.addItem(s)
-            }
-            gamePlayer.removePotionEffects()
-
-            // Add tag for customisation
-            player.addScoreboardTag("bm_player")
-        }
-
-        fun bombStrength(game: Game, player: Player): Int {
-            var strength = 0
-            for (stack in player.inventory.contents) {
-                if (stack != null && stack.type == game.settings.powerItem) {
-                    strength += stack.amount
-                }
-            }
-            return strength.coerceAtLeast(1)
-        }
     }
 }
