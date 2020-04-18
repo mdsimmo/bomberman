@@ -29,9 +29,8 @@ public class Bomberman extends JavaPlugin implements Listener {
 		instance = this;
 
 		ConfigurationSerialization.registerClass(GameSettings.class);
-		ConfigurationSerialization.registerClass(BmSetting.class);
 
-		settings = getConfig().getObject("config", BmSetting.class, new BmSetting());
+		settings = BmSetting.load(getConfig());
 
 		getDataFolder().mkdirs();
 		extractResources();
