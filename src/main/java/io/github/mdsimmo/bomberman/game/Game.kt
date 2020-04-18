@@ -413,12 +413,6 @@ class Game private constructor(val name: String, private var schema: Arena, val 
     }
 
     @EventHandler(ignoreCancelled = true, priority = EventPriority.HIGHEST)
-    fun onPlayerLeave(e: BmPlayerKilledIntent) {
-        if (players.contains(e.player))
-            playerDeadOrGone(e.player)
-    }
-
-    @EventHandler(ignoreCancelled = true, priority = EventPriority.HIGHEST)
     fun onPlayerLeave(e: BmPlayerLeaveGameIntent) {
         if (!running)
             return
