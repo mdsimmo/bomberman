@@ -32,14 +32,15 @@ class StartTimer private constructor(private val game: Game, private var time: I
         if (killed)
             return
 
-        val e = BmTimerCountedEvent(game, time)
-        Bukkit.getPluginManager().callEvent(e)
-        time = e.count
-        if (time == 0) {
+        if (time > 0) {
+            val e = BmTimerCountedEvent(game, time)
+            Bukkit.getPluginManager().callEvent(e)
+            time = e.count
+        } else {
+            --time
             BmRunStartedIntent.startRun(game)
             killSelf()
         }
-        --time
     }
 
     private fun killSelf() {
