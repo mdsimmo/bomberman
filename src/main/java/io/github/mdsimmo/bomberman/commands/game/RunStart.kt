@@ -21,7 +21,7 @@ class RunStart(parent: Cmd) : GameCommand(parent) {
         if (args.size > 1)
             return false
         // get the delay
-        val delay = when (val s = args.getOrNull(1)) {
+        val delay = when (val s = args.getOrNull(0)) {
             null -> 3
             else -> {
                 val i = s.toIntOrNull()

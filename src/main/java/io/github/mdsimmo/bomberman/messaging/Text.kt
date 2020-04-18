@@ -87,6 +87,7 @@ enum class Text(path: String) : Contexted {
     STOP_EXTRA("command.stop.extra"),
     STOP_NOT_STARTED("command.stop.not-started"),
     STOP_SUCCESS("command.stop.success"),
+    STOP_TIMER_STOPPED("command.stop.timer-stopped"),
     RELOAD_NAME("command.reload.name"),
     RELOAD_DESCRIPTION("command.reload.description"),
     RELOAD_USAGE("command.reload.usage"),

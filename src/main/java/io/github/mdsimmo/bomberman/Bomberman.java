@@ -2,6 +2,7 @@ package io.github.mdsimmo.bomberman;
 
 import io.github.mdsimmo.bomberman.commands.BaseCommand;
 import io.github.mdsimmo.bomberman.game.Game;
+import io.github.mdsimmo.bomberman.game.GamePlayer;
 import io.github.mdsimmo.bomberman.game.GameSettings;
 import org.bukkit.configuration.serialization.ConfigurationSerialization;
 import org.bukkit.event.Listener;
@@ -36,6 +37,8 @@ public class Bomberman extends JavaPlugin implements Listener {
 		extractResources();
 		new BaseCommand();
 		Game.loadGames();
+
+		GamePlayer.setupLoginWatcher();
 	}
 
 	public BmSetting getSettings() {

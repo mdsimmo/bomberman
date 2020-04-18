@@ -5,6 +5,7 @@ import io.github.mdsimmo.bomberman.events.BmRunStartCountDownIntent
 import io.github.mdsimmo.bomberman.events.BmRunStartedIntent
 import io.github.mdsimmo.bomberman.events.BmRunStoppedIntent
 import io.github.mdsimmo.bomberman.events.BmTimerCountedEvent
+import io.github.mdsimmo.bomberman.messaging.Text
 import org.bukkit.Bukkit
 import org.bukkit.event.EventHandler
 import org.bukkit.event.EventPriority
@@ -54,10 +55,15 @@ class StartTimer private constructor(private val game: Game, private var time: I
         killSelf()
     }
 
-    @EventHandler(ignoreCancelled = true, priority = EventPriority.HIGH)
+    // Must be run before Game::onRunStoppedWhileNotRunning
+    @EventHandler(ignoreCancelled = true, priority = EventPriority.LOW)
     fun onGameStop(e: BmRunStoppedIntent) {
         if (e.game != game)
             return
         killSelf()
+        e.cancelFor(Text.STOP_TIMER_STOPPED
+                .with("time", time)
+                .with("game", game)
+                .format())
     }
 }

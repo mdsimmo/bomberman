@@ -261,6 +261,10 @@ command:
     # The game has stopped
     # {game}: the game
     success: Game {game} stopped
+    # The timer stopped
+    # {game}: the game
+    # {time}: time before it would have started
+    timer-stopped: Timer cancelled
   reload:
     name: reload
     description: Reloads the config file and resets the arena

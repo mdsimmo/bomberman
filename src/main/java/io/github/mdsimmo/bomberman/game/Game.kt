@@ -426,7 +426,7 @@ class Game private constructor(val name: String, private var schema: Arena, val 
             playerDeadOrGone(e.player)
     }
 
-    @EventHandler(ignoreCancelled = true, priority = EventPriority.LOW)
+    @EventHandler(ignoreCancelled = true, priority = EventPriority.NORMAL)
     fun onRunStoppedWhileRunning(e: BmRunStoppedIntent) {
         if (e.game != this)
             return
