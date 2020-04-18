@@ -53,7 +53,7 @@ class Game private constructor(val name: String, private var schema: Arena, val 
             }
         }
 
-        private fun loadGame(file: File): Game? {
+        fun loadGame(file: File): Game? {
             val data = YamlConfiguration.loadConfiguration(file)
             val name = data["name"] as? String? ?: return null
             val schema = data["schema"] as? String? ?: return null
@@ -470,16 +470,6 @@ class Game private constructor(val name: String, private var schema: Arena, val 
             tempDataFile(this).delete()
         e.setHandled()
     }
-
-    /*@EventHandler(ignoreCancelled = true, priority = EventPriority.NORMAL)
-    fun onGameReloadData(e: BmGameReloadDataIntent) {
-        if (e.game != this)
-            return
-        BmGameBuildIntent.build(this)
-        File(GameRegistry.plugin.settings.tempGameData(), "${game.name}.yml").delete()
-        return loadGame(fileOf(game))!!
-    }*/
-
 
     @EventHandler(ignoreCancelled = true, priority = EventPriority.HIGH)
     fun onServerStop(e: PluginDisableEvent) {

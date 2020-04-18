@@ -270,6 +270,9 @@ command:
     # The game has been reloaded
     # {game}: the game
     success: Game {game} reloaded
+    # Error while loading
+    # {game}: the game
+    cannot-load: Error reloading the game's save file
   # Messages relating to '/bm game set schema'
   set-schema:
     name: schema

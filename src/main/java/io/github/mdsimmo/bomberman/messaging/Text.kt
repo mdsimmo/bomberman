@@ -93,6 +93,7 @@ enum class Text(path: String) : Contexted {
     RELOAD_EXAMPLE("command.reload.example"),
     RELOAD_EXTRA("command.reload.extra"),
     RELOAD_SUCCESS("command.reload.success"),
+    RELOAD_CANNOT_LOAD("command.reload.cannot-load"),
     SET_SCHEMA_NAME("command.set-schema.name"),
     SET_SCHEMA_DESCRIPTION("command.set-schema.description"),
     SET_SCHEMA_USAGE("command.set-schema.usage"),
