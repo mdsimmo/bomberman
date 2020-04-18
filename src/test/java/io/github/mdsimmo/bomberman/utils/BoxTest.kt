@@ -2,7 +2,7 @@ package io.github.mdsimmo.bomberman.utils
 
 import org.bukkit.Location
 import org.bukkit.World
-import org.junit.Assert.assertEquals
+import org.junit.Assert.*
 import org.junit.Test
 import org.mockito.Mockito.`when`
 import org.mockito.Mockito.mock
@@ -49,5 +49,17 @@ class BoxTest {
         }
         assertEquals(expected.size, actual.size)
         assertEquals(expected, actual)
+    }
+
+    @Test
+    fun testBoxContains() {
+        val world = mock(World::class.java, "testWorld")
+        val box = Box(world, Dim(3, 5, 7), Dim(6, 7, 8))
+
+        assertTrue(box.contains(Location(world, 3.0, 5.0, 7.0)))
+        assertTrue(box.contains(Location(world, 6.9, 7.9, 8.9)))
+
+        assertFalse(box.contains(Location(world, 2.5, 6.0, 7.5)))
+        assertFalse(box.contains(Location(world, 7.1, 6.0, 7.5)))
     }
 }

@@ -13,19 +13,16 @@ import com.sk89q.worldedit.math.BlockVector3
 import com.sk89q.worldedit.session.ClipboardHolder
 import io.github.mdsimmo.bomberman.Bomberman
 import io.github.mdsimmo.bomberman.events.*
-import io.github.mdsimmo.bomberman.messaging.Contexted
 import io.github.mdsimmo.bomberman.messaging.Formattable
 import io.github.mdsimmo.bomberman.messaging.Message
 import io.github.mdsimmo.bomberman.messaging.Text
 import io.github.mdsimmo.bomberman.utils.Box
 import io.github.mdsimmo.bomberman.utils.BukkitUtils
-import io.github.mdsimmo.bomberman.utils.RefectAccess
 import io.github.mdsimmo.bomberman.utils.WorldEditUtils
 import org.bukkit.Bukkit
 import org.bukkit.Location
 import org.bukkit.Material
-import org.bukkit.block.BlockState
-import org.bukkit.configuration.serialization.ConfigurationSerializable
+import org.bukkit.configuration.file.YamlConfiguration
 import org.bukkit.entity.Player
 import org.bukkit.event.EventHandler
 import org.bukkit.event.EventPriority
@@ -38,10 +35,45 @@ import java.io.FileOutputStream
 import java.lang.ref.WeakReference
 
 class Game private constructor(val name: String, private var schema: Arena, val settings: GameSettings = GameSettings())
-    : Formattable, Listener, ConfigurationSerializable {
+    : Formattable, Listener {
 
     companion object {
         private val plugin = Bomberman.instance
+
+        @JvmStatic
+        fun loadGames() {
+            val data = plugin.settings.gameSaves()
+            val files = data
+                    .listFiles { _, name ->
+                        name.endsWith(".yml")
+                    }
+                    ?: return
+            for (f in files) {
+                loadGame(f)
+            }
+        }
+
+        private fun loadGame(file: File): Game? {
+            val data = YamlConfiguration.loadConfiguration(file)
+            val name = data["name"] as? String? ?: return null
+            val schema = data["schema"] as? String? ?: return null
+            val loc = data["origin"] as? Location? ?: return null
+            val settings = data["settings"] as? GameSettings? ?: GameSettings()
+            return Game(name, Arena(File(schema), loc), settings)
+        }
+
+        fun saveGame(game: Game) {
+            val file = YamlConfiguration()
+            file.set("name", game.name)
+            file.set("schema", game.schema.file.path)
+            file.set("settings", game.settings)
+            file.set("origin", game.schema.origin)
+            file.save(File(plugin.settings.gameSaves(), "${game.name}.yml"))
+        }
+
+        private fun tempDataFile(game: Game): File {
+            return File(plugin.settings.tempGameData(), "${game.name}.yml")
+        }
 
         fun BuildGameFromRegion(name: String, box: Box): Game {
 
@@ -63,23 +95,16 @@ class Game private constructor(val name: String, private var schema: Arena, val 
             }
 
             // Make the Game
-            return Game(name, Arena(file, BukkitUtils.boxLoc1(box), clipboard))
+            val game = Game(name, Arena(file, BukkitUtils.boxLoc1(box), clipboard))
+            // TODO when building from selection, only need to build cages
+            BmGameBuildIntent.build(game)
+            return game
         }
 
         fun BuildGameFromSchema(name: String, loc: Location, file: File, skipAir: Boolean): Game {
-            val arena = Arena(file, loc)
-            arena.build(skipAir)
-            return Game(name, arena)
-        }
-
-        @JvmStatic
-        @RefectAccess
-        fun deserialize(data: Map<String, Any>): Game {
-            val name = data["name"] as String
-            val settings = data["settings"] as GameSettings
-            val schema = data["schema"] as String
-            val loc = data["origin"] as Location
-            return Game(name, Arena(File(schema), loc), settings)
+            val game = Game(name, Arena(file, loc))
+            BmGameBuildIntent.build(game)
+            return game
         }
     }
 
@@ -87,34 +112,68 @@ class Game private constructor(val name: String, private var schema: Arena, val 
 
         val origin: Location
         val file: File
-        var box: Box
+
+        var boxCache: Box? = null
+        val box: Box get() {
+            return boxCache ?: {
+                val c = loadClipboard()
+                val box = WorldEditUtils.pastedBounds(origin, c)
+                boxCache = box
+                box
+            }()
+        }
+        val spawns: Set<Location> by lazy {
+            searchSpawns()
+        }
+
         private var clipboard: WeakReference<Clipboard>? = null
 
         constructor(file: File, origin: Location) {
             this.file = file
             this.origin = BukkitUtils.blockLoc(origin)
-            this.box = Box(origin, 1, 1, 1)
-            loadClipboard() // will set box size correctly
         }
 
         constructor(file: File, origin: Location, clipboard: Clipboard) {
             this.file = file
             this.origin = BukkitUtils.blockLoc(origin)
-            this.box =  WorldEditUtils.pastedBounds(origin, clipboard)
+            this.boxCache =  WorldEditUtils.pastedBounds(origin, clipboard)
             this.clipboard = WeakReference(clipboard)
         }
 
-        private fun loadClipboard() : Clipboard =
+        internal fun loadClipboard() : Clipboard =
             clipboard?.get() ?: {
+                plugin.logger.info("Reading schematic data")
                 // Load the schematic
                 val format = ClipboardFormats.findByFile(file)
                 val c = format!!.getReader(FileInputStream(file)).use { it.read() }
 
                 // cache the schematic
                 clipboard = WeakReference(c)
-                this.box = WorldEditUtils.pastedBounds(origin, c)
+                plugin.logger.info("data read")
                 c
             }()
+
+        private fun searchSpawns(): Set<Location> {
+            val clip = loadClipboard()
+
+            plugin.logger.info("Searching for spawns...")
+            val spawns = mutableSetOf<Location>()
+            for (loc in clip.region) {
+                val block = clip.getFullBlock(loc)
+                block.nbtData?.let {
+                    if (
+                            it.getString("Text1").contains("[spawn]", ignoreCase = true) or
+                            it.getString("Text2").contains("[spawn]", ignoreCase = true) or
+                            it.getString("Text3").contains("[spawn]", ignoreCase = true) or
+                            it.getString("Text4").contains("[spawn]", ignoreCase = true)
+                    ) {
+                        spawns += BukkitAdapter.adapt(box.world, loc.subtract(clip.origin)).add(origin)
+                    }
+                }
+            }
+            plugin.logger.info("  ${spawns.size} spawns found")
+            return spawns
+        }
 
         fun build(skipAir: Boolean) {
 
@@ -132,7 +191,7 @@ class Game private constructor(val name: String, private var schema: Arena, val 
                                 .build()
                         Operations.complete(operation)
                         // TODO undo arena build
-                        // this undoes th building, but it should also delete the game
+                        // this undoes the building, but it should also delete the game
                         //if (user != null)
                         //    WorldEdit.getInstance().sessionManager.get(BukkitAdapter.adapt(user))?.remember(editSession)
                     }
@@ -155,35 +214,28 @@ class Game private constructor(val name: String, private var schema: Arena, val 
 
     private val players: MutableSet<Player> = HashSet()
     private var running = false
-    private var cageBlocks: Set<BlockState> = emptySet()
-    private var signBlocks: Set<BlockState> = emptySet()
-
-    private var spawnCache: Set<Location>? = null
-    private val spawns: Set<Location> get() = {
-        val spawnCache = this.spawnCache
-        if (spawnCache == null) {
-            val spawns = HashSet<Location>()
-            for (l in schema.box.stream()) {
-                val state = l.block.state
-                if (state is org.bukkit.block.Sign) {
-                    val lines = state.lines
-                    if (lines.any { it.toLowerCase().contains("[spawn]") }) {
-                        spawns += l
-                    }
-                }
-            }
-            this.spawnCache = spawns
-            spawns
-        } else {
-            spawnCache
-        }
-    }()
+    private var spawns: Set<Location>
+    private var tempData: YamlConfiguration
 
     init {
+        tempData = YamlConfiguration.loadConfiguration(tempDataFile(this))
+        spawns = (tempData.getList("spawns") as? List<Location>?)?.toSet() ?: schema.spawns
+        writeData("spawns", spawns.toList())
+
+        // If game was not shut down cleanly (ie. server died), rebuild the arena
+        if (tempData.getBoolean("rebuild-needed", false)) {
+            Bukkit.getScheduler().scheduleSyncDelayedTask(plugin) {
+                BmGameBuildIntent.build(this)
+            }
+        }
+
         Bukkit.getPluginManager().registerEvents(this, plugin)
-        GameProtection.protect(this, schema.box)
-        GameRegistry.register(this)
-        makeCages()
+        saveGame(this)
+    }
+
+    private fun writeData(path: String, obj: Any?) {
+        tempData.set(path, obj)
+        tempData.save(tempDataFile(this))
     }
 
     /*
@@ -209,11 +261,6 @@ class Game private constructor(val name: String, private var schema: Arena, val 
     //		List<Message> list = new ArrayList<Message>( players.size() )
     //	public List<Message> scoreDisplay( CommandSender sender ) {
 
-    private fun messagePlayers(text: Contexted) {
-        val message = text.with("game", this).format()
-        for (player in players)
-            message.sendTo(player)
-    }
 //
 //    fun switchSchema(newSchema: File) {
 //        BmRunStoppedIntent.stopGame(this)
@@ -232,34 +279,50 @@ class Game private constructor(val name: String, private var schema: Arena, val 
         }
     }
 
-    private fun removeCages(replaceSpawnSigns: Boolean) {
-        cageBlocks.forEach{ data -> data.update(true) }
-        if (replaceSpawnSigns)
-            signBlocks.forEach{ data -> data.update(true) }
+    private fun removeCages(replaceSpawnSign: Boolean) {
+        val clip = schema.loadClipboard()
+        WorldEdit.getInstance().editSessionFactory
+                .getEditSession(BukkitAdapter.adapt(schema.origin.world), -1).use { editSession ->
+                    val offset = BlockVector3.at(schema.origin.x, schema.origin.y, schema.origin.z)
+                            .subtract(clip.origin)
+                    spawnBlocks()
+                            .filter { (isSpawn, _) ->
+                                replaceSpawnSign or !isSpawn
+                            }
+                            .forEach { (_, block) ->
+                                val loc = block.location
+                                val blockVec = BlockVector3.at(loc.x, loc.y, loc.z)
+                                val clipLocation = blockVec.subtract(offset)
+                                val blockState = clip.getFullBlock(clipLocation)
+                                editSession.setBlock(blockVec, blockState)
+                            }
+                }
     }
 
     private fun makeCages() {
-        removeCages(true)
-        cageBlocks = HashSet<BlockState>().also { cage ->
-            signBlocks = HashSet<BlockState>().also { signs ->
-                spawns.forEach{ makeCage(it, cage, signs) }
+        spawnBlocks().forEach { (sign, block) ->
+            if (sign) {
+                block.type = Material.AIR
+            } else if (block.isPassable) {
+                block.type = Material.WHITE_STAINED_GLASS
             }
         }
     }
 
-    private fun makeCage(location: Location, cage: HashSet<BlockState>, signs: HashSet<BlockState>) {
-        for (i in -1..1) {
-            for (j in -1..2) {
-                for (k in -1..1) {
-                    val blockLoc = location.clone().add(i.toDouble(), j.toDouble(), k.toDouble())
-                    val b = blockLoc.block
-                    if ((j == 0 || j == 1) && (i == 0 && k == 0)) {
-                        signs.add(b.state)
-                        b.type = Material.AIR
-                    } else if (((j == 0 || j == 1) && (i == 0 || k == 0)) || (i == 0 && k == 0)) {
-                        if (b.isPassable) {
-                            cage.add(b.state)
-                            b.type = Material.WHITE_STAINED_GLASS
+    private fun spawnBlocks() = sequence {
+        for (location: Location in spawns) {
+            for (i in -1..1) {
+                for (j in -1..2) {
+                    for (k in -1..1) {
+                        val blockLoc = location.clone().add(i.toDouble(), j.toDouble(), k.toDouble())
+                        if(!schema.box.contains(blockLoc)) {
+                            continue
+                        }
+                        val b = blockLoc.block
+                        if ((j == 0 || j == 1) && (i == 0 && k == 0)) {
+                            yield(Pair(true, b))
+                        } else if (((j == 0 || j == 1) && (i == 0 || k == 0)) || (i == 0 && k == 0)) {
+                            yield(Pair(false, b))
                         }
                     }
                 }
@@ -276,6 +339,17 @@ class Game private constructor(val name: String, private var schema: Arena, val 
             }
             Bukkit.getScheduler().scheduleSyncDelayedTask(plugin, { BmRunStoppedIntent.stopGame(this) }, players.size * 20*5L)
         }
+    }
+
+    @EventHandler(ignoreCancelled = true, priority = EventPriority.LOW)
+    fun onGameListing(e: BmGameListIntent) {
+        e.games.add(this)
+    }
+
+    @EventHandler(ignoreCancelled = true, priority = EventPriority.LOW)
+    fun onGameLookup(e: BmGameLookupIntent) {
+        if (e.name.equals(name, ignoreCase = true))
+            e.game = this
     }
 
     @EventHandler(ignoreCancelled = true, priority = EventPriority.HIGHEST)
@@ -306,13 +380,8 @@ class Game private constructor(val name: String, private var schema: Arena, val 
         e.setHandled()
 
         // Trigger auto-start if needed
-        val delay = if (findSpareSpawn() == null) {
-            5
-        } else {
-            null
-        }
-        if (delay != null) {
-            BmRunStartCountDownIntent.startGame(this, delay)
+        if (findSpareSpawn() == null) {
+            BmRunStartCountDownIntent.startGame(this, 5)
         }
     }
 
@@ -331,19 +400,13 @@ class Game private constructor(val name: String, private var schema: Arena, val 
     }
 
     @EventHandler(ignoreCancelled = true, priority = EventPriority.HIGH)
-    fun onCount(e: BmTimerCountedEvent) {
-        if (e.game != this)
-            return
-        messagePlayers(Text.GAME_COUNT.with("time", e.count))
-    }
-
-    @EventHandler(ignoreCancelled = true, priority = EventPriority.HIGH)
     fun onRunStarted(e: BmRunStartedIntent) {
         if (e.game != this)
             return
         running = true
         removeCages(false)
-        messagePlayers(Text.GAME_STARTED)
+        GameProtection.protect(this, schema.box)
+        writeData("rebuild-needed", true)
         e.setHandled()
     }
 
@@ -374,8 +437,17 @@ class Game private constructor(val name: String, private var schema: Arena, val 
             return
         running = false
         // Reset the arena
+        BmGameBuildIntent.build(this)
+        e.setHandled()
+    }
+
+    @EventHandler(ignoreCancelled = true, priority = EventPriority.HIGH)
+    fun onGameRebuild(e: BmGameBuildIntent) {
+        if (e.game != this)
+            return
         schema.build(false)
         makeCages()
+        writeData("rebuild-needed", false)
         e.setHandled()
     }
 
@@ -384,9 +456,7 @@ class Game private constructor(val name: String, private var schema: Arena, val 
         if (e.game != this)
             return
         BmRunStoppedIntent.stopGame(this)
-
         HandlerList.unregisterAll(this)
-        removeCages(true)
         e.setHandled()
     }
 
@@ -395,9 +465,20 @@ class Game private constructor(val name: String, private var schema: Arena, val 
         if (e.game != this)
             return
         BmGameTerminatedIntent.terminateGame(this)
-        GameRegistry.remove(this, e.isDeletingSave)
+        removeCages(true)
+        if (e.isDeletingSave)
+            tempDataFile(this).delete()
         e.setHandled()
     }
+
+    /*@EventHandler(ignoreCancelled = true, priority = EventPriority.NORMAL)
+    fun onGameReloadData(e: BmGameReloadDataIntent) {
+        if (e.game != this)
+            return
+        BmGameBuildIntent.build(this)
+        File(GameRegistry.plugin.settings.tempGameData(), "${game.name}.yml").delete()
+        return loadGame(fileOf(game))!!
+    }*/
 
 
     @EventHandler(ignoreCancelled = true, priority = EventPriority.HIGH)
@@ -405,15 +486,6 @@ class Game private constructor(val name: String, private var schema: Arena, val 
         if (e.plugin != plugin)
             return
         BmGameTerminatedIntent.terminateGame(this)
-    }
-
-    @EventHandler(ignoreCancelled = true, priority = EventPriority.HIGH)
-    fun onGameRebuild(e: BmGameRebuildIntent) {
-        if (e.game != this)
-            return
-        schema.build(false)
-        makeCages()
-        e.setHandled()
     }
 
     override fun format(args: List<Message>): Message {
@@ -435,15 +507,6 @@ class Game private constructor(val name: String, private var schema: Arena, val 
             "running" -> Message.of(if (running) { "true" } else { "false" })
             else -> Message.empty()
         }
-    }
-
-    override fun serialize(): MutableMap<String, Any> {
-        return mutableMapOf(
-                Pair("name", name),
-                Pair("schema", schema.file.path),
-                Pair("settings", settings),
-                Pair("origin", schema.origin)
-        )
     }
 
 }

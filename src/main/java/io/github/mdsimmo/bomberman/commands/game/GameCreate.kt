@@ -6,10 +6,11 @@ import com.sk89q.worldedit.bukkit.BukkitAdapter
 import com.sk89q.worldedit.session.SessionOwner
 import io.github.mdsimmo.bomberman.Bomberman
 import io.github.mdsimmo.bomberman.commands.Cmd
+import io.github.mdsimmo.bomberman.events.BmGameListIntent
+import io.github.mdsimmo.bomberman.events.BmGameLookupIntent
 import io.github.mdsimmo.bomberman.game.Game
 import io.github.mdsimmo.bomberman.game.Game.Companion.BuildGameFromRegion
 import io.github.mdsimmo.bomberman.game.Game.Companion.BuildGameFromSchema
-import io.github.mdsimmo.bomberman.game.GameRegistry
 import io.github.mdsimmo.bomberman.messaging.Message
 import io.github.mdsimmo.bomberman.messaging.Text
 import io.github.mdsimmo.bomberman.utils.WorldEditUtils.selectionBounds
@@ -25,7 +26,7 @@ class GameCreate(parent: Cmd) : Cmd(parent) {
 
     override fun options(sender: CommandSender, args: List<String>): List<String> {
         return when (args.size) {
-            1 -> GameRegistry.allGames().map(Game::name)
+            1 -> BmGameListIntent.listGames().map(Game::name).toList()
             2 -> listOf("WorldEdit", "Bomberman", "wand")
             3 -> {
                 val root = root(args[1]) ?: return emptyList()
@@ -45,7 +46,7 @@ class GameCreate(parent: Cmd) : Cmd(parent) {
             return true
         }
         val gameName = args[0]
-        GameRegistry.byName(gameName)?.let { game ->
+        BmGameLookupIntent.find(gameName)?.let { game ->
             context(Text.CREATE_GAME_EXISTS)
                     .with("game", game)
                     .sendTo(sender)
@@ -103,7 +104,6 @@ class GameCreate(parent: Cmd) : Cmd(parent) {
         matches // The minimum length path will be the closest match
             .minBy { it.name.length }?.also { file: File ->
                 val game = BuildGameFromSchema(gameName, player.location, file, skipAir)
-                GameRegistry.saveGame(game)
                 context(Text.CREATE_SUCCESS)
                         .with("game", game)
                         .sendTo(player)

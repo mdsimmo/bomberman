@@ -3,7 +3,6 @@ package io.github.mdsimmo.bomberman.commands.game.set
 import io.github.mdsimmo.bomberman.commands.Cmd
 import io.github.mdsimmo.bomberman.commands.GameCommand
 import io.github.mdsimmo.bomberman.game.Game
-import io.github.mdsimmo.bomberman.game.GameRegistry
 import io.github.mdsimmo.bomberman.messaging.Message
 import io.github.mdsimmo.bomberman.messaging.Text
 import org.bukkit.command.CommandSender
@@ -28,7 +27,7 @@ class SetLives(parent: Cmd) : GameCommand(parent) {
             return true
         }
         game.settings.lives = amount
-        GameRegistry.saveGame(game)
+        Game.saveGame(game)
         context(Text.LIVES_SET)
                 .with("game", game)
                 .sendTo(sender)

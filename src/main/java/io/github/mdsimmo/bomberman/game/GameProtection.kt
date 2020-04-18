@@ -1,7 +1,7 @@
 package io.github.mdsimmo.bomberman.game
 
 import io.github.mdsimmo.bomberman.Bomberman
-import io.github.mdsimmo.bomberman.events.BmGameTerminatedIntent
+import io.github.mdsimmo.bomberman.events.BmRunStoppedIntent
 import io.github.mdsimmo.bomberman.utils.Box
 import org.bukkit.Bukkit
 import org.bukkit.event.EventHandler
@@ -21,7 +21,7 @@ import org.bukkit.plugin.Plugin
 class GameProtection private constructor(private val game: Game, private val bounds: Box) : Listener {
 
     @EventHandler
-    fun onGameTerminate(e: BmGameTerminatedIntent) {
+    fun onRunStopped(e: BmRunStoppedIntent) {
         if (e.game == game) {
             HandlerList.unregisterAll(this)
         }

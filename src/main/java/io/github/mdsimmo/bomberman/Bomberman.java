@@ -2,7 +2,6 @@ package io.github.mdsimmo.bomberman;
 
 import io.github.mdsimmo.bomberman.commands.BaseCommand;
 import io.github.mdsimmo.bomberman.game.Game;
-import io.github.mdsimmo.bomberman.game.GameRegistry;
 import io.github.mdsimmo.bomberman.game.GameSettings;
 import org.bukkit.configuration.serialization.ConfigurationSerialization;
 import org.bukkit.event.Listener;
@@ -29,7 +28,6 @@ public class Bomberman extends JavaPlugin implements Listener {
 	public void onEnable() {
 		instance = this;
 
-		ConfigurationSerialization.registerClass(Game.class);
 		ConfigurationSerialization.registerClass(GameSettings.class);
 		ConfigurationSerialization.registerClass(BmSetting.class);
 
@@ -38,7 +36,7 @@ public class Bomberman extends JavaPlugin implements Listener {
 		getDataFolder().mkdirs();
 		extractResources();
 		new BaseCommand();
-		GameRegistry.loadGames();
+		Game.loadGames();
 	}
 
 	public BmSetting getSettings() {

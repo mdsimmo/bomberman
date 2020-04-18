@@ -247,6 +247,26 @@ class GamePlayer private constructor(private val player: Player, private val gam
         immunity = true
     }
 
+    @EventHandler(ignoreCancelled = true, priority = EventPriority.HIGH)
+    fun onCount(e: BmTimerCountedEvent) {
+        if (e.game != game)
+            return
+        Text.GAME_COUNT
+                .with("time", e.count)
+                .with("game", game)
+                .sendTo(player)
+    }
+
+    @EventHandler(ignoreCancelled = true, priority = EventPriority.HIGH)
+    fun onRunStarted(e: BmRunStartedIntent) {
+        if (e.game != game)
+            return
+        Text.GAME_STARTED
+                .with("game", game)
+                .sendTo(player)
+        e.setHandled()
+    }
+
     private fun bombStrength(): Int {
         return bombStrength(game, player)
     }

@@ -1,7 +1,7 @@
 package io.github.mdsimmo.bomberman.commands.game
 
 import io.github.mdsimmo.bomberman.commands.Cmd
-import io.github.mdsimmo.bomberman.game.GameRegistry
+import io.github.mdsimmo.bomberman.events.BmGameListIntent
 import io.github.mdsimmo.bomberman.messaging.Message
 import io.github.mdsimmo.bomberman.messaging.Text
 import org.bukkit.command.CommandSender
@@ -18,7 +18,7 @@ class GameList(parent: Cmd?) : Cmd(parent) {
     override fun run(sender: CommandSender, args: List<String>): Boolean {
         if (args.isNotEmpty())
             return false
-        val games = GameRegistry.allGames()
+        val games = BmGameListIntent.listGames()
         context(Text.GAMELIST_GAMES)
                 .with("games", games)
                 .sendTo(sender)

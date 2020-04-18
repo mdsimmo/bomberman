@@ -2,9 +2,7 @@ package io.github.mdsimmo.bomberman.commands.game
 
 import io.github.mdsimmo.bomberman.commands.Cmd
 import io.github.mdsimmo.bomberman.commands.GameCommand
-import io.github.mdsimmo.bomberman.events.BmGameRebuildIntent
 import io.github.mdsimmo.bomberman.game.Game
-import io.github.mdsimmo.bomberman.game.GameRegistry
 import io.github.mdsimmo.bomberman.messaging.Message
 import io.github.mdsimmo.bomberman.messaging.Text
 import org.bukkit.command.CommandSender
@@ -17,12 +15,15 @@ class GameReload(parent: Cmd) : GameCommand(parent) {
     override fun gameRun(sender: CommandSender, args: List<String>, game: Game): Boolean {
         if (args.isNotEmpty())
             return false
-        val newGame = GameRegistry.reload(game)
-        BmGameRebuildIntent.rebuild(newGame)
+        // TODO arena rebuilt twice if running
+        sender.sendMessage("Not implemented yet")
+        return true
+        /*val newGame = GameRegistry.reload(game)
+        BmGameBuildIntent.build(newGame)
         Text.RELOAD_SUCCESS
                 .with("game", newGame)
                 .sendTo(sender)
-        return true
+        return true*/
     }
 
     override fun permission(): Permission {

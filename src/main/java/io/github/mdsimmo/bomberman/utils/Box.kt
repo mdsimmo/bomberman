@@ -13,16 +13,22 @@ class Box(val world: World, val p1: Dim, val p2: Dim) {
 
     val size: Dim get() = Dim(p2.x - p1.x + 1, p2.y - p1.y + 1, p2.z - p1.z + 1)
 
-    constructor(world: World, x: Int, y: Int, z: Int, xSize: Int, ySize: Int, zSize: Int) : this(world, Dim(x, y, z), Dim(x+xSize-1, y+ySize-1, z+zSize-1)) {}
+    constructor(world: World, x: Int, y: Int, z: Int, xSize: Int, ySize: Int, zSize: Int)
+            : this(world, Dim(x, y, z), Dim(x+xSize-1, y+ySize-1, z+zSize-1))
 
-    constructor(l: Location, xSize: Int, ySize: Int, zSize: Int) : this(l.world!!, l.blockX, l.blockY, l.blockZ, xSize, ySize, zSize) {}
+    constructor(l: Location, xSize: Int, ySize: Int, zSize: Int)
+            : this(l.world!!, l.blockX, l.blockY, l.blockZ, xSize, ySize, zSize)
 
     operator fun contains(l: Location): Boolean {
         return contains(l.world, l.blockX, l.blockY, l.blockZ)
     }
 
     fun contains(world: World?, x: Int, y: Int, z: Int): Boolean {
-        return if (world != this.world) false else x >= p1.x && x <= p1.x + size.x && y >= p1.y && y <= p1.y + size.y && z >= p1.z && z <= p1.z + size.z
+        return if (world != this.world)
+            false
+        else x >= p1.x && x <= p2.x
+                && y >= p1.y && y <= p2.y
+                && z >= p1.z && z <= p2.z
     }
 
     val entities: List<Entity>
@@ -67,11 +73,7 @@ class Box(val world: World, val p1: Dim, val p2: Dim) {
     }.asStream()
 
     override fun equals(other: Any?): Boolean {
-        return if (other is Box) {
-            other.world == world && other.p1 == p1 && other.p2 == p2
-        } else {
-            false
-        }
+        return other is Box && other.world == world && other.p1 == p1 && other.p2 == p2
     }
 
 }
