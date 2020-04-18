@@ -23,6 +23,7 @@ import org.bukkit.Bukkit
 import org.bukkit.Location
 import org.bukkit.Material
 import org.bukkit.configuration.file.YamlConfiguration
+import org.bukkit.entity.Item
 import org.bukkit.entity.Player
 import org.bukkit.event.EventHandler
 import org.bukkit.event.EventPriority
@@ -179,6 +180,11 @@ class Game private constructor(val name: String, private var schema: Arena, val 
 
             plugin.logger.info("Building schematic ...")
             val clip = loadClipboard()
+
+            // cleanup any dropped items
+            box.world.getNearbyEntities(BukkitUtils.convert(box))
+                    .filterIsInstance<Item>()
+                    .forEach{ it.remove() }
 
             // Paste the schematic
             WorldEdit.getInstance().editSessionFactory.getEditSession(BukkitAdapter.adapt(box.world), -1)

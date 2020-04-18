@@ -7,6 +7,7 @@ import org.bukkit.Bukkit
 import org.bukkit.GameMode
 import org.bukkit.Location
 import org.bukkit.attribute.Attribute
+import org.bukkit.entity.Item
 import org.bukkit.entity.Player
 import org.bukkit.event.*
 import org.bukkit.event.block.Action
@@ -265,6 +266,11 @@ class GamePlayer private constructor(private val player: Player, private val gam
     fun onPlayerLeaveGameEvent(e: BmPlayerLeaveGameIntent) {
         if (e.player !== player)
             return
+
+        // Remove items near the player (stops players duplicating items out at spawn)
+        player.world.getNearbyEntities(player.location, 2.0, 3.0, 2.0)
+                .filterIsInstance<Item>()
+                .forEach{ it.remove() }
 
         // Give player their stuff back
         if (player.isDead) {

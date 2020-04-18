@@ -25,6 +25,7 @@ object BukkitUtils {
         return BoundingBox(box.p1.x.toDouble(), box.p1.y.toDouble(), box.p1.z.toDouble(),
                 (box.p2.x+1).toDouble(), (box.p2.y+1).toDouble(), (box.p2.z+1).toDouble())
     }
+
     @CheckReturnValue
     fun makePotion(type: PotionType, qty: Int = 1, extend: Boolean = false, upgraded: Boolean = false):ItemStack {
         return ItemStack(Material.POTION, qty).also {
