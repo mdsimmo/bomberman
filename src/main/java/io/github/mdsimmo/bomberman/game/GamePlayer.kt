@@ -54,7 +54,9 @@ class GamePlayer private constructor(private val player: Player, private val gam
             player.gameMode = GameMode.SURVIVAL
             player.health = game.settings.lives.toDouble()
             player.getAttribute(Attribute.GENERIC_MAX_HEALTH)!!.baseValue = game.settings.lives.toDouble()
-            player.healthScale = game.settings.lives * 2.toDouble()
+            Bukkit.getScheduler().scheduleSyncDelayedTask(plugin) {
+                player.healthScale = game.settings.lives * 2.toDouble()
+            }
             player.exhaustion = 0f
             player.foodLevel = 100000 // just a big number
             player.isFlying = false
