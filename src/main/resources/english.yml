@@ -2,17 +2,17 @@ format:
   # How a basic message looks
   # TODO remove need for empty message check
   # {message}: the message being sent
-  message: '{switch|{message}|||{green|[Bomberman]} {message}}'
+  message: '{#switch|{message}|||{#green|[Bomberman]} {message}}'
   # How to format a heading
   # {heading}: The title
-  heading: '{raw}{yellow|--------} {arg0} {yellow|---------------}'
+  heading: '{#raw}{#yellow|--------} {arg0} {#yellow|---------------}'
   # How to format a list of key-value pairs
   # {key}: the maps key
   # {value} the map's value
-  map: "{raw}{switch|{arg1}||| {gold|{arg0}:} {arg1}}"
+  map: "{#raw}{#switch|{arg1}||| {#gold|{arg0}:} {arg1}}"
   # How to display a list
   # {value}: the value of the list
-  list: "{raw}{switch|{arg0}||| {gold|*} {arg0}}"
+  list: "{#raw}{#switch|{arg0}||| {#gold|*} {arg0}}"
   # How to format an item by default
   # {item}: the item to format
   item: '{item|amount}x{item|type}'
@@ -41,7 +41,7 @@ editmode:
 # Messages with 'players', 'observers' and 'all' sub paths will be sent to the different groups of players.  
 game-play:
   # Sent when a player tries to teleport while playing
-  teleport-denied: '{RED|Cannot teleport while part of a game}'
+  teleport-denied: '{#red|Cannot teleport while part of a game}'
   # Sent to player who hit someone else
   # {attacker}: the player who placed the bomb (same as {sender})
   # {defender}: the player who got hit
@@ -57,37 +57,37 @@ game-play:
   # Sent to player who killed another player
   # {attacker}: this player (same as {sender})
   # {defender}: the player who died
-  kill-opponent: '{YELLOW|You killed {defender}}'
+  kill-opponent: '{#yellow|You killed {defender}}'
   # Sent to a player who killed them-self
   # {attacker}: this player
   # {defender}: this player
-  kill-suicide: '{RED|You killed yourself!}'
+  kill-suicide: '{#red|You killed yourself!}'
   # Sent to a player who has been killed
   # {attacker}: the player who killed this player
   # {defender}: this player
-  killed-by: '{RED|Killed by {attacker}}'
+  killed-by: '{#red|Killed by {attacker}}'
   # Informs all the other players not involved that a player died
   # {player}: the player who died 
   player-killed: '{player} is out!'
   # Informs all players of a game that a player left
   # {player}: the player who left
-  player-left: '{grey|{italic|{player} left}}'
+  player-left: '{#grey|{#italic|{player} left}}'
   # The winning text message
   # {player}: the winner
-  player-won: '{title|{Gold|WIN!}||0|60|20}'
+  player-won: '{#title|{#gold|WIN!}||0|60|20}'
   # Called when a player drinks a potion during sudden death
   no-regen: No regen in sudden death!
   # Sent when a game's auto-start countdown timer beings counting
   # {time}: time till the game starts
   starting:
     players: Game {game} is starting soon
-    observers: Game {game} is starting soon. Type {aqua|/bm game join {game}} to play!
-    all: Game {game} is starting soon. Type {aqua|/bm game join {game}} to play!
+    observers: Game {game} is starting soon. Type {#aqua|/bm game join {game}} to play!
+    all: Game {game} is starting soon. Type {#aqua|/bm game join {game}} to play!
   # Sent as the game timer counts down. Called ever 
   # {time}: the time till the game begins
-  count: '{title|{yellow|{time}}||0|17|2}'
+  count: '{#title|{#yellow|{time}}||0|17|2}'
   # Sent when the game starts
-  started: '{title|{white|GO!}||0|20|2}'
+  started: '{#title|{#white|GO!}||0|20|2}'
   # sent when the count-down stops because a player left
   stopped-count:
     players: Not enough players remaining. The countdown timer has been stopped
@@ -95,7 +95,7 @@ game-play:
     all: ''
   # Called when a game finishes
   game-over:
-    players: '{YELLOW|The game is over!}'
+    players: '{#yellow|The game is over!}'
     observers: Game {game} is over!
     all: ''
 # Messages related to events concerning sudden death
@@ -109,7 +109,7 @@ suddendeath:
     all: ''
   # Sudden death has just started
   start:
-    players: '{RED|Sudden death started!}'
+    players: '{#red|Sudden death started!}'
     observers: Sudden death started in {game}
     all: ''
 # Messages related to timeout
@@ -136,7 +136,7 @@ scores:
   # {game}: the game
   # {player}: the winner
   # {place}: the players position (as a number)
-  winners: ' {gold|{switch|{place}|1|1st|2|2nd|3|3rd|{place}th}:} {player}'
+  winners: ' {#gold|{#switch|{place}|1|1st|2|2nd|3|3rd|{place}th}:} {player}'
 # All messages that can be displayed when executing a command. All these messages will only be
 # shown to the player who ran the command. 
 # All the messages have a {command} argument
@@ -144,18 +144,18 @@ command:
   # How to display command help
   # {command}: The command
   help: |+
-    {c|format.heading|Help: {command|name}}
-    {c|format.map|Description|{command|description}}
-    {c|format.map|Usage|{command|usage}}
-    {c|format.map|Example|{command|example}}
+    {#|format.heading|Help: {command|name}}
+    {#|format.map|Description|{command|description}}
+    {#|format.map|Usage|{command|usage}}
+    {#|format.map|Example|{command|example}}
   # Shown when a player tries to run a command they do not have permission to use
-  deny-permission: '{RED|You do not have permission to use /{command|path}!}'
+  deny-permission: '{#red|You do not have permission to use /{command|path}!}'
   # Shown when the player uses a command incorrectly
   # {attempt}: the list of arguments that the player typed
-  incorrect-usage: '{RED|Incorrect usage: {command|usage}}'
+  incorrect-usage: '{#red|Incorrect usage: {command|usage}}'
   # Shown when a player types a command that does not exist
   # {attempt}: the cmd that the player typed
-  unknown-command: '{RED|Unknown command: {attempt}}'
+  unknown-command: '{#red|Unknown command: {attempt}}'
   # Shown to the console when it tries to run a command that needs to be done as a player 
   must-be-player: You must be a player
   # Shown when a command needs a number but they typed something else
@@ -355,7 +355,7 @@ command:
     # The handicap has been set for a specific player
     # {game}: the game set for
     # {player}: the player handicapped/advantaged
-    set: '{switch|{=|signum({player|handicap})}|0|Handicap removed from {player}|-1|{player}''s
+    set: '{#switch|{=|signum({player|handicap})}|0|Handicap removed from {player}|-1|{player}''s
       advantage set to level {=|abs({player|handicap})}|{player}''s handicap set to
       level {player|handicap}}'
   # Messages relating to '/bm game set lives'
@@ -492,14 +492,14 @@ command:
     need-selection: Use wooden axe to select a region first
     # The requested schematic was not found
     # {schema}: the file name that was attempted
-    schema-not-found: '{red|Schematic not found: {italic|{schema}}}'
+    schema-not-found: '{#red|Schematic not found: {#italic|{schema}}}'
   # Messages relating to '/bm game destroy'
   destroy:
     name: destroy
     description: Destroy a game and revert the land to its previous state
     usage: /{command|path} <game>
     example: ''
-    extra: 'See also: {aqua|/bm game forget <game>}'
+    extra: 'See also: {#aqua|/bm game forget <game>}'
     # The game has been destroyed
     # {game}: the game that was destroyed (this is a valid game)
     success: Game {game} destroyed
@@ -509,7 +509,7 @@ command:
     description: Forgets about a game but does not destroy/reset the arena
     usage: /{command|path} <game>
     example: ''
-    extra: 'See also: {aqua|/bm game destroy <game>}'
+    extra: 'See also: {#aqua|/bm game destroy <game>}'
     # The game has been forgotten
     # {game}: the forgotten game (this is a valid game)
     success: Game {game} forgotten
@@ -527,8 +527,8 @@ command:
     # What to show when games are present
     # {games}: a list of games
     games: |+
-      {c|format.heading|Games}
-      {Switch|{games|length}|0|{Red|No games present}|{games|foreach|{c|format.map|\{value\|name\}|\{value\|players\}/\{value\|maxplayers\} (\{switch\|\{value\|running\}\|true\|Running\|false\|Waiting\|\{Red\|?\}\})}|
+      {#|format.heading|Games}
+      {#switch|{games|length}|0|{#red|No games present}|{games|foreach|{#|format.map|\{value\|name\}|\{value\|players\}/\{value\|maxplayers\} (\{#switch\|\{value\|running\}\|true\|Running\|false\|Waiting\|\{#red\|?\}\})}|
       }}
   # Messages relating to '/bm game ignore'
   ignore:
@@ -553,16 +553,16 @@ command:
     # What info to display about a game
     # {game}: the game
     details: |+
-      {c|format.heading|Info: {game|name}}
-      {c|format.map|Status|{switch|{game|running}|true|Playing|false|Waiting|{Red|?}}}
-      {c|format.map|Players|{game|players}}
-      {c|format.map|Max players|{game|maxplayers}}
-      {c|format.map|Init lives|{game|lives}}
-      {c|format.map|Init bombs|{game|bombs}}
-      {c|format.map|Init power|{game|power}}
-      {c|format.map|Location|({game|x}, {game|y}, {game|z})}
-      {c|format.map|Schema|{game|schema|name}}
-      {c|format.map|Size|[{game|schema|xsize}x{game|schema|ysize}x{game|schema|zsize}]}
+      {#|format.heading|Info: {game|name}}
+      {#|format.map|Status|{#switch|{game|running}|true|Playing|false|Waiting|{#red|?}}}
+      {#|format.map|Players|{game|players}}
+      {#|format.map|Max players|{game|maxplayers}}
+      {#|format.map|Init lives|{game|lives}}
+      {#|format.map|Init bombs|{game|bombs}}
+      {#|format.map|Init power|{game|power}}
+      {#|format.map|Location|({game|x}, {game|y}, {game|z})}
+      {#|format.map|Schema|{game|schema|name}}
+      {#|format.map|Size|[{game|schema|xsize}x{game|schema|ysize}x{game|schema|zsize}]}
 
   # Commands relating to '/bm game join'. Also see 'join.xxx' messages
   join:
@@ -603,7 +603,7 @@ command:
     not-joined: You're not part of a game
     # Player left successfully
     # {player}: the player that left
-    success: '{gray|{italic|{player} left game}}'
+    success: '{#grey|{#italic|{player} left game}}'
   # Messages relating to '/bm game protect'
   protect:
     name: protect
@@ -693,7 +693,7 @@ command:
     # Exporting the language failed
     # {file}: where the file was attempted to be placed
     # {lang}: the language being exported
-    failed: Failed to create file {aqua|{file}}. Was the filename legal?
+    failed: Failed to create file {#aqua|{file}}. Was the filename legal?
   # Messages relating to '/bm language fromlua'
   fromlua:
     name: fromlua
@@ -717,7 +717,7 @@ command:
     # Shown when a player breaks a sign or a block that a sign is attached to
     # {block}: the block tried to be broken
     # {signblock}: the block that the sign was on (might be the same as {block})
-    cant_break: Command blocks cannot be broken. Use {aqua|/bm sign remove}
+    cant_break: Command blocks cannot be broken. Use {#aqua|/bm sign remove}
     # Messages relating to '/bm sign'
     sign:
       name: sign
@@ -766,7 +766,7 @@ command:
       not-sign: You must click on a sign. Action cancelled
       # Format error
       # {error}: the error that caused the problem (in english only)
-      error: 'Invalid message: {Red|{error}}'
+      error: 'Invalid message: {#red|{error}}'
   # Messages relating to '/bm resethealth'.
   # Note: this command is a hacky quick fix bug and will be removed when the bug is fixed
   sethealth:

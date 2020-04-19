@@ -4,18 +4,22 @@ import org.bukkit.ChatColor
 import java.util.concurrent.atomic.AtomicInteger
 
 object Expander {
-    private val functions = mapOf(
+    private val functions = mutableMapOf(
             Pair("=", Equation()),
-            Pair("switch", Switch()),
-            Pair("title", TitleExpander()),
-            Pair("raw", RawExpander()),
-            Pair("c", CustomPath()),
-            Pair("regex", RegexExpander()),
-            Pair("len", LengthExpander()),
-            Pair("sub", SubstringExpander()),
-            Pair("padl", PadLeftExpander()),
-            Pair("padr", PadRightExpander())
-    )
+            Pair("#switch", Switch()),
+            Pair("#title", TitleExpander()),
+            Pair("#raw", RawExpander()),
+            Pair("#", CustomPath()),
+            Pair("#regex", RegexExpander()),
+            Pair("#len", LengthExpander()),
+            Pair("#sub", SubstringExpander()),
+            Pair("#padl", PadLeftExpander()),
+            Pair("#padr", PadRightExpander())
+    ).also {
+        for (color in ChatColor.values()) {
+            it["#${color.name.toLowerCase()}"] = ColorWrapper(color)
+        }
+    }.toMap()
 
     /**
      * Expands all braces in text. The number of open braces must be balanced with close braces
@@ -90,11 +94,7 @@ object Expander {
         // Try and look up a key, function or chat color to format with
         val thing = things[keyString]
                 ?: functions[keyString]
-                ?: try {
-                    ColorWrapper(ChatColor.valueOf(keyString.toUpperCase()))
-                } catch (e: IllegalArgumentException) {
-                    Message.error(text)
-                }
+                ?: Message.error(text)
         return thing.format(args)
     }
 

@@ -17,7 +17,7 @@ class ExpanderTest {
 
     @Test
     fun singleColorIsAdded() {
-        val message = expand("hi {red|boo}", mapOf())
+        val message = expand("hi {#red|boo}", mapOf())
         assertEquals(
                 "hi " + ChatColor.RED + "boo" + ChatColor.RESET, 
                 message.toString()
@@ -26,7 +26,7 @@ class ExpanderTest {
 
     @Test
     fun embeddedColorsHandled() {
-        val message = expand("{green|hello, {yellow|fred}.} You Stink", mapOf())
+        val message = expand("{#green|hello, {#yellow|fred}.} You Stink", mapOf())
         assertEquals(
                 ChatColor.GREEN.toString() + "hello, " + ChatColor.YELLOW + "fred" + ChatColor.GREEN + "." + ChatColor.RESET + " You Stink", 
                 message.toString()
@@ -68,8 +68,8 @@ class ExpanderTest {
 
     @Test
     fun colorsPassedThroughMessages() {
-        val a = expand("A{red|B}C", mapOf())
-        val b = expand("{Green|X{a}Y}", mapOf(Pair("a", a)))
+        val a = expand("A{#red|B}C", mapOf())
+        val b = expand("{#Green|X{a}Y}", mapOf(Pair("a", a)))
         assertEquals(
                 ChatColor.GREEN.toString() + "XA" + ChatColor.RED + "B" + ChatColor.GREEN + "CY" + ChatColor.RESET,
                 b.toString()
@@ -78,8 +78,8 @@ class ExpanderTest {
 
     @Test
     fun noCachedDataRemains() {
-        val a = expand("A{red|B}C", mapOf())
-        val b = expand("{Green|X{a}Y}", mapOf(Pair("a", a)))
+        val a = expand("A{#red|B}C", mapOf())
+        val b = expand("{#Green|X{a}Y}", mapOf(Pair("a", a)))
         // run the test a few times with the same objects. If it fails, the cache is broken
         for (i in 0..4)
             assertEquals(
@@ -91,7 +91,7 @@ class ExpanderTest {
     @Test
     fun singleMessageThatIsSuperComplex() {
         val message = expand(
-                "Hey, {bold|Mr. {Red|Red {yellow|Bob} the {yellow|Tob} BANG} BOOM} CRASH",
+                "Hey, {#bold|Mr. {#Red|Red {#yellow|Bob} the {#yellow|Tob} BANG} BOOM} CRASH",
                 mapOf()
         )
         assertEquals(
@@ -104,7 +104,7 @@ class ExpanderTest {
 
     @Test
     fun multipleFormatsGetApplied() {
-        val message = expand("Hello, {bold|{italic|{green|World}}}!", mapOf())
+        val message = expand("Hello, {#bold|{#italic|{#green|World}}}!", mapOf())
         // TODO lazy apply color formats
         // note that the bold/italic is applied twice here because the green resets it
         assertEquals("Hello, " + ChatColor.BOLD + ChatColor.ITALIC + ChatColor.GREEN
@@ -116,7 +116,7 @@ class ExpanderTest {
 
     @Test
     fun resetDoesResetThings() {
-        val message = expand("{Green|{Bold|Hi {reset|world}!}}", mapOf())
+        val message = expand("{#Green|{#Bold|Hi {#reset|world}!}}", mapOf())
         assertEquals(
                 ChatColor.GREEN.toString() + "" + ChatColor.BOLD + "Hi " + ChatColor.RESET
                         + "world" + ChatColor.GREEN + ChatColor.BOLD + "!" + ChatColor.GREEN
@@ -126,8 +126,8 @@ class ExpanderTest {
 
     @Test
     fun formatCodesThroughMessages() {
-        val a = expand("{Green|{bold|A}}", mapOf())
-        val b = expand("{Italic|{Blue|{a}}}", mapOf(Pair("a", a)))
+        val a = expand("{#Green|{#bold|A}}", mapOf())
+        val b = expand("{#Italic|{#Blue|{a}}}", mapOf(Pair("a", a)))
         assertEquals(ChatColor.ITALIC.toString() + "" + ChatColor.BLUE + ChatColor.ITALIC
                 + ChatColor.GREEN + ChatColor.ITALIC + ChatColor.BOLD + "A" + ChatColor.GREEN
                 + ChatColor.ITALIC + ChatColor.BLUE + ChatColor.ITALIC + ChatColor.RESET
@@ -137,9 +137,9 @@ class ExpanderTest {
 
     @Test
     fun backslashEscapes() {
-        val a = expand("{Red|\\{Green\\|Hello\\{\\}}", mapOf())
+        val a = expand("{#Red|\\{#Green\\|Hello\\{\\}}", mapOf())
         assertEquals(
-                ChatColor.RED.toString() + "{Green|Hello{}" + ChatColor.RESET,
+                ChatColor.RED.toString() + "{#Green|Hello{}" + ChatColor.RESET,
                 a.toString()
         )
     }
@@ -161,7 +161,7 @@ class ExpanderTest {
         val badExpand = mock(Formattable::class.java)
         `when`(badExpand.format(anyList())).thenReturn(Message.of("no no"))
 
-        val a = expand("{switch|0|0|choose me|{bad}}", mapOf(Pair("bad", badExpand)))
+        val a = expand("{#switch|0|0|choose me|{bad}}", mapOf(Pair("bad", badExpand)))
 
         assertEquals("choose me", a.toString())
         verifyNoInteractions(badExpand)

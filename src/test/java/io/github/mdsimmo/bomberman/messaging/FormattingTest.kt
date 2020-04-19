@@ -23,7 +23,7 @@ class FormattingTest {
 
     @Test
     fun testCustomFormat() {
-        val a = expand("A map: \n{c|format.map|key|value}\nWow!", mapOf())
+        val a = expand("A map: \n{#|format.map|key|value}\nWow!", mapOf())
         assertEquals("A map: \n key: value\nWow!", ChatColor.stripColor(a.toString()))
     }
 
@@ -62,7 +62,7 @@ class FormattingTest {
     fun testTitleGetsSent() {
         val sender = mock(Player::class.java)
         val message = expand(
-                "{title|Chapter {chapter}|The story ends|1|2|3}",
+                "{#title|Chapter {chapter}|The story ends|1|2|3}",
                 mapOf(Pair("chapter", of(1)))
         )
 
@@ -79,13 +79,13 @@ class FormattingTest {
 
     @Test
     fun testSwitchExpands() {
-        val a = expand("{switch|a|a|1|b|2|3} {switch|b|a|1|b|2|3} {switch|c|a|1|b|2|3}", mapOf())
+        val a = expand("{#switch|a|a|1|b|2|3} {#switch|b|a|1|b|2|3} {#switch|c|a|1|b|2|3}", mapOf())
         assertEquals("1 2 3", a.toString())
     }
 
     @Test
     fun testSwitchNoMatchReturnsEmpty() {
-        val a = expand("{switch|c|a|1|b|2}", mapOf())
+        val a = expand("{#switch|c|a|1|b|2}", mapOf())
         assertEquals("", a.toString())
     }
 
@@ -96,7 +96,7 @@ class FormattingTest {
         `when`(no.format(anyList())).thenReturn(of("No"))
         `when`(yes.format(anyList())).thenReturn(of("Yes"))
 
-        val a = expand("{switch|1|0|{no}|1|{yes}|2|{no}|{no}}", mapOf(
+        val a = expand("{#switch|1|0|{no}|1|{yes}|2|{no}|{no}}", mapOf(
                 Pair("no", no),
                 Pair("yes", yes)
         ))
@@ -116,7 +116,7 @@ class FormattingTest {
         `when`(two.format(anyList())).thenReturn(of("2"))
         `when`(three.format(anyList())).thenReturn(of("3"))
 
-        val a = expand("{switch|2|{one}|One|{two}|Two|{three}|Three|Four+}", mapOf(
+        val a = expand("{#switch|2|{one}|One|{two}|Two|{three}|Three|Four+}", mapOf(
                 Pair("one", one),
                 Pair("two", two),
                 Pair("three", three)
@@ -148,61 +148,67 @@ class FormattingTest {
 
     @Test
     fun testStringLength() {
-        val a = expand("{len|Hello}", emptyMap())
+        val a = expand("{#len|Hello}", emptyMap())
         assertEquals("5", a.toString())
     }
 
     @Test
     fun testPadLeft() {
-        val a = expand("{padl|abc|8|xyz}", emptyMap())
+        val a = expand("{#padl|abc|8|xyz}", emptyMap())
         assertEquals("xyzxyabc", a.toString())
     }
 
     @Test
     fun testPadRight() {
-        val a = expand("{padr|abc|8|xyz}", emptyMap())
+        val a = expand("{#padr|abc|8|xyz}", emptyMap())
         assertEquals("abcxyzxy", a.toString())
     }
 
     @Test
     fun testSubStringPosNone() {
-        val a = expand("{sub|icecream|3}", emptyMap())
+        val a = expand("{#sub|icecream|3}", emptyMap())
         assertEquals("cream", a.toString())
     }
 
     @Test
     fun testSubStringPosPos() {
-        val a = expand("{sub|icecream|3|2}", emptyMap())
+        val a = expand("{#sub|icecream|3|2}", emptyMap())
         assertEquals("cr", a.toString())
     }
 
     @Test
     fun testSubStringPosNeg() {
-        val a = expand("{sub|icecream|3|-2}", emptyMap())
+        val a = expand("{#sub|icecream|3|-2}", emptyMap())
         assertEquals("cre", a.toString())
     }
 
     @Test
     fun testSubStringNegNone() {
-        val a = expand("{sub|icecream|-3}", emptyMap())
+        val a = expand("{#sub|icecream|-3}", emptyMap())
         assertEquals("eam", a.toString())
     }
 
     @Test
     fun testSubStringNegPos() {
-        val a = expand("{sub|icecream|-3|2}", emptyMap())
+        val a = expand("{#sub|icecream|-3|2}", emptyMap())
         assertEquals("ea", a.toString())
     }
 
     @Test
     fun testSubStringNegNeg() {
-        val a = expand("{sub|icecream|-4|-2}", emptyMap())
+        val a = expand("{#sub|icecream|-4|-2}", emptyMap())
         assertEquals("re", a.toString())
     }
 
     @Test
+    fun testSubStringEndBeforeStart() {
+        val a = expand("{#sub|icecream|10|-10}", emptyMap())
+        assertEquals("", a.toString())
+    }
+
+    @Test
     fun testRegex() {
-        val a = expand("{regex|The little bird says|i(\\\\w+)|a\$1d}", emptyMap())
+        val a = expand("{#regex|The little bird says|i(\\\\w+)|a\$1d}", emptyMap())
         assertEquals("The lattled bardd says", a.toString())
     }
 }

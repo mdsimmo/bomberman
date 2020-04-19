@@ -39,8 +39,7 @@ class SenderWrapper(private val sender: CommandSender) : Formattable {
 
 class ColorWrapper(private val color: ChatColor) : Formattable {
     override fun format(args: List<Message>): Message {
-        if (args.size != 1)
-            throw RuntimeException("Colors must have exactly one argument. Given " + args.size)
+        require (args.size == 1) { "Colors format is {<color>|text}" }
         return args[0].color(color)
     }
 }
@@ -70,14 +69,14 @@ class CollectionWrapper<T : Formattable>(private val list: Collection<T>) : Form
 
 class RawExpander : Formattable {
     override fun format(args: List<Message>): Message {
-        require(args.isEmpty()) { "{raw} cannot be used with arguments" }
+        require(args.isEmpty()) { "Raw format is {#raw}" }
         return Message.rawFlag
     }
 }
 
 class TitleExpander : Formattable {
     override fun format(args: List<Message>): Message {
-        require(args.isNotEmpty()) { "{title} needs at least one argument" }
+        require(args.isNotEmpty()) { "Title format is {#title|title|subtitle=''|fadeIn=0|stay=20|fadeOut=0}" }
         val text = args[0]
         val subtitle = if (args.size >= 2) args[1] else Message.empty
         val fadein = if (args.size >= 3) args[2].toString().toInt() else 0
@@ -110,7 +109,7 @@ class Switch : Formattable {
 
 class Equation : Formattable {
     override fun format(args: List<Message>): Message {
-        require (args.size == 1) { "Equation must have exactly one argument" }
+        require (args.size == 1) { "Equation format is {#=|equation}" }
         return try {
             val answer = ExpressionBuilder(args[0].toString()).build().evaluate()
             Message.of(BigDecimal.valueOf(answer).stripTrailingZeros().toPlainString())
@@ -122,7 +121,7 @@ class Equation : Formattable {
 
 class CustomPath : Formattable {
     override fun format(args: List<Message>): Message {
-        require(args.isNotEmpty()) { "Custom message needs path" }
+        require(args.isNotEmpty()) { "Custom format is {#|path|args...}" }
         val text = Text.getSection(args[0].toString())
         return args.drop(1)
                 .foldIndexed(text) { i, acc, iArg ->
@@ -134,7 +133,7 @@ class CustomPath : Formattable {
 
 class RegexExpander : Formattable {
     override fun format(args: List<Message>): Message {
-        require(args.size == 3) { "Regex format is {regex|text|pattern|replace}" }
+        require(args.size == 3) { "Regex format is {#regex|text|pattern|replace}" }
         val text = args[0].toString()
         val pattern = args[1].toString()
         val replace = args[2].toString()
@@ -145,14 +144,14 @@ class RegexExpander : Formattable {
 
 class LengthExpander : Formattable {
     override fun format(args: List<Message>): Message {
-        require(args.size == 1) { "Length format is {len|text}" }
+        require(args.size == 1) { "Length format is {#len|text}" }
         return Message.of(args[0].toString().length)
     }
 }
 
 class SubstringExpander : Formattable {
     override fun format(args: List<Message>): Message {
-        require(args.size == 2 || args.size == 3) { "Substring format is {sub|text|start|length}"}
+        require(args.size == 2 || args.size == 3) { "Substring format is {#sub|text|start|length}"}
         val text = args[0].toString()
         var start = args[1].toString().toInt().let {
             if (it < 0)
@@ -186,7 +185,7 @@ class SubstringExpander : Formattable {
 
 interface PadExpander : Formattable {
     override fun format(args: List<Message>): Message {
-        require(args.size > 2) { "Pad format is {pad|text|length|padtext=' '}"}
+        require(args.size > 2) { "Pad format is {#pad|text|length|padtext=' '}"}
         val length = args[1].toString().toInt()
         val padText = args.getOrNull(2)?.toString()?.ifEmpty{ " " } ?: " "
 
