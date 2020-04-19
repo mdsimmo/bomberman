@@ -167,10 +167,12 @@ class GamePlayer private constructor(private val player: Player, private val gam
     fun onCount(e: BmTimerCountedEvent) {
         if (e.game != game)
             return
-        Text.GAME_COUNT
-                .with("time", e.count)
-                .with("game", game)
-                .sendTo(player)
+        if (e.count > 0) {
+            Text.GAME_COUNT
+                    .with("time", e.count)
+                    .with("game", game)
+                    .sendTo(player)
+        }
     }
 
     @EventHandler(ignoreCancelled = true, priority = EventPriority.HIGH)

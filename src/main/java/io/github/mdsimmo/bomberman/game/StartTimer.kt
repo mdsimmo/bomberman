@@ -18,6 +18,7 @@ class StartTimer private constructor(private val game: Game, private var time: I
         private val plugin = Bomberman.instance
 
         fun createTimer(game: Game, time: Int) {
+            println("new timer")
             Bukkit.getPluginManager().registerEvents(
                     StartTimer(game, time),
                     plugin)
@@ -29,21 +30,25 @@ class StartTimer private constructor(private val game: Game, private var time: I
             .scheduleSyncRepeatingTask(plugin, this, 1, 20)
 
     override fun run() {
-        if (killed)
+        if (killed) {
+            println("Timer run when killed")
             return
+        }
 
+        val e = BmTimerCountedEvent(game, time)
+        Bukkit.getPluginManager().callEvent(e)
+        time = e.count
         if (time > 0) {
-            val e = BmTimerCountedEvent(game, time)
-            Bukkit.getPluginManager().callEvent(e)
-            time = e.count
+            --time // the next count
         } else {
-            --time
+            println("start")
             BmRunStartedIntent.startRun(game)
             killSelf()
         }
     }
 
     private fun killSelf() {
+        println("Time killed")
         killed = true
         Bukkit.getScheduler().cancelTask(taskID)
         HandlerList.unregisterAll(this)
