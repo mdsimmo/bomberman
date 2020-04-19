@@ -39,7 +39,7 @@ class ExplosionTest {
             got.forEach(Consumer { obj: AtomicInteger -> obj.incrementAndGet() })
         }
 
-        Assert.assertEquals(diamonds.get().toFloat(), 250f, 30f)
-        Assert.assertEquals(dirt.get().toFloat(), 750f, 30f)
+        Assert.assertEquals(diamonds.get().toFloat(), 250f, 40f)
+        Assert.assertEquals(dirt.get().toFloat(), 750f, 40f)
     }
 }

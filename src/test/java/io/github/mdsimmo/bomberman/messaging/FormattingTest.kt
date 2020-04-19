@@ -78,6 +78,84 @@ class FormattingTest {
     }
 
     @Test
+    fun testEquationEquals() {
+        val a = expand("{=|5==6} {=|5==5}", mapOf())
+        assertEquals("0 1", a.toString())
+    }
+
+    @Test
+    fun testEquationEqualsNot() {
+        val a = expand("{=|5!=6} {=|5!=5}", mapOf())
+        assertEquals("1 0", a.toString())
+    }
+
+    @Test
+    fun testEquationGreater() {
+        val a = expand("{=|5>6} {=|6>5} {=|5>5}", mapOf())
+        assertEquals("0 1 0", a.toString())
+    }
+
+    @Test
+    fun testEquationLesser() {
+        val a = expand("{=|5<6} {=|6<5} {=|5<5}", mapOf())
+        assertEquals("1 0 0", a.toString())
+    }
+
+    @Test
+    fun testEquationGreaterEqual() {
+        val a = expand("{=|5>=6} {=|6>=5} {=|5>=5}", mapOf())
+        assertEquals("0 1 1", a.toString())
+    }
+
+    @Test
+    fun testEquationLesserEqual() {
+        val a = expand("{=|5<=6} {=|6<=5} {=|5<=5}", mapOf())
+        assertEquals("1 0 1", a.toString())
+    }
+
+    @Test
+    fun testEquationAnd() {
+        val a = expand("{=|0 & 0} {=|0 & 1} {=|1 & 0} {=|1 & 1} {=|-1 & 2}", mapOf())
+        assertEquals("0 0 0 1 1", a.toString())
+    }
+
+    @Test
+    fun testEquationOr() {
+        val a = expand("{=|0 $ 0} {=|0 $ 1} {=|1 $ 0} {=|1 $ 1} {=|-1 $ 2}", mapOf())
+        assertEquals("0 1 1 1 1", a.toString())
+    }
+
+    @Test
+    fun testEquationNot() {
+        val a = expand("{=|!0} {=|!1} {=|!(-2)} {=|-(!2)}", mapOf())
+        assertEquals("1 0 0 0", a.toString())
+    }
+
+    @Test
+    fun testNotBeforeAnd() {
+        val a = expand("{=|1 $ !0}", mapOf())
+        assertEquals("1", a.toString())
+    }
+
+    @Test
+    fun testEquationAndBeforeOr() {
+        val a = expand("{=|1 $ 1 & 0}", mapOf())
+        assertEquals("1", a.toString())
+    }
+
+    @Test
+    fun testAndOrBeforeEqual() {
+        val a = expand("{=|-1 == -1 & 1} {=|0 == 0 $ 1}", mapOf())
+        assertEquals("0 0", a.toString())
+    }
+
+    @Test
+    fun testCompareBeforeEqual() {
+        val a = expand("{=|0 == 1 > 1}", mapOf())
+        assertEquals("1", a.toString())
+    }
+
+    @Test
     fun testSwitchExpands() {
         val a = expand("{#switch|a|a|1|b|2|3} {#switch|b|a|1|b|2|3} {#switch|c|a|1|b|2|3}", mapOf())
         assertEquals("1 2 3", a.toString())

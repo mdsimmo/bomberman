@@ -1,11 +1,12 @@
 package io.github.mdsimmo.bomberman.messaging
 
 import net.objecthunter.exp4j.ExpressionBuilder
+import net.objecthunter.exp4j.operator.Operator
 import org.bukkit.ChatColor
 import org.bukkit.command.CommandSender
 import org.bukkit.inventory.ItemStack
 import java.math.BigDecimal
-import kotlin.text.StringBuilder
+
 
 class StringWrapper(val text: String) : Formattable {
 
@@ -111,13 +112,130 @@ class Equation : Formattable {
     override fun format(args: List<Message>): Message {
         require (args.size == 1) { "Equation format is {#=|equation}" }
         return try {
-            val answer = ExpressionBuilder(args[0].toString()).build().evaluate()
-            Message.of(BigDecimal.valueOf(answer).stripTrailingZeros().toPlainString())
+            val answer = ExpressionBuilder(args[0].toString())
+                    .operator(greater)
+                    .operator(lesser)
+                    .operator(greaterEqual)
+                    .operator(lesserEqual)
+                    .operator(equal)
+                    .operator(notEqual)
+                    .operator(and)
+                    .operator(or)
+                    .operator(not)
+                    .build()
+                    .evaluate()
+            Message.of(BigDecimal.valueOf(answer)
+                    .stripTrailingZeros()
+                    .toPlainString())
         } catch (e: Exception) {
             Message.error("{${args[0]}}")
         }
     }
 }
+const val epsilon =  0.00000001
+
+const val PRECEDENCE_NOT = Operator.PRECEDENCE_UNARY_MINUS
+const val PRECEDENCE_AND = Operator.PRECEDENCE_ADDITION - 10
+const val PRECEDENCE_OR = Operator.PRECEDENCE_ADDITION - 20
+const val PRECEDENCE_COMPARE = Operator.PRECEDENCE_ADDITION - 100
+const val PRECEDENCE_EQUAL = Operator.PRECEDENCE_ADDITION - 1000
+
+private val not : Operator =
+        object : Operator("!", 1, true, PRECEDENCE_NOT) {
+            override fun apply(vararg args: Double): Double {
+                return if ((args[0] > -epsilon) && (args[0] < epsilon)) {
+                    1.0
+                } else {
+                    0.0
+                }
+            }
+        }
+
+private val or : Operator =
+        object : Operator("$", 2, true, PRECEDENCE_OR) {
+            override fun apply(vararg args: Double): Double {
+                return if (((args[0] < -epsilon) || (args[0] > epsilon)) or ((args[1] < -epsilon) || (args[1] > epsilon))) {
+                    1.0
+                } else {
+                    0.0
+                }
+            }
+        }
+
+private val and : Operator =
+        object : Operator("&", 2, true, PRECEDENCE_AND) {
+            override fun apply(vararg args: Double): Double {
+                return if (((args[0] < -epsilon) || (args[0] > epsilon)) and ((args[1] < -epsilon) || (args[1] > epsilon))) {
+                    1.0
+                } else {
+                    0.0
+                }
+            }
+        }
+
+
+private val greater: Operator =
+        object : Operator(">", 2, true, PRECEDENCE_COMPARE) {
+            override fun apply(vararg args: Double): Double {
+                return if (args[0] > args[1] + epsilon) {
+                    1.0
+                } else {
+                    0.0
+                }
+            }
+        }
+private val lesser: Operator =
+        object : Operator("<", 2, true, PRECEDENCE_COMPARE) {
+            override fun apply(vararg args: Double): Double {
+                return if (args[0] + epsilon < args[1]) {
+                    1.0
+                } else {
+                    0.0
+                }
+            }
+        }
+private val greaterEqual: Operator =
+        object : Operator(">=", 2, true, PRECEDENCE_COMPARE) {
+            override fun apply(vararg args: Double): Double {
+                return if (args[0] + epsilon >= args[1]) {
+                    1.0
+                } else {
+                    0.0
+                }
+            }
+        }
+private val lesserEqual: Operator =
+        object : Operator("<=", 2, true, PRECEDENCE_COMPARE) {
+            override fun apply(vararg args: Double): Double {
+                return if (args[0] <= args[1] + epsilon) {
+                    1.0
+                } else {
+                    0.0
+                }
+            }
+        }
+
+private val equal : Operator =
+        object : Operator("==", 2, true, PRECEDENCE_EQUAL) {
+            override fun apply(vararg args: Double): Double {
+                return if ((args[0] > args[1] - epsilon) && (args[0] < args[1] + epsilon)) {
+                    1.0
+                } else {
+                    0.0
+                }
+            }
+        }
+
+private val notEqual : Operator =
+        object : Operator("!=", 2, true, PRECEDENCE_EQUAL) {
+            override fun apply(vararg args: Double): Double {
+                return if ((args[0] < args[1] - epsilon) || (args[0] > args[1] + epsilon)) {
+                    1.0
+                } else {
+                    0.0
+                }
+            }
+        }
 
 class CustomPath : Formattable {
     override fun format(args: List<Message>): Message {
