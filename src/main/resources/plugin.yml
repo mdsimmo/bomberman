@@ -1,6 +1,6 @@
 name: Bomberman
 main: io.github.mdsimmo.bomberman.Bomberman
-version: 0.4.2
+version: ${version}
 api-version: 1.15
 load: POSTWORLD
 

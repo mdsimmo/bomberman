@@ -8,7 +8,7 @@ sourceCompatibility = JavaVersion.VERSION_1_8
 targetCompatibility = JavaVersion.VERSION_1_8
 
 group = 'io.github.mdsimmo'
-version = '0.4.2'
+version = '0.4.3'
 
 repositories {
     mavenCentral()
@@ -44,7 +44,6 @@ processResources  {
         filter {
             line ->
                 line
-                        .replace('${name}', project.name)
                         .replace('${version}', version)
         }
     }
