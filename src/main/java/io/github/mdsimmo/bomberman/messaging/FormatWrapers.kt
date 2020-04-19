@@ -52,14 +52,14 @@ class CollectionWrapper<T : Formattable>(private val list: Collection<T>) : Form
         return when (args.getOrNull(0)?.toString() ?: "foreach") {
             "foreach" -> {
                 // Join all elements by applying arg[1] to each item separated by arg[2]
-                val mapper = args.getOrNull(1)?.toString() ?: "{value}"
-                val separator = args.getOrNull(2) ?: Message.of(", ")
+                val mapper = args.getOrNull(1)?.toString() ?: "format.foreach"
+                val separator = args.getOrNull(2) ?: Message.of(" ")
                 list
                         .mapIndexed {i, item ->
-                            Expander.expand(mapper, mapOf(
-                                    Pair("value", item),
-                                    Pair("i", Message.of(i))
-                            ))
+                            Text.getSection(mapper)
+                                    .with("arg0", item)
+                                    .with("arg1", Message.of(i))
+                                    .format()
                         }
                         .ifEmpty { listOf(Message.empty) }
                         .reduce { a, b -> a.append(separator).append(b) }

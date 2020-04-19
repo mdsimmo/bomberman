@@ -224,9 +224,9 @@ class FormattingTest {
     fun testListForeach() {
         val mylist = listOf(of("Hello"), of("Small"), of("World"))
         val a = expand(
-                "{mylist|foreach|\\{i\\}:\\{value\\}|-}",
+                "{mylist|foreach|format.foreach|-}",
                 mapOf(Pair("mylist", CollectionWrapper(mylist))))
-        assertEquals("0:Hello-1:Small-2:World", a.toString())
+        assertEquals("(0: Hello)-(1: Small)-(2: World)", a.toString())
     }
 
     @Test

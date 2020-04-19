@@ -4,15 +4,19 @@ format:
   # {message}: the message being sent
   message: '{#switch|{message}|||{#green|[Bomberman]} {message}}'
   # How to format a heading
-  # {heading}: The title
+  # {arg0}: The title
   heading: '{#raw}{#yellow|--------} {arg0} {#yellow|---------------}'
   # How to format a list of key-value pairs
-  # {key}: the maps key
-  # {value} the map's value
+  # {arg0}: the maps key
+  # {arg1} the map's value
   map: "{#raw}{#switch|{arg1}||| {#gold|{arg0}:} {arg1}}"
   # How to display a list
-  # {value}: the value of the list
+  # {arg0}: the value of the list
   list: "{#raw}{#switch|{arg0}||| {#gold|*} {arg0}}"
+  # Default expansion of foreach
+  # {arg0}: the value of the list
+  # {arg1}: the index
+  foreach: "({arg1}: {arg0})"
   # How to format an item by default
   # {item}: the item to format
   item: '{item|amount}x{item|type}'
@@ -528,8 +532,10 @@ command:
     # {games}: a list of games
     games: |+
       {#|format.heading|Games}
-      {#switch|{games|length}|0|{#red|No games present}|{games|foreach|{#|format.map|\{value\|name\}|\{value\|players\}/\{value\|maxplayers\} (\{#switch\|\{value\|running\}\|true\|Running\|false\|Waiting\|\{#red\|?\}\})}|
+      {#switch|{games|length}|0|{#red|No games present}|{games|foreach|command.gamelist.game|
       }}
+    game: |+
+      {#|format.map|{arg0|name}|{arg0|players}/{arg0|maxplayers} ({#switch|{arg0|running}|true|Running|false|Waiting|{#red|?}})}
   # Messages relating to '/bm game ignore'
   ignore:
     name: ignore
