@@ -138,6 +138,12 @@ class FormattingTest {
     }
 
     @Test
+    fun testPlusBeforeAnd() {
+        val a = expand("{=|1 & -1 + 1}", mapOf())
+        assertEquals("0", a.toString())
+    }
+
+    @Test
     fun testEquationAndBeforeOr() {
         val a = expand("{=|1 $ 1 & 0}", mapOf())
         assertEquals("1", a.toString())
@@ -153,6 +159,12 @@ class FormattingTest {
     fun testCompareBeforeEqual() {
         val a = expand("{=|0 == 1 > 1}", mapOf())
         assertEquals("1", a.toString())
+    }
+
+    @Test
+    fun testEquationRound() {
+        val a = expand("{=|round(0.6)} {=|round(0.1)} {=|round(0.5)} {=|round(-0.6)} {=|round(-0.1)} {=|round(-0.5)}", mapOf())
+        assertEquals("1 0 1 -1 0 0", a.toString())
     }
 
     @Test

@@ -1,11 +1,13 @@
 package io.github.mdsimmo.bomberman.messaging
 
 import net.objecthunter.exp4j.ExpressionBuilder
+import net.objecthunter.exp4j.function.Function
 import net.objecthunter.exp4j.operator.Operator
 import org.bukkit.ChatColor
 import org.bukkit.command.CommandSender
 import org.bukkit.inventory.ItemStack
 import java.math.BigDecimal
+import kotlin.math.roundToLong
 
 
 class StringWrapper(val text: String) : Formattable {
@@ -122,6 +124,7 @@ class Equation : Formattable {
                     .operator(and)
                     .operator(or)
                     .operator(not)
+                    .function(round)
                     .build()
                     .evaluate()
             Message.of(BigDecimal.valueOf(answer)
@@ -172,7 +175,6 @@ private val and : Operator =
                 }
             }
         }
-
 
 private val greater: Operator =
         object : Operator(">", 2, true, PRECEDENCE_COMPARE) {
@@ -234,6 +236,13 @@ private val notEqual : Operator =
                 } else {
                     0.0
                 }
+            }
+        }
+
+private val round : Function =
+        object : Function("round", 1) {
+            override fun apply(vararg args: Double): Double {
+                return args[0].roundToLong().toDouble()
             }
         }
 
