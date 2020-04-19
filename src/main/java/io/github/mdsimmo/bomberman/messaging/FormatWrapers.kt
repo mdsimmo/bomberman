@@ -5,6 +5,7 @@ import org.bukkit.ChatColor
 import org.bukkit.command.CommandSender
 import org.bukkit.inventory.ItemStack
 import java.math.BigDecimal
+import kotlin.text.StringBuilder
 
 class StringWrapper(val text: String) : Formattable {
 
@@ -94,7 +95,7 @@ class Switch : Formattable {
         while (i < size) {
             val test = args[i]
             if (i+1 < args.size) {
-                if (equal(value, test.toString())) {
+                if (value == test.toString()) {
                     return args[i + 1]
                 }
             } else {
@@ -104,14 +105,6 @@ class Switch : Formattable {
         }
         // no default supplied
         return Message.empty
-    }
-
-    private fun equal(start: String, arg: String): Boolean {
-        val parts = arg.split(",").toTypedArray()
-        for (part in parts) {
-            if (part.trim { it <= ' ' }.equals(start, ignoreCase = true)) return true
-        }
-        return false
     }
 }
 
@@ -137,4 +130,91 @@ class CustomPath : Formattable {
                 }
                 .format()
     }
+}
+
+class RegexExpander : Formattable {
+    override fun format(args: List<Message>): Message {
+        require(args.size == 3) { "Regex format is {regex|text|pattern|replace}" }
+        val text = args[0].toString()
+        val pattern = args[1].toString()
+        val replace = args[2].toString()
+        println(pattern)
+        return Message.of(text.replace(Regex(pattern), replace))
+    }
+}
+
+class LengthExpander : Formattable {
+    override fun format(args: List<Message>): Message {
+        require(args.size == 1) { "Length format is {len|text}" }
+        return Message.of(args[0].toString().length)
+    }
+}
+
+class SubstringExpander : Formattable {
+    override fun format(args: List<Message>): Message {
+        require(args.size == 2 || args.size == 3) { "Substring format is {sub|text|start|length}"}
+        val text = args[0].toString()
+        var start = args[1].toString().toInt().let {
+            if (it < 0)
+                text.length - -it
+            else
+                it
+        }
+        var end = args.getOrElse(2) { text.length }.toString().toInt().let {
+            if (it < 0)
+                text.length - -it
+            else
+                start + it
+        }
+
+        // clip if outside of bounds
+        if (start < 0)
+            start = 0
+        if (start > text.length)
+            start = text.length
+        if (end < 0)
+            end = 0
+        if (end > text.length)
+            end = text.length
+        if (end < start) {
+            end = start
+        }
+
+        return Message.of(text.substring(start, end))
+    }
+}
+
+interface PadExpander : Formattable {
+    override fun format(args: List<Message>): Message {
+        require(args.size > 2) { "Pad format is {pad|text|length|padtext=' '}"}
+        val length = args[1].toString().toInt()
+        val padText = args.getOrNull(2)?.toString()?.ifEmpty{ " " } ?: " "
+
+        val result = StringBuilder(startText(args[0].toString()))
+        val endText = endText(args[0].toString())
+        var padTextIndexIterator = padText.iterator()
+        while (result.length < length - endText.length) {
+            if (!padTextIndexIterator.hasNext()) {
+                padTextIndexIterator = padText.iterator()
+            }
+            result.append(padTextIndexIterator.next())
+        }
+        result.append(endText)
+
+        return Message.of(result.toString())
+    }
+
+    fun startText(text: String): String
+
+    fun endText(text: String): String
+}
+
+class PadLeftExpander : PadExpander{
+    override fun startText(text: String) = ""
+    override fun endText(text: String) = text
+}
+
+class PadRightExpander : PadExpander {
+    override fun startText(text: String) = text
+    override fun endText(text: String) = ""
 }

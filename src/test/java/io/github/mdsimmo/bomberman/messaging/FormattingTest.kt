@@ -145,4 +145,64 @@ class FormattingTest {
         val a = expand("{mylist|length}", mapOf(Pair("mylist", CollectionWrapper(mylist))))
         assertEquals("3", a.toString())
     }
+
+    @Test
+    fun testStringLength() {
+        val a = expand("{len|Hello}", emptyMap())
+        assertEquals("5", a.toString())
+    }
+
+    @Test
+    fun testPadLeft() {
+        val a = expand("{padl|abc|8|xyz}", emptyMap())
+        assertEquals("xyzxyabc", a.toString())
+    }
+
+    @Test
+    fun testPadRight() {
+        val a = expand("{padr|abc|8|xyz}", emptyMap())
+        assertEquals("abcxyzxy", a.toString())
+    }
+
+    @Test
+    fun testSubStringPosNone() {
+        val a = expand("{sub|icecream|3}", emptyMap())
+        assertEquals("cream", a.toString())
+    }
+
+    @Test
+    fun testSubStringPosPos() {
+        val a = expand("{sub|icecream|3|2}", emptyMap())
+        assertEquals("cr", a.toString())
+    }
+
+    @Test
+    fun testSubStringPosNeg() {
+        val a = expand("{sub|icecream|3|-2}", emptyMap())
+        assertEquals("cre", a.toString())
+    }
+
+    @Test
+    fun testSubStringNegNone() {
+        val a = expand("{sub|icecream|-3}", emptyMap())
+        assertEquals("eam", a.toString())
+    }
+
+    @Test
+    fun testSubStringNegPos() {
+        val a = expand("{sub|icecream|-3|2}", emptyMap())
+        assertEquals("ea", a.toString())
+    }
+
+    @Test
+    fun testSubStringNegNeg() {
+        val a = expand("{sub|icecream|-4|-2}", emptyMap())
+        assertEquals("re", a.toString())
+    }
+
+    @Test
+    fun testRegex() {
+        val a = expand("{regex|The little bird says|i(\\\\w+)|a\$1d}", emptyMap())
+        assertEquals("The lattled bardd says", a.toString())
+    }
 }

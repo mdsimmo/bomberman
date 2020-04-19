@@ -9,7 +9,12 @@ object Expander {
             Pair("switch", Switch()),
             Pair("title", TitleExpander()),
             Pair("raw", RawExpander()),
-            Pair("c", CustomPath())
+            Pair("c", CustomPath()),
+            Pair("regex", RegexExpander()),
+            Pair("len", LengthExpander()),
+            Pair("sub", SubstringExpander()),
+            Pair("padl", PadLeftExpander()),
+            Pair("padr", PadRightExpander())
     )
 
     /**
