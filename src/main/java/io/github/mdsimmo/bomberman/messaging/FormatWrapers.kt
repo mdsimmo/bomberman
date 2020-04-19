@@ -312,7 +312,7 @@ class SubstringExpander : Formattable {
 
 interface PadExpander : Formattable {
     override fun format(args: List<Message>): Message {
-        require(args.size > 2) { "Pad format is {#pad|text|length|padtext=' '}"}
+        require(args.size >= 2) { "Pad format is {#pad|text|length|padtext=' '}"}
         val length = args[1].toString().toInt()
         val padText = args.getOrNull(2)?.toString()?.ifEmpty{ " " } ?: " "
 

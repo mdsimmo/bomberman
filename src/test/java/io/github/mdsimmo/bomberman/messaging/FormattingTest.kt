@@ -243,6 +243,12 @@ class FormattingTest {
     }
 
     @Test
+    fun testPadEmpty() {
+        val a = expand("{#padl|abc|5}", emptyMap())
+        assertEquals("  abc", a.toString())
+    }
+
+    @Test
     fun testPadLeft() {
         val a = expand("{#padl|abc|8|xyz}", emptyMap())
         assertEquals("xyzxyabc", a.toString())

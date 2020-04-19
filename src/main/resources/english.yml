@@ -147,7 +147,7 @@ scores:
 command:
   # How to display command help
   # {command}: The command
-  help: |+
+  help: |-
     {#|format.heading|Help: {command|name}}
     {#|format.map|Description|{command|description}}
     {#|format.map|Usage|{command|usage}}
@@ -530,11 +530,11 @@ command:
     extra: ''
     # What to show when games are present
     # {games}: a list of games
-    games: |+
+    games: |-
       {#|format.heading|Games}
       {#switch|{games|length}|0|{#red|No games present}|{games|foreach|command.gamelist.game|
       }}
-    game: |+
+    game: |-
       {#|format.map|{arg0|name}|{arg0|players}/{arg0|maxplayers} ({#switch|{arg0|running}|true|Running|false|Waiting|{#red|?}})}
   # Messages relating to '/bm game ignore'
   ignore:
@@ -558,7 +558,7 @@ command:
     extra: ''
     # What info to display about a game
     # {game}: the game
-    details: |+
+    details: |-
       {#|format.heading|Info: {game|name}}
       {#|format.map|Status|{#switch|{game|running}|true|Playing|false|Waiting|{#red|?}}}
       {#|format.map|Players|{game|players}}
