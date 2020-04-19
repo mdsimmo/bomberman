@@ -75,7 +75,7 @@ game-play:
   player-killed: '{player} is out!'
   # Informs all players of a game that a player left
   # {player}: the player who left
-  player-left: '{#grey|{#italic|{player} left}}'
+  player-left: '{#gray|{#italic|{player} left}}'
   # The winning text message
   # {player}: the winner
   player-won: '{#title|{#gold|WIN!}||0|60|20}'
@@ -609,7 +609,7 @@ command:
     not-joined: You're not part of a game
     # Player left successfully
     # {player}: the player that left
-    success: '{#grey|{#italic|{player} left game}}'
+    success: '{#gray|{#italic|{player} left game}}'
   # Messages relating to '/bm game protect'
   protect:
     name: protect
