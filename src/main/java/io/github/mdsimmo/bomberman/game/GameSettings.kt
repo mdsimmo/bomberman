@@ -48,8 +48,7 @@ class GameSettings : ConfigurationSerializable {
             Material.PODZOL
     )
     var initialItems = listOf(
-            ItemStack(bombItem, 3),
-            ItemStack(powerItem, 1)
+            ItemStack(bombItem, 3)
     )
     var lives = 3
     var fuse: Long = 40

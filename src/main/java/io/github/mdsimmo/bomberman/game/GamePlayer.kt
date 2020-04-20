@@ -72,7 +72,7 @@ class GamePlayer private constructor(private val player: Player, private val gam
         }
 
         fun bombStrength(game: Game, player: Player): Int {
-            var strength = 0
+            var strength = 1
             for (stack in player.inventory.contents) {
                 if (stack != null && stack.type == game.settings.powerItem) {
                     strength += stack.amount
@@ -89,7 +89,7 @@ class GamePlayer private constructor(private val player: Player, private val gam
                     val player = e.player
                     val save = tempDataFile(player)
                     if (save.exists())
-                        Bukkit.getScheduler().scheduleSyncDelayedTask(plugin, { reset(player) })
+                        Bukkit.getScheduler().scheduleSyncDelayedTask(plugin) { reset(player) }
                 }
             }, plugin)
         }
