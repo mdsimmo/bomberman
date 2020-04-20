@@ -1,5 +1,6 @@
 package io.github.mdsimmo.bomberman.commands
 
+import io.github.mdsimmo.bomberman.messaging.CollectionWrapper
 import io.github.mdsimmo.bomberman.messaging.Message
 import io.github.mdsimmo.bomberman.messaging.Text
 import org.bukkit.command.CommandSender
@@ -30,6 +31,10 @@ abstract class CommandGroup(parent: Cmd?) : Cmd(parent) {
         }
     }
 
+    override fun help(sender: CommandSender) {
+        context(Text.COMMAND_GROUP_HELP).sendTo(sender)
+    }
+
     override fun extra(): Message {
         return Text.COMMAND_GROUP_EXTRA.format()
     }
@@ -58,6 +63,14 @@ abstract class CommandGroup(parent: Cmd?) : Cmd(parent) {
                     .sendTo(sender)
             help(sender)
             true
+        }
+    }
+
+    override fun format(args: List<Message>): Message {
+        if (args.getOrNull(0).toString().equals("children", ignoreCase = true)) {
+            return CollectionWrapper(children).format(args.drop(1))
+        } else {
+            return super.format(args)
         }
     }
 }

@@ -54,6 +54,7 @@ enum class Text(path: String) : Contexted {
     INVALID_MATERIAL("command.invalid-material"),
     INVALID_SCHEMA("command.invalid-schema"),
     INVALID_GAME("command.invalid-game"),
+    COMMAND_GROUP_HELP("command.group.help"),
     COMMAND_GROUP_USAGE("command.group.usage"),
     COMMAND_GROUP_EXAMPLE("command.group.example"),
     COMMAND_GROUP_EXTRA("command.group.extra"),

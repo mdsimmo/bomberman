@@ -62,7 +62,7 @@ abstract class Cmd(protected var parent: Cmd?) : Formattable {
      *
      * @param sender the player to help
      */
-    fun help(sender: CommandSender) {
+    open fun help(sender: CommandSender) {
         context(Text.COMMAND_HELP).sendTo(sender)
     }
 

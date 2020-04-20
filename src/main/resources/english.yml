@@ -184,9 +184,14 @@ command:
     description: Main command for Bomberman
   # Details for commands which group other commands
   group:
-    usage: '/{command|path} TODO'
+    help: |-
+      {#|format.heading|Help: {command|name}}
+      {command|children|foreach|command.group.child|
+      }
+    usage: '/{command|path} <subcommand>'
     example: ''
     extra: ''
+    child: '{#|format.map|{arg0|name}|{#switch|{=|{#len|{arg0|description}}>40}|1|{#sub|{arg0|description}|0|40}...|{arg0|description}}}'
   # details for '/bm arena create'
   arenacreate:
     name: create
@@ -235,8 +240,8 @@ command:
   # Commands relating to '/bm game start'
   start:
     name: start
-    description: Forcibly start a game
-    usage: /{command|path} <game>
+    description: Start a game
+    usage: /{command|path} <game> <count-delay>
     example: ''
     extra: ''
     # Message when a player starts an already started arena
@@ -255,7 +260,7 @@ command:
   # Messages relating to '/bm game force stop'
   stop:
     name: stop
-    description: Forcibly stop a game
+    description: Stop a game
     usage: /{command|path} <game>
     example: ''
     extra: ''
