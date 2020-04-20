@@ -34,7 +34,8 @@ class Explosion private constructor(
             val destroyed: BlockState
     )
 
-    private val taskId: Int = Bukkit.getScheduler().scheduleSyncDelayedTask(Bomberman.instance, this::cleanup, 20)
+    private val taskId: Int = Bukkit.getScheduler().scheduleSyncDelayedTask(Bomberman.instance,
+            { cleanup() }, game.settings.fireTicks.toLong())
     private var noExplode = false
 
     private fun cleanup() {

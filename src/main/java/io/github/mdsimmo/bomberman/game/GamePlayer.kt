@@ -280,14 +280,14 @@ class GamePlayer private constructor(private val player: Player, private val gam
         if (player.health > 1) {
             player.damage(1.0)
             immunity = true
-            player.fireTicks = 22
+            player.fireTicks = game.settings.immunityTicks
             Bukkit.getScheduler().scheduleSyncDelayedTask(plugin, {
                 immunity = false
                 player.fireTicks = 0
                 // Call the player move event to recheck damage required
                 Bukkit.getPluginManager().callEvent(
                         BmPlayerMovedEvent(game, player, player.location, player.location))
-            }, 22) // 22 is slightly longer than 20 ticks a bomb is active for
+            }, game.settings.immunityTicks.toLong()) // 22 is slightly longer than 20 ticks a bomb is active for
         } else {
             BmPlayerKilledIntent.kill(game, player, e.attacker)
         }

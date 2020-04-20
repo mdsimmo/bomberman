@@ -53,7 +53,9 @@ class GameSettings : ConfigurationSerializable {
                         settings.initialItems = it
                     }
             (data["lives"] as? Number)?.toInt()?.also { settings.lives = it }
-            (data["fuse"] as? Number)?.toLong()?.also { settings.fuse = it }
+            (data["fuse-ticks"] as? Number)?.toInt()?.also { settings.fuseTicks = it.coerceAtLeast(0) }
+            (data["fire-ticks"] as? Number)?.toInt()?.also { settings.fireTicks = it.coerceAtLeast(0) }
+            (data["immunity-ticks"] as? Number)?.toInt()?.also { settings.immunityTicks = it.coerceAtLeast(0) }
             return settings
         }
     }
@@ -82,7 +84,9 @@ class GameSettings : ConfigurationSerializable {
             ItemStack(bombItem, 3)
     )
     var lives = 3
-    var fuse: Long = 40
+    var fuseTicks: Int = 40
+    var fireTicks: Int = 20
+    var immunityTicks : Int = 21
 
     override fun serialize(): Map<String, Any> {
         val objs: MutableMap<String, Any> = HashMap()
@@ -94,7 +98,10 @@ class GameSettings : ConfigurationSerializable {
                 .map { it.key.toString() }
         objs["initial-items"] = initialItems
         objs["lives"] = lives
-        objs["tnt-fuse"] = fuse
+        objs["fuse-ticks"] = fuseTicks
+        objs["fire-ticks"] = fireTicks
+        objs["immunity-ticks"] = immunityTicks
+
         return objs
     }
 }

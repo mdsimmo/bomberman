@@ -11,7 +11,7 @@ import org.bukkit.event.HandlerList
  * Called when a player places down a block of TNT (or whatever the game configured as the tnt block). Cancelling the
  * event will remove the tnt from the ground as if the player never clicked
  */
-class BmPlayerPlacedBombEvent(val game: Game, val player: Player, val block: Block, var fuse: Long) : BmEvent(),
+class BmPlayerPlacedBombEvent(val game: Game, val player: Player, val block: Block, var fuse: Int) : BmEvent(),
         Cancellable by BmCancellable() {
 
     val strength: Int = GamePlayer.bombStrength(game, player)

@@ -62,11 +62,11 @@ class Bomb private constructor(
 
         @JvmStatic
         fun spawnBomb(game: Game, player: Player, b: Block): Boolean {
-            val tntPlaceEvent = BmPlayerPlacedBombEvent(game, player, b, game.settings.fuse)
+            val tntPlaceEvent = BmPlayerPlacedBombEvent(game, player, b, game.settings.fuseTicks)
             Bukkit.getPluginManager().callEvent(tntPlaceEvent)
             if (tntPlaceEvent.isCancelled)
                 return false
-            val bomb = Bomb(game, player, b, tntPlaceEvent.strength, tntPlaceEvent.fuse)
+            val bomb = Bomb(game, player, b, tntPlaceEvent.strength, tntPlaceEvent.fuse.toLong())
             Bukkit.getPluginManager().registerEvents(bomb, plugin)
             return true
         }
