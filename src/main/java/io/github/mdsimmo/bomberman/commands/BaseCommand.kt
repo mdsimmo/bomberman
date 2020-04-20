@@ -14,12 +14,6 @@ import org.bukkit.util.StringUtil
 class BaseCommand : CommandGroup(null), TabCompleter, CommandExecutor {
 
     init {
-        val plugin: Bomberman = Bomberman.instance
-
-        // TODO BaseCommand shouldn't self register
-        plugin.getCommand("bomberman")!!.setExecutor(this)
-        plugin.getCommand("bomberman")!!.tabCompleter = this
-
         addChildren(
                 Set(this),
                 GameCreate(this),
@@ -47,7 +41,20 @@ class BaseCommand : CommandGroup(null), TabCompleter, CommandExecutor {
     }
 
     override fun onCommand(sender: CommandSender, command: Command, s: String, args: Array<String>): Boolean {
-        execute(sender, args.toList())
+        // Strip out options
+        val (modifierStrings, arguments) = args.partition {
+            it.startsWith("-")
+        }
+        val modifiers = modifierStrings.map {
+            val separator = it.indexOf('=', 0)
+            if (separator == -1) {
+                Pair(it, "")
+            } else {
+                // +1s are to skip "-" and "="
+                Pair(it.substring(1, separator), it.substring(separator+1))
+            }
+        }.toMap()
+        execute(sender, arguments, modifiers)
         return true
     }
 

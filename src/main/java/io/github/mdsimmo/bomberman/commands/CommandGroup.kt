@@ -47,14 +47,14 @@ abstract class CommandGroup(parent: Cmd?) : Cmd(parent) {
         return context(Text.COMMAND_GROUP_USAGE).format()
     }
 
-    override fun run(sender: CommandSender, args: List<String>): Boolean {
+    override fun run(sender: CommandSender, args: List<String>, modifiers: Map<String, String>): Boolean {
         return if (args.isEmpty()) {
             help(sender)
             true
         } else {
             for (c in children) {
                 if (c.name().toString().equals(args[0], ignoreCase = true)) {
-                    c.execute(sender, args.drop(1))
+                    c.execute(sender, args.drop(1), modifiers)
                     return true
                 }
             }

@@ -17,27 +17,30 @@ class RunStart(parent: Cmd) : GameCommand(parent) {
         return emptyList()
     }
 
-    override fun gameRun(sender: CommandSender, args: List<String>, game: Game): Boolean {
-        if (args.size > 1)
+    override fun gameRun(sender: CommandSender, args: List<String>, modifiers: Map<String, String>, game: Game): Boolean {
+        println(args)
+        println(modifiers)
+        if (args.isNotEmpty()) {
+            println("bad args")
             return false
+        }
         // get the delay
-        val delay = when (val s = args.getOrNull(0)) {
+        val delay = when (val s = modifiers["d"] ?: modifiers["delay"]) {
             null -> 3
             else -> {
                 val i = s.toIntOrNull()
-                when {
-                    i == null -> return false
-                    i < 0 -> {
-                        Text.INVALID_NUMBER.with("number", i).sendTo(sender)
-                        return true
-                    }
-                    else -> i
+                if ((i == null) || (i < 0)) {
+                    Text.INVALID_NUMBER.with("number", s).sendTo(sender)
+                    return true
+                } else {
+                    i
                 }
             }
         }
 
         val e = BmRunStartCountDownIntent.startGame(game, delay)
         if (e.isCancelled) {
+            println("cancelled")
             (e.cancelledReason
                     ?: Text.GAME_START_CANCELLED
                             .with("game", game)
@@ -45,6 +48,7 @@ class RunStart(parent: Cmd) : GameCommand(parent) {
                     )
                     .sendTo(sender)
         } else {
+            println("start success")
             Text.GAME_START_SUCCESS.with("game", game).sendTo(sender)
         }
         return true

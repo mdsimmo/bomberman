@@ -7,15 +7,13 @@ import io.github.mdsimmo.bomberman.game.Game
 import io.github.mdsimmo.bomberman.messaging.Message
 import io.github.mdsimmo.bomberman.messaging.Text
 import org.bukkit.command.CommandSender
-import java.lang.RuntimeException
-import java.util.*
 
 class RunStop(parent: Cmd) : GameCommand(parent) {
     override fun name(): Message {
         return context(Text.STOP_NAME).format()
     }
 
-    override fun gameRun(sender: CommandSender, args: List<String>, game: Game): Boolean {
+    override fun gameRun(sender: CommandSender, args: List<String>, modifiers: Map<String, String>, game: Game): Boolean {
         if (args.isNotEmpty())
             return false
         val e = BmRunStoppedIntent.stopGame(game)

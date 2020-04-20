@@ -16,7 +16,7 @@ class SetSchema(parent: Cmd) : GameCommand(parent) {
         return emptyList()
     }
 
-    override fun gameRun(sender: CommandSender, args: List<String>, game: Game): Boolean {
+    override fun gameRun(sender: CommandSender, args: List<String>, modifiers: Map<String, String>, game: Game): Boolean {
 //        if (args.size != 1) return false
         // FIXME how to get schema from name?
   //      val newSchema = File(args[0])

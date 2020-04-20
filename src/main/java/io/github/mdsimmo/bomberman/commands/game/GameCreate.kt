@@ -38,7 +38,7 @@ class GameCreate(parent: Cmd) : Cmd(parent) {
         }
     }
 
-    override fun run(sender: CommandSender, args: List<String>): Boolean {
+    override fun run(sender: CommandSender, args: List<String>, modifiers: Map<String, String>): Boolean {
         if (args.isEmpty())
             return false
         if (sender !is Player) {

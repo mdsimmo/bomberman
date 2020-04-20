@@ -4,6 +4,7 @@ import io.github.mdsimmo.bomberman.commands.BaseCommand;
 import io.github.mdsimmo.bomberman.game.Game;
 import io.github.mdsimmo.bomberman.game.GamePlayer;
 import io.github.mdsimmo.bomberman.game.GameSettings;
+import org.bukkit.command.PluginCommand;
 import org.bukkit.configuration.serialization.ConfigurationSerialization;
 import org.bukkit.event.Listener;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -35,7 +36,11 @@ public class Bomberman extends JavaPlugin implements Listener {
 
 		getDataFolder().mkdirs();
 		extractResources();
-		new BaseCommand();
+		BaseCommand bmCmd = new BaseCommand();
+		PluginCommand bukkitBmCmd = Objects.requireNonNull(getCommand("bomberman"));
+		bukkitBmCmd.setExecutor(bmCmd);
+		bukkitBmCmd.setTabCompleter(bmCmd);
+
 		Game.loadGames();
 
 		GamePlayer.setupLoginWatcher();

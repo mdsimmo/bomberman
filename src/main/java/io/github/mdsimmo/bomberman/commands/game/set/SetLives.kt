@@ -16,7 +16,7 @@ class SetLives(parent: Cmd) : GameCommand(parent) {
         return emptyList()
     }
 
-    override fun gameRun(sender: CommandSender, args: List<String>, game: Game): Boolean {
+    override fun gameRun(sender: CommandSender, args: List<String>, modifiers: Map<String, String>, game: Game): Boolean {
         if (args.size != 1)
             return false
         val amount = args[0].toIntOrNull()

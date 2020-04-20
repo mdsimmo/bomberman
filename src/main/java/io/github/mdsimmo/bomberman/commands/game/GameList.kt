@@ -15,7 +15,7 @@ class GameList(parent: Cmd?) : Cmd(parent) {
         return emptyList()
     }
 
-    override fun run(sender: CommandSender, args: List<String>): Boolean {
+    override fun run(sender: CommandSender, args: List<String>, modifiers: Map<String, String>): Boolean {
         if (args.isNotEmpty())
             return false
         val games = BmGameListIntent.listGames()
