@@ -1,6 +1,5 @@
 package io.github.mdsimmo.bomberman.commands
 
-import io.github.mdsimmo.bomberman.Bomberman
 import io.github.mdsimmo.bomberman.commands.game.*
 import io.github.mdsimmo.bomberman.commands.game.set.Set
 import io.github.mdsimmo.bomberman.messaging.Message
@@ -24,7 +23,8 @@ class BaseCommand : CommandGroup(null), TabCompleter, CommandExecutor {
                 RunStart(this),
                 RunStop(this),
                 GameList(this),
-                GameReload(this)
+                GameReload(this),
+                DevInfo(this)
         )
     }
 

@@ -20,14 +20,14 @@ import org.bukkit.plugin.Plugin
  */
 class GameProtection private constructor(private val game: Game, private val bounds: Box) : Listener {
 
-    @EventHandler
+    @EventHandler(ignoreCancelled = true, priority = EventPriority.HIGH)
     fun onRunStopped(e: BmRunStoppedIntent) {
         if (e.game == game) {
             HandlerList.unregisterAll(this)
         }
     }
 
-    @EventHandler(priority = EventPriority.LOWEST)
+    @EventHandler(ignoreCancelled = true, priority = EventPriority.LOWEST)
     fun onBlockBurn(e: BlockBurnEvent) {
         if (bounds.contains(e.block.location)) {
             e.isCancelled = true

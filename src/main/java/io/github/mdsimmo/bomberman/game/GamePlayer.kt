@@ -116,9 +116,14 @@ class GamePlayer private constructor(private val player: Player, private val gam
                     }.toTypedArray()
                     .let { player.inventory.contents = it }
             (dataFile["is-flying"] as? Boolean? ?: false).let { player.isFlying = it }
+            println(player.location)
             (dataFile["location"] as? Location?
                     ?: Bukkit.getServer().worlds.first().spawnLocation)
-                    .let { player.teleport(it) }
+                    .let { println("teleporting to $it")
+                        Bukkit.getScheduler().scheduleSyncDelayedTask(plugin) {
+                            println(player.teleport(it))
+                        }}
+            println(player.location)
             player.removeScoreboardTag("bm_player")
             file.delete()
 
@@ -140,6 +145,7 @@ class GamePlayer private constructor(private val player: Player, private val gam
     }
 
     private var immunity = false
+    private var spawnLocation = player.location.clone()
 
     /**
      * Removes the player from the game and removes any hooks to this player. Treats the player like they disconnected
@@ -187,7 +193,7 @@ class GamePlayer private constructor(private val player: Player, private val gam
         e.setHandled()
     }
 
-    @EventHandler(priority = EventPriority.LOWEST)
+    @EventHandler(ignoreCancelled = true, priority = EventPriority.LOWEST)
     fun onPlayerRegen(e: EntityRegainHealthEvent) {
         if (e.entity != player)
             return
@@ -329,7 +335,8 @@ class GamePlayer private constructor(private val player: Player, private val gam
                 @EventHandler(ignoreCancelled = true, priority = EventPriority.HIGH)
                 fun onPlayerRespawn(e: PlayerRespawnEvent) {
                     reset(player)
-                    e.respawnLocation = player.location
+                    println(player.location)
+                    e.respawnLocation = spawnLocation
                     HandlerList.unregisterAll(this)
                 }
             }, plugin)
@@ -356,7 +363,7 @@ class GamePlayer private constructor(private val player: Player, private val gam
         BmPlayerLeaveGameIntent.leave(player)
     }
 
-    @EventHandler(priority = EventPriority.HIGH)
+    @EventHandler(ignoreCancelled = true, priority = EventPriority.HIGH)
     fun onPlayerLogout(e: PlayerQuitEvent) {
         if (e.player === player) {
             BmPlayerLeaveGameIntent.leave(player)

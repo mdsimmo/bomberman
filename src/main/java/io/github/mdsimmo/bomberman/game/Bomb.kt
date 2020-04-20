@@ -27,8 +27,12 @@ class Bomb private constructor(
 
     @EventHandler(ignoreCancelled = true, priority = EventPriority.HIGH)
     fun onExplosion(e: BmExplosionEvent) {
-        if (e.game != game) return
-        if (!noExplode && e.igniting.any { b: BlockPlan -> b.block == block }) { // explode one tick latter
+        if (e.game != game) {
+            return
+        }
+
+        // Allow other bombs to blow this bomb up
+        if (!noExplode && e.igniting.any { b: BlockPlan -> b.block == block }) {
             Bukkit.getScheduler().cancelTask(taskId)
             taskId = Bukkit.getScheduler().scheduleSyncDelayedTask(Bomberman.instance) { explode() }
         }
@@ -37,6 +41,7 @@ class Bomb private constructor(
     @EventHandler(ignoreCancelled = true, priority = EventPriority.HIGH)
     fun onRunStopped(e: BmRunStoppedIntent) {
         if (e.game != game) return
+        HandlerList.unregisterAll(this)
         Bukkit.getScheduler().cancelTask(taskId)
         noExplode = true
     }
