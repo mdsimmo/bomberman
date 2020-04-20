@@ -4,6 +4,7 @@ import io.github.mdsimmo.bomberman.Bomberman
 import io.github.mdsimmo.bomberman.commands.Cmd
 import io.github.mdsimmo.bomberman.messaging.Message
 import org.bukkit.Bukkit
+import org.bukkit.ChatColor
 import org.bukkit.command.CommandSender
 import org.bukkit.event.HandlerList
 
@@ -21,11 +22,11 @@ class DevInfo(parent: Cmd) : Cmd(parent) {
     override fun run(sender: CommandSender, args: List<String>, modifiers: Map<String, String>): Boolean {
         return when (args.getOrNull(0).toString().toLowerCase()) {
             "watch" -> {
-                run(sender, listOf("taskcount"), modifiers)
-                run(sender, listOf("handlercount"), modifiers)
+                run(sender, listOf("nocancelled"), modifiers)
                 run(sender, listOf("handlerwatch"), modifiers)
                 run(sender, listOf("taskwatch"), modifiers)
-                run(sender, listOf("nocancelled"), modifiers)
+                run(sender, listOf("taskcount"), modifiers)
+                run(sender, listOf("handlercount"), modifiers)
                 true
             }
             "handlerlist" -> {
@@ -53,15 +54,24 @@ class DevInfo(parent: Cmd) : Cmd(parent) {
             }
             "handlerwatch" -> {
                 var handlers = HandlerList.getRegisteredListeners(Bomberman.instance).toSet()
+                val startCount = handlers.size
                 Bukkit.getScheduler().scheduleSyncRepeatingTask(Bomberman.instance, {
                     val updated = HandlerList.getRegisteredListeners(Bomberman.instance).toSet()
                     val added = updated.filterNot { handlers.contains(it) }
                     val removed = handlers.filterNot { updated.contains(it) }
                     added.forEach {
-                        sender.sendMessage("Added: " + it.listener)
+                        sender.sendMessage(" ${ChatColor.RED}+${ChatColor.RESET} " + it.listener)
                     }
                     removed.forEach {
-                        sender.sendMessage("Removed: " + it.listener)
+                        sender.sendMessage(" ${ChatColor.GREEN}-${ChatColor.RESET} " + it.listener)
+                    }
+                    if (handlers.size != updated.size) {
+                        val countDiff = updated.size - startCount
+                        sender.sendMessage(if (countDiff > 0) {
+                            ChatColor.RED
+                        } else {
+                            ChatColor.GREEN
+                        }.toString() + " $countDiff handlers")
                     }
                     handlers = updated
                 }, 1, 1)
@@ -83,18 +93,29 @@ class DevInfo(parent: Cmd) : Cmd(parent) {
                 true
             }
             "taskwatch" -> {
-                var tasks =
-                        Bukkit.getScheduler().pendingTasks.filter { it.owner == Bomberman.instance }.toSet()
+                var tasks = Bukkit.getScheduler().pendingTasks
+                        .filter { it.owner == Bomberman.instance }.toSet()
+                val startCount = tasks.size + 1 // allow for itself
                 Bukkit.getScheduler().scheduleSyncRepeatingTask(Bomberman.instance, {
-                    val updated =
-                            Bukkit.getScheduler().pendingTasks.filter { it.owner == Bomberman.instance }.toSet()
+                    val updated = Bukkit.getScheduler().pendingTasks
+                            .filter { it.owner == Bomberman.instance }.toSet()
                     val added = updated.filterNot { tasks.contains(it) }
                     val removed = tasks.filterNot { updated.contains(it) }
                     added.forEach {
-                        sender.sendMessage("Added: " + it.taskId)
+                        sender.sendMessage(  " ${ChatColor.RED}+${ChatColor.RESET} " + it.taskId)
                     }
                     removed.forEach {
-                        sender.sendMessage("Removed: " + it.taskId)
+                        sender.sendMessage(" ${ChatColor.GREEN}-${ChatColor.RESET} " + it.taskId)
+                    }
+
+                    if (tasks.size != updated.size) {
+                        val countDiff = updated.size - startCount
+                        sender.sendMessage(
+                                if (countDiff > 0) {
+                                    ChatColor.RED
+                                } else {
+                                    ChatColor.GREEN
+                                }.toString() + " $countDiff tasks")
                     }
                     tasks = updated
                 }, 1, 1)
