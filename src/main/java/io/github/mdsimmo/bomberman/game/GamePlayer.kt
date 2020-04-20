@@ -85,16 +85,25 @@ class GamePlayer private constructor(private val player: Player, private val gam
         fun setupLoginWatcher() {
             Bukkit.getPluginManager().registerEvents(object: Listener {
                 @EventHandler(ignoreCancelled = true, priority = EventPriority.LOW)
-                fun onPlayerLogin(e: PlayerLoginEvent) {
+                fun onPlayerLogin(e: PlayerJoinEvent) {
+                    val player = e.player
+                    if (player.isDead)
+                        return // cannot reset a dead player (client side glitches out)
+                    val save = tempDataFile(player)
+                    if (save.exists())
+                        reset(player)
+                }
+                @EventHandler(ignoreCancelled = true, priority = EventPriority.LOW)
+                fun onPlayerRespawn(e: PlayerRespawnEvent) {
                     val player = e.player
                     val save = tempDataFile(player)
                     if (save.exists())
-                        Bukkit.getScheduler().scheduleSyncDelayedTask(plugin) { reset(player) }
+                        e.respawnLocation = reset(player)
                 }
             }, plugin)
         }
 
-        private fun reset(player: Player) {
+        private fun reset(player: Player): Location {
             // Give player StuffBack
             val file =  tempDataFile(player)
             val dataFile = YamlConfiguration.loadConfiguration(file)
@@ -116,18 +125,15 @@ class GamePlayer private constructor(private val player: Player, private val gam
                     }.toTypedArray()
                     .let { player.inventory.contents = it }
             (dataFile["is-flying"] as? Boolean? ?: false).let { player.isFlying = it }
-            println(player.location)
-            (dataFile["location"] as? Location?
+            val location = (dataFile["location"] as? Location?
                     ?: Bukkit.getServer().worlds.first().spawnLocation)
-                    .let { println("teleporting to $it")
-                        Bukkit.getScheduler().scheduleSyncDelayedTask(plugin) {
-                            println(player.teleport(it))
-                        }}
-            println(player.location)
+            player.teleport(location)
+
             player.removeScoreboardTag("bm_player")
             file.delete()
 
             removePotionEffects(player)
+            return location
         }
 
         private fun removePotionEffects(player: Player) {
@@ -145,7 +151,6 @@ class GamePlayer private constructor(private val player: Player, private val gam
     }
 
     private var immunity = false
-    private var spawnLocation = player.location.clone()
 
     /**
      * Removes the player from the game and removes any hooks to this player. Treats the player like they disconnected
@@ -323,23 +328,15 @@ class GamePlayer private constructor(private val player: Player, private val gam
         if (e.player !== player)
             return
 
-        // Remove items near the player (stops players duplicating items out at spawn)
+        // Remove items near the player (stops players duplicating items at spawn)
         player.world.getNearbyEntities(player.location, 2.0, 3.0, 2.0)
                 .filterIsInstance<Item>()
                 .forEach{ it.remove() }
 
         // Give player their stuff back
         if (player.isDead) {
-            // Attempting reset player health when dead causes very strange bugs. So wait to respawned
-            Bukkit.getPluginManager().registerEvents(object: Listener {
-                @EventHandler(ignoreCancelled = true, priority = EventPriority.HIGH)
-                fun onPlayerRespawn(e: PlayerRespawnEvent) {
-                    reset(player)
-                    println(player.location)
-                    e.respawnLocation = spawnLocation
-                    HandlerList.unregisterAll(this)
-                }
-            }, plugin)
+            // Attempting reset player health when dead causes very strange bugs.
+            // Just let the loginWatcher handle it
             HandlerList.unregisterAll(this)
         } else {
             resetStuffAndUnregister()
@@ -363,9 +360,9 @@ class GamePlayer private constructor(private val player: Player, private val gam
         BmPlayerLeaveGameIntent.leave(player)
     }
 
-    @EventHandler(ignoreCancelled = true, priority = EventPriority.HIGH)
+    @EventHandler(ignoreCancelled = true, priority = EventPriority.LOW)
     fun onPlayerLogout(e: PlayerQuitEvent) {
-        if (e.player === player) {
+        if (e.player == player) {
             BmPlayerLeaveGameIntent.leave(player)
         }
     }
