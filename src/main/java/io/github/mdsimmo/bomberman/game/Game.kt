@@ -225,7 +225,9 @@ class Game private constructor(val name: String, private var schema: Arena, val 
 
     init {
         tempData = YamlConfiguration.loadConfiguration(tempDataFile(this))
-        spawns = (tempData.getList("spawns") as? List<Location>?)?.toSet() ?: schema.spawns
+        spawns = (tempData.getList("spawns"))
+                ?.filterIsInstance(Location::class.java)?.toSet()
+                ?: schema.spawns
         writeData("spawns", spawns.toList())
 
         // If game was not shut down cleanly (ie. server died), rebuild the arena
