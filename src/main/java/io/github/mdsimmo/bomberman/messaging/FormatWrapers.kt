@@ -281,7 +281,6 @@ class RegexExpander : Formattable {
         val text = args[0].toString()
         val pattern = args[1].toString()
         val replace = args[2].toString()
-        println(pattern)
         return Message.of(text.replace(Regex(pattern), replace))
     }
 }
