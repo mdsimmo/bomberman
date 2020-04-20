@@ -48,6 +48,7 @@ class Bomb private constructor(
             return
         }
         noExplode = true
+
         Explosion.spawnExplosion(game, block.location, player, strength)
     }
 
