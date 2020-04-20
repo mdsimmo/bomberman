@@ -13,16 +13,47 @@ class GameSettings : ConfigurationSerializable {
         @JvmStatic
         fun deserialize(data: Map<String?, Any?>): GameSettings {
             val settings = GameSettings()
-            settings.bombItem = Material.matchMaterial(data["bomb"] as String)!!
-            settings.powerItem = Material.matchMaterial(data["power"] as String)!!
-            settings.blockLoot = (data["block-loot"] as Map<String, Map<ItemStack, Number>>)
-                    .mapKeys { (matName, _) -> Material.matchMaterial(matName)!! }
-            settings.destructable = (data["destructable"] as List<String>)
-                    .map { name: String -> Material.matchMaterial(name)!! }
-                    .toSet()
-            settings.initialItems = data["initial-items"] as List<ItemStack>
-            settings.lives = (data["lives"] as Number).toInt()
-            settings.fuse = (data["fuse"] as Number).toLong()
+            (data["bomb"] as? String?)?.let { Material.matchMaterial(it) } ?.also { settings.bombItem = it }
+            (data["power"] as? String?)?.let { Material.matchMaterial(it)} ?.also { settings.powerItem = it }
+            (data["block-loot"] as? Map<*, *>?)
+                    ?.mapNotNull { (key, value) ->
+                        val material = (key as? String)?.let { Material.matchMaterial(key) }
+                        if (material == null) {
+                            null
+                        } else {
+                            val map = (value as? Map<*, *>)?.mapNotNull {(k, v) ->
+                                val itemStack = k as? ItemStack
+                                val number = v as? Number
+                                if (itemStack == null || number == null)
+                                    null
+                                else
+                                    Pair(itemStack, number)
+                            }?.toMap()
+                            if (map == null) {
+                                null
+                            } else {
+                                Pair(material, map)
+                            }
+                        }
+                    }?.toMap()
+                    ?.also {
+                        settings.blockLoot = it
+                    }
+            (data["destructable"] as? List<*>)
+                    ?.filterIsInstance<String>()
+                    ?.mapNotNull {
+                        Material.matchMaterial(it)
+                    }?.toSet()
+                    ?.also {
+                        settings.destructable = it
+                    }
+            (data["initial-items"] as? List<*>)
+                    ?.filterIsInstance<ItemStack>()
+                    ?.also {
+                        settings.initialItems = it
+                    }
+            (data["lives"] as? Number)?.toInt()?.also { settings.lives = it }
+            (data["fuse"] as? Number)?.toLong()?.also { settings.fuse = it }
             return settings
         }
     }
