@@ -18,10 +18,11 @@ class Bomb private constructor(
         private val game: Game,
         private val player: Player,
         private val block: Block,
-        private val strength: Int)
+        private val strength: Int,
+        fuse: Long)
     : Listener {
 
-    private var taskId: Int = Bukkit.getScheduler().scheduleSyncDelayedTask(plugin, { explode() }, 40)
+    private var taskId: Int = Bukkit.getScheduler().scheduleSyncDelayedTask(plugin, { explode() }, fuse)
     private var noExplode = false
 
     @EventHandler(ignoreCancelled = true, priority = EventPriority.HIGH)
@@ -54,11 +55,11 @@ class Bomb private constructor(
 
         @JvmStatic
         fun spawnBomb(game: Game, player: Player, b: Block): Boolean {
-            val tntPlaceEvent = BmPlayerPlacedBombEvent(game, player, b)
+            val tntPlaceEvent = BmPlayerPlacedBombEvent(game, player, b, game.settings.fuse)
             Bukkit.getPluginManager().callEvent(tntPlaceEvent)
             if (tntPlaceEvent.isCancelled)
                 return false
-            val bomb = Bomb(game, player, b, tntPlaceEvent.strength)
+            val bomb = Bomb(game, player, b, tntPlaceEvent.strength, tntPlaceEvent.fuse)
             Bukkit.getPluginManager().registerEvents(bomb, plugin)
             return true
         }

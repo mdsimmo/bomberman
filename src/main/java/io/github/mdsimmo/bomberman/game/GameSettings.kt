@@ -22,6 +22,7 @@ class GameSettings : ConfigurationSerializable {
                     .toSet()
             settings.initialItems = data["initial-items"] as List<ItemStack>
             settings.lives = (data["lives"] as Number).toInt()
+            settings.fuse = (data["fuse"] as Number).toLong()
             return settings
         }
     }
@@ -40,13 +41,18 @@ class GameSettings : ConfigurationSerializable {
     )
     var destructable = setOf(
             Material.TNT,
-            Material.SNOW_BLOCK
+            Material.SNOW_BLOCK,
+            Material.DIRT,
+            Material.GRASS_BLOCK,
+            Material.COARSE_DIRT,
+            Material.PODZOL
     )
     var initialItems = listOf(
             ItemStack(bombItem, 3),
             ItemStack(powerItem, 1)
     )
     var lives = 3
+    var fuse: Long = 40
 
     override fun serialize(): Map<String, Any> {
         val objs: MutableMap<String, Any> = HashMap()
@@ -58,6 +64,7 @@ class GameSettings : ConfigurationSerializable {
                 .map { it.key.toString() }
         objs["initial-items"] = initialItems
         objs["lives"] = lives
+        objs["tnt-fuse"] = fuse
         return objs
     }
 }
