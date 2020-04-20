@@ -465,8 +465,9 @@ class Game private constructor(val name: String, private var schema: Arena, val 
             return
         BmGameTerminatedIntent.terminateGame(this)
         removeCages(true)
+        tempDataFile(this).delete()
         if (e.isDeletingSave)
-            tempDataFile(this).delete()
+            File(Bomberman.instance.settings.gameSaves(), "${name}.yml").delete()
         e.setHandled()
     }
 
