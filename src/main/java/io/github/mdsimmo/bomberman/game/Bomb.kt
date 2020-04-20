@@ -41,13 +41,14 @@ class Bomb private constructor(
         noExplode = true
     }
 
-    private fun explode() { // The ran flag prevents the tnt from exploding itself twice
-        if (noExplode) return
-        noExplode = true
-        if (Explosion.spawnExplosion(game, block.location, player, strength)) {
-            HandlerList.unregisterAll(this)
+    private fun explode() {
+        HandlerList.unregisterAll(this)
+        // The ran flag prevents the tnt from exploding itself twice
+        if (noExplode) {
+            return
         }
-        // TODO what should happen to unexploded bomb?
+        noExplode = true
+        Explosion.spawnExplosion(game, block.location, player, strength)
     }
 
     companion object {

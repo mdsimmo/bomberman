@@ -38,8 +38,10 @@ class Explosion private constructor(
     private var noExplode = false
 
     private fun cleanup() {
-        if (noExplode)
+        if (noExplode) {
+            HandlerList.unregisterAll(this)
             return
+        }
 
         // Replace fire with air.
         // Note: Check if fire first because a player may have placed a block onto the space.
@@ -106,7 +108,8 @@ class Explosion private constructor(
         if (e.game != game) return
 
         Bukkit.getScheduler().cancelTask(taskId)
-        noExplode = true // need noExplode because sometimes events don't cancel?!?!
+        HandlerList.unregisterAll(this)
+        noExplode = true // need noExplode because sometimes tasks don't cancel?!?!
     }
 
     companion object {

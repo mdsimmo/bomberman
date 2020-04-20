@@ -26,7 +26,7 @@ class CommandGroupTest {
         group.addChildren(child)
         `when`(child.name()).thenReturn(Message.of("Child"))
         `when`(child.permission()).thenReturn(Cmd.Permission.GAME_DICTATE)
-        `when`(child.run(any(), eq(listOf("hello", "world")))).thenReturn(true)
+        `when`(child.run(any(), eq(listOf("hello", "world")), eq(emptyMap()))).thenReturn(true)
 
         val child2 = mock(Cmd::class.java, "child2")
         group.addChildren(child2)
@@ -36,9 +36,9 @@ class CommandGroupTest {
         val sender = mock(CommandSender::class.java, "sender")
         `when`(sender.hasPermission(anyString())).thenReturn(true)
 
-        group.execute(sender, listOf("chIlD", "hello", "world"))
+        group.execute(sender, listOf("chIlD", "hello", "world"), emptyMap())
 
-        verify(child).run(sender, listOf("hello", "world"))
+        verify(child).run(sender, listOf("hello", "world"), emptyMap())
 
         // child2 should not be touched
         verify(child2, atMostOnce()).name()
