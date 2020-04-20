@@ -64,6 +64,23 @@ class CollectionWrapper<T : Formattable>(private val list: Collection<T>) : Form
                         .ifEmpty { listOf(Message.empty) }
                         .reduce { a, b -> a.append(separator).append(b) }
             }
+            "sort" -> {
+                val mapper = args.getOrNull(1)?.toString()
+                val sorted = if (mapper == null) {
+                    list.sortedBy {
+                        it.toString()
+                    }
+                } else {
+                    list.withIndex().sortedBy {
+                        Text.getSection(mapper)
+                                .with("arg0", it.value)
+                                .with("arg1", Message.of(it.index))
+                                .format()
+                                .toString()
+                    }.map { it.value }
+                }
+                return CollectionWrapper(sorted).format(args.drop(2))
+            }
             "length" -> Message.of(list.size)
             else -> throw IllegalArgumentException("Unknown list option: " + args[0])
         }

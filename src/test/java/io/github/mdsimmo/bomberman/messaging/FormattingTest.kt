@@ -224,9 +224,18 @@ class FormattingTest {
     fun testListForeach() {
         val mylist = listOf(of("Hello"), of("Small"), of("World"))
         val a = expand(
-                "{mylist|foreach|format.foreach|-}",
+                "{mylist|foreach|dev.indexed-list|-}",
                 mapOf(Pair("mylist", CollectionWrapper(mylist))))
         assertEquals("(0: Hello)-(1: Small)-(2: World)", a.toString())
+    }
+
+    @Test
+    fun testListSorted() {
+        val mylist = listOf(of("One"), of("Two"), of("Three"))
+        val a = expand(
+                "{mylist|sort|dev.second-char|foreach|dev.indexed-list|, }",
+                mapOf(Pair("mylist", CollectionWrapper(mylist))))
+        assertEquals("(0: Three), (1: One), (2: Two)", a.toString())
     }
 
     @Test

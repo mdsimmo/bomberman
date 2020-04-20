@@ -186,11 +186,12 @@ command:
   group:
     help: |-
       {#|format.heading|Help: {command|name}}
-      {command|children|foreach|command.group.child|
+      {command|children|sort|command.group.sort|foreach|command.group.child|
       }
     usage: '/{command|path} <subcommand>'
     example: ''
     extra: ''
+    sort: '{arg0|name}'
     child: '{#|format.map|{arg0|name}|{#switch|{=|{#len|{arg0|description}}>40}|1|{#sub|{arg0|description}|0|40}...|{arg0|description}}}'
   # details for '/bm arena create'
   arenacreate:
@@ -537,8 +538,9 @@ command:
     # {games}: a list of games
     games: |-
       {#|format.heading|Games}
-      {#switch|{games|length}|0|{#red|No games present}|{games|foreach|command.gamelist.game|
+      {#switch|{games|length}|0|{#red|No games present}|{games|sort|command.gamelist.sort|foreach|command.gamelist.game|
       }}
+    sort: {arg0|name}
     game: |-
       {#|format.map|{arg0|name}|{arg0|players}/{arg0|maxplayers} ({#switch|{arg0|running}|true|Running|false|Waiting|{#red|?}})}
   # Messages relating to '/bm game ignore'
@@ -566,8 +568,7 @@ command:
     details: |-
       {#|format.heading|Info: {game|name}}
       {#|format.map|Status|{#switch|{game|running}|true|Playing|false|Waiting|{#red|?}}}
-      {#|format.map|Players|{game|players}}
-      {#|format.map|Max players|{game|maxplayers}}
+      {#|format.map|Players|{game|players}/{game|maxplayers}}
       {#|format.map|Init lives|{game|lives}}
       {#|format.map|Init bombs|{game|bombs}}
       {#|format.map|Init power|{game|power}}
@@ -786,3 +787,7 @@ command:
     usage: /{command|path} <player> [health]
     example: ''
     extra: "This command is here due to a bug where bomberman doesn't reset a players health to the normal 20. If this happens to you, just run this command."
+# For unit testing
+dev:
+  indexed-list: '({arg1}: {arg0})'
+  second-char: '{#sub|{arg0}|1}'

@@ -134,7 +134,6 @@ class GameCreate(parent: Cmd) : Cmd(parent) {
         return context(Text.CREATE_USAGE).format()
     }
 }
-
 private val bm = Bomberman.instance
 private val we = WorldEdit.getInstance()
 private fun root(plugin: String): File? {
