@@ -14,6 +14,7 @@ class BaseCommand : CommandGroup(null), TabCompleter, CommandExecutor {
 
     init {
         addChildren(
+                //DevInfo(this),
                 Set(this),
                 GameCreate(this),
                 GameInfo(this),
@@ -23,8 +24,7 @@ class BaseCommand : CommandGroup(null), TabCompleter, CommandExecutor {
                 RunStart(this),
                 RunStop(this),
                 GameList(this),
-                GameReload(this),
-                DevInfo(this)
+                GameReload(this)
         )
     }
 
