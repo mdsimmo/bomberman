@@ -50,13 +50,16 @@ class GamePlayer private constructor(private val player: Player, private val gam
                     .forEach{ it.remove() }
 
             // Initialise the player for the game
-            player.teleport(start.clone().add(0.5, 0.01, 0.5))
-            player.gameMode = GameMode.SURVIVAL
+            val maxHealth = player.getAttribute(Attribute.GENERIC_MAX_HEALTH)!!
+            maxHealth.baseValue = game.settings.lives.toDouble()
+            maxHealth.modifiers.forEach { maxHealth.removeModifier(it) }
             player.health = game.settings.lives.toDouble()
-            player.getAttribute(Attribute.GENERIC_MAX_HEALTH)!!.baseValue = game.settings.lives.toDouble()
             Bukkit.getScheduler().scheduleSyncDelayedTask(plugin) {
+                // delayed because it seems to reduce client side death screen glitch
                 player.healthScale = game.settings.lives * 2.toDouble()
             }
+            player.teleport(start.clone().add(0.5, 0.01, 0.5))
+            player.gameMode = GameMode.SURVIVAL
             player.exhaustion = 0f
             player.foodLevel = 100000 // just a big number
             player.isFlying = false
@@ -114,9 +117,9 @@ class GamePlayer private constructor(private val player: Player, private val gam
                 null
             }} ?: GameMode.CREATIVE).let { player.gameMode = it }
             (dataFile["health-scale"] as? Number? ?: 20).let { player.healthScale = it.toDouble() }
-            player.getAttribute(Attribute.GENERIC_MAX_HEALTH)?.let {
-                it.baseValue = (dataFile["health-max"] as? Number? ?: 20.0).toDouble()
-            }
+            val maxHealth = player.getAttribute(Attribute.GENERIC_MAX_HEALTH)
+            maxHealth?.baseValue = (dataFile["health-max"] as? Number? ?: 20.0).toDouble()
+            maxHealth?.modifiers?.forEach { maxHealth.removeModifier(it) }
             (dataFile["health"] as? Number? ?: 20).let { player.health = it.toDouble() }
             (dataFile["food-level"] as? Number? ?: 20).let { player.foodLevel = it.toInt() }
             (dataFile["inventory"] as? List<Any?> ?: emptyList())
