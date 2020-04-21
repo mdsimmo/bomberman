@@ -22,6 +22,17 @@ class BmSetting private constructor() {
             (data["language"] as? String?)?.let { settings.language = it }
             return settings
         }
+
+        @JvmStatic
+        fun save(data: FileConfiguration, settings: BmSetting) {
+            data["schematics-save.builtin"] = settings.schematicsBuiltin
+            data["schematics-save.custom"] = settings.schematicsCustom
+            data["game-saves"] = settings.gameSaves
+            data["temp-data.game"] = settings.tempGameData
+            data["temp-data.player"] = settings.tempPlayerData
+            data["default-game-settings"] = settings.defaultGameSettings
+            data["language"] = settings.language
+        }
     }
 
     private var schematicsBuiltin: String = "schematics/builtin"

@@ -5,6 +5,7 @@ import io.github.mdsimmo.bomberman.game.Game;
 import io.github.mdsimmo.bomberman.game.GamePlayer;
 import io.github.mdsimmo.bomberman.game.GameSettings;
 import org.bukkit.command.PluginCommand;
+import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.serialization.ConfigurationSerialization;
 import org.bukkit.event.Listener;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -33,7 +34,10 @@ public class Bomberman extends JavaPlugin implements Listener {
 		ConfigurationSerialization.registerClass(GameSettings.class);
 		ConfigurationSerialization.registerClass(Game.BuildFlags.class);
 
-		settings = BmSetting.load(getConfig());
+		FileConfiguration config = getConfig();
+		settings = BmSetting.load(config);
+		BmSetting.save(config, settings);
+		saveConfig();
 
 		getDataFolder().mkdirs();
 		extractResources();
