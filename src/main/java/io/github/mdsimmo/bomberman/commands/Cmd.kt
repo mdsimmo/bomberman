@@ -33,6 +33,10 @@ abstract class Cmd(protected var parent: Cmd?) : Formattable {
      */
     abstract fun options(sender: CommandSender, args: List<String>): List<String>
 
+    open fun flags(args: List<String>, flags: Map<String, String>): Set<String> = emptySet()
+
+    open fun flagOptions(flag: String, args: List<String>, flags: Map<String, String>): Set<String> = emptySet()
+
     /**
      * Execute the command
      *

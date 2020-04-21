@@ -8,7 +8,6 @@ import org.bukkit.command.Command
 import org.bukkit.command.CommandExecutor
 import org.bukkit.command.CommandSender
 import org.bukkit.command.TabCompleter
-import org.bukkit.util.StringUtil
 
 class BaseCommand : CommandGroup(null), TabCompleter, CommandExecutor {
 
@@ -41,6 +40,30 @@ class BaseCommand : CommandGroup(null), TabCompleter, CommandExecutor {
     }
 
     override fun onCommand(sender: CommandSender, command: Command, s: String, args: Array<String>): Boolean {
+        val (arguments, flags) = seperateFlags(args)
+        execute(sender, arguments, flags)
+        return true
+    }
+
+    override fun onTabComplete(sender: CommandSender, command: Command, alias: String, args: Array<String>): List<String> {
+        val (arguments, flags) = seperateFlags(args)
+        val currentlyTyping = args.last() // Will always have one.
+        val allOptions = if (currentlyTyping.startsWith("-")) {
+            val splitIndex = currentlyTyping.indexOf('=')
+            if (splitIndex == -1) {
+                flags(arguments, flags).map { "-$it" }
+            } else {
+                val key = currentlyTyping.substring(1, splitIndex)
+                flagOptions(key, arguments, flags)
+                        .map { "-$key=$it" }
+            }
+        } else {
+            options(sender, arguments)
+        }
+        return allOptions.toList()
+    }
+
+    private fun seperateFlags(args: Array<String>) : Pair<List<String>, Map<String, String>> {
         // Strip out options
         val (flagStrings, arguments) = args.partition {
             it.startsWith("-")
@@ -54,16 +77,6 @@ class BaseCommand : CommandGroup(null), TabCompleter, CommandExecutor {
                 Pair(it.substring(1, separator), it.substring(separator+1))
             }
         }.toMap()
-        execute(sender, arguments, flags)
-        return true
-    }
-
-    override fun onTabComplete(sender: CommandSender, command: Command, typing: String, args: Array<String>): List<String> {
-        val arguments = args.asList()
-        val allOptions = options(sender, arguments).toMutableList()
-        val currentlyCompleting = args.last()
-        return allOptions.filter {
-            StringUtil.startsWithIgnoreCase(it, currentlyCompleting)
-        }
+        return Pair(arguments, flags)
     }
 }

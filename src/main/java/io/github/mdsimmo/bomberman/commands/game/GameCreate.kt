@@ -67,16 +67,27 @@ class GameCreate(parent: Cmd) : Cmd(parent) {
 
     override fun options(sender: CommandSender, args: List<String>): List<String> {
         return when (args.size) {
-
             1 -> BmGameListIntent.listGames().map(Game::name).toList()
-            2 -> listOf("WorldEdit", "Bomberman", "wand")
-            3 -> {
-                val root = root(args[1]) ?: return emptyList()
-                val allFiles = allFiles(root)
-                allFiles.map { it.path.substring(root.path.length + 1) }
-            }
-            4 -> listOf("skipAir")
             else -> emptyList()
+        }
+    }
+
+    override fun flags(args: List<String>, flags: Map<String, String>): Set<String> {
+        return setOf(F_PLUGIN, F_SCHEMA, F_SKIP_AIR, F_VOID_TO_AIR)
+    }
+
+    override fun flagOptions(flag: String, args: List<String>, flags: Map<String, String>): Set<String> {
+        return when (flag) {
+            F_PLUGIN -> setOf("we", "bm")
+            F_SCHEMA -> {
+                val plugin = flags[F_PLUGIN] ?: "we"
+                root(plugin)?.let {
+                    allFiles(it)
+                            .map { it.path }
+                            .toSet()
+                } ?: emptySet()
+            }
+            else -> emptySet()
         }
     }
 

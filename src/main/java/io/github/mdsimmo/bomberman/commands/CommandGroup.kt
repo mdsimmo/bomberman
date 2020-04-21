@@ -18,16 +18,33 @@ abstract class CommandGroup(parent: Cmd?) : Cmd(parent) {
         this.children.addAll(listOf(*children))
     }
 
-    override fun options(sender: CommandSender, args: List<String>): List<String> {
+    private fun child(args: List<String>): Cmd? {
         return when (args.size) {
-            in 0..1 -> children.map {
-                it.name().toString()
-            }
+            in 0..1 -> null
             else -> {
                 children.firstOrNull { c -> c.name().toString().equals(args.first(), ignoreCase = true) }
-                        ?.options(sender, args.drop(1))
-                        ?: emptyList()
             }
+        }
+    }
+
+    override fun options(sender: CommandSender, args: List<String>): List<String> {
+        return when (val c = child(args)) {
+            null -> children.map { it.name().toString() }
+            else -> c.options(sender, args.drop(1))
+        }
+    }
+
+    override fun flags(args: List<String>, flags: Map<String, String>): Set<String> {
+        return when (val c = child(args)) {
+            null -> emptySet()
+            else -> c.flags(args.drop(1), flags)
+        }
+    }
+
+    override fun flagOptions(flag: String, args: List<String>, flags: Map<String, String>): Set<String> {
+        return when (val c = child(args)) {
+            null -> emptySet()
+            else -> c.flagOptions(flag, args.drop(1), flags)
         }
     }
 
