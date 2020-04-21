@@ -16,6 +16,7 @@ class GameSettings : ConfigurationSerializable {
             val settings = GameSettings()
             (data["bomb"] as? String?)?.let { Material.matchMaterial(it) } ?.also { settings.bombItem = it }
             (data["power"] as? String?)?.let { Material.matchMaterial(it)} ?.also { settings.powerItem = it }
+            (data["fire"] as? String?)?.let { Material.matchMaterial(it)} ?.also { settings.fireType = it }
             (data["loot-table"] as? List<*>?)
                     ?.filterIsInstance<Map<*, *>>()
                     ?.flatMap { section ->
@@ -44,14 +45,11 @@ class GameSettings : ConfigurationSerializable {
                     ?.also {
                         settings.blockLoot = it
                     }
-            (data["destructable"] as? List<*>)
-                    ?.filterIsInstance<String>()
-                    ?.mapNotNull {
-                        Material.matchMaterial(it)
-                    }?.toSet()
-                    ?.also {
-                        settings.destructable = it
-                    }
+            readMaterials(data["destructible"])?.also { settings.destructible = it }
+            readMaterials(data["indestructible"])?.also { settings.indestructible = it }
+            readMaterials(data["pass-keep"])?.also { settings.passKeep = it }
+            readMaterials(data["pass-revert"])?.also { settings.passRevert = it }
+            readMaterials(data["pass-destroy"])?.also { settings.passDestroy = it }
             (data["initial-items"] as? List<*>)
                     ?.filterIsInstance<ItemStack>()
                     ?.also {
@@ -63,10 +61,19 @@ class GameSettings : ConfigurationSerializable {
             (data["immunity-ticks"] as? Number)?.toInt()?.also { settings.immunityTicks = it.coerceAtLeast(0) }
             return settings
         }
+
+        private fun readMaterials(data: Any?): Set<Material>? {
+            return (data as? List<*>)
+                    ?.filterIsInstance<String>()
+                    ?.mapNotNull {
+                        Material.matchMaterial(it)
+                    }?.toSet()
+        }
     }
 
     var bombItem: Material = Material.TNT
     var powerItem: Material = Material.GUNPOWDER
+    var fireType: Material = Material.FIRE
     var blockLoot: Map<Material, Map<ItemStack, Number>> =
             mapOf(
                 Pair(ItemStack(Material.TNT, 1), 4.0),
@@ -83,13 +90,17 @@ class GameSettings : ConfigurationSerializable {
                     Pair(Material.GRAVEL, it)
                 )
             }
-    var destructable = setOf(
+    var destructible = setOf(
             Material.TNT,
             Material.SNOW_BLOCK,
             Material.DIRT,
             Material.SAND,
             Material.GRAVEL
     )
+    var indestructible = setOf<Material>()
+    var passKeep = setOf<Material>()
+    var passRevert = setOf<Material>()
+    var passDestroy = setOf<Material>()
     var initialItems = listOf(
             ItemStack(bombItem, 3)
     )
@@ -102,6 +113,7 @@ class GameSettings : ConfigurationSerializable {
         val objs: MutableMap<String, Any> = HashMap()
         objs["bomb"] = bombItem.key.toString()
         objs["power"] = powerItem.key.toString()
+        objs["fire"] = fireType.key.toString()
         // condense duplicate loot values by swapping key and values
         val lootBlock = mutableMapOf<Map<ItemStack, Number>, MutableSet<Material>>()
         blockLoot.forEach { (mat, loot) ->
@@ -117,7 +129,15 @@ class GameSettings : ConfigurationSerializable {
                             )
                         })
                 )}
-        objs["destructable"] = destructable
+        objs["destructible"] = destructible
+                .map { it.key.toString() }
+        objs["indestructible"] = indestructible
+                .map { it.key.toString() }
+        objs["pass-keep"] = passKeep
+                .map { it.key.toString() }
+        objs["pass-revert"] = passRevert
+                .map { it.key.toString() }
+        objs["pass-destroy"] = passDestroy
                 .map { it.key.toString() }
         objs["initial-items"] = initialItems
         objs["lives"] = lives

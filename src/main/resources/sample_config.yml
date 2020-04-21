@@ -43,6 +43,8 @@ default-game-settings:
   power: minecraft:gunpowder
   # The block type which explodes
   bomb: minecraft:tnt
+  # The block type used for flames from tnt
+  fire: minecraft:fire
 
   # What each player spawns in the game with
   initial-items:
@@ -129,12 +131,45 @@ default-game-settings:
       weight: 10.0
 
 
-  # Blocks which tnt can destroy.
-  # All non-solid blocks are destructable
-  # Removing tnt means tnt explosions will not chain together
-  destructable:
+  # Bomberman has five types of blocks:
+  #  1. indestructible: tnt will not effect the block
+  #  2. destructible: tnt will destroy the block, but progress no further
+  #  3. pass-keep: tnt will pass through the block without changing the blocks state
+  #  4. pass-revert: tnt will pass through the block, ignite the block, then revert to its original state
+  #  5. pass-destroy: tnt will pass through the block, ignite the block, then change into air
+  #
+  # Unless set otherwise:
+  #  * All solid blocks are indestructible
+  #  * All non-solid blocks are pass-destroy.
+  # A solid block is defined as a block that has any hitbox that blocks the players movement
+  #
+  # All types will drop loot when destroyed if they are assigned in loot-table
+  #
+  # The assigned tnt fire type and air types are always pass-destroy and cannot be altered
+
+  # Blocks tnt will explode the first block of
+  # Generally, blocks that are in the loot-table should be destructible
+  # Removing tnt from destructible means tnt explosions will not chain together
+  destructible:
   - minecraft:tnt
   - minecraft:snow_block
   - minecraft:dirt
   - minecraft:sand
   - minecraft:gravel
+
+  # Blocks tnt cannot touch.
+  # All solid blocks included by default
+  indestructible: []
+
+  # Blocks tnt will pass through, but not alter.
+  # You might like to put your sensitive redstone, tripwires, etc here
+  pass-keep: []
+
+  # Blocks tnt wll pass though, temporarily ignite, and then revert.
+  # Signs and hanging things are probably good to put here
+  pass-revert: []
+
+  # Blocks tnt will pass through, ignite, and destroy
+  # All non-solid blocks included by default
+  # Will always include air types and the tnt fire type
+  pass-destroy: []

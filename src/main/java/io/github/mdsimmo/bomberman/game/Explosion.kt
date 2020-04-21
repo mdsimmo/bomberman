@@ -123,9 +123,11 @@ class Explosion private constructor(
                     .map { b: Block ->
                         val prior = b.state
                         val ignited = b.state
-                        ignited.type = Material.FIRE
+                        if (!game.settings.passKeep.contains(b.type))
+                            ignited.type = game.settings.fireType
                         val converted = b.state
-                        converted.type = Material.AIR
+                        if (!game.settings.passKeep.contains(b.type) && !game.settings.passRevert.contains(b.type))
+                            converted.type = Material.AIR
                         BlockPlan(b, prior, ignited, converted)
                     }
                     .toSet()
@@ -206,15 +208,24 @@ class Explosion private constructor(
             val b = l.block
 
             // Pass through air/weak things
-            if (b.isPassable) {
+            if (isPassing(b, game.settings)) {
                 blocks.add(b)
                 return false
             }
 
-            // If hit dirt, blow up one block and then stop
-            if (game.settings.destructable.contains(b.type))
+            // If hit destructible, blow up one block and then stop
+            if (game.settings.destructible.contains(b.type))
                 blocks.add(b)
             return true
+        }
+
+        private fun isPassing(b: Block, settings: GameSettings): Boolean {
+            val t = b.type
+            return t == Material.AIR || t == settings.fireType
+                    || (b.isPassable && !(settings.indestructible.contains(t) || settings.destructible.contains(t)))
+                    || settings.passDestroy.contains(t)
+                    || settings.passKeep.contains(t)
+                    || settings.passRevert.contains(t)
         }
 
         @JvmStatic
