@@ -3,6 +3,7 @@ package io.github.mdsimmo.bomberman.game
 import io.github.mdsimmo.bomberman.utils.BukkitUtils
 import io.github.mdsimmo.bomberman.utils.RefectAccess
 import org.bukkit.Material
+import org.bukkit.configuration.file.YamlConfiguration
 import org.bukkit.configuration.serialization.ConfigurationSerializable
 import org.bukkit.inventory.ItemStack
 import org.bukkit.potion.PotionType
@@ -103,5 +104,17 @@ class GameSettings : ConfigurationSerializable {
         objs["immunity-ticks"] = immunityTicks
 
         return objs
+    }
+
+    fun clone(): GameSettings {
+        // I'm too lazy to specify all the parameters again. So just serialize and deserialize
+        val configOut = YamlConfiguration()
+        configOut["data"] = this
+
+        val string = configOut.saveToString()
+
+        val configIn = YamlConfiguration()
+        configIn.loadFromString(string)
+        return configIn["data"] as GameSettings
     }
 }

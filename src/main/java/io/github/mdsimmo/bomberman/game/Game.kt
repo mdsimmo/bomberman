@@ -39,7 +39,7 @@ import java.io.FileInputStream
 import java.io.FileOutputStream
 import java.lang.ref.WeakReference
 
-class Game private constructor(val name: String, private var schema: Arena, val settings: GameSettings = GameSettings())
+class Game private constructor(val name: String, private var schema: Arena, val settings: GameSettings = plugin.settings.defaultGameSettings())
     : Formattable, Listener {
 
     companion object {
@@ -63,7 +63,7 @@ class Game private constructor(val name: String, private var schema: Arena, val 
             val name = data["name"] as? String ?: return null
             val schema = data["schema"] as? String ?: return null
             val loc = data["origin"] as? Location ?: return null
-            val settings = data["settings"] as? GameSettings ?: GameSettings()
+            val settings = data["settings"] as? GameSettings ?: plugin.settings.defaultGameSettings()
             val flags = data["build-flags"] as? BuildFlags ?: BuildFlags()
             return Game(name, Arena(File(schema), loc, flags), settings)
         }

@@ -87,4 +87,8 @@ class BmSetting private constructor() {
     fun language(): File {
         return File(Bomberman.instance.dataFolder, language)
     }
+
+    fun defaultGameSettings(): GameSettings {
+        return defaultGameSettings.clone()
+    }
 }
