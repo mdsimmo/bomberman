@@ -77,9 +77,8 @@ class GameSettings : ConfigurationSerializable {
             Material.TNT,
             Material.SNOW_BLOCK,
             Material.DIRT,
-            Material.GRASS_BLOCK,
-            Material.COARSE_DIRT,
-            Material.PODZOL
+            Material.SAND,
+            Material.GRAVEL
     )
     var initialItems = listOf(
             ItemStack(bombItem, 3)
