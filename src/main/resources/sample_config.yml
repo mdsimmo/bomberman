@@ -1,0 +1,140 @@
+# ----------------------------------------------------------------- #
+#                                                                   #
+#                     BOMBERMAN SAMPLE CONFIG                       #
+#                                                                   #
+#                        sample_config.yml                          #
+#                                                                   #
+#                                                                   #
+#   This file contains the default configuration.                   #
+#   You can overwrite anything by setting the value in config.yml   #
+#                                                                   #
+#   Note: this file will be reset every time the server reloads     #
+#                                                                   #
+# ----------------------------------------------------------------- #
+
+
+# Directory where schematics should be saved
+# Note: configuring where WorldEdit schematics are loaded from is in the WorldEdit config
+schematics-save:
+  # A location to copy any schematics packaged with the jar
+  builtin: schematics/builtin
+  # A location to save schematics made from the wand selection
+  custom: schematics/custom
+# Directory where Game config data is saved
+game-saves: games
+# Directories to save temporary data
+temp-data:
+  # Cached game data
+  game: temp/game
+  # Player inventories and spawn information
+  player: temp/player
+# Where the translated text file is
+language: 'messages.yml'
+
+# Default settings for new games
+# Changing these values will NOT effect existing games.
+# Alter existing games' settings by editing games/<name>.yml
+default-game-settings:
+  ==: io.github.mdsimmo.bomberman.game.GameSettings
+
+  # How many lives each player gets
+  lives: 3
+  # The item type to use for bomb size calculations
+  power: minecraft:gunpowder
+  # The block type which explodes
+  bomb: minecraft:tnt
+
+  # What each player spawns in the game with
+  initial-items:
+  - ==: org.bukkit.inventory.ItemStack
+    v: 2230
+    type: TNT
+    amount: 3
+
+  # How long before tnt explodes
+  fuse-ticks: 40
+  # The duration that tnt flames should remain for
+  fire-ticks: 20
+  # How long before a player can take a second hit
+  immunity-ticks: 21
+
+  # What each block type should drop.
+  # Each set of materials has a list of Item stacks mapped to a weighting.
+  # Materials without an entry will not drop anything.
+  loot-table:
+  - blocks:
+    - minecraft:snow_block
+    - minecraft:dirt
+    - minecraft:sand
+    loot:
+    - weight: 4.0   # The relative weighting of choosing this item
+      item:         # What item to drop
+        ==: org.bukkit.inventory.ItemStack
+        v: 2230
+        type: TNT
+    - weight: 100.0
+      item:
+        ==: org.bukkit.inventory.ItemStack
+        v: 2230
+        type: AIR
+        amount: 0   # amount 0 means "no drop"
+    - weight: 3.0
+      item:
+        ==: org.bukkit.inventory.ItemStack
+        v: 2230
+        type: GUNPOWDER
+    - weight: 1.0
+      item:
+        ==: org.bukkit.inventory.ItemStack
+        v: 2230
+        type: POTION
+        meta:
+          ==: ItemMeta
+          meta-type: POTION
+          potion-type: minecraft:healing
+    - weight: 1.0
+      item:
+        ==: org.bukkit.inventory.ItemStack
+        v: 2230
+        type: POTION
+        meta:
+          ==: ItemMeta
+          meta-type: POTION
+          potion-type: minecraft:strong_swiftness
+    - weight: 1.0
+      item:
+        ==: org.bukkit.inventory.ItemStack
+        v: 2230
+        type: POTION
+        meta:
+          ==: ItemMeta
+          meta-type: POTION
+          potion-type: minecraft:invisibility
+
+    # Below is a second set of blocks with different loot.
+    # Add as many sets as you want
+  - blocks:
+    - minecraft:gravel
+    loot:
+    - item:
+        ==: org.bukkit.inventory.ItemStack
+        v: 2230
+        type: TNT
+      weight: 1.0
+    - item:
+        ==: org.bukkit.inventory.ItemStack
+        v: 2230
+        type: AIR
+        amount: 0
+      weight: 10.0
+
+
+  # Blocks which tnt can destroy.
+  # All non-solid blocks are destructable
+  # Removing tnt means tnt explosions will not chain together
+  destructable:
+  - minecraft:tnt
+  - minecraft:snow_block
+  - minecraft:dirt
+  - minecraft:sand
+  - minecraft:gravel

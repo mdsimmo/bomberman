@@ -16,25 +16,29 @@ class GameSettings : ConfigurationSerializable {
             val settings = GameSettings()
             (data["bomb"] as? String?)?.let { Material.matchMaterial(it) } ?.also { settings.bombItem = it }
             (data["power"] as? String?)?.let { Material.matchMaterial(it)} ?.also { settings.powerItem = it }
-            (data["block-loot"] as? Map<*, *>?)
-                    ?.mapNotNull { (key, value) ->
-                        val material = (key as? String)?.let { Material.matchMaterial(key) }
-                        if (material == null) {
-                            null
+            (data["loot-table"] as? List<*>?)
+                    ?.filterIsInstance<Map<*, *>>()
+                    ?.flatMap { section ->
+                        val blocks = (section["blocks"] as? List<*>)
+                                ?.filterIsInstance<String>()
+                                ?.mapNotNull { Material.matchMaterial(it) }
+                        val loot = (section["loot"] as? List<*>)
+                                ?.filterIsInstance<Map<*,*>>()
+                                ?.mapNotNull { itemWeight ->
+                                    val weight = itemWeight["weight"] as? Number
+                                    val itemStack = itemWeight["item"] as? ItemStack
+                                    if (itemStack == null || weight == null
+                                            || weight.toDouble() <= 0) {
+                                        null
+                                    } else {
+                                        Pair(itemStack, weight)
+                                    }
+                                }
+                                ?.toMap()
+                        if (blocks == null || loot == null || blocks.isEmpty() || loot.isEmpty()) {
+                            emptyList()
                         } else {
-                            val map = (value as? Map<*, *>)?.mapNotNull {(k, v) ->
-                                val itemStack = k as? ItemStack
-                                val number = v as? Number
-                                if (itemStack == null || number == null)
-                                    null
-                                else
-                                    Pair(itemStack, number)
-                            }?.toMap()
-                            if (map == null) {
-                                null
-                            } else {
-                                Pair(material, map)
-                            }
+                            blocks.map { b-> Pair(b, loot) }
                         }
                     }?.toMap()
                     ?.also {
@@ -63,16 +67,22 @@ class GameSettings : ConfigurationSerializable {
 
     var bombItem: Material = Material.TNT
     var powerItem: Material = Material.GUNPOWDER
-    var blockLoot: Map<Material, Map<ItemStack, Number>> = mapOf(
-            Pair(Material.SNOW_BLOCK, mapOf(
-                    Pair(ItemStack(Material.TNT, 1), 4.0),
-                    Pair(ItemStack(Material.GUNPOWDER, 1), 3.0),
-                    Pair(BukkitUtils.makePotion(PotionType.INSTANT_HEAL, 1), 1.0),
-                    Pair(BukkitUtils.makePotion(PotionType.SPEED, 1), 1.0),
-                    Pair(BukkitUtils.makePotion(PotionType.INVISIBILITY, 1), 0.5),
-                    Pair(ItemStack(Material.AIR, 0), 100.0)
-            ))
-    )
+    var blockLoot: Map<Material, Map<ItemStack, Number>> =
+            mapOf(
+                Pair(ItemStack(Material.TNT, 1), 4.0),
+                Pair(ItemStack(Material.GUNPOWDER, 1), 3.0),
+                Pair(BukkitUtils.makePotion(PotionType.INSTANT_HEAL, 1), 1.0),
+                Pair(BukkitUtils.makePotion(PotionType.SPEED, 1, upgraded = true), 1.0),
+                Pair(BukkitUtils.makePotion(PotionType.INVISIBILITY, 1), 1.0),
+                Pair(ItemStack(Material.AIR, 0), 100.0)
+            ).let {
+                mapOf(
+                    Pair(Material.SNOW_BLOCK, it),
+                    Pair(Material.DIRT, it),
+                    Pair(Material.SAND, it),
+                    Pair(Material.GRAVEL, it)
+                )
+            }
     var destructable = setOf(
             Material.TNT,
             Material.SNOW_BLOCK,
@@ -92,8 +102,21 @@ class GameSettings : ConfigurationSerializable {
         val objs: MutableMap<String, Any> = HashMap()
         objs["bomb"] = bombItem.key.toString()
         objs["power"] = powerItem.key.toString()
-        objs["block-loot"] = blockLoot
-                .mapKeys { (mat, _) -> mat.key.toString() }
+        // condense duplicate loot values by swapping key and values
+        val lootBlock = mutableMapOf<Map<ItemStack, Number>, MutableSet<Material>>()
+        blockLoot.forEach { (mat, loot) ->
+            lootBlock.getOrPut(loot) { mutableSetOf() }.add(mat)
+        }
+        objs["loot-table"] = lootBlock
+                .map { (loot, matList) -> mapOf(
+                        Pair("blocks", matList.map { it.key.toString() }.toList()),
+                        Pair("loot", loot.map {(item, weight) ->
+                            mapOf(
+                                    Pair("item", item),
+                                    Pair("weight", weight)
+                            )
+                        })
+                )}
         objs["destructable"] = destructable
                 .map { it.key.toString() }
         objs["initial-items"] = initialItems
