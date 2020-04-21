@@ -16,15 +16,15 @@ abstract class GameCommand(parent: Cmd) : Cmd(parent) {
 
     abstract fun gameOptions(args: List<String>): List<String>
 
-    override fun run(sender: CommandSender, args: List<String>, modifiers: Map<String, String>): Boolean {
+    override fun run(sender: CommandSender, args: List<String>, flags: Map<String, String>): Boolean {
         return if (args.isEmpty()) {
             false
         } else {
             BmGameLookupIntent.find(args[0]) ?.let {
-                gameRun(sender, args.drop(1), modifiers, it)
+                gameRun(sender, args.drop(1), flags, it)
             } ?: false
         }
     }
 
-    abstract fun gameRun(sender: CommandSender, args: List<String>, modifiers: Map<String, String>, game: Game): Boolean
+    abstract fun gameRun(sender: CommandSender, args: List<String>, flags: Map<String, String>, game: Game): Boolean
 }

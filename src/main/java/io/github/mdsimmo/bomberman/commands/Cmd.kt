@@ -40,15 +40,15 @@ abstract class Cmd(protected var parent: Cmd?) : Formattable {
      * @param args   the arguments
      * @return true if correctly typed. False will display info
      */
-    abstract fun run(sender: CommandSender, args: List<String>, modifiers: Map<String, String>): Boolean
+    abstract fun run(sender: CommandSender, args: List<String>, flags: Map<String, String>): Boolean
 
     /**
      * Execute the command. Checks for permissions
      * @return true if success. false to show usage
      */
-    fun execute(sender: CommandSender, args: List<String>, modifiers: Map<String, String>) {
+    fun execute(sender: CommandSender, args: List<String>, flags: Map<String, String>) {
         if (isAllowedBy(sender)) {
-            if (!run(sender, args, modifiers)) {
+            if (!run(sender, args, flags)) {
                 incorrectUsage(sender, args)
                 help(sender)
             }

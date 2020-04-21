@@ -17,12 +17,12 @@ class RunStart(parent: Cmd) : GameCommand(parent) {
         return emptyList()
     }
 
-    override fun gameRun(sender: CommandSender, args: List<String>, modifiers: Map<String, String>, game: Game): Boolean {
+    override fun gameRun(sender: CommandSender, args: List<String>, flags: Map<String, String>, game: Game): Boolean {
         if (args.isNotEmpty()) {
             return false
         }
         // get the delay
-        val delay = when (val s = modifiers["d"] ?: modifiers["delay"]) {
+        val delay = when (val s = flags["d"] ?: flags["delay"]) {
             null -> 3
             else -> {
                 val i = s.toIntOrNull()

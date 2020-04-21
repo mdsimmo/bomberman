@@ -19,20 +19,20 @@ class DevInfo(parent: Cmd) : Cmd(parent) {
                 "tasklist", "taskcount", "taskwatch", "watch")
     }
 
-    override fun run(sender: CommandSender, args: List<String>, modifiers: Map<String, String>): Boolean {
+    override fun run(sender: CommandSender, args: List<String>, flags: Map<String, String>): Boolean {
         return when (args.getOrNull(0).toString().toLowerCase()) {
             "watch" -> {
-                run(sender, listOf("nocancelled"), modifiers)
-                run(sender, listOf("handlerwatch"), modifiers)
-                run(sender, listOf("taskwatch"), modifiers)
-                run(sender, listOf("taskcount"), modifiers)
-                run(sender, listOf("handlercount"), modifiers)
+                run(sender, listOf("nocancelled"), flags)
+                run(sender, listOf("handlerwatch"), flags)
+                run(sender, listOf("taskwatch"), flags)
+                run(sender, listOf("taskcount"), flags)
+                run(sender, listOf("handlercount"), flags)
                 true
             }
             "handlerlist" -> {
                 val handlers = HandlerList.getRegisteredListeners(Bomberman.instance).map {
                     it.listener
-                }.filter { it::class.java.name.contains(modifiers["class"] ?: "") }
+                }.filter { it::class.java.name.contains(flags["class"] ?: "") }
                 sender.sendMessage(handlers.toString())
                 true
             }

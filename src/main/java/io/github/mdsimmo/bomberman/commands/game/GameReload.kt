@@ -16,7 +16,7 @@ class GameReload(parent: Cmd) : GameCommand(parent) {
         return context(Text.RELOAD_NAME).format()
     }
 
-    override fun gameRun(sender: CommandSender, args: List<String>, modifiers: Map<String, String>, game: Game): Boolean {
+    override fun gameRun(sender: CommandSender, args: List<String>, flags: Map<String, String>, game: Game): Boolean {
         if (args.isNotEmpty())
             return false
         BmGameDeletedIntent.delete(game, false)

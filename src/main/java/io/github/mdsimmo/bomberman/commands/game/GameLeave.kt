@@ -16,7 +16,7 @@ class GameLeave(parent: Cmd) : Cmd(parent) {
         return emptyList()
     }
 
-    override fun run(sender: CommandSender, args: List<String>, modifiers: Map<String, String>): Boolean {
+    override fun run(sender: CommandSender, args: List<String>, flags: Map<String, String>): Boolean {
         if (args.isNotEmpty())
             return false
         if (sender is Player) {
