@@ -9,8 +9,8 @@ import io.github.mdsimmo.bomberman.commands.Cmd
 import io.github.mdsimmo.bomberman.events.BmGameListIntent
 import io.github.mdsimmo.bomberman.events.BmGameLookupIntent
 import io.github.mdsimmo.bomberman.game.Game
-import io.github.mdsimmo.bomberman.game.Game.Companion.BuildGameFromRegion
-import io.github.mdsimmo.bomberman.game.Game.Companion.BuildGameFromSchema
+import io.github.mdsimmo.bomberman.game.Game.Companion.buildGameFromRegion
+import io.github.mdsimmo.bomberman.game.Game.Companion.buildGameFromSchema
 import io.github.mdsimmo.bomberman.messaging.Message
 import io.github.mdsimmo.bomberman.messaging.Text
 import io.github.mdsimmo.bomberman.utils.WorldEditUtils.selectionBounds
@@ -167,7 +167,7 @@ class GameCreate(parent: Cmd) : Cmd(parent) {
             try {
                 val region = session.getSelection(session.selectionWorld)
                 val box = selectionBounds(region)
-                val game = BuildGameFromRegion(gameName, box, flags)
+                val game = buildGameFromRegion(gameName, box, flags)
                 Text.CREATE_SUCCESS.with("game", game).sendTo(sender)
             } catch (e: IncompleteRegionException) { // FIXME can selection occur in world other than selection?
                 throw RuntimeException("Selection World different to selection", e)
@@ -179,7 +179,7 @@ class GameCreate(parent: Cmd) : Cmd(parent) {
         val matches = saveDir.listFiles { dir: File -> dir.path.contains(schemaName) } ?: emptyArray()
         matches // The minimum length path will be the closest match
             .minBy { it.name.length }?.also { file: File ->
-                val game = BuildGameFromSchema(gameName, player.location, file, flags)
+                val game = buildGameFromSchema(gameName, player.location, file, flags)
                 context(Text.CREATE_SUCCESS)
                         .with("game", game)
                         .sendTo(player)

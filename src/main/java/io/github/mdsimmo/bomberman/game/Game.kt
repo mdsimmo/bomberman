@@ -82,7 +82,7 @@ class Game private constructor(val name: String, private var schema: Arena, val 
             return File(plugin.settings.tempGameData(), "${game.name}.yml")
         }
 
-        fun BuildGameFromRegion(name: String, box: Box, flags: BuildFlags): Game {
+        fun buildGameFromRegion(name: String, box: Box, flags: BuildFlags): Game {
 
             // Copy the blocks to a clipboard
             val region = WorldEditUtils.convert(box)
@@ -108,7 +108,7 @@ class Game private constructor(val name: String, private var schema: Arena, val 
             return game
         }
 
-        fun BuildGameFromSchema(name: String, loc: Location, file: File, flags: BuildFlags): Game {
+        fun buildGameFromSchema(name: String, loc: Location, file: File, flags: BuildFlags): Game {
             val game = Game(name, Arena(file, loc, flags))
             BmGameBuildIntent.build(game)
             return game
