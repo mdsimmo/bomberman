@@ -407,6 +407,15 @@ class Game private constructor(val name: String, private var schema: Arena, val 
         e.setHandled()
     }
 
+    @EventHandler(ignoreCancelled = true, priority = EventPriority.NORMAL)
+    fun onPlayerMoveOutOfArena(e: BmPlayerMovedEvent) {
+        if (e.game != this)
+            return
+        if (!schema.box.contains(e.getTo())) {
+            BmPlayerLeaveGameIntent.leave(e.player)
+        }
+    }
+
     @EventHandler(ignoreCancelled = true, priority = EventPriority.HIGHEST)
     fun onPlayerLeave(e: BmPlayerLeaveGameIntent) {
         if (players.contains(e.player)) {
