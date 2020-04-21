@@ -14,7 +14,7 @@ class BaseCommand : CommandGroup(null), TabCompleter, CommandExecutor {
 
     init {
         addChildren(
-                DevInfo(this),
+                //DevInfo(this),
                 Set(this),
                 GameCreate(this),
                 GameInfo(this),
