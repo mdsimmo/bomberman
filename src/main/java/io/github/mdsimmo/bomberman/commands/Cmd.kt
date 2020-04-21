@@ -54,7 +54,7 @@ abstract class Cmd(protected var parent: Cmd?) : Formattable {
         if (isAllowedBy(sender)) {
             if (!run(sender, args, flags)) {
                 incorrectUsage(sender, args)
-                help(sender)
+                help(sender, args, flags)
             }
         } else {
             context(Text.DENY_PERMISSION).sendTo(sender)
@@ -66,7 +66,7 @@ abstract class Cmd(protected var parent: Cmd?) : Formattable {
      *
      * @param sender the player to help
      */
-    open fun help(sender: CommandSender) {
+    open fun help(sender: CommandSender, args: List<String>, flags: Map<String, String>) {
         context(Text.COMMAND_HELP).sendTo(sender)
     }
 
@@ -74,6 +74,7 @@ abstract class Cmd(protected var parent: Cmd?) : Formattable {
     abstract fun example(): Message
     abstract fun description(): Message
     abstract fun usage(): Message
+
     /**
      * @return the permission needed to run this command
      */
@@ -124,8 +125,27 @@ abstract class Cmd(protected var parent: Cmd?) : Formattable {
             "extra" -> extra()
             "example" -> example()
             "description" -> description()
-            else -> throw RuntimeException("Unknown value " + args[0])
+            "flags" -> CollectionWrapper(flags(listOf(), mapOf())
+                    .map { flag -> object: Formattable {
+                        override fun format(args: List<Message>): Message {
+                            return when ((args.firstOrNull() ?: "name").toString()) {
+                                "name" -> Message.of(flag)
+                                "ext" -> flagExtension(flag)
+                                "description" -> flagDescription(flag)
+                                else -> throw RuntimeException("Unknown flag value '" + args[0] + "'")
+                            }
+                        }
+                    } }).format(args.drop(1))
+            else -> throw RuntimeException("Unknown command value '" + args[0] + "'")
         }
+    }
+
+    open fun flagExtension(flag: String): Message {
+        return Message.empty
+    }
+
+    open fun flagDescription(flag: String): Message {
+        return Message.empty
     }
 
 }

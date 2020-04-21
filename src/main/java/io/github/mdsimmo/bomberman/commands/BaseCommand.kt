@@ -8,6 +8,7 @@ import org.bukkit.command.Command
 import org.bukkit.command.CommandExecutor
 import org.bukkit.command.CommandSender
 import org.bukkit.command.TabCompleter
+import org.bukkit.util.StringUtil
 
 class BaseCommand : CommandGroup(null), TabCompleter, CommandExecutor {
 
@@ -41,7 +42,11 @@ class BaseCommand : CommandGroup(null), TabCompleter, CommandExecutor {
 
     override fun onCommand(sender: CommandSender, command: Command, s: String, args: Array<String>): Boolean {
         val (arguments, flags) = seperateFlags(args)
-        execute(sender, arguments, flags)
+        if (flags.containsKey("?")) {
+            help(sender, arguments, flags)
+        } else {
+            execute(sender, arguments, flags)
+        }
         return true
     }
 
@@ -51,7 +56,7 @@ class BaseCommand : CommandGroup(null), TabCompleter, CommandExecutor {
         val allOptions = if (currentlyTyping.startsWith("-")) {
             val splitIndex = currentlyTyping.indexOf('=')
             if (splitIndex == -1) {
-                flags(arguments, flags).map { "-$it" }
+                flags(arguments, flags).map { "-$it" } + "-?"
             } else {
                 val key = currentlyTyping.substring(1, splitIndex)
                 flagOptions(key, arguments, flags)
@@ -60,7 +65,9 @@ class BaseCommand : CommandGroup(null), TabCompleter, CommandExecutor {
         } else {
             options(sender, arguments)
         }
-        return allOptions.toList()
+        return allOptions.filter {
+            StringUtil.startsWithIgnoreCase(it, currentlyTyping)
+        }.toList()
     }
 
     private fun seperateFlags(args: Array<String>) : Pair<List<String>, Map<String, String>> {

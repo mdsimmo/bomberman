@@ -149,9 +149,14 @@ command:
   # {command}: The command
   help: |-
     {#|format.heading|Help: {command|name}}
-    {#|format.map|Description|{command|description}}
+    {command|description}
     {#|format.map|Usage|{command|usage}}
-    {#|format.map|Example|{command|example}}
+    {#|format.map|Extra|{command|extra}}
+    {#|format.map|Flags|{#switch|{command|flags|length}|0|| }}
+    {command|flags|foreach|command.flag-list|
+    }
+  flag-list: '{#|format.map|   -{arg0|name}{#switch|{arg0|ext}|||={arg0|ext}}|{arg0|description}}'
+  flag-sort: '{arg0|name}'
   # Shown when a player tries to run a command they do not have permission to use
   deny-permission: '{#red|You do not have permission to use /{command|path}!}'
   # Shown when the player uses a command incorrectly
@@ -242,9 +247,13 @@ command:
   start:
     name: start
     description: Start a game
-    usage: /{command|path} <game> <count-delay>
+    usage: /{command|path} <game>
     example: ''
     extra: ''
+    flags:
+      d:
+        description: 'The count down delay in seconds (default=3)'
+        ext: '<delay>'
     # Message when a player starts an already started arena
     # {game}: the game attempted to be started
     already-started: Game {game} already started
@@ -482,10 +491,21 @@ command:
   # Messages relating to '/bm game create'
   create:
     name: create
-    description: Builds a Bomberman game
-    usage: /{command|path} <game> <wand|schema|default> [path]
-    example: ''
+    description: Builds a Bomberman game. Defaults to current axe selection. Use -p and -f to use a saved schematic.
+    usage: /{command|path} <name> [options]
+    example: /{command|path} mygame -p=bm -f=purple
     extra: ''
+    flags:
+      p:
+        description: Plugin to load schem from (default=WorldEdit)
+        ext: [bm|we]
+      f:
+        description: The schematic file to load
+        ext: <file>
+      a:
+        description: Skip air blocks
+      v:
+        description: Replace structure void with air
     # The game's name is already used
     # {game}: the game that has the shared name 
     game-exists: Game {game} already exists

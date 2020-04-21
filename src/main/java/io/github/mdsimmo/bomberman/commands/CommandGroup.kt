@@ -19,11 +19,8 @@ abstract class CommandGroup(parent: Cmd?) : Cmd(parent) {
     }
 
     private fun child(args: List<String>): Cmd? {
-        return when (args.size) {
-            in 0..1 -> null
-            else -> {
-                children.firstOrNull { c -> c.name().toString().equals(args.first(), ignoreCase = true) }
-            }
+        return args.firstOrNull()?.let {arg ->
+            children.firstOrNull { c -> c.name().toString().equals(arg, ignoreCase = true) }
         }
     }
 
@@ -48,8 +45,11 @@ abstract class CommandGroup(parent: Cmd?) : Cmd(parent) {
         }
     }
 
-    override fun help(sender: CommandSender) {
-        context(Text.COMMAND_GROUP_HELP).sendTo(sender)
+    override fun help(sender: CommandSender, args: List<String>, flags: Map<String, String>) {
+        when (val c = child(args)) {
+            null -> context(Text.COMMAND_GROUP_HELP).sendTo(sender)
+            else -> c.help(sender, args.drop(1), flags)
+        }
     }
 
     override fun extra(): Message {
@@ -66,7 +66,7 @@ abstract class CommandGroup(parent: Cmd?) : Cmd(parent) {
 
     override fun run(sender: CommandSender, args: List<String>, flags: Map<String, String>): Boolean {
         return if (args.isEmpty()) {
-            help(sender)
+            help(sender, args, flags)
             true
         } else {
             for (c in children) {
@@ -78,7 +78,7 @@ abstract class CommandGroup(parent: Cmd?) : Cmd(parent) {
             context(Text.UNKNOWN_COMMAND)
                     .with("attempt", args[0])
                     .sendTo(sender)
-            help(sender)
+            help(sender, args, flags)
             true
         }
     }

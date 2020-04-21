@@ -17,6 +17,24 @@ class RunStart(parent: Cmd) : GameCommand(parent) {
         return emptyList()
     }
 
+    override fun flags(args: List<String>, flags: Map<String, String>): Set<String> {
+        return setOf("d")
+    }
+
+    override fun flagExtension(flag: String): Message {
+        return when (flag) {
+            "d" -> context(Text.START_FLAG_DELAY_EXT).format()
+            else -> Message.empty
+        }
+    }
+
+    override fun flagDescription(flag: String): Message {
+        return when (flag) {
+            "d" -> context(Text.START_FLAG_DELAY_DESC).format()
+            else -> Message.empty
+        }
+    }
+
     override fun gameRun(sender: CommandSender, args: List<String>, flags: Map<String, String>, game: Game): Boolean {
         if (args.isNotEmpty()) {
             return false

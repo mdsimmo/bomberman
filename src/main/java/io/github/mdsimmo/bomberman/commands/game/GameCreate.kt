@@ -26,7 +26,7 @@ class GameCreate(parent: Cmd) : Cmd(parent) {
         private val we = WorldEdit.getInstance()
 
         private const val F_PLUGIN = "p"
-        private const val F_SCHEMA = "l"
+        private const val F_SCHEMA = "f"
         private const val F_SKIP_AIR = "a"
         private const val F_VOID_TO_AIR = "v"
 
@@ -88,6 +88,24 @@ class GameCreate(parent: Cmd) : Cmd(parent) {
                 } ?: emptySet()
             }
             else -> emptySet()
+        }
+    }
+
+    override fun flagDescription(flag: String): Message {
+        return when(flag) {
+            F_PLUGIN -> context(Text.CREATE_FLAG_PLUGIN).format()
+            F_SCHEMA -> context(Text.CREATE_FLAG_SCHEMA).format()
+            F_SKIP_AIR -> context(Text.CREATE_FLAG_SKIP_AIR).format()
+            F_VOID_TO_AIR -> context(Text.CREATE_FLAG_VOID_TO_AIR).format()
+            else -> Message.empty
+        }
+    }
+
+    override fun flagExtension(flag: String): Message {
+        return when(flag) {
+            F_PLUGIN -> context(Text.CREATE_FLAG_PLUGIN_EXT).format()
+            F_SCHEMA -> context(Text.CREATE_FLAG_SCHEMA_EXT).format()
+            else -> Message.empty
         }
     }
 
@@ -177,7 +195,7 @@ class GameCreate(parent: Cmd) : Cmd(parent) {
     }
 
     override fun example(): Message {
-        return context(Text.CONVERT_EXAMPLE).format()
+        return context(Text.CREATE_EXAMPLE).format()
     }
 
     override fun extra(): Message {
