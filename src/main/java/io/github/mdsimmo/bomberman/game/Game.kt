@@ -234,7 +234,7 @@ class Game private constructor(val name: String, private var schema: Arena, val 
 
                         if (flags.deleteVoid) {
                             editSession.replaceBlocks(WorldEditUtils.convert(box),
-                                    BlockTypeMask(editSession, BlockTypes.WHITE_STAINED_GLASS),
+                                    BlockTypeMask(editSession, BlockTypes.STRUCTURE_VOID),
                                     BlockPattern(BlockTypes.AIR!!.defaultState)
                             )
                         }
