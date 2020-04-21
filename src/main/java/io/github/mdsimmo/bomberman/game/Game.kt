@@ -6,11 +6,13 @@ import com.sk89q.worldedit.extent.clipboard.BlockArrayClipboard
 import com.sk89q.worldedit.extent.clipboard.Clipboard
 import com.sk89q.worldedit.extent.clipboard.io.BuiltInClipboardFormat
 import com.sk89q.worldedit.extent.clipboard.io.ClipboardFormats
+import com.sk89q.worldedit.function.mask.BlockTypeMask
 import com.sk89q.worldedit.function.operation.ForwardExtentCopy
-import com.sk89q.worldedit.function.operation.Operation
 import com.sk89q.worldedit.function.operation.Operations
+import com.sk89q.worldedit.function.pattern.BlockPattern
 import com.sk89q.worldedit.math.BlockVector3
 import com.sk89q.worldedit.session.ClipboardHolder
+import com.sk89q.worldedit.world.block.BlockTypes
 import io.github.mdsimmo.bomberman.Bomberman
 import io.github.mdsimmo.bomberman.events.*
 import io.github.mdsimmo.bomberman.messaging.Formattable
@@ -18,11 +20,13 @@ import io.github.mdsimmo.bomberman.messaging.Message
 import io.github.mdsimmo.bomberman.messaging.Text
 import io.github.mdsimmo.bomberman.utils.Box
 import io.github.mdsimmo.bomberman.utils.BukkitUtils
+import io.github.mdsimmo.bomberman.utils.RefectAccess
 import io.github.mdsimmo.bomberman.utils.WorldEditUtils
 import org.bukkit.Bukkit
 import org.bukkit.Location
 import org.bukkit.Material
 import org.bukkit.configuration.file.YamlConfiguration
+import org.bukkit.configuration.serialization.ConfigurationSerializable
 import org.bukkit.entity.Item
 import org.bukkit.entity.Player
 import org.bukkit.event.EventHandler
@@ -56,19 +60,21 @@ class Game private constructor(val name: String, private var schema: Arena, val 
 
         fun loadGame(file: File): Game? {
             val data = YamlConfiguration.loadConfiguration(file)
-            val name = data["name"] as? String? ?: return null
-            val schema = data["schema"] as? String? ?: return null
-            val loc = data["origin"] as? Location? ?: return null
-            val settings = data["settings"] as? GameSettings? ?: GameSettings()
-            return Game(name, Arena(File(schema), loc), settings)
+            val name = data["name"] as? String ?: return null
+            val schema = data["schema"] as? String ?: return null
+            val loc = data["origin"] as? Location ?: return null
+            val settings = data["settings"] as? GameSettings ?: GameSettings()
+            val flags = data["build-flags"] as? BuildFlags ?: BuildFlags()
+            return Game(name, Arena(File(schema), loc, flags), settings)
         }
 
         fun saveGame(game: Game) {
             val file = YamlConfiguration()
             file.set("name", game.name)
             file.set("schema", game.schema.file.path)
-            file.set("settings", game.settings)
             file.set("origin", game.schema.origin)
+            file.set("settings", game.settings)
+            file.set("build-flags", game.schema.flags)
             file.save(File(plugin.settings.gameSaves(), "${game.name}.yml"))
         }
 
@@ -76,7 +82,7 @@ class Game private constructor(val name: String, private var schema: Arena, val 
             return File(plugin.settings.tempGameData(), "${game.name}.yml")
         }
 
-        fun BuildGameFromRegion(name: String, box: Box): Game {
+        fun BuildGameFromRegion(name: String, box: Box, flags: BuildFlags): Game {
 
             // Copy the blocks to a clipboard
             val region = WorldEditUtils.convert(box)
@@ -96,16 +102,39 @@ class Game private constructor(val name: String, private var schema: Arena, val 
             }
 
             // Make the Game
-            val game = Game(name, Arena(file, BukkitUtils.boxLoc1(box), clipboard))
+            val game = Game(name, Arena(file, BukkitUtils.boxLoc1(box), clipboard, flags))
             // TODO when building from selection, only need to build cages
             BmGameBuildIntent.build(game)
             return game
         }
 
-        fun BuildGameFromSchema(name: String, loc: Location, file: File, skipAir: Boolean): Game {
-            val game = Game(name, Arena(file, loc))
+        fun BuildGameFromSchema(name: String, loc: Location, file: File, flags: BuildFlags): Game {
+            val game = Game(name, Arena(file, loc, flags))
             BmGameBuildIntent.build(game)
             return game
+        }
+    }
+
+    class BuildFlags : ConfigurationSerializable {
+        var skipAir = false
+        var deleteVoid = false
+
+        override fun serialize(): Map<String, Any> {
+            return mapOf(
+                    Pair("skip-air", skipAir),
+                    Pair("delete-void", deleteVoid)
+            )
+        }
+
+        companion object {
+            @JvmStatic
+            @RefectAccess
+            fun deserialize(data: Map<String, Any?>): BuildFlags {
+                val buildFlags = BuildFlags()
+                (data["skip-air"] as? Boolean)?.let { buildFlags.skipAir = it }
+                (data["delete-void"] as? Boolean)?.let { buildFlags.deleteVoid = it }
+                return buildFlags
+            }
         }
     }
 
@@ -113,6 +142,7 @@ class Game private constructor(val name: String, private var schema: Arena, val 
 
         val origin: Location
         val file: File
+        val flags: BuildFlags
 
         var boxCache: Box? = null
         val box: Box get() {
@@ -129,13 +159,15 @@ class Game private constructor(val name: String, private var schema: Arena, val 
 
         private var clipboard: WeakReference<Clipboard>? = null
 
-        constructor(file: File, origin: Location) {
+        constructor(file: File, origin: Location, flags: BuildFlags) {
             this.file = file
+            this.flags = flags
             this.origin = BukkitUtils.blockLoc(origin)
         }
 
-        constructor(file: File, origin: Location, clipboard: Clipboard) {
+        constructor(file: File, origin: Location, clipboard: Clipboard, flags: BuildFlags) {
             this.file = file
+            this.flags = flags
             this.origin = BukkitUtils.blockLoc(origin)
             this.boxCache =  WorldEditUtils.pastedBounds(origin, clipboard)
             this.clipboard = WeakReference(clipboard)
@@ -176,7 +208,7 @@ class Game private constructor(val name: String, private var schema: Arena, val 
             return spawns
         }
 
-        fun build(skipAir: Boolean) {
+        fun build() {
 
             plugin.logger.info("Building schematic ...")
             val clip = loadClipboard()
@@ -189,13 +221,24 @@ class Game private constructor(val name: String, private var schema: Arena, val 
             // Paste the schematic
             WorldEdit.getInstance().editSessionFactory.getEditSession(BukkitAdapter.adapt(box.world), -1)
                     .use { editSession ->
-                        val operation: Operation = ClipboardHolder(clip)
+
+                        val operation = ClipboardHolder(clip)
                                 .createPaste(editSession)
                                 .to(BlockVector3.at(origin.blockX, origin.blockY, origin.blockZ))
                                 .copyEntities(true)
-                                .ignoreAirBlocks(skipAir)
+                                .ignoreAirBlocks(flags.skipAir)
                                 .build()
                         Operations.complete(operation)
+
+                        editSession.flushSession()
+
+                        if (flags.deleteVoid) {
+                            editSession.replaceBlocks(WorldEditUtils.convert(box),
+                                    BlockTypeMask(editSession, BlockTypes.WHITE_STAINED_GLASS),
+                                    BlockPattern(BlockTypes.AIR!!.defaultState)
+                            )
+                        }
+
                         // TODO undo arena build
                         // this undoes the building, but it should also delete the game
                         //if (user != null)
@@ -455,7 +498,7 @@ class Game private constructor(val name: String, private var schema: Arena, val 
     fun onGameRebuild(e: BmGameBuildIntent) {
         if (e.game != this)
             return
-        schema.build(false)
+        schema.build()
         makeCages()
         writeData("rebuild-needed", false)
         e.setHandled()

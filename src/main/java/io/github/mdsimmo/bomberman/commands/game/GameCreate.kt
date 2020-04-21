@@ -20,12 +20,54 @@ import java.io.File
 import java.util.*
 
 class GameCreate(parent: Cmd) : Cmd(parent) {
+
+    companion object {
+        private val bm = Bomberman.instance
+        private val we = WorldEdit.getInstance()
+
+        private const val F_PLUGIN = "p"
+        private const val F_SCHEMA = "l"
+        private const val F_SKIP_AIR = "a"
+        private const val F_VOID_TO_AIR = "v"
+
+        private fun root(plugin: String): File? {
+            return when (plugin.toLowerCase()) {
+                "bomberman", "bm" -> bm.settings.builtinSaves()
+                "worldedit", "we" -> we.getWorkingDirectoryFile(we.configuration.saveDir)
+                else -> null
+            }
+        }
+
+        private fun defaultSchema(plugin: String): String? {
+            return when(plugin.toLowerCase()) {
+                "bm", "bomberman" -> "purple"
+                else -> null
+            }
+        }
+
+        private fun allFiles(root: File): List<File> {
+            val files = root.listFiles() ?: return listOf()
+            val fileList: MutableList<File> = ArrayList()
+            for (f in files) {
+                if (f.isDirectory) {
+                    val subFiles = allFiles(f)
+                    // empty subdir
+                    fileList.addAll(subFiles)
+                } else {
+                    fileList.add(f)
+                }
+            }
+            return fileList
+        }
+    }
+
     override fun name(): Message {
         return context(Text.CREATE_NAME).format()
     }
 
     override fun options(sender: CommandSender, args: List<String>): List<String> {
         return when (args.size) {
+
             1 -> BmGameListIntent.listGames().map(Game::name).toList()
             2 -> listOf("WorldEdit", "Bomberman", "wand")
             3 -> {
@@ -38,8 +80,8 @@ class GameCreate(parent: Cmd) : Cmd(parent) {
         }
     }
 
-    override fun run(sender: CommandSender, args: List<String>, modifiers: Map<String, String>): Boolean {
-        if (args.isEmpty())
+    override fun run(sender: CommandSender, args: List<String>, flags: Map<String, String>): Boolean {
+        if (args.size != 1)
             return false
         if (sender !is Player) {
             context(Text.MUST_BE_PLAYER).sendTo(sender)
@@ -53,32 +95,37 @@ class GameCreate(parent: Cmd) : Cmd(parent) {
             return true
         }
 
-        val mutArgs = args.toMutableList()
-        if (mutArgs.size < 2) {
-            mutArgs.add("bm")
-            mutArgs.add("purple")
-            mutArgs.add("skipAir")
-        }
-        if ("wand".equals(mutArgs[1], ignoreCase = true)) {
-            return if (mutArgs.size == 2) {
-                makeFromSelection(gameName, sender)
-                true
+        // Read the build flags
+        val buildFlags = Game.BuildFlags()
+        buildFlags.skipAir = flags.containsKey(F_SKIP_AIR)
+        buildFlags.deleteVoid = flags.containsKey(F_VOID_TO_AIR)
+
+        val (root, schema) = Pair(flags[F_PLUGIN], flags[F_SCHEMA]).let { (plug, schema) ->
+            if (plug.isNullOrBlank()) {
+                if (schema.isNullOrBlank()) {
+                    Pair(null, null)
+                } else {
+                    Pair(root("we"), schema)
+                }
             } else {
-                false
+                if (schema.isNullOrBlank()) {
+                    Pair(root(plug), defaultSchema(plug))
+                } else {
+                    Pair(root(plug), schema)
+                }
             }
         }
-        val skipAir = mutArgs.getOrNull(3)
-                .equals("skipAir", ignoreCase = true)
-        if (mutArgs.size >= 3) {
-            val saveDir = root(mutArgs[1]) ?: return false
-            makeFromFile(gameName, mutArgs[2], saveDir, sender, skipAir)
-            return true
+
+        return if (root != null && schema != null) {
+            makeFromFile(gameName, schema, root, sender, buildFlags)
+            true
         } else {
-            return false
+            makeFromSelection(gameName, sender, buildFlags)
+            true
         }
     }
 
-    private fun makeFromSelection(gameName: String, sender: CommandSender) {
+    private fun makeFromSelection(gameName: String, sender: CommandSender, flags: Game.BuildFlags) {
         if (sender !is Player) {
             context(Text.MUST_BE_PLAYER).sendTo(sender)
             return
@@ -91,7 +138,7 @@ class GameCreate(parent: Cmd) : Cmd(parent) {
             try {
                 val region = session.getSelection(session.selectionWorld)
                 val box = selectionBounds(region)
-                val game = BuildGameFromRegion(gameName, box)
+                val game = BuildGameFromRegion(gameName, box, flags)
                 Text.CREATE_SUCCESS.with("game", game).sendTo(sender)
             } catch (e: IncompleteRegionException) { // FIXME can selection occur in world other than selection?
                 throw RuntimeException("Selection World different to selection", e)
@@ -99,11 +146,11 @@ class GameCreate(parent: Cmd) : Cmd(parent) {
         }
     }
 
-    private fun makeFromFile(gameName: String, schemaName: String, saveDir: File, player: Player, skipAir: Boolean) {
+    private fun makeFromFile(gameName: String, schemaName: String, saveDir: File, player: Player, flags: Game.BuildFlags) {
         val matches = saveDir.listFiles { dir: File -> dir.path.contains(schemaName) } ?: emptyArray()
         matches // The minimum length path will be the closest match
             .minBy { it.name.length }?.also { file: File ->
-                val game = BuildGameFromSchema(gameName, player.location, file, skipAir)
+                val game = BuildGameFromSchema(gameName, player.location, file, flags)
                 context(Text.CREATE_SUCCESS)
                         .with("game", game)
                         .sendTo(player)
@@ -133,30 +180,4 @@ class GameCreate(parent: Cmd) : Cmd(parent) {
     override fun usage(): Message {
         return context(Text.CREATE_USAGE).format()
     }
-}
-private val bm = Bomberman.instance
-private val we = WorldEdit.getInstance()
-private fun root(plugin: String): File? {
-    if (plugin.equals("bomberman", ignoreCase = true)
-            || plugin.equals("bm", ignoreCase = true)) {
-        return bm.settings.builtinSaves()
-    }
-    if (plugin.equals("worldedit", ignoreCase = true) || plugin.equals("we", ignoreCase = true))
-        return we.getWorkingDirectoryFile(we.configuration.saveDir)
-    return null
-}
-
-private fun allFiles(root: File): List<File> {
-    val files = root.listFiles() ?: return listOf()
-    val fileList: MutableList<File> = ArrayList()
-    for (f in files) {
-        if (f.isDirectory) {
-            val subFiles = allFiles(f)
-            // empty subdir
-            fileList.addAll(subFiles)
-        } else {
-            fileList.add(f)
-        }
-    }
-    return fileList
 }
