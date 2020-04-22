@@ -27,7 +27,7 @@ class ItemWrapper(private val item: ItemStack) : Formattable {
                     .format()
         } else when (args[0].toString()) {
             "amount" -> Message.of(item.amount)
-            "type" -> Message.of(item.type.key.toString())
+            "type" -> Message.of(item.type.toString().toLowerCase())
             else -> Message.empty
         }
     }

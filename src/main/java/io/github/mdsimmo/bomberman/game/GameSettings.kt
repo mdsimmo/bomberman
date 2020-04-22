@@ -72,12 +72,12 @@ class GameSettings : ConfigurationSerializable {
     }
 
     var bombItem: Material = Material.TNT
-    var powerItem: Material = Material.GUNPOWDER
+    var powerItem: Material = Material.SULPHUR
     var fireType: Material = Material.FIRE
     var blockLoot: Map<Material, Map<ItemStack, Number>> =
             mapOf(
                 Pair(ItemStack(Material.TNT, 1), 4.0),
-                Pair(ItemStack(Material.GUNPOWDER, 1), 3.0),
+                Pair(ItemStack(Material.SULPHUR, 1), 3.0),
                 Pair(BukkitUtils.makePotion(PotionType.INSTANT_HEAL, 1), 1.0),
                 Pair(BukkitUtils.makePotion(PotionType.SPEED, 1, upgraded = true), 1.0),
                 Pair(BukkitUtils.makePotion(PotionType.INVISIBILITY, 1), 1.0),
@@ -111,9 +111,9 @@ class GameSettings : ConfigurationSerializable {
 
     override fun serialize(): Map<String, Any> {
         val objs: MutableMap<String, Any> = HashMap()
-        objs["bomb"] = bombItem.key.toString()
-        objs["power"] = powerItem.key.toString()
-        objs["fire"] = fireType.key.toString()
+        objs["bomb"] = bombItem.toString()
+        objs["power"] = powerItem.toString()
+        objs["fire"] = fireType.toString()
         // condense duplicate loot values by swapping key and values
         val lootBlock = mutableMapOf<Map<ItemStack, Number>, MutableSet<Material>>()
         blockLoot.forEach { (mat, loot) ->
@@ -121,7 +121,7 @@ class GameSettings : ConfigurationSerializable {
         }
         objs["loot-table"] = lootBlock
                 .map { (loot, matList) -> mapOf(
-                        Pair("blocks", matList.map { it.key.toString() }.toList()),
+                        Pair("blocks", matList.map { it.toString() }.toList()),
                         Pair("loot", loot.map {(item, weight) ->
                             mapOf(
                                     Pair("item", item),
@@ -130,15 +130,15 @@ class GameSettings : ConfigurationSerializable {
                         })
                 )}
         objs["destructible"] = destructible
-                .map { it.key.toString() }
+                .map { it.toString() }
         objs["indestructible"] = indestructible
-                .map { it.key.toString() }
+                .map { it.toString() }
         objs["pass-keep"] = passKeep
-                .map { it.key.toString() }
+                .map { it.toString() }
         objs["pass-revert"] = passRevert
-                .map { it.key.toString() }
+                .map { it.toString() }
         objs["pass-destroy"] = passDestroy
-                .map { it.key.toString() }
+                .map { it.toString() }
         objs["initial-items"] = initialItems
         objs["lives"] = lives
         objs["fuse-ticks"] = fuseTicks

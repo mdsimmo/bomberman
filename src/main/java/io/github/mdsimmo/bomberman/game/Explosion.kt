@@ -222,7 +222,7 @@ class Explosion private constructor(
         private fun isPassing(b: Block, settings: GameSettings): Boolean {
             val t = b.type
             return t == Material.AIR || t == settings.fireType
-                    || (b.isPassable && !(settings.indestructible.contains(t) || settings.destructible.contains(t)))
+                    || (t.isSolid && !(settings.indestructible.contains(t) || settings.destructible.contains(t)))
                     || settings.passDestroy.contains(t)
                     || settings.passKeep.contains(t)
                     || settings.passRevert.contains(t)

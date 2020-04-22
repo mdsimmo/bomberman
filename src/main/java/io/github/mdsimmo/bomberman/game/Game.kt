@@ -1,18 +1,12 @@
 package io.github.mdsimmo.bomberman.game
 
+import com.sk89q.worldedit.BlockVector
+import com.sk89q.worldedit.CuboidClipboard
 import com.sk89q.worldedit.WorldEdit
-import com.sk89q.worldedit.bukkit.BukkitAdapter
-import com.sk89q.worldedit.extent.clipboard.BlockArrayClipboard
-import com.sk89q.worldedit.extent.clipboard.Clipboard
-import com.sk89q.worldedit.extent.clipboard.io.BuiltInClipboardFormat
-import com.sk89q.worldedit.extent.clipboard.io.ClipboardFormats
-import com.sk89q.worldedit.function.mask.BlockTypeMask
-import com.sk89q.worldedit.function.operation.ForwardExtentCopy
-import com.sk89q.worldedit.function.operation.Operations
-import com.sk89q.worldedit.function.pattern.BlockPattern
-import com.sk89q.worldedit.math.BlockVector3
-import com.sk89q.worldedit.session.ClipboardHolder
-import com.sk89q.worldedit.world.block.BlockTypes
+import com.sk89q.worldedit.bukkit.BukkitWorld
+import com.sk89q.worldedit.regions.CuboidRegion
+import com.sk89q.worldedit.schematic.SchematicFormat
+import com.sk89q.worldedit.world.World
 import io.github.mdsimmo.bomberman.Bomberman
 import io.github.mdsimmo.bomberman.events.*
 import io.github.mdsimmo.bomberman.messaging.Formattable
@@ -35,8 +29,6 @@ import org.bukkit.event.HandlerList
 import org.bukkit.event.Listener
 import org.bukkit.event.server.PluginDisableEvent
 import java.io.File
-import java.io.FileInputStream
-import java.io.FileOutputStream
 import java.lang.ref.WeakReference
 
 class Game private constructor(val name: String, private var schema: Arena, val settings: GameSettings = plugin.settings.defaultGameSettings())
@@ -85,21 +77,14 @@ class Game private constructor(val name: String, private var schema: Arena, val 
         fun buildGameFromRegion(name: String, box: Box, flags: BuildFlags): Game {
 
             // Copy the blocks to a clipboard
-            val region = WorldEditUtils.convert(box)
-            val clipboard = BlockArrayClipboard(region)
-            WorldEdit.getInstance().editSessionFactory.getEditSession(BukkitAdapter.adapt(box.world), -1)
-                    .use { editSession ->
-                        val forwardExtentCopy = ForwardExtentCopy(
-                                editSession, region, clipboard, region.minimumPoint
-                        )
-                        Operations.complete(forwardExtentCopy)
-                    }
+            val clipboard = CuboidClipboard(WorldEditUtils.convert(box.size), WorldEditUtils.convert(box.p1))
+            val editSession = WorldEdit.getInstance().editSessionFactory.getEditSession(BukkitWorld(box.world) as World, -1)
+            clipboard.copy(editSession)
+            editSession.flushQueue()
 
             // Write the clipboard to a schematic file
             val file = File(plugin.settings.customSaves(), "$name.schematic")
-            BuiltInClipboardFormat.SPONGE_SCHEMATIC.getWriter(FileOutputStream(file)).use {
-                writer -> writer.write(clipboard)
-            }
+            SchematicFormat.MCEDIT.save(clipboard, file)
 
             // Make the Game
             val game = Game(name, Arena(file, BukkitUtils.boxLoc1(box), clipboard, flags))
@@ -157,7 +142,7 @@ class Game private constructor(val name: String, private var schema: Arena, val 
             searchSpawns()
         }
 
-        private var clipboard: WeakReference<Clipboard>? = null
+        private var clipboard: WeakReference<CuboidClipboard>? = null
 
         constructor(file: File, origin: Location, flags: BuildFlags) {
             this.file = file
@@ -165,7 +150,7 @@ class Game private constructor(val name: String, private var schema: Arena, val 
             this.origin = BukkitUtils.blockLoc(origin)
         }
 
-        constructor(file: File, origin: Location, clipboard: Clipboard, flags: BuildFlags) {
+        constructor(file: File, origin: Location, clipboard: CuboidClipboard, flags: BuildFlags) {
             this.file = file
             this.flags = flags
             this.origin = BukkitUtils.blockLoc(origin)
@@ -173,12 +158,11 @@ class Game private constructor(val name: String, private var schema: Arena, val 
             this.clipboard = WeakReference(clipboard)
         }
 
-        internal fun loadClipboard() : Clipboard =
+        internal fun loadClipboard() : CuboidClipboard =
             clipboard?.get() ?: {
                 plugin.logger.info("Reading schematic data")
                 // Load the schematic
-                val format = ClipboardFormats.findByFile(file)
-                val c = format!!.getReader(FileInputStream(file)).use { it.read() }
+                val c = SchematicFormat.MCEDIT.load(file)
 
                 // cache the schematic
                 clipboard = WeakReference(c)
@@ -191,8 +175,8 @@ class Game private constructor(val name: String, private var schema: Arena, val 
 
             plugin.logger.info("Searching for spawns...")
             val spawns = mutableSetOf<Location>()
-            for (loc in clip.region) {
-                val block = clip.getFullBlock(loc)
+            for (loc in CuboidRegion(clip.origin, clip.origin.add(clip.offset))) {
+                val block = clip.getBlock(loc)
                 block.nbtData?.let {
                     if (
                             it.getString("Text1").contains("[spawn]", ignoreCase = true) or
@@ -200,7 +184,9 @@ class Game private constructor(val name: String, private var schema: Arena, val 
                             it.getString("Text3").contains("[spawn]", ignoreCase = true) or
                             it.getString("Text4").contains("[spawn]", ignoreCase = true)
                     ) {
-                        spawns += BukkitAdapter.adapt(box.world, loc.subtract(clip.origin)).add(origin)
+                        spawns += Location(box.world, loc.x, loc.y, loc.z)
+                                .subtract(clip.origin.x, clip.origin.y, clip.origin.z)
+                                .add(origin)
                     }
                 }
             }
@@ -214,36 +200,21 @@ class Game private constructor(val name: String, private var schema: Arena, val 
             val clip = loadClipboard()
 
             // cleanup any dropped items
-            box.world.getNearbyEntities(BukkitUtils.convert(box))
+            box.world.getNearbyEntities(
+                    BukkitUtils.boxLoc1(box).add(BukkitUtils.boxLoc2(box)).multiply(0.5),
+                    box.size.x.toDouble()/2, box.size.y.toDouble()/2, box.size.z.toDouble()/2)
                     .filterIsInstance<Item>()
                     .forEach{ it.remove() }
 
             // Paste the schematic
-            WorldEdit.getInstance().editSessionFactory.getEditSession(BukkitAdapter.adapt(box.world), -1)
-                    .use { editSession ->
+            val editSession = WorldEdit.getInstance().editSessionFactory.getEditSession(BukkitWorld(box.world) as World, -1)
+            val operation = clip.paste(editSession, BlockVector(origin.blockX, origin.blockY, origin.blockZ), flags.skipAir)
+            editSession.flushQueue()
 
-                        val operation = ClipboardHolder(clip)
-                                .createPaste(editSession)
-                                .to(BlockVector3.at(origin.blockX, origin.blockY, origin.blockZ))
-                                .copyEntities(true)
-                                .ignoreAirBlocks(flags.skipAir)
-                                .build()
-                        Operations.complete(operation)
-
-                        editSession.flushSession()
-
-                        if (flags.deleteVoid) {
-                            editSession.replaceBlocks(WorldEditUtils.convert(box),
-                                    BlockTypeMask(editSession, BlockTypes.STRUCTURE_VOID),
-                                    BlockPattern(BlockTypes.AIR!!.defaultState)
-                            )
-                        }
-
-                        // TODO undo arena build
-                        // this undoes the building, but it should also delete the game
-                        //if (user != null)
-                        //    WorldEdit.getInstance().sessionManager.get(BukkitAdapter.adapt(user))?.remember(editSession)
-                    }
+            // TODO undo arena build
+            // this undoes the building, but it should also delete the game
+            //if (user != null)
+            //    WorldEdit.getInstance().sessionManager.get(BukkitAdapter.adapt(user))?.remember(editSession)
             plugin.logger.info("Rebuild done")
         }
 
@@ -332,21 +303,20 @@ class Game private constructor(val name: String, private var schema: Arena, val 
 
     private fun removeCages(replaceSpawnSign: Boolean) {
         val clip = schema.loadClipboard()
-        WorldEdit.getInstance().editSessionFactory
-                .getEditSession(BukkitAdapter.adapt(schema.origin.world), -1).use { editSession ->
-                    val offset = BlockVector3.at(schema.origin.x, schema.origin.y, schema.origin.z)
-                            .subtract(clip.origin)
-                    spawnBlocks()
-                            .filter { (isSpawn, _) ->
-                                replaceSpawnSign or !isSpawn
-                            }
-                            .forEach { (_, block) ->
-                                val loc = block.location
-                                val blockVec = BlockVector3.at(loc.x, loc.y, loc.z)
-                                val clipLocation = blockVec.subtract(offset)
-                                val blockState = clip.getFullBlock(clipLocation)
-                                editSession.setBlock(blockVec, blockState)
-                            }
+        val editSession = WorldEdit.getInstance().editSessionFactory
+                .getEditSession(BukkitWorld(schema.origin.world) as World, -1)
+        val offset = BlockVector(schema.origin.x, schema.origin.y, schema.origin.z)
+                .subtract(clip.origin)
+        spawnBlocks()
+                .filter { (isSpawn, _) ->
+                    replaceSpawnSign or !isSpawn
+                }
+                .forEach { (_, block) ->
+                    val loc = block.location
+                    val blockVec = BlockVector(loc.x, loc.y, loc.z)
+                    val clipLocation = blockVec.subtract(offset)
+                    val blockState = clip.getBlock(clipLocation)
+                    editSession.setBlock(blockVec, blockState)
                 }
     }
 
@@ -354,8 +324,8 @@ class Game private constructor(val name: String, private var schema: Arena, val 
         spawnBlocks().forEach { (sign, block) ->
             if (sign) {
                 block.type = Material.AIR
-            } else if (block.isPassable) {
-                block.type = Material.WHITE_STAINED_GLASS
+            } else if (block.type.isSolid) {
+                block.type = Material.STAINED_GLASS
             }
         }
     }

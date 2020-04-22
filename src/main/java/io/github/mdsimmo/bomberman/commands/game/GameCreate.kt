@@ -2,7 +2,6 @@ package io.github.mdsimmo.bomberman.commands.game
 
 import com.sk89q.worldedit.IncompleteRegionException
 import com.sk89q.worldedit.WorldEdit
-import com.sk89q.worldedit.bukkit.BukkitAdapter
 import com.sk89q.worldedit.session.SessionOwner
 import io.github.mdsimmo.bomberman.Bomberman
 import io.github.mdsimmo.bomberman.commands.Cmd
@@ -159,7 +158,7 @@ class GameCreate(parent: Cmd) : Cmd(parent) {
             context(Text.MUST_BE_PLAYER).sendTo(sender)
             return
         }
-        val owner: SessionOwner = BukkitAdapter.adapt(sender)
+        val owner: SessionOwner = Bomberman.worldEdit.wrapCommandSender(sender)
         val session = WorldEdit.getInstance().sessionManager.getIfPresent(owner)
         if (session == null || session.selectionWorld == null) {
             context(Text.CREATE_NEED_SELECTION).sendTo(sender)

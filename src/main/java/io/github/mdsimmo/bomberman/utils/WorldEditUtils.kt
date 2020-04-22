@@ -1,31 +1,34 @@
 package io.github.mdsimmo.bomberman.utils
 
-import com.sk89q.worldedit.bukkit.BukkitAdapter
+import com.sk89q.worldedit.BlockVector
+import com.sk89q.worldedit.CuboidClipboard
+import com.sk89q.worldedit.Vector
+import com.sk89q.worldedit.bukkit.BukkitWorld
 import com.sk89q.worldedit.extent.clipboard.Clipboard
-import com.sk89q.worldedit.math.BlockVector3
 import com.sk89q.worldedit.regions.CuboidRegion
 import com.sk89q.worldedit.regions.Region
+import com.sk89q.worldedit.world.World
 import org.bukkit.Location
 
 object WorldEditUtils {
 
     @JvmStatic
-    fun convert(box: Box): CuboidRegion = CuboidRegion(BukkitAdapter.adapt(box.world),
-            BlockVector3.at(box.p1.x.toDouble(), box.p1.y.toDouble(), box.p1.z.toDouble()),
-            BlockVector3.at(box.p2.x.toDouble(), box.p2.y.toDouble(), box.p2.z.toDouble()))
+    fun convert(box: Box): CuboidRegion = CuboidRegion(BukkitWorld(box.world) as World,
+            BlockVector(box.p1.x, box.p1.y, box.p1.z),
+            BlockVector(box.p2.x, box.p2.y, box.p2.z))
 
     @JvmStatic
-    fun convert(dim: Dim): BlockVector3 = BlockVector3.at(dim.x, dim.y, dim.z)
+    fun convert(dim: Dim): BlockVector = BlockVector(dim.x, dim.y, dim.z)
 
     @JvmStatic
-    fun convert(vec: BlockVector3): Dim = Dim(vec.x, vec.y, vec.z)
+    fun convert(vec: Vector): Dim = Dim(vec.x.toInt(), vec.y.toInt(), vec.z.toInt())
 
     @JvmStatic
-    fun pastedBounds(pasteLocation: Location, clipboard: Clipboard): Box {
-        val pasteVec = BlockVector3.at(pasteLocation.blockX, pasteLocation.blockY, pasteLocation.blockZ)
+    fun pastedBounds(pasteLocation: Location, clipboard: CuboidClipboard): Box {
+        val pasteVec = BlockVector(pasteLocation.blockX, pasteLocation.blockY, pasteLocation.blockZ)
         val delta = pasteVec.subtract(clipboard.origin)
-        val min = clipboard.minimumPoint.add(delta)
-        val max = clipboard.maximumPoint.add(delta)
+        val min = clipboard.offset.add(delta)
+        val max = clipboard.offset.add(delta).add(clipboard.size)
 
         return Box(pasteLocation.world!!, convert(min), convert(max))
     }
@@ -35,7 +38,7 @@ object WorldEditUtils {
         val min = region.minimumPoint
         val max = region.maximumPoint
 
-        return Box(BukkitAdapter.adapt(region.world), convert(min), convert(max))
+        return Box((region.world as BukkitWorld).world, convert(min), convert(max))
     }
 
 }

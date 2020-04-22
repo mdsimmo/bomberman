@@ -1,9 +1,11 @@
 package io.github.mdsimmo.bomberman;
 
+import com.sk89q.worldedit.bukkit.WorldEditPlugin;
 import io.github.mdsimmo.bomberman.commands.BaseCommand;
 import io.github.mdsimmo.bomberman.game.Game;
 import io.github.mdsimmo.bomberman.game.GamePlayer;
 import io.github.mdsimmo.bomberman.game.GameSettings;
+import org.bukkit.Bukkit;
 import org.bukkit.command.PluginCommand;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.serialization.ConfigurationSerialization;
@@ -25,11 +27,16 @@ public class Bomberman extends JavaPlugin implements Listener {
 	@Nonnull
 	public static Bomberman instance;
 
+	@SuppressWarnings("NotNullFieldNotInitialized")
+	@Nonnull
+	public static WorldEditPlugin worldEdit;
+
 	private BmSetting settings;
 
 	@Override
 	public void onEnable() {
 		instance = this;
+		worldEdit = (WorldEditPlugin) Bukkit.getPluginManager().getPlugin("WorldEdit");
 
 		ConfigurationSerialization.registerClass(GameSettings.class);
 		ConfigurationSerialization.registerClass(Game.BuildFlags.class);
