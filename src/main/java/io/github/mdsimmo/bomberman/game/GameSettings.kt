@@ -87,7 +87,8 @@ class GameSettings : ConfigurationSerializable {
                     Pair(Material.SNOW_BLOCK, it),
                     Pair(Material.DIRT, it),
                     Pair(Material.SAND, it),
-                    Pair(Material.GRAVEL, it)
+                    Pair(Material.GRAVEL, it),
+                    Pair(Material.SANDSTONE, it)
                 )
             }
     var destructible = setOf(

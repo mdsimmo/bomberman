@@ -37,10 +37,11 @@ dependencies {
     testImplementation "org.mockito:mockito-core:3.3.+"
 }
 
+
 processResources  {
      // auto assign values in the plugin.yml
     // Do not filter schematics as they get corrupted when trying to be read as text
-    filesNotMatching("**.schem") {
+    filesNotMatching(["**.schematic"]) {
         filter {
             line ->
                 line

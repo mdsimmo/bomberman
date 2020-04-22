@@ -26,9 +26,9 @@ object WorldEditUtils {
     @JvmStatic
     fun pastedBounds(pasteLocation: Location, clipboard: CuboidClipboard): Box {
         val pasteVec = BlockVector(pasteLocation.blockX, pasteLocation.blockY, pasteLocation.blockZ)
-        val delta = pasteVec.subtract(clipboard.origin)
-        val min = clipboard.offset.add(delta)
-        val max = clipboard.offset.add(delta).add(clipboard.size)
+        val delta = pasteVec.subtract(clipboard.origin).add(clipboard.offset)
+        val min = clipboard.origin.add(delta)
+        val max = clipboard.origin.add(delta).add(clipboard.size)
 
         return Box(pasteLocation.world!!, convert(min), convert(max))
     }

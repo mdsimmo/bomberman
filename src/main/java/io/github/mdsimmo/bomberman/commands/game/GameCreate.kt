@@ -39,7 +39,7 @@ class GameCreate(parent: Cmd) : Cmd(parent) {
 
         private fun defaultSchema(plugin: String): String? {
             return when(plugin.toLowerCase()) {
-                "bm", "bomberman" -> "purple"
+                "bm", "bomberman" -> "ruins"
                 else -> null
             }
         }
@@ -168,8 +168,8 @@ class GameCreate(parent: Cmd) : Cmd(parent) {
                 val box = selectionBounds(region)
                 val game = buildGameFromRegion(gameName, box, flags)
                 Text.CREATE_SUCCESS.with("game", game).sendTo(sender)
-            } catch (e: IncompleteRegionException) { // FIXME can selection occur in world other than selection?
-                throw RuntimeException("Selection World different to selection", e)
+            } catch (e: IncompleteRegionException) {
+                context(Text.CREATE_NEED_SELECTION).sendTo(sender)
             }
         }
     }

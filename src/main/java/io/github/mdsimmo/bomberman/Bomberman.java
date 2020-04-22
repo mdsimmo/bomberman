@@ -63,7 +63,7 @@ public class Bomberman extends JavaPlugin implements Listener {
 
 	private void extractResources() {
 		String[] schematics = new String[] {
-		        "purple.schem"
+		        "ruins.schematic"
         };
 	    for (String schem : schematics) {
 			try (InputStream input = new BufferedInputStream(

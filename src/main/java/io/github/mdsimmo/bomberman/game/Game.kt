@@ -1,7 +1,10 @@
+@file:Suppress("DEPRECATION")
+
 package io.github.mdsimmo.bomberman.game
 
 import com.sk89q.worldedit.BlockVector
 import com.sk89q.worldedit.CuboidClipboard
+import com.sk89q.worldedit.Vector
 import com.sk89q.worldedit.WorldEdit
 import com.sk89q.worldedit.bukkit.BukkitWorld
 import com.sk89q.worldedit.regions.CuboidRegion
@@ -175,7 +178,7 @@ class Game private constructor(val name: String, private var schema: Arena, val 
 
             plugin.logger.info("Searching for spawns...")
             val spawns = mutableSetOf<Location>()
-            for (loc in CuboidRegion(clip.origin, clip.origin.add(clip.offset))) {
+            for (loc in CuboidRegion(Vector.ZERO, clip.size.subtract(1, 1, 1))) {
                 val block = clip.getBlock(loc)
                 block.nbtData?.let {
                     if (
@@ -185,8 +188,7 @@ class Game private constructor(val name: String, private var schema: Arena, val 
                             it.getString("Text4").contains("[spawn]", ignoreCase = true)
                     ) {
                         spawns += Location(box.world, loc.x, loc.y, loc.z)
-                                .subtract(clip.origin.x, clip.origin.y, clip.origin.z)
-                                .add(origin)
+                                .add(origin).add(clip.offset.x, clip.offset.y, clip.offset.z)
                     }
                 }
             }
@@ -208,7 +210,7 @@ class Game private constructor(val name: String, private var schema: Arena, val 
 
             // Paste the schematic
             val editSession = WorldEdit.getInstance().editSessionFactory.getEditSession(BukkitWorld(box.world) as World, -1)
-            val operation = clip.paste(editSession, BlockVector(origin.blockX, origin.blockY, origin.blockZ), flags.skipAir)
+            clip.paste(editSession, BlockVector(origin.blockX, origin.blockY, origin.blockZ), flags.skipAir)
             editSession.flushQueue()
 
             // TODO undo arena build
@@ -305,8 +307,7 @@ class Game private constructor(val name: String, private var schema: Arena, val 
         val clip = schema.loadClipboard()
         val editSession = WorldEdit.getInstance().editSessionFactory
                 .getEditSession(BukkitWorld(schema.origin.world) as World, -1)
-        val offset = BlockVector(schema.origin.x, schema.origin.y, schema.origin.z)
-                .subtract(clip.origin)
+        val offset = BlockVector(schema.origin.x, schema.origin.y, schema.origin.z).add(clip.offset)
         spawnBlocks()
                 .filter { (isSpawn, _) ->
                     replaceSpawnSign or !isSpawn
@@ -324,7 +325,7 @@ class Game private constructor(val name: String, private var schema: Arena, val 
         spawnBlocks().forEach { (sign, block) ->
             if (sign) {
                 block.type = Material.AIR
-            } else if (block.type.isSolid) {
+            } else if (!block.type.isSolid) {
                 block.type = Material.STAINED_GLASS
             }
         }
