@@ -115,9 +115,10 @@ class Game private constructor(val name: String, private var schema: Arena, val 
         }
     }
 
-    class BuildFlags : ConfigurationSerializable {
-        var skipAir = false
-        var deleteVoid = false
+    data class BuildFlags(
+            var skipAir: Boolean = false,
+            var deleteVoid: Boolean = false
+    ) : ConfigurationSerializable {
 
         override fun serialize(): Map<String, Any> {
             return mapOf(
@@ -431,7 +432,7 @@ class Game private constructor(val name: String, private var schema: Arena, val 
             return
 
         if (running) {
-            e.cancelBecause(Text.GAME_ALREADY_STARTED.with("game", this).format())
+            e.cancelFor(Text.GAME_ALREADY_STARTED.with("game", this).format())
             return
         }
 

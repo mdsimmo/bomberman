@@ -1,6 +1,5 @@
 package io.github.mdsimmo.bomberman.messaging
 
-import io.github.mdsimmo.bomberman.Bomberman
 import org.bukkit.configuration.InvalidConfigurationException
 import org.bukkit.configuration.file.YamlConfiguration
 import java.io.BufferedReader
@@ -323,11 +322,11 @@ enum class Text(path: String) : Contexted {
             server = YamlConfiguration()
             try {
                 builtin.load(reader)
-                Bomberman.instance?.let {
+                   /*     Bomberman.instance?.let {
                     val custom = it.settings.language()
                     if (custom.exists())
                         server.load(custom)
-                }
+                }*/
             } catch (e: IOException) {
                 e.printStackTrace()
             } catch (e: InvalidConfigurationException) {
