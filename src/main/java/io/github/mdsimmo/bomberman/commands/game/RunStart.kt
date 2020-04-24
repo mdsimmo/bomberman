@@ -58,7 +58,7 @@ class RunStart(parent: Cmd) : GameCommand(parent) {
         val e = BmRunStartCountDownIntent.startGame(game, delay)
         if (e.isCancelled) {
             (e.cancelledReason
-                    ?: Text.GAME_START_CANCELLED
+                    ?: Text.COMMAND_CANCELLED
                             .with("game", game)
                             .format()
                     )

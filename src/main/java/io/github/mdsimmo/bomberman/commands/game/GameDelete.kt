@@ -12,7 +12,7 @@ import org.bukkit.command.CommandSender
 
 class GameDelete(parent: Cmd) : GameCommand(parent) {
     override fun name(): Message {
-        return context(Text.DESTROY_NAME).format()
+        return context(Text.DELETE_NAME).format()
     }
 
     override fun gameOptions(args: List<String>): List<String> {
@@ -23,7 +23,7 @@ class GameDelete(parent: Cmd) : GameCommand(parent) {
         if (args.isNotEmpty())
             return false
         BmGameDeletedIntent.delete(game, true)
-        context(Text.DESTROY_SUCCESS).with("game", game).sendTo(sender)
+        context(Text.DELETE_SUCCESS).with("game", game).sendTo(sender)
         return true
     }
 
@@ -32,18 +32,18 @@ class GameDelete(parent: Cmd) : GameCommand(parent) {
     }
 
     override fun example(): Message {
-        return context(Text.DESTROY_EXAMPLE).format()
+        return context(Text.DELETE_EXAMPLE).format()
     }
 
     override fun extra(): Message {
-        return context(Text.DESTROY_EXTRA).format()
+        return context(Text.DELETE_EXTRA).format()
     }
 
     override fun description(): Message {
-        return context(Text.DESTROY_DESCRIPTION).format()
+        return context(Text.DELETE_DESCRIPTION).format()
     }
 
     override fun usage(): Message {
-        return context(Text.DESTROY_USAGE).format()
+        return context(Text.DELETE_USAGE).format()
     }
 }

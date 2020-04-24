@@ -30,7 +30,7 @@ class SetLives(parent: Cmd) : GameCommand(parent) {
         }
         game.settings.lives = amount
         Game.saveGame(game)
-        context(Text.LIVES_SET)
+        context(Text.LIVES_SUCCESS)
                 .with("game", game)
                 .sendTo(sender)
         return true

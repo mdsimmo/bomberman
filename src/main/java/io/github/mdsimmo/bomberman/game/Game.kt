@@ -408,7 +408,7 @@ class Game private constructor(val name: String, private var schema: Arena, val 
         // Check if there is spare room
         val gameSpawn = findSpareSpawn()
         if (gameSpawn == null) {
-            e.cancelFor(Text.GAME_FULL
+            e.cancelFor(Text.JOIN_GAME_FULL
                     .with("game", this)
                     .with("player", e.player)
                     .format())
