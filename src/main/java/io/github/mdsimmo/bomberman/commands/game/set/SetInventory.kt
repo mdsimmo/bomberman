@@ -4,14 +4,17 @@ import io.github.mdsimmo.bomberman.commands.Cmd
 import io.github.mdsimmo.bomberman.commands.GameCommand
 import io.github.mdsimmo.bomberman.commands.Permission
 import io.github.mdsimmo.bomberman.commands.Permissions
+import io.github.mdsimmo.bomberman.commands.game.set.inventory.PlayerInvEditor
 import io.github.mdsimmo.bomberman.game.Game
 import io.github.mdsimmo.bomberman.messaging.Message
 import io.github.mdsimmo.bomberman.messaging.Text
+import org.bukkit.GameMode
 import org.bukkit.command.CommandSender
+import org.bukkit.entity.Player
 
-class SetLives(parent: Cmd) : GameCommand(parent) {
+class SetInventory(parent: Cmd) : GameCommand(parent) {
     override fun name(): Message {
-        return context(Text.LIVES_NAME).format()
+        return context(Text.INVENTORY_NAME).format()
     }
 
     override fun gameOptions(args: List<String>): List<String> {
@@ -19,40 +22,38 @@ class SetLives(parent: Cmd) : GameCommand(parent) {
     }
 
     override fun gameRun(sender: CommandSender, args: List<String>, flags: Map<String, String>, game: Game): Boolean {
-        if (args.size != 1)
+        if (args.isNotEmpty())
             return false
-        val amount = args[0].toIntOrNull()
-        if (amount == null) {
-            context(Text.INVALID_NUMBER)
-                    .with("number", args[0])
-                    .sendTo(sender)
+        if (sender !is Player) {
+            context(Text.MUST_BE_PLAYER).sendTo(sender)
             return true
         }
-        game.settings.lives = amount
-        Game.saveGame(game)
-        context(Text.LIVES_SUCCESS)
-                .with("game", game)
-                .sendTo(sender)
+        if (sender.gameMode != GameMode.CREATIVE) {
+            context(Text.INVENTORY_NEED_CREATIVE).sendTo(sender)
+            return true
+        }
+
+        PlayerInvEditor.manage(sender, game)
         return true
     }
 
     override fun permission(): Permission {
-        return Permissions.SET_LIVES
+        return Permissions.SET_INVENTORY
     }
 
     override fun extra(): Message {
-        return context(Text.LIVES_EXTRA).format()
+        return context(Text.INVENTORY_EXTRA).format()
     }
 
     override fun example(): Message {
-        return context(Text.LIVES_EXAMPLE).format()
+        return context(Text.INFO_EXAMPLE).format()
     }
 
     override fun description(): Message {
-        return context(Text.LIVES_DESCRIPTION).format()
+        return context(Text.INVENTORY_DESCRIPTION).format()
     }
 
     override fun usage(): Message {
-        return context(Text.LIVES_USAGE).format()
+        return context(Text.INVENTORY_USAGE).format()
     }
 }

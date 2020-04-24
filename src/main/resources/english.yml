@@ -139,6 +139,19 @@ command:
     # The amount of lives has been set
     # {game}: the game
     success: Lives set to {game|lives}
+  # Messages relating to '/bm set inventory'
+  inventory:
+    name: inventory
+    description: Sets what the players initially hold
+    usage: /{command|path} <game>
+    example: ''
+    extra: '{#gray|{#italic|Creative users only}}'
+    # The inventory has been updated
+    # {game}: the game
+    success: Inventory updated
+    # If player tries to edit when not in creative
+    # {player}: the player
+    need-creative: '{#red|You must be in creative}'
   # Messages relating to '/bm set'
   set:
     name: set

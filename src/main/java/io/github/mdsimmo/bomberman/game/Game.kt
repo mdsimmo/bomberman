@@ -547,9 +547,9 @@ class Game private constructor(val name: String, private var schema: Arena, val 
             "players" -> CollectionWrapper(players.map { SenderWrapper(it) })
                     .format(args.drop(1))
             "power" -> Message.of(settings.initialItems.sumBy {
-                if (it.type == settings.bombItem) { it.amount } else { 0 }})
+                if (it?.type == settings.bombItem) { it.amount } else { 0 }})
             "bombs" -> Message.of(settings.initialItems.sumBy {
-                if (it.type == settings.powerItem) { it.amount } else { 0 }})
+                if (it?.type == settings.powerItem) { it.amount } else { 0 }})
             "lives" -> Message.of(settings.lives.toString())
             "w", "world" -> Message.of(schema.origin.world?.name ?: "unknown")
             "x" -> Message.of(schema.origin.x.toInt())

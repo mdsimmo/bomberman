@@ -5,6 +5,7 @@ import io.github.mdsimmo.bomberman.utils.RefectAccess
 import org.bukkit.Material
 import org.bukkit.configuration.file.YamlConfiguration
 import org.bukkit.configuration.serialization.ConfigurationSerializable
+import org.bukkit.entity.Item
 import org.bukkit.inventory.ItemStack
 import org.bukkit.potion.PotionType
 
@@ -51,7 +52,7 @@ class GameSettings : ConfigurationSerializable {
             readMaterials(data["pass-revert"])?.also { settings.passRevert = it }
             readMaterials(data["pass-destroy"])?.also { settings.passDestroy = it }
             (data["initial-items"] as? List<*>)
-                    ?.filterIsInstance<ItemStack>()
+                    ?.map { it as? ItemStack }
                     ?.also {
                         settings.initialItems = it
                     }
@@ -101,7 +102,7 @@ class GameSettings : ConfigurationSerializable {
     var passKeep = setOf<Material>()
     var passRevert = setOf<Material>()
     var passDestroy = setOf<Material>()
-    var initialItems = listOf(
+    var initialItems = listOf<ItemStack?>(
             ItemStack(bombItem, 3)
     )
     var lives = 3

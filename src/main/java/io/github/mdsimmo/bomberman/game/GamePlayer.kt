@@ -64,9 +64,9 @@ class GamePlayer private constructor(private val player: Player, private val gam
             player.foodLevel = 100000 // just a big number
             player.isFlying = false
             player.inventory.clear()
-            for (stack in game.settings.initialItems) {
-                val s = stack.clone()
-                player.inventory.addItem(s)
+            for ((i, stack) in game.settings.initialItems.withIndex()) {
+                if (i < player.inventory.size)
+                    player.inventory.setItem(i, stack?.clone())
             }
             removePotionEffects(player)
 

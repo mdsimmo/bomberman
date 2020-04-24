@@ -41,7 +41,13 @@ permissions:
     children:
       bomberman.create: true
       bomberman.delete: true
+      bomberman.set.*: true
+  bomberman.set.*:
+    description: Allows editting game's details
+    children:
       bomberman.set: true
+      bomberman.set.lives: true
+      bomberman.set.inventory: true
   bomberman.bm:
     description: Root bomberman command (/bm)
     default: true
@@ -74,4 +80,10 @@ permissions:
     default: op
   bomberman.set:
     description: /bm set
+    default: op
+  bomberman.set.lives:
+    description: /bm set lives
+    default: op
+  bomberman.set.inventory:
+    description: /bm set inventory
     default: op

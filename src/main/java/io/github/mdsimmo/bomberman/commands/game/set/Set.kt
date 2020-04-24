@@ -22,7 +22,8 @@ class Set(parent: Cmd) : CommandGroup(parent) {
 
     init {
         addChildren( //new Schema(this),
-                SetLives(this)
+                SetLives(this),
+                SetInventory(this)
         )
     }
 }

@@ -12,6 +12,8 @@ enum class Permissions(val permission: String) : Permission {
     DELETE("bomberman.delete"),
     RELOAD("bomberman.reload"),
     SET("bomberman.set"),
+    SET_LIVES("bomberman.set.lives"),
+    SET_INVENTORY("bomberman.set.inventory"),
     START("bomberman.start"),
     STOP("bomberman.stop"),
     INFO("bomberman.info"),
