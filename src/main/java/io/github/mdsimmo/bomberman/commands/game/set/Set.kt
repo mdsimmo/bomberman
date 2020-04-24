@@ -2,6 +2,8 @@ package io.github.mdsimmo.bomberman.commands.game.set
 
 import io.github.mdsimmo.bomberman.commands.Cmd
 import io.github.mdsimmo.bomberman.commands.CommandGroup
+import io.github.mdsimmo.bomberman.commands.Permission
+import io.github.mdsimmo.bomberman.commands.Permissions
 import io.github.mdsimmo.bomberman.messaging.Message
 import io.github.mdsimmo.bomberman.messaging.Text
 
@@ -11,7 +13,7 @@ class Set(parent: Cmd) : CommandGroup(parent) {
     }
 
     override fun permission(): Permission {
-        return Permission.GAME_DICTATE
+        return Permissions.SET
     }
 
     override fun description(): Message {

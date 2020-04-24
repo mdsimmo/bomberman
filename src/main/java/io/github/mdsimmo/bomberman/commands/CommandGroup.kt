@@ -18,35 +18,40 @@ abstract class CommandGroup(parent: Cmd?) : Cmd(parent) {
         this.children.addAll(listOf(*children))
     }
 
-    private fun child(args: List<String>): Cmd? {
+    private fun child(sender: CommandSender, args: List<String>): Cmd? {
         return args.firstOrNull()?.let {arg ->
-            children.firstOrNull { c -> c.name().toString().equals(arg, ignoreCase = true) }
+            children.filter { it.permission().isAllowedBy(sender) }
+                    .firstOrNull { c -> c.name().toString().equals(arg, ignoreCase = true) }
         }
     }
 
     override fun options(sender: CommandSender, args: List<String>): List<String> {
-        return when (val c = child(args)) {
-            null -> children.map { it.name().toString() }
-            else -> c.options(sender, args.drop(1))
+        return when (val c = child(sender, args)) {
+            null -> children
+                    .filter { it.permission().isAllowedBy(sender) }
+                    .map { it.name().toString() }
+            else -> {
+                c.options(sender, args.drop(1))
+            }
         }
     }
 
-    override fun flags(args: List<String>, flags: Map<String, String>): Set<String> {
-        return when (val c = child(args)) {
+    override fun flags(sender: CommandSender, args: List<String>, flags: Map<String, String>): Set<String> {
+        return when (val c = child(sender, args)) {
             null -> emptySet()
-            else -> c.flags(args.drop(1), flags)
+            else -> c.flags(sender, args.drop(1), flags)
         }
     }
 
-    override fun flagOptions(flag: String, args: List<String>, flags: Map<String, String>): Set<String> {
-        return when (val c = child(args)) {
+    override fun flagOptions(sender: CommandSender, flag: String, args: List<String>, flags: Map<String, String>): Set<String> {
+        return when (val c = child(sender, args)) {
             null -> emptySet()
-            else -> c.flagOptions(flag, args.drop(1), flags)
+            else -> c.flagOptions(sender, flag, args.drop(1), flags)
         }
     }
 
     override fun help(sender: CommandSender, args: List<String>, flags: Map<String, String>) {
-        when (val c = child(args)) {
+        when (val c = child(sender, args)) {
             null -> context(Text.COMMAND_GROUP_HELP).sendTo(sender)
             else -> c.help(sender, args.drop(1), flags)
         }

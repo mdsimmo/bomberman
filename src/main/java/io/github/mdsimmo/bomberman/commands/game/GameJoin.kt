@@ -2,6 +2,8 @@ package io.github.mdsimmo.bomberman.commands.game
 
 import io.github.mdsimmo.bomberman.commands.Cmd
 import io.github.mdsimmo.bomberman.commands.GameCommand
+import io.github.mdsimmo.bomberman.commands.Permission
+import io.github.mdsimmo.bomberman.commands.Permissions
 import io.github.mdsimmo.bomberman.events.BmPlayerJoinGameIntent
 import io.github.mdsimmo.bomberman.game.Game
 import io.github.mdsimmo.bomberman.messaging.Message
@@ -49,7 +51,7 @@ class GameJoin(parent: Cmd) : GameCommand(parent) {
     }
 
     override fun permission(): Permission {
-        return Permission.PLAYER
+        return Permissions.JOIN
     }
 
     override fun extra(): Message {

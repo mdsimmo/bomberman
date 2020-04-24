@@ -9,7 +9,7 @@ commands:
     description: Main command for Bomberman
     usage: bomberman <more commands>
     aliases: bm
-    permission: bomberman.observer
+    permission: bomberman.bm
 
 depend: [WorldEdit]
 # SoftDepend Multiverse so Bomberman is loaded after the Multiverse worlds get loaded
@@ -19,15 +19,59 @@ permissions:
   bomberman.*:
     description: Gives access to all Bomberman commands
     children:
-      bomberman.player: true
-      bomberman.operator: true
+      bomberman.bm: true
       bomberman.dictator: true
+      bomberman.operator: true
+      bomberman.player: true
   bomberman.player:
-    description: Allows you to join/leave bomberman games
-    default: true
+    description: Allows join/leave/info
+    children:
+      bomberman.join: true
+      bomberman.leave: true
+      bomberman.info: true
+      bomberman.list: true
   bomberman.operator:
-    description: Allows you control games (eg, start/stop)
-    default: op
+    description: Allows control of games (start/stop)
+    children:
+      bomberman.start: true
+      bomberman.stop: true
+      bomberman.reload: true
   bomberman.dictator:
-    description: Complete control over a bomberman game settings
+    description: Allows building/configuring games
+    children:
+      bomberman.create: true
+      bomberman.delete: true
+      bomberman.set: true
+  bomberman.bm:
+    description: Root bomberman command (/bm)
+    default: true
+  bomberman.join:
+    description: /bm join
+    default: true
+  bomberman.leave:
+    description: /bm join
+    default: true
+  bomberman.info:
+    description: /bm info
+    default: true
+  bomberman.list:
+    description: /bm list
+    default: true
+  bomberman.start:
+    description: /bm start
+    default: op
+  bomberman.stop:
+    description: /bm stop
+    default: op
+  bomberman.reload:
+    description: /bm reload
+    default: op
+  bomberman.create:
+    description: /bm create
+    default: op
+  bomberman.delete:
+    description: /bm delete
+    default: op
+  bomberman.set:
+    description: /bm set
     default: op

@@ -2,6 +2,8 @@ package io.github.mdsimmo.bomberman.commands.game
 
 import io.github.mdsimmo.bomberman.commands.Cmd
 import io.github.mdsimmo.bomberman.commands.GameCommand
+import io.github.mdsimmo.bomberman.commands.Permission
+import io.github.mdsimmo.bomberman.commands.Permissions
 import io.github.mdsimmo.bomberman.events.BmRunStoppedIntent
 import io.github.mdsimmo.bomberman.game.Game
 import io.github.mdsimmo.bomberman.messaging.Message
@@ -30,7 +32,7 @@ class RunStop(parent: Cmd) : GameCommand(parent) {
     }
 
     override fun permission(): Permission {
-        return Permission.GAME_OPERATE
+        return Permissions.STOP
     }
 
     override fun gameOptions(args: List<String>): List<String> {

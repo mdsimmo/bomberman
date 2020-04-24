@@ -2,6 +2,8 @@ package io.github.mdsimmo.bomberman.commands.game
 
 import io.github.mdsimmo.bomberman.commands.Cmd
 import io.github.mdsimmo.bomberman.commands.GameCommand
+import io.github.mdsimmo.bomberman.commands.Permission
+import io.github.mdsimmo.bomberman.commands.Permissions
 import io.github.mdsimmo.bomberman.events.BmRunStartCountDownIntent
 import io.github.mdsimmo.bomberman.game.Game
 import io.github.mdsimmo.bomberman.messaging.Message
@@ -17,7 +19,7 @@ class RunStart(parent: Cmd) : GameCommand(parent) {
         return emptyList()
     }
 
-    override fun flags(args: List<String>, flags: Map<String, String>): Set<String> {
+    override fun flags(sender: CommandSender, args: List<String>, flags: Map<String, String>): Set<String> {
         return setOf("d")
     }
 
@@ -68,7 +70,7 @@ class RunStart(parent: Cmd) : GameCommand(parent) {
     }
 
     override fun permission(): Permission {
-        return Permission.GAME_OPERATE
+        return Permissions.START
     }
 
     override fun extra(): Message {

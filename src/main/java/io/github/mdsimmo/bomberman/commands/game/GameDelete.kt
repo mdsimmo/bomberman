@@ -2,6 +2,8 @@ package io.github.mdsimmo.bomberman.commands.game
 
 import io.github.mdsimmo.bomberman.commands.Cmd
 import io.github.mdsimmo.bomberman.commands.GameCommand
+import io.github.mdsimmo.bomberman.commands.Permission
+import io.github.mdsimmo.bomberman.commands.Permissions
 import io.github.mdsimmo.bomberman.events.BmGameDeletedIntent
 import io.github.mdsimmo.bomberman.game.Game
 import io.github.mdsimmo.bomberman.messaging.Message
@@ -26,7 +28,7 @@ class GameDelete(parent: Cmd) : GameCommand(parent) {
     }
 
     override fun permission(): Permission {
-        return Permission.GAME_DICTATE
+        return Permissions.DELETE
     }
 
     override fun example(): Message {

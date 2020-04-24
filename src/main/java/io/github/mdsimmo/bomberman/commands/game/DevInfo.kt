@@ -2,6 +2,8 @@ package io.github.mdsimmo.bomberman.commands.game
 
 import io.github.mdsimmo.bomberman.Bomberman
 import io.github.mdsimmo.bomberman.commands.Cmd
+import io.github.mdsimmo.bomberman.commands.Permission
+import io.github.mdsimmo.bomberman.commands.Permissions
 import io.github.mdsimmo.bomberman.messaging.Message
 import org.bukkit.Bukkit
 import org.bukkit.ChatColor
@@ -129,7 +131,7 @@ class DevInfo(parent: Cmd) : Cmd(parent) {
     }
 
     override fun permission(): Permission {
-        return Permission.GAME_DICTATE
+        return Permissions.CREATE
     }
 
     override fun example(): Message {

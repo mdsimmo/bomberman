@@ -33,7 +33,7 @@ class BaseCommand : CommandGroup(null), TabCompleter, CommandExecutor {
     }
 
     override fun permission(): Permission {
-        return Permission.PLAYER
+        return Permissions.BASE
     }
 
     override fun description(): Message {
@@ -56,10 +56,10 @@ class BaseCommand : CommandGroup(null), TabCompleter, CommandExecutor {
         val allOptions = if (currentlyTyping.startsWith("-")) {
             val splitIndex = currentlyTyping.indexOf('=')
             if (splitIndex == -1) {
-                flags(arguments, flags).map { "-$it" } + "-?"
+                flags(sender, arguments, flags).map { "-$it" } + "-?"
             } else {
                 val key = currentlyTyping.substring(1, splitIndex)
-                flagOptions(key, arguments, flags)
+                flagOptions(sender, key, arguments, flags)
                         .map { "-$key=$it" }
             }
         } else {

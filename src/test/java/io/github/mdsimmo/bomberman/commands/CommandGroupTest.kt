@@ -19,19 +19,19 @@ class CommandGroupTest {
 
             override fun description(): Message = Message.of("desc")
 
-            override fun permission(): Permission = Permission.GAME_DICTATE
+            override fun permission(): Permission = Permissions.CREATE
         }
 
         val child = mock(Cmd::class.java, "child")
         group.addChildren(child)
         `when`(child.name()).thenReturn(Message.of("Child"))
-        `when`(child.permission()).thenReturn(Cmd.Permission.GAME_DICTATE)
+        `when`(child.permission()).thenReturn(Permissions.CREATE)
         `when`(child.run(any(), eq(listOf("hello", "world")), eq(emptyMap()))).thenReturn(true)
 
         val child2 = mock(Cmd::class.java, "child2")
         group.addChildren(child2)
         `when`(child2.name()).thenReturn(Message.of("child2"))
-        `when`(child2.permission()).thenReturn(Cmd.Permission.GAME_DICTATE)
+        `when`(child2.permission()).thenReturn(Permissions.CREATE)
 
         val sender = mock(CommandSender::class.java, "sender")
         `when`(sender.hasPermission(anyString())).thenReturn(true)
@@ -55,31 +55,37 @@ class CommandGroupTest {
 
             override fun description(): Message = Message.of("desc")
 
-            override fun permission(): Permission = Permission.GAME_DICTATE
+            override fun permission(): Permission = Permissions.CREATE
         }
 
         val sender = mock(CommandSender::class.java, "sender")
         `when`(sender.hasPermission(anyString())).thenReturn(true)
+        val permission = mock(Permission::class.java)
+        `when`(permission.isAllowedBy(any())).thenReturn(true)
 
         val child = mock(Cmd::class.java, "child")
         group.addChildren(child)
         `when`(child.name()).thenReturn(Message.of("child"))
+        `when`(child.permission()).thenReturn(permission)
         `when`(child.options(sender, listOf("hello", "world"))).thenReturn(listOf("all", "good"))
 
         val child2 = mock(Cmd::class.java, "child2")
         group.addChildren(child2)
         `when`(child2.name()).thenReturn(Message.of("child2"))
+        `when`(child2.permission()).thenReturn(permission)
 
         val result = group.options(sender, listOf("chIlD", "hello", "world"))
 
         assertEquals(listOf("all", "good"), result)
 
         verify(child).name()
+        verify(child).permission()
         verify(child).options(sender, listOf("hello", "world"))
         verifyNoMoreInteractions(child)
 
         // child2 should not be touched
         verify(child2, atMostOnce()).name()
+        verify(child2, atMostOnce()).permission()
         verifyNoMoreInteractions(child2)
 
         // Nothing should be sent to player

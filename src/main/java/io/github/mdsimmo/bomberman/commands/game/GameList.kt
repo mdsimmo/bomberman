@@ -1,6 +1,8 @@
 package io.github.mdsimmo.bomberman.commands.game
 
 import io.github.mdsimmo.bomberman.commands.Cmd
+import io.github.mdsimmo.bomberman.commands.Permission
+import io.github.mdsimmo.bomberman.commands.Permissions
 import io.github.mdsimmo.bomberman.events.BmGameListIntent
 import io.github.mdsimmo.bomberman.messaging.Message
 import io.github.mdsimmo.bomberman.messaging.Text
@@ -26,7 +28,7 @@ class GameList(parent: Cmd?) : Cmd(parent) {
     }
 
     override fun permission(): Permission {
-        return Permission.PLAYER
+        return Permissions.LIST
     }
 
     override fun example(): Message {
