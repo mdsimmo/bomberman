@@ -26,6 +26,7 @@ class GameLeave(parent: Cmd) : Cmd(parent) {
             if (e.isHandled()) {
                 Text.LEAVE_SUCCESS
                         .with("player", sender)
+                        .with("game", e.game ?: Message.error("none"))
                         .sendTo(sender)
             } else {
                 Text.LEAVE_NOT_JOINED

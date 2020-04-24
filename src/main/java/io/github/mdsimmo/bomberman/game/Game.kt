@@ -35,6 +35,7 @@ import org.bukkit.event.server.PluginDisableEvent
 import java.io.File
 import java.io.FileInputStream
 import java.io.FileOutputStream
+import java.lang.IllegalArgumentException
 import java.lang.ref.WeakReference
 
 class Game private constructor(val name: String, private var schema: Arena, val settings: GameSettings = plugin.settings.defaultGameSettings())
@@ -416,11 +417,6 @@ class Game private constructor(val name: String, private var schema: Arena, val 
         GamePlayer.spawnGamePlayer(e.player, this, gameSpawn)
         players.add(e.player)
         e.setHandled()
-
-        // Trigger auto-start if needed
-        if (findSpareSpawn() == null) {
-            BmRunStartCountDownIntent.startGame(this, 5, false)
-        }
     }
 
     @EventHandler(ignoreCancelled = true, priority = EventPriority.HIGHEST)
@@ -535,7 +531,18 @@ class Game private constructor(val name: String, private var schema: Arena, val 
             return Message.of(name)
         return when (args[0].toString()) {
             "name" -> Message.of(name)
-            "maxplayers" -> Message.of(spawns.size)
+            "spawns" -> CollectionWrapper(spawns.map { object : Formattable {
+                override fun format(args: List<Message>): Message {
+                    require(args.size == 1) { "Spawn format must have one arg" }
+                    return when(args[0].toString().toLowerCase()) {
+                        "world", "w" -> Message.of(it.world?.name ?: "unknown")
+                        "x" -> Message.of(it.x.toInt())
+                        "y" -> Message.of(it.y.toInt())
+                        "z" -> Message.of(it.z.toInt())
+                        else -> throw IllegalArgumentException("Unknown spawn format ${args[0]}")
+                    }
+                }
+            } }).format(args.drop(1))
             "schema" -> schema.format(args.drop(1))
             "players" -> CollectionWrapper(players.map { SenderWrapper(it) })
                     .format(args.drop(1))
@@ -544,6 +551,7 @@ class Game private constructor(val name: String, private var schema: Arena, val 
             "bombs" -> Message.of(settings.initialItems.sumBy {
                 if (it.type == settings.powerItem) { it.amount } else { 0 }})
             "lives" -> Message.of(settings.lives.toString())
+            "w", "world" -> Message.of(schema.origin.world?.name ?: "unknown")
             "x" -> Message.of(schema.origin.x.toInt())
             "y" -> Message.of(schema.origin.y.toInt())
             "z" -> Message.of(schema.origin.z.toInt())

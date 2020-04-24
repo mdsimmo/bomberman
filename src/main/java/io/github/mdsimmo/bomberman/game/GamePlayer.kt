@@ -344,7 +344,7 @@ class GamePlayer private constructor(private val player: Player, private val gam
         } else {
             resetStuffAndUnregister()
         }
-        e.setHandled()
+        e.setHandled(game)
     }
 
     @EventHandler(ignoreCancelled = true, priority = EventPriority.HIGHEST)
