@@ -14,7 +14,8 @@ object Expander {
             Pair("#len", LengthExpander()),
             Pair("#sub", SubstringExpander()),
             Pair("#padl", PadLeftExpander()),
-            Pair("#padr", PadRightExpander())
+            Pair("#padr", PadRightExpander()),
+            Pair("#exec", Execute())
     ).also {
         for (color in ChatColor.values()) {
             it["#${color.name.toLowerCase()}"] = ColorWrapper(color)

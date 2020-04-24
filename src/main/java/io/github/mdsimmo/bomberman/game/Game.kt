@@ -15,9 +15,7 @@ import com.sk89q.worldedit.session.ClipboardHolder
 import com.sk89q.worldedit.world.block.BlockTypes
 import io.github.mdsimmo.bomberman.Bomberman
 import io.github.mdsimmo.bomberman.events.*
-import io.github.mdsimmo.bomberman.messaging.Formattable
-import io.github.mdsimmo.bomberman.messaging.Message
-import io.github.mdsimmo.bomberman.messaging.Text
+import io.github.mdsimmo.bomberman.messaging.*
 import io.github.mdsimmo.bomberman.utils.Box
 import io.github.mdsimmo.bomberman.utils.BukkitUtils
 import io.github.mdsimmo.bomberman.utils.RefectAccess
@@ -539,7 +537,8 @@ class Game private constructor(val name: String, private var schema: Arena, val 
             "name" -> Message.of(name)
             "maxplayers" -> Message.of(spawns.size)
             "schema" -> schema.format(args.drop(1))
-            "players" -> Message.of(players.size.toString())
+            "players" -> CollectionWrapper(players.map { SenderWrapper(it) })
+                    .format(args.drop(1))
             "power" -> Message.of(settings.initialItems.sumBy {
                 if (it.type == settings.bombItem) { it.amount } else { 0 }})
             "bombs" -> Message.of(settings.initialItems.sumBy {

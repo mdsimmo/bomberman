@@ -88,7 +88,7 @@ abstract class Cmd(protected var parent: Cmd?) : Formattable {
 
     fun incorrectUsage(sender: CommandSender, args: List<String>) {
         context(Text.INCORRECT_USAGE)
-                .with("attempt", CollectionWrapper<Message>(
+                .with("attempt", CollectionWrapper(
                         args.map { Message.of(it) }
                 ))
                 .sendTo(sender)

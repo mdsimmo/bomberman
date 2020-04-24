@@ -3,6 +3,7 @@ package io.github.mdsimmo.bomberman.messaging
 import net.objecthunter.exp4j.ExpressionBuilder
 import net.objecthunter.exp4j.function.Function
 import net.objecthunter.exp4j.operator.Operator
+import org.bukkit.Bukkit
 import org.bukkit.ChatColor
 import org.bukkit.command.CommandSender
 import org.bukkit.inventory.ItemStack
@@ -36,7 +37,23 @@ class ItemWrapper(private val item: ItemStack) : Formattable {
 
 class SenderWrapper(private val sender: CommandSender) : Formattable {
     override fun format(args: List<Message>): Message {
-        return Message.of(sender.name)
+        return when (args.getOrNull(0)?.toString()?.toLowerCase() ?: "name") {
+            "name" -> Message.of(sender.name)
+            "msg" -> {
+                require(args.size >= 2) { "Sending a message requires a second argument" }
+                args[1].sendTo(sender)
+                Message.empty
+            }
+            "exec" -> {
+                require(args.size >= 2) { "Exec requires a second argument" }
+                val cmd = args[1].toString()
+                Bukkit.getServer().dispatchCommand(sender, cmd)
+                Message.empty
+            }
+            else -> {
+                throw IllegalArgumentException("Unknown CommandSender option: ${args[0]}")
+            }
+        }
     }
 }
 
@@ -49,7 +66,7 @@ class ColorWrapper(private val color: ChatColor) : Formattable {
 
 class CollectionWrapper<T : Formattable>(private val list: Collection<T>) : Formattable {
     override fun format(args: List<Message>): Message {
-        return when (args.getOrNull(0)?.toString() ?: "foreach") {
+        return when (args.getOrNull(0)?.toString() ?: "length") {
             "foreach" -> {
                 // Join all elements by applying arg[1] to each item separated by arg[2]
                 val mapper = args.getOrNull(1)?.toString() ?: "format.foreach"
@@ -123,6 +140,14 @@ class Switch : Formattable {
             i += 2
         }
         // no default supplied
+        return Message.empty
+    }
+}
+
+class Execute : Formattable {
+    override fun format(args: List<Message>): Message {
+        require(args.size == 1) { "Execute format is {#exec|command}" }
+        Bukkit.getServer().dispatchCommand(Bukkit.getConsoleSender(), args[0].toString())
         return Message.empty
     }
 }
