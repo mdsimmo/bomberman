@@ -8,7 +8,11 @@ import org.bukkit.event.HandlerList
 /**
  * Called whenever a run is attempted to be started
  */
-class BmRunStartCountDownIntent private constructor(val game: Game, var delay: Int): BmEvent(),
+class BmRunStartCountDownIntent private constructor(
+        val game: Game,
+        var delay: Int,
+        val override: Boolean
+    ): BmEvent(),
         IntentCancellable by BmIntentCancellable() {
     private var cancelReason: Message? = null
 
@@ -26,8 +30,8 @@ class BmRunStartCountDownIntent private constructor(val game: Game, var delay: I
 
     companion object {
         @JvmStatic
-        fun startGame(game: Game, delay: Int): BmRunStartCountDownIntent {
-            val e = BmRunStartCountDownIntent(game, delay)
+        fun startGame(game: Game, delay: Int, override: Boolean): BmRunStartCountDownIntent {
+            val e = BmRunStartCountDownIntent(game, delay, override)
             Bukkit.getPluginManager().callEvent(e)
             e.verifyHandled()
             return e

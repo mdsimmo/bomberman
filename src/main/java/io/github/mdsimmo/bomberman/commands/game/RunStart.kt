@@ -20,7 +20,7 @@ class RunStart(parent: Cmd) : GameCommand(parent) {
     }
 
     override fun flags(sender: CommandSender, args: List<String>, flags: Map<String, String>): Set<String> {
-        return setOf("d")
+        return setOf("d", "o")
     }
 
     override fun flagExtension(flag: String): Message {
@@ -33,6 +33,7 @@ class RunStart(parent: Cmd) : GameCommand(parent) {
     override fun flagDescription(flag: String): Message {
         return when (flag) {
             "d" -> context(Text.START_FLAG_DELAY_DESC).format()
+            "o" -> context(Text.START_FLAG_OVERRIDE_DESC).format()
             else -> Message.empty
         }
     }
@@ -55,7 +56,7 @@ class RunStart(parent: Cmd) : GameCommand(parent) {
             }
         }
 
-        val e = BmRunStartCountDownIntent.startGame(game, delay)
+        val e = BmRunStartCountDownIntent.startGame(game, delay, flags.containsKey("o"))
         if (e.isCancelled) {
             (e.cancelledReason
                     ?: Text.COMMAND_CANCELLED

@@ -421,7 +421,7 @@ class Game private constructor(val name: String, private var schema: Arena, val 
 
         // Trigger auto-start if needed
         if (findSpareSpawn() == null) {
-            BmRunStartCountDownIntent.startGame(this, 5)
+            BmRunStartCountDownIntent.startGame(this, 5, false)
         }
     }
 

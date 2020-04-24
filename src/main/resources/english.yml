@@ -87,9 +87,15 @@ command:
       d:
         description: 'The delay in seconds (default=3)'
         ext: '<delay>'
+      o:
+        description: 'Override existing timers (default=false)'
     # Message when a player starts an already started arena
     # {game}: the game attempted to be started
     already-started: Game {game} already started
+    # Called if game start was called when a timer was already running
+    # {game}: the game attempted to be started
+    # {time}: the time remaining
+    already-counting: Game {game} already counting
     # The game has been started
     # {game}: the game that has been started
     success: Game {game} starting
