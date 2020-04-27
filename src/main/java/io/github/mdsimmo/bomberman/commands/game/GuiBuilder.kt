@@ -109,8 +109,7 @@ class GuiBuilder : Listener {
 
     @EventHandler
     fun onInventoryClosed(e: InventoryCloseEvent) {
-        val mem = lookup[e.view] ?: return
-        lookup.remove(e.view)
+        val mem = lookup.remove(e.view) ?: return
         val inv = e.inventory
         mem.onClose(sequence {
             for (index in mem.slots) {
