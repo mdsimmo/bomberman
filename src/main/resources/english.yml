@@ -152,6 +152,18 @@ command:
     # If player tries to edit when not in creative
     # {player}: the player
     need-creative: '{#red|You must be in creative}'
+  block-types:
+    name: blocktypes
+    description: Sets how tnt interacts with blocks
+    usage: /{command|path} <game>
+    example: ''
+    extra: '{#gray|{#italic|Creative users only}}'
+    # The game has been updated
+    # {game}: the game
+    success: Blocks updated
+    # If player tries to edit when not in creative
+    # {player}: the player
+    need-creative: '{#red|You must be in creative}'
   # Messages relating to '/bm set'
   set:
     name: set

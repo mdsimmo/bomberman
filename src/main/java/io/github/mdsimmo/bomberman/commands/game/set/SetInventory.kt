@@ -35,7 +35,6 @@ class SetInventory(parent: Cmd) : GameCommand(parent) {
             return true
         }
 
-        val starterInv = game.settings.initialItems
         GuiBuilder.show(sender, "Initial Inventory", arrayOf(
                 "  HCLBS  ",
                 "  aaaas  ",
@@ -44,11 +43,12 @@ class SetInventory(parent: Cmd) : GameCommand(parent) {
                 "iiiiiiiii",
                 "hhhhhhhhh"),
                 onInit = { index ->
+                    val initialItems = game.settings.initialItems
                     when (index.section) {
-                        'a' -> GuiBuilder.ItemSlot(starterInv[index.secIndex+9*4])
-                        's' -> GuiBuilder.ItemSlot(starterInv[(9*4+4)])
-                        'h' -> GuiBuilder.ItemSlot(starterInv[index.secIndex])
-                        'i' -> GuiBuilder.ItemSlot(starterInv[index.secIndex+9])
+                        'a' -> GuiBuilder.ItemSlot(initialItems[(3-index.secIndex)+9*4])
+                        's' -> GuiBuilder.ItemSlot(initialItems[(9*4+4)])
+                        'h' -> GuiBuilder.ItemSlot(initialItems[index.secIndex])
+                        'i' -> GuiBuilder.ItemSlot(initialItems[index.secIndex+9])
                         'H' -> GuiBuilder.ItemSlot(Material.IRON_HELMET).unMovable().hideAttributes()
                         'C' -> GuiBuilder.ItemSlot(Material.IRON_CHESTPLATE).unMovable().hideAttributes()
                         'L' -> GuiBuilder.ItemSlot(Material.IRON_LEGGINGS).unMovable().hideAttributes()
@@ -61,7 +61,7 @@ class SetInventory(parent: Cmd) : GameCommand(parent) {
                     val closingItems = Array<ItemStack?>(9*4+5) { null }
                     for ((index, item) in inventoryIterator) {
                         when(index.section) {
-                            'a' -> closingItems[9*4+index.secIndex] = item
+                            'a' -> closingItems[9*4+(3-index.secIndex)] = item
                             's' -> closingItems[9*4+4] = item
                             'h' -> closingItems[index.secIndex] = item
                             'i' -> closingItems[9+index.secIndex] = item

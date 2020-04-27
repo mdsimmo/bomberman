@@ -23,7 +23,7 @@ class GuiBuilder : Listener {
     data class ItemSlot(val item: ItemStack?) {
         constructor(type: Material, qty: Int = 1): this(ItemStack(type, qty))
 
-        fun alterMeta(mod: (ItemMeta) -> Unit): ItemSlot {
+        private fun alterMeta(mod: (ItemMeta) -> Unit): ItemSlot {
             val newItem = item?.clone() ?: return this
             val itemMeta = newItem.itemMeta!!
             mod(itemMeta)
@@ -46,8 +46,6 @@ class GuiBuilder : Listener {
 
     companion object {
 
-        val blank = ItemSlot(Material.BLACK_STAINED_GLASS_PANE).hideAttributes().displayName("-").unMovable()
-
         fun show(player: Player, name: String, contents: Array<CharSequence>,
                  onInit: (Index) -> ItemSlot,
                  onClick: (Index, ItemStack?, ItemStack?) -> Unit = { _, _, _ -> },
@@ -59,7 +57,7 @@ class GuiBuilder : Listener {
 
             val slotLookup = ArrayList<Index>()
             val sectionCount = mutableMapOf<Char, AtomicInteger>()
-            for (i in 0..size) {
+            for (i in 0 until size) {
                 val x  = i % 9
                 val y = i / 9
                 val c = contents[y][x]
@@ -81,6 +79,7 @@ class GuiBuilder : Listener {
         private val plugin = Bomberman.instance
         private val noMoveKey = NamespacedKey(plugin, "nomove")
         private val lookup: MutableMap<InventoryView, InvMemory> = HashMap()
+        val blank = ItemSlot(Material.BLACK_STAINED_GLASS_PANE).hideAttributes().displayName("-").unMovable()
 
         init {
             Bukkit.getPluginManager().registerEvents(GuiBuilder(), plugin)
@@ -113,6 +112,9 @@ class GuiBuilder : Listener {
     @EventHandler
     fun onInventoryItemClicked(e: InventoryClickEvent) {
         val mem = lookup[e.view] ?: return
+        if (e.clickedInventory != e.inventory) {
+            return
+        }
         val index = mem.slots[e.slot]
         val currentItem = e.currentItem
         val cursorItem = e.cursor

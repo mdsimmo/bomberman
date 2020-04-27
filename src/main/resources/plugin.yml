@@ -48,6 +48,7 @@ permissions:
       bomberman.set: true
       bomberman.set.lives: true
       bomberman.set.inventory: true
+      bomberman.set.block-types: true
   bomberman.bm:
     description: Root bomberman command (/bm)
     default: true
@@ -86,4 +87,7 @@ permissions:
     default: op
   bomberman.set.inventory:
     description: /bm set inventory
+    default: op
+  bomberman.set.block-types:
+    description: /bm set blocktypes
     default: op
