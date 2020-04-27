@@ -229,14 +229,12 @@ class Explosion private constructor(
         }
 
         @JvmStatic
-		fun <T> lootSelect(loot: Map<out T, Number>): Set<T> {
+		fun <T> lootSelect(loot: Map<out T, Int>): Set<T> {
             // Sum the weights
-            var sum = loot.values
-                    .sumByDouble(Number::toDouble)
+            var sum = loot.values.sum()
 
             // Select the item based off weights
-            for ((item, value) in loot) {
-                val weight = value.toDouble()
+            for ((item, weight) in loot) {
                 if (sum * Math.random() <= weight) {
                     return setOf(item)
                 }
@@ -244,7 +242,7 @@ class Explosion private constructor(
             }
 
             // Handle possible empty set
-            return if (sum == 0.0)
+            return if (sum == 0)
                 emptySet()
             else
                 throw RuntimeException("Explosion.drop didn't select (should never happen)")

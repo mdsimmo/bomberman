@@ -19,7 +19,7 @@ class ExplosionTest {
     @Test
     fun lootSelectWithNoLootGetsNothing() {
         for (i in 0..99) {
-            val loot = mapOf<String, Number>()
+            val loot = mapOf<String, Int>()
             val got = lootSelect(loot)
             Assert.assertEquals(setOf<String>(), got)
         }

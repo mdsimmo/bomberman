@@ -19,7 +19,14 @@ import java.util.concurrent.atomic.AtomicInteger
 
 class GuiBuilder : Listener {
 
-    data class Index (val x: Int, val y: Int, val invIndex: Int, val section: Char, val secIndex: Int, val inventory: Inventory)
+    data class Index (
+            val x: Int,
+            val y: Int,
+            val invIndex: Int,
+            val section: Char,
+            val secIndex: Int,
+            val inventory: Inventory
+    )
 
     data class ItemSlot(val item: ItemStack?) {
         constructor(type: Material, qty: Int = 1): this(ItemStack(type, qty))
@@ -76,8 +83,7 @@ class GuiBuilder : Listener {
                 inventory.setItem(i, slot.item)
             }
             val view = player.openInventory(inventory) ?: return
-            lookup[view] =
-                    InvMemory(slotLookup, onClick, onClose)
+            lookup[view] = InvMemory(slotLookup, onClick, onClose)
         }
 
         private val plugin = Bomberman.instance
@@ -126,7 +132,6 @@ class GuiBuilder : Listener {
         if ((currentItem != null && isNotMovable(currentItem))
                 || (cursorItem != null && isNotMovable(cursorItem))) {
             e.isCancelled = true
-            println("CANCELLED")
         }
     }
 

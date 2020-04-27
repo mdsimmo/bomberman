@@ -5,7 +5,6 @@ import io.github.mdsimmo.bomberman.utils.RefectAccess
 import org.bukkit.Material
 import org.bukkit.configuration.file.YamlConfiguration
 import org.bukkit.configuration.serialization.ConfigurationSerializable
-import org.bukkit.entity.Item
 import org.bukkit.inventory.ItemStack
 import org.bukkit.potion.PotionType
 
@@ -27,10 +26,9 @@ class GameSettings : ConfigurationSerializable {
                         val loot = (section["loot"] as? List<*>)
                                 ?.filterIsInstance<Map<*,*>>()
                                 ?.mapNotNull { itemWeight ->
-                                    val weight = itemWeight["weight"] as? Number
+                                    val weight = (itemWeight["weight"] as? Number)?.toInt()
                                     val itemStack = itemWeight["item"] as? ItemStack
-                                    if (itemStack == null || weight == null
-                                            || weight.toDouble() <= 0) {
+                                    if (itemStack == null || weight == null || weight <= 0) {
                                         null
                                     } else {
                                         Pair(itemStack, weight)
@@ -75,14 +73,14 @@ class GameSettings : ConfigurationSerializable {
     var bombItem: Material = Material.TNT
     var powerItem: Material = Material.GUNPOWDER
     var fireType: Material = Material.FIRE
-    var blockLoot: Map<Material, Map<ItemStack, Number>> =
+    var blockLoot: Map<Material, Map<ItemStack, Int>> =
             mapOf(
-                Pair(ItemStack(Material.TNT, 1), 4.0),
-                Pair(ItemStack(Material.GUNPOWDER, 1), 3.0),
-                Pair(BukkitUtils.makePotion(PotionType.INSTANT_HEAL, 1), 1.0),
-                Pair(BukkitUtils.makePotion(PotionType.SPEED, 1, upgraded = true), 1.0),
-                Pair(BukkitUtils.makePotion(PotionType.INVISIBILITY, 1), 1.0),
-                Pair(ItemStack(Material.AIR, 0), 100.0)
+                Pair(ItemStack(Material.TNT, 1), 4),
+                Pair(ItemStack(Material.GUNPOWDER, 1), 3),
+                Pair(BukkitUtils.makePotion(PotionType.INSTANT_HEAL, 1), 1),
+                Pair(BukkitUtils.makePotion(PotionType.SPEED, 1, upgraded = true), 1),
+                Pair(BukkitUtils.makePotion(PotionType.INVISIBILITY, 1), 1),
+                Pair(ItemStack(Material.AIR, 0), 100)
             ).let {
                 mapOf(
                     Pair(Material.SNOW_BLOCK, it),

@@ -5,6 +5,7 @@ import io.github.mdsimmo.bomberman.commands.GameCommand
 import io.github.mdsimmo.bomberman.commands.Permission
 import io.github.mdsimmo.bomberman.commands.Permissions
 import io.github.mdsimmo.bomberman.game.Game
+import io.github.mdsimmo.bomberman.messaging.Contexted
 import io.github.mdsimmo.bomberman.messaging.Message
 import io.github.mdsimmo.bomberman.messaging.Text
 import org.bukkit.GameMode
@@ -12,7 +13,9 @@ import org.bukkit.Material
 import org.bukkit.command.CommandSender
 import org.bukkit.entity.Player
 import org.bukkit.inventory.ItemStack
+import java.util.concurrent.atomic.AtomicInteger
 import kotlin.math.max
+import kotlin.math.min
 
 class Configure(parent: Cmd) : GameCommand(parent) {
     override fun name(): Message {
@@ -81,7 +84,7 @@ class Configure(parent: Cmd) : GameCommand(parent) {
                     when (index.section) {
                         's' -> showGeneralConfig(player, game)
                         'b' -> showBlockSettings(player, game)
-                        'l' -> {}//showLootSettings(player, game)
+                        'l' -> showLootSettings(player, game)
                         'i' -> showInventorySettings(player, game)
                     }
                 }
@@ -273,6 +276,124 @@ class Configure(parent: Cmd) : GameCommand(parent) {
         )
     }
 
+    private fun showLootSettings(player: Player, game: Game) {
+        val gameLoot = game.settings.blockLoot
+        // manipulate the loot into a format that can be shown visually
+        // Need to group blocks with duplicate loot by flipping key/values
+        val lootBlock = mutableMapOf<Map<ItemStack, Int>, MutableSet<Material>>()
+        gameLoot.forEach { (mat, loot) ->
+            lootBlock.getOrPut(loot) { mutableSetOf() }.add(mat)
+        }
+        // Flip the key/values back
+        val loot = lootBlock
+                .map { (loot, matList) ->
+                    Pair(matList.toList(), loot.toList())
+                }.toMutableList()
+
+        showLootSettings(player, game, 0, loot)
+    }
+
+    private fun showLootSettings(player: Player, game: Game, slot: Int, loot: MutableList<Pair<List<Material>, List<Pair<ItemStack, Int>>>>) {
+        // split out stacks with weight over 64
+        val (mats, items) = loot.getOrElse(slot) { Pair(arrayListOf(), arrayListOf()) }.let { (mats, items) ->
+            Pair(mats, items.flatMap {(stack, weight) ->
+                var brokenWeight = weight
+                val list = mutableListOf<Pair<ItemStack, Int>>()
+                do {
+                    list.add(Pair(stack, min(brokenWeight, 64)))
+                    brokenWeight -= 64
+                } while (brokenWeight > 0)
+                list
+            })
+        }
+
+        GuiBuilder.show(player, stringify(Text.CONFIGURE_TITLE_LOOT), arrayOf(
+                "<SSSSSSSS",
+                "Kkkkkkkkk",
+                "         ",
+                "Vvvvvvvvv",
+                "Wwwwwwwww"),
+                onInit = { index ->
+                    when (index.section) {
+                        '<' -> GuiBuilder.ItemSlot(Material.PAPER)
+                                .unMovable().displayName(stringify(Text.CONFIGURE_BACK))
+                        'S' -> {
+                            val icon = when {
+                                // selected
+                                index.secIndex == slot -> Material.YELLOW_CONCRETE
+                                // nothing added
+                                index.secIndex >= loot.size
+                                        || loot[index.secIndex].let { (mats, items) ->
+                                    mats.isEmpty() && items.isEmpty()
+                                }  -> Material.GRAY_CONCRETE
+                                // something present
+                                else -> Material.WHITE_CONCRETE
+                            }
+                            GuiBuilder.ItemSlot(icon)
+                                    .unMovable().displayName(stringify(Text.CONFIGURE_LOOT_SLOT.with("slot", index.secIndex)))
+                        }
+                        'K' -> GuiBuilder.ItemSlot(Material.EMERALD)
+                                .unMovable().displayName(stringify(Text.CONFIGURE_LOOT_BLOCK.with("slot", slot)))
+                        'k' -> GuiBuilder.ItemSlot(mats.getOrNull(index.secIndex)?.let { ItemStack(it) })
+                        'V' -> GuiBuilder.ItemSlot(Material.EMERALD)
+                                .unMovable().displayName(stringify(Text.CONFIGURE_LOOT_ITEM.with("slot", slot)))
+                        'v' -> GuiBuilder.ItemSlot(items.getOrNull(index.secIndex)?.first)
+                        'W' -> GuiBuilder.ItemSlot(Material.EMERALD)
+                                .unMovable().displayName(stringify(Text.CONFIGURE_LOOT_WEIGHT.with("slot", slot)))
+                        'w' -> GuiBuilder.ItemSlot(Material.GOLD_NUGGET, items.getOrNull(index.secIndex)?.second ?: 0)
+                        else -> GuiBuilder.blank
+                    }
+                },
+                onClick = {index, invItem, cursorItem ->
+                    when (index.section) {
+                        '<' -> showMainMenu(player, game)
+                        'S' -> {
+                            // Trying to reload the same slot causes ghost bugs
+                            // (because closing previous screen happens AFTER loading new screen)
+                            showLootSettings(player, game, index.secIndex, loot)
+                            // TODO the colored tiles are one cycle behind because of the close-load order
+                        }
+                    }
+                },
+                onClose = {inventoryIterator ->
+                    val matsSaved = mutableListOf<Material>()
+
+                    // Count the weightings of each item
+                    val itemsSaved = HashMap<ItemStack?, AtomicInteger>()
+                    for ((index, item) in inventoryIterator) {
+                        when (index.section) {
+                            'k' -> item?.let { matsSaved.add(it.type) }
+                            'v' -> {
+                                val weight = index.inventory.getItem(index.invIndex+9)?.amount ?: 0
+                                itemsSaved.getOrPut(item) { AtomicInteger(0) }.addAndGet(weight)
+                            }
+                        }
+                    }
+                    // Override the current list for the next view
+                    // (but first pad the list out to make sure the item slot doesn't move around while editing)
+                    while (loot.size <=  slot) {
+                        loot.add(Pair(listOf(), listOf()))
+                    }
+                    loot[slot] = Pair(matsSaved, itemsSaved.mapNotNull { (stack, weight) ->
+                        if (weight.get() == 0 && stack == null) {
+                            // This filters the empty row sum
+                            null
+                        } else {
+                            Pair(stack ?: ItemStack(Material.AIR, 0), weight.get())
+                        }
+                    }.toList())
+
+                    // Map to standard form to save
+                    game.settings.blockLoot = loot.flatMap {(mats, itemWeights) ->
+                        mats.map {
+                            Pair(it, itemWeights.toMap())
+                        }
+                    }.toMap()
+                    Game.saveGame(game)
+                }
+        )
+    }
+
     private fun setQty(itemStack: ItemStack, amount: Int = itemStack.amount) : ItemStack {
         itemStack.amount = amount
         val meta = itemStack.itemMeta!!
@@ -281,7 +402,7 @@ class Configure(parent: Cmd) : GameCommand(parent) {
         return itemStack
     }
 
-    private fun stringify(text: Text): String {
+    private fun stringify(text: Contexted): String {
         return text.format().toString()
     }
 }

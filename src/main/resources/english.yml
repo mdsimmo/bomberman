@@ -146,24 +146,31 @@ command:
       loot: 'Block Loot Table'
       inventory: 'Starting Kit'
     back: 'Menu'
-    destructible:
-      name: 'Destructible'
-      description: 'Semi-solid blocks'
-    indestructible:
-      name: 'Indestructible'
-      description: 'Solid blocks default'
-    pass-destroy:
-      name: 'Pass Destroy'
-      description: 'Non solid blocks default'
-    pass-keep:
-      name: 'Pass keep'
-      description: 'Fire passes through without changing'
-    lives: Lives
-    fuse-ticks: Fuse ticks
-    fire-ticks: Fire ticks
-    immunity-ticks: Immunity ticks
-    tnt-block: TNT Block
-    fire-item: Fire Item
+    blocks:
+      destructible:
+        name: 'Destructible'
+        description: 'Semi-solid blocks'
+      indestructible:
+        name: 'Indestructible'
+        description: 'Solid blocks default'
+      pass-destroy:
+        name: 'Pass Destroy'
+        description: 'Non solid blocks default'
+      pass-keep:
+        name: 'Pass keep'
+        description: 'Fire passes through without changing'
+    general:
+      lives: Lives
+      fuse-ticks: Fuse ticks
+      fire-ticks: Fire ticks
+      immunity-ticks: Immunity ticks
+      tnt-block: TNT Block
+      fire-item: Fire Item
+    loot:
+      slot: "Block Group {=|{slot}+1}"
+      block: Block Types
+      item: Drop
+      weight: Weighting
   # Messages relating to '/bm create'
   create:
     name: create
