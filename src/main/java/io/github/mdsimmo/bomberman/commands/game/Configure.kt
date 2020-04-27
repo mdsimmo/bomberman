@@ -157,11 +157,12 @@ class Configure(parent: Cmd) : GameCommand(parent) {
     }
 
     private fun showBlockSettings(player: Player, game: Game) {
-        showBlockSettings(player, game, 0, stringify(Text.CONFIGURE_DESTRUCTIBLE_DESC), game.settings.destructible) { game.settings.destructible = it }
+        showBlockSettings(player, game, 0, stringify(Text.CONFIGURE_DESTRUCTIBLE_DESC),
+                game.settings.destructible) { game.settings.destructible = it }
     }
 
     private fun showBlockSettings(player: Player, game: Game, selected: Int, description: String, types: Set<Material>, result: (Set<Material>) -> Unit) {
-        val typesList = types.toList()
+        val typesList = types.filter { it.isItem }.filter { it.isBlock }.toList()
         val settings = game.settings
         GuiBuilder.show(player, Text.CONFIGURE_TITLE_BLOCKS.format().toString(), arrayOf(
                 "<d s p n ",
@@ -221,11 +222,25 @@ class Configure(parent: Cmd) : GameCommand(parent) {
                         } else {
                             null
                         }
+                    }.flatMap { mat ->
+                        expandSimilarMaterials(mat)
                     }.toSet()
                     result(blocks)
                     Game.saveGame(game)
                 }
         )
+    }
+
+    private fun expandSimilarMaterials(mat: Material): Sequence<Material> {
+        val wallVariant = mat.key.key
+                .replace("sign", "wall_sign")
+                .replace("banner", "wall_banner")
+                .replace("fan", "wall_fan")
+                .replace("torch", "wall_torch")
+                .replace("head", "wall_head")
+                .replace("skull", "skull_head")
+        val wallType = Material.matchMaterial(wallVariant) ?: return sequenceOf(mat)
+        return sequenceOf(mat, wallType)
     }
 
     private fun showInventorySettings(player: Player, game: Game) {
@@ -295,16 +310,21 @@ class Configure(parent: Cmd) : GameCommand(parent) {
 
     private fun showLootSettings(player: Player, game: Game, slot: Int, loot: MutableList<Pair<List<Material>, List<Pair<ItemStack, Int>>>>) {
         // split out stacks with weight over 64
-        val (mats, items) = loot.getOrElse(slot) { Pair(arrayListOf(), arrayListOf()) }.let { (mats, items) ->
-            Pair(mats, items.flatMap {(stack, weight) ->
-                var brokenWeight = weight
-                val list = mutableListOf<Pair<ItemStack, Int>>()
-                do {
-                    list.add(Pair(stack, min(brokenWeight, 64)))
-                    brokenWeight -= 64
-                } while (brokenWeight > 0)
-                list
-            })
+        val (mats, items) = loot.getOrElse(slot) {
+            Pair(arrayListOf(), arrayListOf())
+        }.let { (mats, items) ->
+            Pair(
+                    mats.filter { it.isBlock && it.isItem },
+                    items.flatMap {(stack, weight) ->
+                        var brokenWeight = weight
+                        val list = mutableListOf<Pair<ItemStack, Int>>()
+                        do {
+                            list.add(Pair(stack, min(brokenWeight, 64)))
+                            brokenWeight -= 64
+                        } while (brokenWeight > 0)
+                        list
+                    }
+            )
         }
 
         GuiBuilder.show(player, stringify(Text.CONFIGURE_TITLE_LOOT), arrayOf(
@@ -385,9 +405,8 @@ class Configure(parent: Cmd) : GameCommand(parent) {
 
                     // Map to standard form to save
                     game.settings.blockLoot = loot.flatMap {(mats, itemWeights) ->
-                        mats.map {
-                            Pair(it, itemWeights.toMap())
-                        }
+                        mats.flatMap { expandSimilarMaterials(it).toList() }
+                                .map { Pair(it, itemWeights.toMap()) }
                     }.toMap()
                     Game.saveGame(game)
                 }

@@ -147,6 +147,9 @@ default-game-settings:
   # All types will drop loot when destroyed if they are assigned in loot-table
   #
   # The assigned tnt fire type and air types are always pass-destroy and cannot be altered
+  #
+  # Note: The in-game configuration gui will "smart add" similar material ids (e.g wall_sign and sign).
+  #  You have to add similar ids manually here
 
   # Blocks tnt will explode the first block of
   # Generally, blocks that are in the loot-table should be destructible
