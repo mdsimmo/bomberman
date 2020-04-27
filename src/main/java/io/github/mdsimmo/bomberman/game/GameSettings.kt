@@ -134,7 +134,7 @@ class GameSettings : ConfigurationSerializable {
                 .map { it.key.toString() }
         objs["pass-destroy"] = passDestroy
                 .map { it.key.toString() }
-        objs["initial-items"] = initialItems
+        objs["initial-items"] = initialItems.dropLastWhile { it == null }
         objs["lives"] = lives
         objs["fuse-ticks"] = fuseTicks
         objs["fire-ticks"] = fireTicks
