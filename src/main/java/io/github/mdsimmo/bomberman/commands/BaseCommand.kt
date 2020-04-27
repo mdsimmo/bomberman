@@ -1,7 +1,6 @@
 package io.github.mdsimmo.bomberman.commands
 
 import io.github.mdsimmo.bomberman.commands.game.*
-import io.github.mdsimmo.bomberman.commands.game.set.SetCmd
 import io.github.mdsimmo.bomberman.messaging.Message
 import io.github.mdsimmo.bomberman.messaging.Text
 import org.bukkit.command.Command
@@ -15,7 +14,7 @@ class BaseCommand : CommandGroup(null), TabCompleter, CommandExecutor {
     init {
         addChildren(
                 DevInfo(this),
-                SetCmd(this),
+                Configure(this),
                 GameCreate(this),
                 GameInfo(this),
                 GameJoin(this),

@@ -129,45 +129,41 @@ command:
     # Error while loading
     # {game}: the game
     cannot-load: Error reloading the game's save file
-  # Messages relating to '/bm set lives'
-  lives:
-    name: lives
-    description: Sets players' initial lives
-    usage: /{command|path} <game> <number>
-    example: ''
-    extra: ''
-    # The amount of lives has been set
-    # {game}: the game
-    success: Lives set to {game|lives}
-  # Messages relating to '/bm set inventory'
-  inventory:
-    name: inventory
-    description: Sets what the players initially hold
+  configure:
+    name: configure
+    description: Configure game's settings
     usage: /{command|path} <game>
     example: ''
     extra: '{#gray|{#italic|Creative users only}}'
-    # The inventory has been updated
-    # {game}: the game
-    success: Inventory updated
     # If player tries to edit when not in creative
     # {player}: the player
-    need-creative: '{#red|You must be in creative}'
-  block-types:
-    name: blocktypes
-    description: Sets how tnt interacts with blocks
-    usage: /{command|path} <game>
-    example: ''
-    extra: '{#gray|{#italic|Creative users only}}'
-    # The game has been updated
-    # {game}: the game
-    success: Blocks updated
-    # If player tries to edit when not in creative
-    # {player}: the player
-    need-creative: '{#red|You must be in creative}'
-  # Messages relating to '/bm set'
-  set:
-    name: set
-    description: Change a game's settings
+    prompt-creative: '{#red|You must be in creative}'
+    # Various labels in the pop-up menu (no args)
+    title:
+      main: 'Game Settings'
+      general: 'General Settings'
+      blocks: 'Block Settings'
+      loot: 'Block Loot Table'
+      inventory: 'Starting Kit'
+    back: 'Menu'
+    destructible:
+      name: 'Destructible'
+      description: 'Semi-solid blocks'
+    indestructible:
+      name: 'Indestructible'
+      description: 'Solid blocks default'
+    pass-destroy:
+      name: 'Pass Destroy'
+      description: 'Non solid blocks default'
+    pass-keep:
+      name: 'Pass keep'
+      description: 'Fire passes through without changing'
+    lives: Lives
+    fuse-ticks: Fuse ticks
+    fire-ticks: Fire ticks
+    immunity-ticks: Immunity ticks
+    tnt-block: TNT Block
+    fire-item: Fire Item
   # Messages relating to '/bm create'
   create:
     name: create

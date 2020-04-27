@@ -17,7 +17,7 @@ softdepend: [Multiverse-Core]
 
 permissions:
   bomberman.*:
-    description: Gives access to all Bomberman commands
+    description: Access to all Bomberman commands
     children:
       bomberman.bm: true
       bomberman.dictator: true
@@ -41,14 +41,7 @@ permissions:
     children:
       bomberman.create: true
       bomberman.delete: true
-      bomberman.set.*: true
-  bomberman.set.*:
-    description: Allows editting game's details
-    children:
-      bomberman.set: true
-      bomberman.set.lives: true
-      bomberman.set.inventory: true
-      bomberman.set.block-types: true
+      bomberman.configure: true
   bomberman.bm:
     description: Root bomberman command (/bm)
     default: true
@@ -79,15 +72,6 @@ permissions:
   bomberman.delete:
     description: /bm delete
     default: op
-  bomberman.set:
-    description: /bm set
-    default: op
-  bomberman.set.lives:
-    description: /bm set lives
-    default: op
-  bomberman.set.inventory:
-    description: /bm set inventory
-    default: op
-  bomberman.set.block-types:
-    description: /bm set blocktypes
+  bomberman.configure:
+    description: /bm configure
     default: op

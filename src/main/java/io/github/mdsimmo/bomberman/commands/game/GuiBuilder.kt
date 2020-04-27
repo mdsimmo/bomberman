@@ -1,4 +1,4 @@
-package io.github.mdsimmo.bomberman.commands.game.set.inventory
+package io.github.mdsimmo.bomberman.commands.game
 
 import io.github.mdsimmo.bomberman.Bomberman
 import org.bukkit.Bukkit
@@ -9,6 +9,7 @@ import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
 import org.bukkit.event.inventory.InventoryClickEvent
 import org.bukkit.event.inventory.InventoryCloseEvent
+import org.bukkit.inventory.Inventory
 import org.bukkit.inventory.InventoryView
 import org.bukkit.inventory.ItemFlag
 import org.bukkit.inventory.ItemStack
@@ -18,7 +19,7 @@ import java.util.concurrent.atomic.AtomicInteger
 
 class GuiBuilder : Listener {
 
-    data class Index (val x: Int, val y: Int, val invIndex: Int, val section: Char, val secIndex: Int)
+    data class Index (val x: Int, val y: Int, val invIndex: Int, val section: Char, val secIndex: Int, val inventory: Inventory)
 
     data class ItemSlot(val item: ItemStack?) {
         constructor(type: Material, qty: Int = 1): this(ItemStack(type, qty))
@@ -61,25 +62,28 @@ class GuiBuilder : Listener {
                 val x  = i % 9
                 val y = i / 9
                 val c = contents[y][x]
-                val index = Index(
-                        x  = i % 9,
-                        y = i / 9,
-                        invIndex = i,
-                        secIndex = sectionCount.getOrPut(c) {AtomicInteger(0)}.getAndIncrement(),
-                        section = c
-                )
+                val index =
+                        Index(
+                                x = i % 9,
+                                y = i / 9,
+                                invIndex = i,
+                                secIndex = sectionCount.getOrPut(c) { AtomicInteger(0) }.getAndIncrement(),
+                                section = c,
+                                inventory = inventory
+                        )
                 slotLookup += index
                 val slot = onInit(index)
                 inventory.setItem(i, slot.item)
             }
             val view = player.openInventory(inventory) ?: return
-            lookup[view] = InvMemory(slotLookup, onClick, onClose)
+            lookup[view] =
+                    InvMemory(slotLookup, onClick, onClose)
         }
 
         private val plugin = Bomberman.instance
-        private val noMoveKey = NamespacedKey(plugin, "nomove")
+        private val noMoveKey = NamespacedKey(plugin, "no-move")
         private val lookup: MutableMap<InventoryView, InvMemory> = HashMap()
-        val blank = ItemSlot(Material.BLACK_STAINED_GLASS_PANE).hideAttributes().displayName("-").unMovable()
+        val blank = ItemSlot(Material.BLACK_STAINED_GLASS_PANE).hideAttributes().displayName(" ").unMovable()
 
         init {
             Bukkit.getPluginManager().registerEvents(GuiBuilder(), plugin)
@@ -113,7 +117,7 @@ class GuiBuilder : Listener {
     fun onInventoryItemClicked(e: InventoryClickEvent) {
         val mem = lookup[e.view] ?: return
         if (e.clickedInventory != e.inventory) {
-            return
+            return // ignore interactions with player's inventory
         }
         val index = mem.slots[e.slot]
         val currentItem = e.currentItem
@@ -122,6 +126,7 @@ class GuiBuilder : Listener {
         if ((currentItem != null && isNotMovable(currentItem))
                 || (cursorItem != null && isNotMovable(cursorItem))) {
             e.isCancelled = true
+            println("CANCELLED")
         }
     }
 
