@@ -47,6 +47,7 @@ default-game-settings:
   fire: minecraft:fire
 
   # What each player spawns in the game with
+  # The item order is preserved in players inventory; pad with nulls
   initial-items:
   - ==: org.bukkit.inventory.ItemStack
     v: 2230
@@ -69,23 +70,23 @@ default-game-settings:
     - minecraft:dirt
     - minecraft:sand
     loot:
-    - weight: 4.0   # The relative weighting of choosing this item
+    - weight: 4   # The relative weighting of choosing this item
       item:         # What item to drop
         ==: org.bukkit.inventory.ItemStack
         v: 2230
         type: TNT
-    - weight: 100.0
+    - weight: 100
       item:
         ==: org.bukkit.inventory.ItemStack
         v: 2230
         type: AIR
         amount: 0   # amount 0 means "no drop"
-    - weight: 3.0
+    - weight: 3
       item:
         ==: org.bukkit.inventory.ItemStack
         v: 2230
         type: GUNPOWDER
-    - weight: 1.0
+    - weight: 1
       item:
         ==: org.bukkit.inventory.ItemStack
         v: 2230
@@ -94,7 +95,7 @@ default-game-settings:
           ==: ItemMeta
           meta-type: POTION
           potion-type: minecraft:healing
-    - weight: 1.0
+    - weight: 1
       item:
         ==: org.bukkit.inventory.ItemStack
         v: 2230
@@ -103,7 +104,7 @@ default-game-settings:
           ==: ItemMeta
           meta-type: POTION
           potion-type: minecraft:strong_swiftness
-    - weight: 1.0
+    - weight: 1
       item:
         ==: org.bukkit.inventory.ItemStack
         v: 2230
@@ -131,12 +132,12 @@ default-game-settings:
       weight: 10.0
 
 
-  # Bomberman has five types of blocks:
+  # Bomberman has four types of blocks:
   #  1. indestructible: tnt will not effect the block
   #  2. destructible: tnt will destroy the block, but progress no further
-  #  3. pass-keep: tnt will pass through the block without changing the blocks state
-  #  4. pass-revert: tnt will pass through the block, ignite the block, then revert to its original state
-  #  5. pass-destroy: tnt will pass through the block, ignite the block, then change into air
+  #  3. pass-keep: tnt will pass through the block without changing the blocks state.
+  #                Players inside pass-keep blocks will still be hit
+  #  4. pass-destroy: tnt will pass through the block, ignite the block, then change into air
   #
   # Unless set otherwise:
   #  * All solid blocks are indestructible
@@ -162,12 +163,8 @@ default-game-settings:
   indestructible: []
 
   # Blocks tnt will pass through, but not alter.
-  # You might like to put your sensitive redstone, tripwires, etc here
+  # You might like to put your sensitive redstone, tripwires, signs, etc here
   pass-keep: []
-
-  # Blocks tnt wll pass though, temporarily ignite, and then revert.
-  # Signs and hanging things are probably good to put here
-  pass-revert: []
 
   # Blocks tnt will pass through, ignite, and destroy
   # All non-solid blocks included by default

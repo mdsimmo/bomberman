@@ -47,7 +47,6 @@ class GameSettings : ConfigurationSerializable {
             readMaterials(data["destructible"])?.also { settings.destructible = it }
             readMaterials(data["indestructible"])?.also { settings.indestructible = it }
             readMaterials(data["pass-keep"])?.also { settings.passKeep = it }
-            readMaterials(data["pass-revert"])?.also { settings.passRevert = it }
             readMaterials(data["pass-destroy"])?.also { settings.passDestroy = it }
             (data["initial-items"] as? List<*>)
                     ?.map { it as? ItemStack }
@@ -98,7 +97,6 @@ class GameSettings : ConfigurationSerializable {
     )
     var indestructible = setOf<Material>()
     var passKeep = setOf<Material>()
-    var passRevert = setOf<Material>()
     var passDestroy = setOf<Material>()
     var initialItems = listOf<ItemStack?>(
             ItemStack(bombItem, 3)
@@ -133,8 +131,6 @@ class GameSettings : ConfigurationSerializable {
         objs["indestructible"] = indestructible
                 .map { it.key.toString() }
         objs["pass-keep"] = passKeep
-                .map { it.key.toString() }
-        objs["pass-revert"] = passRevert
                 .map { it.key.toString() }
         objs["pass-destroy"] = passDestroy
                 .map { it.key.toString() }

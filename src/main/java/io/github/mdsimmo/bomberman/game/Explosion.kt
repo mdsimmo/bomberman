@@ -126,7 +126,7 @@ class Explosion private constructor(
                         if (!game.settings.passKeep.contains(b.type))
                             ignited.type = game.settings.fireType
                         val converted = b.state
-                        if (!game.settings.passKeep.contains(b.type) && !game.settings.passRevert.contains(b.type))
+                        if (!game.settings.passKeep.contains(b.type))
                             converted.type = Material.AIR
                         BlockPlan(b, prior, ignited, converted)
                     }
@@ -225,7 +225,6 @@ class Explosion private constructor(
                     || (b.isPassable && !(settings.indestructible.contains(t) || settings.destructible.contains(t)))
                     || settings.passDestroy.contains(t)
                     || settings.passKeep.contains(t)
-                    || settings.passRevert.contains(t)
         }
 
         @JvmStatic
