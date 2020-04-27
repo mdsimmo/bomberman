@@ -175,10 +175,12 @@ class Explosion private constructor(
             blocks.addAll(planFire(center, game, strength, 0, -1))
             blocks.addAll(planFire(center, game, strength, 1, 0))
             blocks.addAll(planFire(center, game, strength, -1, 0))
+
             // center column
-            for (i in -1..1) {
-                planFire(center, game, 0, i, 0, blocks)
-            }
+            planFire(center, game, 0, -1, 0, blocks)
+            planFire(center, game, 0,  1, 0, blocks)
+            blocks.add(center.block)
+
             return blocks
         }
 
