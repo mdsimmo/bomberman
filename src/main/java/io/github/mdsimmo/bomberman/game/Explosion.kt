@@ -126,7 +126,7 @@ class Explosion private constructor(
                         if (!game.settings.passKeep.contains(b.type))
                             ignited.type = game.settings.fireType
                         val converted = b.state
-                        if (!game.settings.passKeep.contains(b.type) && !game.settings.passRevert.contains(b.type))
+                        if (!game.settings.passKeep.contains(b.type))
                             converted.type = Material.AIR
                         BlockPlan(b, prior, ignited, converted)
                     }
@@ -175,10 +175,12 @@ class Explosion private constructor(
             blocks.addAll(planFire(center, game, strength, 0, -1))
             blocks.addAll(planFire(center, game, strength, 1, 0))
             blocks.addAll(planFire(center, game, strength, -1, 0))
+
             // center column
-            for (i in -1..1) {
-                planFire(center, game, 0, i, 0, blocks)
-            }
+            planFire(center, game, 0, -1, 0, blocks)
+            planFire(center, game, 0,  1, 0, blocks)
+            blocks.add(center.block)
+
             return blocks
         }
 
@@ -225,18 +227,15 @@ class Explosion private constructor(
                     || (!t.isSolid && !(settings.indestructible.contains(t) || settings.destructible.contains(t)))
                     || settings.passDestroy.contains(t)
                     || settings.passKeep.contains(t)
-                    || settings.passRevert.contains(t)
         }
 
         @JvmStatic
-		fun <T> lootSelect(loot: Map<out T, Number>): Set<T> {
+		fun <T> lootSelect(loot: Map<out T, Int>): Set<T> {
             // Sum the weights
-            var sum = loot.values
-                    .sumByDouble(Number::toDouble)
+            var sum = loot.values.sum()
 
             // Select the item based off weights
-            for ((item, value) in loot) {
-                val weight = value.toDouble()
+            for ((item, weight) in loot) {
                 if (sum * Math.random() <= weight) {
                     return setOf(item)
                 }
@@ -244,7 +243,7 @@ class Explosion private constructor(
             }
 
             // Handle possible empty set
-            return if (sum == 0.0)
+            return if (sum == 0)
                 emptySet()
             else
                 throw RuntimeException("Explosion.drop didn't select (should never happen)")

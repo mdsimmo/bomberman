@@ -2,6 +2,8 @@ package io.github.mdsimmo.bomberman.commands.game
 
 import io.github.mdsimmo.bomberman.commands.Cmd
 import io.github.mdsimmo.bomberman.commands.GameCommand
+import io.github.mdsimmo.bomberman.commands.Permission
+import io.github.mdsimmo.bomberman.commands.Permissions
 import io.github.mdsimmo.bomberman.events.BmRunStartCountDownIntent
 import io.github.mdsimmo.bomberman.game.Game
 import io.github.mdsimmo.bomberman.messaging.Message
@@ -17,8 +19,8 @@ class RunStart(parent: Cmd) : GameCommand(parent) {
         return emptyList()
     }
 
-    override fun flags(args: List<String>, flags: Map<String, String>): Set<String> {
-        return setOf("d")
+    override fun flags(sender: CommandSender, args: List<String>, flags: Map<String, String>): Set<String> {
+        return setOf("d", "o")
     }
 
     override fun flagExtension(flag: String): Message {
@@ -31,6 +33,7 @@ class RunStart(parent: Cmd) : GameCommand(parent) {
     override fun flagDescription(flag: String): Message {
         return when (flag) {
             "d" -> context(Text.START_FLAG_DELAY_DESC).format()
+            "o" -> context(Text.START_FLAG_OVERRIDE_DESC).format()
             else -> Message.empty
         }
     }
@@ -53,10 +56,10 @@ class RunStart(parent: Cmd) : GameCommand(parent) {
             }
         }
 
-        val e = BmRunStartCountDownIntent.startGame(game, delay)
+        val e = BmRunStartCountDownIntent.startGame(game, delay, flags.containsKey("o"))
         if (e.isCancelled) {
             (e.cancelledReason
-                    ?: Text.GAME_START_CANCELLED
+                    ?: Text.COMMAND_CANCELLED
                             .with("game", game)
                             .format()
                     )
@@ -68,7 +71,7 @@ class RunStart(parent: Cmd) : GameCommand(parent) {
     }
 
     override fun permission(): Permission {
-        return Permission.GAME_OPERATE
+        return Permissions.START
     }
 
     override fun extra(): Message {

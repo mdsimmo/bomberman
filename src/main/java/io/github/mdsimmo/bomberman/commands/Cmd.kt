@@ -1,20 +1,11 @@
 package io.github.mdsimmo.bomberman.commands
 
 import io.github.mdsimmo.bomberman.messaging.*
+import org.bukkit.Bukkit
 import org.bukkit.command.CommandSender
 
 // TODO Cmd shouldn't require knowing its parent
 abstract class Cmd(protected var parent: Cmd?) : Formattable {
-    enum class Permission(val permission: String) {
-        PLAYER("bomberman.player"),
-        GAME_OPERATE("bomberman.operator"),
-        GAME_DICTATE("bomberman.dictator");
-
-        fun isAllowedBy(sender: CommandSender): Boolean {
-            return sender.hasPermission(permission)
-        }
-
-    }
 
     /**
      * Gets the commands name.
@@ -33,9 +24,9 @@ abstract class Cmd(protected var parent: Cmd?) : Formattable {
      */
     abstract fun options(sender: CommandSender, args: List<String>): List<String>
 
-    open fun flags(args: List<String>, flags: Map<String, String>): Set<String> = emptySet()
+    open fun flags(sender: CommandSender, args: List<String>, flags: Map<String, String>): Set<String> = emptySet()
 
-    open fun flagOptions(flag: String, args: List<String>, flags: Map<String, String>): Set<String> = emptySet()
+    open fun flagOptions(sender: CommandSender, flag: String, args: List<String>, flags: Map<String, String>): Set<String> = emptySet()
 
     /**
      * Execute the command
@@ -51,7 +42,7 @@ abstract class Cmd(protected var parent: Cmd?) : Formattable {
      * @return true if success. false to show usage
      */
     fun execute(sender: CommandSender, args: List<String>, flags: Map<String, String>) {
-        if (isAllowedBy(sender)) {
+        if (permission().isAllowedBy(sender)) {
             if (!run(sender, args, flags)) {
                 incorrectUsage(sender, args)
                 help(sender, args, flags)
@@ -81,16 +72,6 @@ abstract class Cmd(protected var parent: Cmd?) : Formattable {
     abstract fun permission(): Permission
 
     /**
-     * gets if the given sender has permission to run this command
-     *
-     * @param sender the sender
-     * @return true if they have permission
-     */
-    fun isAllowedBy(sender: CommandSender): Boolean {
-        return permission().isAllowedBy(sender)
-    }
-
-    /**
      * gets the path to the command
      *
      * @param separator what to separate parent/child commands by
@@ -107,7 +88,7 @@ abstract class Cmd(protected var parent: Cmd?) : Formattable {
 
     fun incorrectUsage(sender: CommandSender, args: List<String>) {
         context(Text.INCORRECT_USAGE)
-                .with("attempt", CollectionWrapper<Message>(
+                .with("attempt", CollectionWrapper(
                         args.map { Message.of(it) }
                 ))
                 .sendTo(sender)
@@ -125,7 +106,7 @@ abstract class Cmd(protected var parent: Cmd?) : Formattable {
             "extra" -> extra()
             "example" -> example()
             "description" -> description()
-            "flags" -> CollectionWrapper(flags(listOf(), mapOf())
+            "flags" -> CollectionWrapper(flags(Bukkit.getConsoleSender(), listOf(), mapOf())
                     .map { flag -> object: Formattable {
                         override fun format(args: List<Message>): Message {
                             return when ((args.firstOrNull() ?: "name").toString()) {

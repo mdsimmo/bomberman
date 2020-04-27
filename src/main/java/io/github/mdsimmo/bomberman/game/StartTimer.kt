@@ -54,7 +54,14 @@ class StartTimer private constructor(private val game: Game, private var time: I
     fun onTimerStarted(e: BmRunStartCountDownIntent) {
         if (e.game != game)
             return
-        killSelf()
+        if (e.override) {
+            killSelf()
+        } else {
+            e.cancelBecause(Text.GAME_ALREADY_COUNTING
+                    .with("game", game)
+                    .with("time", time)
+                    .format())
+        }
     }
 
     // Must be run before Game::onRunStoppedWhileNotRunning

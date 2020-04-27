@@ -1,6 +1,8 @@
 package io.github.mdsimmo.bomberman.commands.game
 
 import io.github.mdsimmo.bomberman.commands.Cmd
+import io.github.mdsimmo.bomberman.commands.Permission
+import io.github.mdsimmo.bomberman.commands.Permissions
 import io.github.mdsimmo.bomberman.events.BmPlayerLeaveGameIntent
 import io.github.mdsimmo.bomberman.messaging.Message
 import io.github.mdsimmo.bomberman.messaging.Text
@@ -24,6 +26,7 @@ class GameLeave(parent: Cmd) : Cmd(parent) {
             if (e.isHandled()) {
                 Text.LEAVE_SUCCESS
                         .with("player", sender)
+                        .with("game", e.game ?: Message.error("none"))
                         .sendTo(sender)
             } else {
                 Text.LEAVE_NOT_JOINED
@@ -38,7 +41,7 @@ class GameLeave(parent: Cmd) : Cmd(parent) {
     }
 
     override fun permission(): Permission {
-        return Permission.PLAYER
+        return Permissions.LEAVE
     }
 
     override fun extra(): Message {

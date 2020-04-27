@@ -12,9 +12,7 @@ import com.sk89q.worldedit.schematic.SchematicFormat
 import com.sk89q.worldedit.world.World
 import io.github.mdsimmo.bomberman.Bomberman
 import io.github.mdsimmo.bomberman.events.*
-import io.github.mdsimmo.bomberman.messaging.Formattable
-import io.github.mdsimmo.bomberman.messaging.Message
-import io.github.mdsimmo.bomberman.messaging.Text
+import io.github.mdsimmo.bomberman.messaging.*
 import io.github.mdsimmo.bomberman.utils.Box
 import io.github.mdsimmo.bomberman.utils.BukkitUtils
 import io.github.mdsimmo.bomberman.utils.RefectAccess
@@ -32,6 +30,7 @@ import org.bukkit.event.HandlerList
 import org.bukkit.event.Listener
 import org.bukkit.event.server.PluginDisableEvent
 import java.io.File
+import java.lang.IllegalArgumentException
 import java.lang.ref.WeakReference
 
 class Game private constructor(val name: String, private var schema: Arena, val settings: GameSettings = plugin.settings.defaultGameSettings())
@@ -379,7 +378,7 @@ class Game private constructor(val name: String, private var schema: Arena, val 
         // Check if there is spare room
         val gameSpawn = findSpareSpawn()
         if (gameSpawn == null) {
-            e.cancelFor(Text.GAME_FULL
+            e.cancelFor(Text.JOIN_GAME_FULL
                     .with("game", this)
                     .with("player", e.player)
                     .format())
@@ -389,11 +388,6 @@ class Game private constructor(val name: String, private var schema: Arena, val 
         GamePlayer.spawnGamePlayer(e.player, this, gameSpawn)
         players.add(e.player)
         e.setHandled()
-
-        // Trigger auto-start if needed
-        if (findSpareSpawn() == null) {
-            BmRunStartCountDownIntent.startGame(this, 5)
-        }
     }
 
     @EventHandler(ignoreCancelled = true, priority = EventPriority.HIGHEST)
@@ -508,14 +502,27 @@ class Game private constructor(val name: String, private var schema: Arena, val 
             return Message.of(name)
         return when (args[0].toString()) {
             "name" -> Message.of(name)
-            "maxplayers" -> Message.of(spawns.size)
+            "spawns" -> CollectionWrapper(spawns.map { object : Formattable {
+                override fun format(args: List<Message>): Message {
+                    require(args.size == 1) { "Spawn format must have one arg" }
+                    return when(args[0].toString().toLowerCase()) {
+                        "world", "w" -> Message.of(it.world?.name ?: "unknown")
+                        "x" -> Message.of(it.x.toInt())
+                        "y" -> Message.of(it.y.toInt())
+                        "z" -> Message.of(it.z.toInt())
+                        else -> throw IllegalArgumentException("Unknown spawn format ${args[0]}")
+                    }
+                }
+            } }).format(args.drop(1))
             "schema" -> schema.format(args.drop(1))
-            "players" -> Message.of(players.size.toString())
+            "players" -> CollectionWrapper(players.map { SenderWrapper(it) })
+                    .format(args.drop(1))
             "power" -> Message.of(settings.initialItems.sumBy {
-                if (it.type == settings.bombItem) { it.amount } else { 0 }})
+                if (it?.type == settings.bombItem) { it.amount } else { 0 }})
             "bombs" -> Message.of(settings.initialItems.sumBy {
-                if (it.type == settings.powerItem) { it.amount } else { 0 }})
+                if (it?.type == settings.powerItem) { it.amount } else { 0 }})
             "lives" -> Message.of(settings.lives.toString())
+            "w", "world" -> Message.of(schema.origin.world?.name ?: "unknown")
             "x" -> Message.of(schema.origin.x.toInt())
             "y" -> Message.of(schema.origin.y.toInt())
             "z" -> Message.of(schema.origin.z.toInt())

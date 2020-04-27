@@ -5,6 +5,8 @@ import com.sk89q.worldedit.WorldEdit
 import com.sk89q.worldedit.session.SessionOwner
 import io.github.mdsimmo.bomberman.Bomberman
 import io.github.mdsimmo.bomberman.commands.Cmd
+import io.github.mdsimmo.bomberman.commands.Permission
+import io.github.mdsimmo.bomberman.commands.Permissions
 import io.github.mdsimmo.bomberman.events.BmGameListIntent
 import io.github.mdsimmo.bomberman.events.BmGameLookupIntent
 import io.github.mdsimmo.bomberman.game.Game
@@ -71,11 +73,11 @@ class GameCreate(parent: Cmd) : Cmd(parent) {
         }
     }
 
-    override fun flags(args: List<String>, flags: Map<String, String>): Set<String> {
+    override fun flags(sender: CommandSender, args: List<String>, flags: Map<String, String>): Set<String> {
         return setOf(F_PLUGIN, F_SCHEMA, F_SKIP_AIR, F_VOID_TO_AIR)
     }
 
-    override fun flagOptions(flag: String, args: List<String>, flags: Map<String, String>): Set<String> {
+    override fun flagOptions(sender: CommandSender, flag: String, args: List<String>, flags: Map<String, String>): Set<String> {
         return when (flag) {
             F_PLUGIN -> setOf("we", "bm")
             F_SCHEMA -> {
@@ -190,7 +192,7 @@ class GameCreate(parent: Cmd) : Cmd(parent) {
     }
 
     override fun permission(): Permission {
-        return Permission.GAME_DICTATE
+        return Permissions.CREATE
     }
 
     override fun example(): Message {

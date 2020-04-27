@@ -3,6 +3,8 @@ package io.github.mdsimmo.bomberman.commands.game
 import io.github.mdsimmo.bomberman.Bomberman
 import io.github.mdsimmo.bomberman.commands.Cmd
 import io.github.mdsimmo.bomberman.commands.GameCommand
+import io.github.mdsimmo.bomberman.commands.Permission
+import io.github.mdsimmo.bomberman.commands.Permissions
 import io.github.mdsimmo.bomberman.events.BmGameBuildIntent
 import io.github.mdsimmo.bomberman.events.BmGameDeletedIntent
 import io.github.mdsimmo.bomberman.game.Game
@@ -35,7 +37,7 @@ class GameReload(parent: Cmd) : GameCommand(parent) {
     }
 
     override fun permission(): Permission {
-        return Permission.GAME_DICTATE
+        return Permissions.RELOAD
     }
 
     override fun gameOptions(args: List<String>): List<String> {
