@@ -204,13 +204,13 @@ class Configure(parent: Cmd) : GameCommand(parent) {
                 onClick = { index, _, _->
                     when (index.section) {
                         '<' -> showMainMenu(player, game)
-                        'd' -> showBlockSettings(player, game, 0, stringify(Text.CONFIGURE_DESTRUCTIBLE_DESC),
-                                settings.destructible) {settings.destructible = it}
-                        's' -> showBlockSettings(player, game, 1, stringify(Text.CONFIGURE_INDESTRUCTIBLE_DESC),
+                        'd' -> if (selected != 0) showBlockSettings(player, game, 0, stringify(Text.CONFIGURE_DESTRUCTIBLE_DESC),
+                                settings.destructible) { settings.destructible = it}
+                        's' -> if (selected != 1) showBlockSettings(player, game, 1, stringify(Text.CONFIGURE_INDESTRUCTIBLE_DESC),
                                 settings.indestructible) {settings.indestructible = it}
-                        'p' -> showBlockSettings(player, game, 2, stringify(Text.CONFIGURE_PASS_DESTROY_DESC),
+                        'p' -> if (selected != 2) showBlockSettings(player, game, 2, stringify(Text.CONFIGURE_PASS_DESTROY_DESC),
                                 settings.passDestroy) {settings.passDestroy = it}
-                        'n' -> showBlockSettings(player, game, 3, stringify(Text.CONFIGURE_PASS_KEEP_DESC),
+                        'n' -> if (selected != 3) showBlockSettings(player, game, 3, stringify(Text.CONFIGURE_PASS_KEEP_DESC),
                                 settings.passKeep) {settings.passKeep = it}
                     }
                 },
