@@ -177,7 +177,7 @@ command:
     description: Builds a Bomberman game. Defaults to current axe selection. Use -p and -f to use a saved schematic.
     usage: /{command|path} <name> [options]
     example: /{command|path} mygame -p=bm -f=purple
-    extra: ''
+    extra: 'Mark spawns by writing {#gray|{#italic|[spawn]}} on signs'
     flags:
       p:
         description: Plugin to load schem from (default=WorldEdit)
@@ -194,7 +194,13 @@ command:
     game-exists: Game {game} already exists
     # The game was built successfully
     # {game}: the game that was built
-    success: Game {game} created
+    success: Game {game} created{#switch|{game|spawns}|0| but has no spawns. Did you mark spawns with "[spawn]"?}
+    # An exception was thrown while building
+    # {error}: the game that was built
+    error: |-
+      {#red|Build Error: '{error}'
+      See console for details. Game creation may be incomplete.
+      Was the schematic made in a different WorldEdit version?}
     # Player needs to use WorldEdit to select something to create the game from
     need-selection: Use wooden axe to select a region first
     # The requested schematic was not found
