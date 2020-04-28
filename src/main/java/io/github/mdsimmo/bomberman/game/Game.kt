@@ -177,7 +177,8 @@ class Game private constructor(val name: String, private var schema: Arena, val 
                 plugin.logger.info("Reading schematic data")
                 // Load the schematic
                 val format = ClipboardFormats.findByFile(file)
-                val c = format!!.getReader(FileInputStream(file)).use { it.read() }
+                        ?: throw IllegalArgumentException("Unknown file format: '${file.path}'")
+                val c = format.getReader(FileInputStream(file)).use { it.read() }
 
                 // cache the schematic
                 clipboard = WeakReference(c)

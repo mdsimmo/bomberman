@@ -169,8 +169,17 @@ class GameCreate(parent: Cmd) : Cmd(parent) {
             try {
                 val region = session.getSelection(session.selectionWorld)
                 val box = selectionBounds(region)
-                val game = buildGameFromRegion(gameName, box, flags)
-                Text.CREATE_SUCCESS.with("game", game).sendTo(sender)
+                try {
+                    val game = buildGameFromRegion(gameName, box, flags)
+                    context(Text.CREATE_SUCCESS)
+                            .with("game", game)
+                            .sendTo(sender)
+                } catch (e: Exception) {
+                    context(Text.CREATE_ERROR)
+                            .with("error", e.message ?: "")
+                            .sendTo(sender)
+                    e.printStackTrace()
+                }
             } catch (e: IncompleteRegionException) { // FIXME can selection occur in world other than selection?
                 throw RuntimeException("Selection World different to selection", e)
             }
@@ -181,10 +190,17 @@ class GameCreate(parent: Cmd) : Cmd(parent) {
         val matches = saveDir.listFiles { dir: File -> dir.path.contains(schemaName) } ?: emptyArray()
         matches // The minimum length path will be the closest match
             .minBy { it.name.length }?.also { file: File ->
-                val game = buildGameFromSchema(gameName, player.location, file, flags)
-                context(Text.CREATE_SUCCESS)
-                        .with("game", game)
-                        .sendTo(player)
+                    try {
+                        val game = buildGameFromSchema(gameName, player.location, file, flags)
+                        context(Text.CREATE_SUCCESS)
+                                .with("game", game)
+                                .sendTo(player)
+                    } catch (e: Exception) {
+                        context(Text.CREATE_ERROR)
+                                .with("error", e.message ?: "")
+                                .sendTo(player)
+                        e.printStackTrace()
+                    }
             } ?: run {
                 context(Text.CREATE_SCHEMA_NOT_FOUND
                         .with("schema", Message.of(schemaName)))
