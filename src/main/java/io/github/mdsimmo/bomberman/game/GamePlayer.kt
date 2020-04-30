@@ -38,7 +38,7 @@ class GamePlayer private constructor(private val player: Player, private val gam
             dataFile["gamemode"] = player.gameMode.name.toLowerCase()
             dataFile["health"] = player.health
             dataFile["health-scale"] = player.healthScale
-            dataFile["health-max"] = player.getAttribute(Attribute.GENERIC_MAX_HEALTH)!!.baseValue
+            //dataFile["health-max"] = player.getAttribute(Attribute.GENERIC_MAX_HEALTH)!!.baseValue
             dataFile["food-level"] = player.foodLevel
             dataFile["inventory"] = player.inventory.contents.toList()
             dataFile["is-flying"] = player.isFlying
@@ -50,14 +50,14 @@ class GamePlayer private constructor(private val player: Player, private val gam
                     .forEach{ it.remove() }
 
             // Initialise the player for the game
-            val maxHealth = player.getAttribute(Attribute.GENERIC_MAX_HEALTH)!!
-            maxHealth.baseValue = game.settings.lives.toDouble()
-            maxHealth.modifiers.forEach { maxHealth.removeModifier(it) }
-            player.health = game.settings.lives.toDouble()
-            Bukkit.getScheduler().scheduleSyncDelayedTask(plugin) {
+            //val maxHealth = player.getAttribute(Attribute.GENERIC_MAX_HEALTH)!!
+            ///maxHealth.baseValue = game.settings.lives.toDouble()
+            //maxHealth.modifiers.forEach { maxHealth.removeModifier(it) }
+            player.health = player.getAttribute(Attribute.GENERIC_MAX_HEALTH)!!.baseValue// game.settings.lives.toDouble()
+            //Bukkit.getScheduler().scheduleSyncDelayedTask(plugin) {
                 // delayed because it seems to reduce client side death screen glitch
                 player.healthScale = game.settings.lives * 2.toDouble()
-            }
+            //}
             player.teleport(start.clone().add(0.5, 0.01, 0.5))
             player.gameMode = GameMode.SURVIVAL
             player.exhaustion = 0f
@@ -115,11 +115,13 @@ class GamePlayer private constructor(private val player: Player, private val gam
                 GameMode.valueOf(it.toUpperCase())
             } catch (e: IllegalArgumentException) {
                 null
-            }} ?: GameMode.CREATIVE).let { player.gameMode = it }
-            (dataFile["health-scale"] as? Number? ?: 20).let { player.healthScale = it.toDouble() }
-            val maxHealth = player.getAttribute(Attribute.GENERIC_MAX_HEALTH)
-            maxHealth?.baseValue = (dataFile["health-max"] as? Number? ?: 20.0).toDouble()
-            maxHealth?.modifiers?.forEach { maxHealth.removeModifier(it) }
+            }} ?: GameMode.SURVIVAL).let { player.gameMode = it }
+            (dataFile["health-scale"] as? Number?
+                    ?: player.getAttribute(Attribute.GENERIC_MAX_HEALTH)!!.baseValue)
+                    .let { player.healthScale = it.toDouble() }
+            //val maxHealth = player.getAttribute(Attribute.GENERIC_MAX_HEALTH)
+            //maxHealth?.baseValue = (dataFile["health-max"] as? Number? ?: 20.0).toDouble()
+            //maxHealth?.modifiers?.forEach { maxHealth.removeModifier(it) }
             (dataFile["health"] as? Number? ?: 20).let { player.health = it.toDouble() }
             (dataFile["food-level"] as? Number? ?: 20).let { player.foodLevel = it.toInt() }
             (dataFile["inventory"] as? List<Any?> ?: emptyList())
@@ -280,8 +282,8 @@ class GamePlayer private constructor(private val player: Player, private val gam
     fun onPlayerDamaged(e: BmPlayerHurtIntent) {
         if (e.player !== player)
             return
-        if (player.health > 1) {
-            player.damage(1.0)
+        if (player.health > 0.1) {
+            player.damage(player.getAttribute(Attribute.GENERIC_MAX_HEALTH)!!.baseValue/game.settings.lives)
             immunity = true
             player.fireTicks = game.settings.immunityTicks
             Bukkit.getScheduler().scheduleSyncDelayedTask(plugin, {
