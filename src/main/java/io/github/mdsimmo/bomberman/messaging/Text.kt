@@ -32,6 +32,8 @@ enum class Text(path: String) : Contexted {
     COMMAND_GROUP_EXTRA("command.group.extra"),
     COMMAND_HELP("command.help"),
     COMMAND_CANCELLED("command.cancelled"),
+    COMMAND_BAD_SELECTOR("command.bad-selector"),
+    COMMAND_PLAYER_NOT_FOUND("command.invalid-player"),
     BOMBERMAN_DESCRIPTION("command.bomberman.description"),
     START_NAME("command.start.name"),
     START_DESCRIPTION("command.start.description"),

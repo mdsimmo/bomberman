@@ -364,7 +364,7 @@ class Configure(parent: Cmd) : GameCommand(parent) {
                         else -> GuiBuilder.blank
                     }
                 },
-                onClick = {index, invItem, cursorItem ->
+                onClick = {index, _, _ ->
                     when (index.section) {
                         '<' -> showMainMenu(player, game)
                         'S' -> {

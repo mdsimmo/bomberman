@@ -62,6 +62,12 @@ command:
   invalid-number: '{number} is not a valid number'
   # Called when a command is cancelled for an unknown reason
   cancelled: Operation cancelled
+  # Command was typed with a improperly written selector
+  # {selector}: the selector string used
+  bad-selector: 'Bad selector: {selector}'
+  # Command was typed referencing an invalid player name
+  # {player}: the invalid player name
+  invalid-player: 'No player online named "{player}"'
   # The base command details
   bomberman:
     description: Main command for Bomberman
