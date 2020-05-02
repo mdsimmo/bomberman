@@ -10,6 +10,7 @@ import io.github.mdsimmo.bomberman.commands.Permission
 import io.github.mdsimmo.bomberman.commands.Permissions
 import io.github.mdsimmo.bomberman.events.BmGameListIntent
 import io.github.mdsimmo.bomberman.events.BmGameLookupIntent
+import io.github.mdsimmo.bomberman.game.BuildFlags
 import io.github.mdsimmo.bomberman.game.Game
 import io.github.mdsimmo.bomberman.game.Game.Companion.buildGameFromRegion
 import io.github.mdsimmo.bomberman.game.Game.Companion.buildGameFromSchema
@@ -127,9 +128,10 @@ class GameCreate(parent: Cmd) : Cmd(parent) {
         }
 
         // Read the build flags
-        val buildFlags = Game.BuildFlags()
-        buildFlags.skipAir = flags.containsKey(F_SKIP_AIR)
-        buildFlags.deleteVoid = flags.containsKey(F_VOID_TO_AIR)
+        val buildFlags = BuildFlags(
+                skipAir = flags.containsKey(F_SKIP_AIR),
+                deleteVoid = flags.containsKey(F_VOID_TO_AIR)
+        )
 
         val (root, schema) = Pair(flags[F_PLUGIN], flags[F_SCHEMA]).let { (plug, schema) ->
             if (plug.isNullOrBlank()) {
@@ -156,7 +158,7 @@ class GameCreate(parent: Cmd) : Cmd(parent) {
         }
     }
 
-    private fun makeFromSelection(gameName: String, sender: CommandSender, flags: Game.BuildFlags) {
+    private fun makeFromSelection(gameName: String, sender: CommandSender, flags: BuildFlags) {
         if (sender !is Player) {
             context(Text.MUST_BE_PLAYER).sendTo(sender)
             return
@@ -186,7 +188,7 @@ class GameCreate(parent: Cmd) : Cmd(parent) {
         }
     }
 
-    private fun makeFromFile(gameName: String, schemaName: String, saveDir: File, player: Player, flags: Game.BuildFlags) {
+    private fun makeFromFile(gameName: String, schemaName: String, saveDir: File, player: Player, flags: BuildFlags) {
         val matches = saveDir.listFiles { dir: File -> dir.path.contains(schemaName) } ?: emptyArray()
         matches // The minimum length path will be the closest match
             .minBy { it.name.length }?.also { file: File ->

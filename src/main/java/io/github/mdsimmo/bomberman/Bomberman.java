@@ -1,6 +1,7 @@
 package io.github.mdsimmo.bomberman;
 
 import io.github.mdsimmo.bomberman.commands.BaseCommand;
+import io.github.mdsimmo.bomberman.game.BuildFlags;
 import io.github.mdsimmo.bomberman.game.Game;
 import io.github.mdsimmo.bomberman.game.GamePlayer;
 import io.github.mdsimmo.bomberman.game.GameSettings;
@@ -32,7 +33,7 @@ public class Bomberman extends JavaPlugin implements Listener {
 		instance = this;
 
 		ConfigurationSerialization.registerClass(GameSettings.class);
-		ConfigurationSerialization.registerClass(Game.BuildFlags.class);
+		ConfigurationSerialization.registerClass(BuildFlags.class);
 
 		saveResource("sample_config.yml", true);
 		FileConfiguration config = getConfig();
