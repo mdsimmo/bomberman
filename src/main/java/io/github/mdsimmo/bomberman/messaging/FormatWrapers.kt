@@ -5,6 +5,7 @@ import net.objecthunter.exp4j.function.Function
 import net.objecthunter.exp4j.operator.Operator
 import org.bukkit.Bukkit
 import org.bukkit.ChatColor
+import org.bukkit.Location
 import org.bukkit.command.CommandSender
 import org.bukkit.inventory.ItemStack
 import java.math.BigDecimal
@@ -33,6 +34,19 @@ class ItemWrapper(private val item: ItemStack) : Formattable {
         }
     }
 
+}
+
+class LocationWrapper(private val loc: Location) : Formattable {
+    override fun format(args: List<Message>): Message {
+        require(args.isNotEmpty()) { "Location requires an argument" }
+        return when (args[0].toString().toLowerCase()) {
+            "x" -> Message.of(loc.x.toString())
+            "y" -> Message.of(loc.y.toString())
+            "z" -> Message.of(loc.z.toString())
+            "world", "w" -> Message.of(loc.world?.name ?: "missingno")
+            else -> throw IllegalArgumentException("Unknown argument: '${args[0]}'")
+        }
+    }
 }
 
 class SenderWrapper(private val sender: CommandSender) : Formattable {

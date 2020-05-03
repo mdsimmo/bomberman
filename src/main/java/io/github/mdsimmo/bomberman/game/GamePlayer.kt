@@ -28,11 +28,9 @@ class GamePlayer private constructor(private val player: Player, private val gam
 
         @JvmStatic
         fun spawnGamePlayer(player: Player, game: Game, start: Location) {
-            // Create the player to store data
-            val gamePlayer = GamePlayer(player, game)
-            plugin.server.pluginManager.registerEvents(gamePlayer, plugin)
 
-            // Record the player stats in file. Use a file so that server can crash
+            // Record the player stats in file. Use a file so that server can crash and player's
+            // stuff will be restored still
             val dataFile = YamlConfiguration()
             dataFile["location"] = player.location
             dataFile["gamemode"] = player.gameMode.name.toLowerCase()
@@ -44,27 +42,16 @@ class GamePlayer private constructor(private val player: Player, private val gam
             dataFile["is-flying"] = player.isFlying
             dataFile.save(tempDataFile(player))
 
-            // Clear the landing area of items (there should never be any, but we don't want no cheating)
-            start.world!!.getNearbyEntities(start, 2.0, 3.0, 2.0)
-                    .filterIsInstance<Item>()
-                    .forEach{ it.remove() }
-
-            // Initialise the player for the game
+            // Initialise the player for the game's lobby
             val maxHealth = player.getAttribute(Attribute.GENERIC_MAX_HEALTH)!!
-            maxHealth.baseValue = game.settings.lives.toDouble()
             maxHealth.modifiers.forEach { maxHealth.removeModifier(it) }
-            player.health = game.settings.lives.toDouble()
-            Bukkit.getScheduler().scheduleSyncDelayedTask(plugin) {
-                // delayed because it seems to reduce client side death screen glitch
-                player.healthScale = game.settings.lives * 2.toDouble()
-            }
-            player.teleport(start.clone().add(0.5, 0.01, 0.5))
-            player.gameMode = GameMode.SURVIVAL
+            player.teleport(start)
+            player.gameMode = GameMode.ADVENTURE
             player.exhaustion = 0f
             player.foodLevel = 100000 // just a big number
             player.isFlying = false
             player.inventory.clear()
-            for ((i, stack) in game.settings.initialItems.withIndex()) {
+            for ((i, stack) in game.settings.initialLobbyItems.withIndex()) {
                 if (i < player.inventory.size)
                     player.inventory.setItem(i, stack?.clone())
             }
@@ -72,6 +59,13 @@ class GamePlayer private constructor(private val player: Player, private val gam
 
             // Add tag for customisation
             player.addScoreboardTag("bm_player")
+
+            // Create the player
+            val gamePlayer = GamePlayer(player, game)
+            plugin.server.pluginManager.registerEvents(gamePlayer, plugin)
+
+            val e = BmJoinPlayerEnterLobbyEvent(game, player)
+            Bukkit.getPluginManager().callEvent(e)
         }
 
         fun bombStrength(game: Game, player: Player): Int {
@@ -154,6 +148,8 @@ class GamePlayer private constructor(private val player: Player, private val gam
     }
 
     private var immunity = false
+    private val joinTime = System.currentTimeMillis()
+    private var inLobby = true
 
     /**
      * Removes the player from the game and removes any hooks to this player. Treats the player like they disconnected
@@ -170,13 +166,41 @@ class GamePlayer private constructor(private val player: Player, private val gam
     }
 
     @EventHandler(ignoreCancelled = true, priority = EventPriority.LOW)
-    fun onPlayerJoinGame(e: BmPlayerJoinGameIntent) { // Cannot join two games at once
+    fun onGameFindLobbyPlayers(e: BmJoinFindLobbyPlayersIntent) { // Cannot join two games at once
+        if (e.game == game) {
+            e.addPlayer(player, joinTime)
+        }
+    }
+
+    @EventHandler(ignoreCancelled = true, priority = EventPriority.LOW)
+    fun onPlayerJoinLobby(e: BmJoinRequestAccessIntent) {
         if (e.player === player) {
             e.cancelFor(Text.JOIN_ALREADY_JOINED
                     .with("game", e.game)
                     .with("player", player)
                     .format())
         }
+    }
+
+    @EventHandler(ignoreCancelled = true, priority = EventPriority.LOW)
+    fun onLoadLobbyPlayer(e: BmJoinEnterGameAtSpawnIntent) {
+        if (e.player != player)
+            return
+        // Change player into game player
+        inLobby = false
+        player.gameMode = GameMode.SURVIVAL
+        player.teleport(e.spawn)
+        player.getAttribute(Attribute.GENERIC_MAX_HEALTH)?.baseValue = game.settings.lives.toDouble()
+        player.health = game.settings.lives.toDouble()
+        Bukkit.getScheduler().scheduleSyncDelayedTask(plugin) {
+            // delayed because it seems to reduce client side death screen glitch
+            player.healthScale = game.settings.lives * 2.toDouble()
+        }
+        for ((i, stack) in game.settings.initialItems.withIndex()) {
+            if (i < player.inventory.size)
+                player.inventory.setItem(i, stack?.clone())
+        }
+        e.setHandled()
     }
 
     @EventHandler(ignoreCancelled = true, priority = EventPriority.HIGH)
@@ -246,7 +270,7 @@ class GamePlayer private constructor(private val player: Player, private val gam
     fun onPlayerMoved(e: PlayerMoveEvent) {
         if (e.player !== player)
             return
-        val bmEvent = BmPlayerMovedEvent(game, player, e.from, e.to ?: e.from)
+        val bmEvent = BmPlayerMovedEvent(game, player, e.from, e.to ?: e.from, inLobby)
         Bukkit.getPluginManager().callEvent(bmEvent)
     }
 
@@ -288,8 +312,7 @@ class GamePlayer private constructor(private val player: Player, private val gam
                 immunity = false
                 player.fireTicks = 0
                 // Call the player move event to recheck damage required
-                Bukkit.getPluginManager().callEvent(
-                        BmPlayerMovedEvent(game, player, player.location, player.location))
+                Bukkit.getPluginManager().callEvent(BmPlayerMovedEvent(game, player, player.location, player.location, inLobby))
             }, game.settings.immunityTicks.toLong()) // 22 is slightly longer than 20 ticks a bomb is active for
         } else {
             BmPlayerKilledIntent.kill(game, player, e.attacker)

@@ -4,7 +4,7 @@ import io.github.mdsimmo.bomberman.commands.Cmd
 import io.github.mdsimmo.bomberman.commands.GameCommand
 import io.github.mdsimmo.bomberman.commands.Permission
 import io.github.mdsimmo.bomberman.commands.Permissions
-import io.github.mdsimmo.bomberman.events.BmPlayerJoinGameIntent
+import io.github.mdsimmo.bomberman.events.BmJoinRequestAccessIntent
 import io.github.mdsimmo.bomberman.game.Game
 import io.github.mdsimmo.bomberman.messaging.Message
 import io.github.mdsimmo.bomberman.messaging.Text
@@ -28,25 +28,8 @@ class GameJoin(parent: Cmd) : GameCommand(parent) {
                     .sendTo(sender)
             return true
         }
-        val e = BmPlayerJoinGameIntent.join(game, sender)
-
-        if (e.isCancelled) {
-            e.cancelledReason()
-                    ?.apply {
-                        sendTo(sender)
-                    }
-                    ?: {
-                        context(Text.COMMAND_CANCELLED)
-                                .with("game", game)
-                                .with("player", sender)
-                                .sendTo(sender)
-                    }()
-        } else {
-            context(Text.JOIN_SUCCESS)
-                    .with("game", game)
-                    .with("player", sender)
-                    .sendTo(sender)
-        }
+        val e = BmJoinRequestAccessIntent.join(game, sender)
+        e.message?.sendTo(sender)
         return true
     }
 

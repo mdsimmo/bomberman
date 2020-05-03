@@ -1,10 +1,7 @@
 package io.github.mdsimmo.bomberman.game
 
 import io.github.mdsimmo.bomberman.Bomberman
-import io.github.mdsimmo.bomberman.events.BmRunStartCountDownIntent
-import io.github.mdsimmo.bomberman.events.BmRunStartedIntent
-import io.github.mdsimmo.bomberman.events.BmRunStoppedIntent
-import io.github.mdsimmo.bomberman.events.BmTimerCountedEvent
+import io.github.mdsimmo.bomberman.events.*
 import io.github.mdsimmo.bomberman.messaging.Text
 import org.bukkit.Bukkit
 import org.bukkit.event.EventHandler
@@ -57,11 +54,18 @@ class StartTimer private constructor(private val game: Game, private var time: I
         if (e.override) {
             killSelf()
         } else {
-            e.cancelBecause(Text.GAME_ALREADY_COUNTING
+            e.cancelBecause(Text.START_GAME_ALREADY_COUNTING
                     .with("game", game)
                     .with("time", time)
                     .format())
         }
+    }
+
+    @EventHandler(ignoreCancelled = true, priority = EventPriority.LOW)
+    fun onPlayerJoinLobby(e: BmJoinPlayerEnterLobbyEvent) {
+        if (e.game != game)
+            return
+        BmJoinEnterGameIntent.join(game, e.player)
     }
 
     // Must be run before Game::onRunStoppedWhileNotRunning

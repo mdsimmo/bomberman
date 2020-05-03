@@ -65,7 +65,7 @@ class RunStart(parent: Cmd) : GameCommand(parent) {
                     )
                     .sendTo(sender)
         } else {
-            Text.GAME_START_SUCCESS.with("game", game).sendTo(sender)
+            Text.START_SUCCESS.with("game", game).sendTo(sender)
         }
         return true
     }

@@ -248,10 +248,10 @@ command:
       {#|format.map|Init lives|{game|lives}}
       {#|format.map|Init bombs|{game|bombs}}
       {#|format.map|Init power|{game|power}}
-      {#|format.map|Location|({game|x}, {game|y}, {game|z})}
+      {#|format.map|Location|{game|location|world} ({game|location|x}, {game|location|y}, {game|location|z})}
       {#|format.map|Schema|{game|schema|name}}
       {#|format.map|Size|[{game|schema|xsize}x{game|schema|ysize}x{game|schema|zsize}]}
-
+      {#|format.map|Lobby|{game|lobby}}
   # Commands relating to '/bm join'. Also see 'join.xxx' messages
   join:
     name: join
@@ -269,10 +269,14 @@ command:
     # {game}: the game that couldn't be joined
     # {player}: the player joining
     already-joined: 'You are already part of a game'
-    # A player has joined the game. Sent to all observers of a game
+    # The player has joined the game
     # {game}: the game joined
     # {player}: the player who joined
-    success: '{player} joined game {game}{#switch|{=|{game|players}=={game|spawns}}|1|{#exec|bm start {game} -d=10}}'
+    added-direct: '{player} joined game {game}'
+    # The player has been added into the game's lobby
+    # {game}: the game
+    # {player}: the added player
+    added-to-lobby: 'Added to game queue'
   # Messages relating to '/bm leave'
   leave:
     name: leave

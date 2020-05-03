@@ -2,16 +2,13 @@ package io.github.mdsimmo.bomberman.events
 
 import io.github.mdsimmo.bomberman.game.Game
 import org.bukkit.Bukkit
+import org.bukkit.Location
 import org.bukkit.entity.Player
 import org.bukkit.event.HandlerList
 
-/**
- * Called whenever a player attempts to join a game. If there are not enough spawns in the game or the player cannot
- * afford entry, or ..., the event will be cancelled
- */
-class BmPlayerJoinGameIntent private constructor(val game: Game, val player: Player) : BmEvent(),
-        IntentCancellableReasoned by BmIntentCancellableReasoned() {
 
+class BmJoinEnterGameAtSpawnIntent private constructor(val game: Game, val player: Player, val spawn: Location) : BmEvent(),
+        IntentCancellableReasoned by BmIntentCancellableReasoned() {
 
     override fun getHandlers(): HandlerList {
         return handlerList
@@ -19,8 +16,8 @@ class BmPlayerJoinGameIntent private constructor(val game: Game, val player: Pla
 
     companion object {
         @JvmStatic
-        fun join(game: Game, player: Player): BmPlayerJoinGameIntent {
-            val e = BmPlayerJoinGameIntent(game, player)
+        fun join(game: Game, player: Player, spawn: Location): BmJoinEnterGameAtSpawnIntent {
+            val e = BmJoinEnterGameAtSpawnIntent(game, player, spawn)
             Bukkit.getPluginManager().callEvent(e)
             e.verifyHandled()
             return e

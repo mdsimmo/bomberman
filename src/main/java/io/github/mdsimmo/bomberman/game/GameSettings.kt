@@ -101,6 +101,7 @@ class GameSettings : ConfigurationSerializable {
     var initialItems = listOf<ItemStack?>(
             ItemStack(bombItem, 3)
     )
+    var initialLobbyItems= listOf<ItemStack?>()
     var lives = 3
     var fuseTicks: Int = 40
     var fireTicks: Int = 20

@@ -8,7 +8,11 @@ import org.bukkit.event.HandlerList
 /**
  * Called whenever a bm player moves. Cannot modify the event.
  */
-class BmPlayerMovedEvent(val game: Game, val player: Player, private val from: Location, private val to: Location) : BmEvent() {
+class BmPlayerMovedEvent(val game: Game,
+                         val player: Player,
+                         private val from: Location,
+                         private val to: Location,
+                         val inLobby: Boolean) : BmEvent() {
 
     fun getFrom(): Location {
         return from.clone()

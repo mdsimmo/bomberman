@@ -26,7 +26,10 @@ import org.bukkit.event.server.PluginDisableEvent
 import java.io.File
 import java.io.FileOutputStream
 
-class Game private constructor(val name: String, private var schema: SchemaBuilder, val settings: GameSettings = plugin.settings.defaultGameSettings())
+class Game private constructor(val name: String,
+                               private var schema: SchemaBuilder,
+                               val settings: GameSettings = plugin.settings.defaultGameSettings(),
+                               var lobby: Location? = null)
     : Formattable, Listener {
 
     companion object {
@@ -51,9 +54,9 @@ class Game private constructor(val name: String, private var schema: SchemaBuild
             val schema = data["schema"] as? String ?: return null
             val loc = data["origin"] as? Location ?: return null
             val settings = data["settings"] as? GameSettings ?: plugin.settings.defaultGameSettings()
-            val flags = data["build-flags"] as? BuildFlags
-                    ?: BuildFlags()
-            return Game(name, SchemaBuilder(File(schema), loc, flags), settings)
+            val flags = data["build-flags"] as? BuildFlags ?: BuildFlags()
+            val lobby = data["lobby"] as? Location
+            return Game(name, SchemaBuilder(File(schema), loc, flags), settings, lobby)
         }
 
         fun saveGame(game: Game) {
@@ -63,6 +66,7 @@ class Game private constructor(val name: String, private var schema: SchemaBuild
             file.set("origin", game.schema.origin)
             file.set("settings", game.settings)
             file.set("build-flags", game.schema.flags)
+            file.set("lobby", game.lobby)
             file.save(File(plugin.settings.gameSaves(), "${game.name}.yml"))
         }
 
@@ -169,7 +173,7 @@ class Game private constructor(val name: String, private var schema: SchemaBuild
                         && spawn.blockY == playerLocation.blockY
                         && spawn.blockZ == playerLocation.blockZ
             }
-        }
+        }?.clone()?.add(0.5, 0.01, 0.5)
     }
 
     private fun removeCages(replaceSpawnSign: Boolean) {
@@ -235,12 +239,22 @@ class Game private constructor(val name: String, private var schema: SchemaBuild
     }
 
     @EventHandler(ignoreCancelled = true, priority = EventPriority.HIGHEST)
-    fun onPlayerJoinGame(e: BmPlayerJoinGameIntent) {
+    fun onPlayerRequestAccess(e: BmJoinRequestAccessIntent) {
         if (e.game != this)
             return
 
+        val lobby = lobby
+        if (lobby != null) {
+            e.successOf(Text.JOIN_ADDED_TO_LOBBY
+                    .with("game", this)
+                    .with("player", e.player)
+                    .format())
+            GamePlayer.spawnGamePlayer(e.player, this, lobby)
+            return
+        }
+
         if (running) {
-            e.cancelFor(Text.GAME_ALREADY_STARTED
+            e.cancelFor(Text.JOIN_GAME_STARTED
                     .with("game", this)
                     .with("player", e.player)
                     .format())
@@ -258,8 +272,37 @@ class Game private constructor(val name: String, private var schema: SchemaBuild
         }
 
         GamePlayer.spawnGamePlayer(e.player, this, gameSpawn)
-        players.add(e.player)
+        BmJoinEnterGameAtSpawnIntent.join(this, e.player, gameSpawn)
+        e.successOf(Text.JOIN_ADDED_DIRECT
+                .with("game", this)
+                .with("player", e.player)
+                .format())
+    }
+
+    @EventHandler(ignoreCancelled = true, priority = EventPriority.LOW)
+    fun onJoinEnterGameIntent(e: BmJoinEnterGameIntent) {
+        if (e.game != this)
+            return
+
+        // Check if there is spare room
+        val gameSpawn = findSpareSpawn()
+        if (gameSpawn == null) {
+            e.cancelFor(Text.JOIN_GAME_FULL
+                    .with("game", this)
+                    .with("player", e.player)
+                    .format())
+            return
+        }
+
+        BmJoinEnterGameAtSpawnIntent.join(this, e.player, gameSpawn)
         e.setHandled()
+    }
+
+    @EventHandler(ignoreCancelled = true, priority = EventPriority.LOW)
+    fun onJoinPlayerAtSpawn(e: BmJoinEnterGameAtSpawnIntent) {
+        if (e.game != this)
+            return
+        players.add(e.player)
     }
 
     @EventHandler(ignoreCancelled = true, priority = EventPriority.HIGHEST)
@@ -268,8 +311,14 @@ class Game private constructor(val name: String, private var schema: SchemaBuild
             return
 
         if (running) {
-            e.cancelBecause(Text.GAME_ALREADY_STARTED.with("game", this).format())
+            e.cancelBecause(Text.START_GAME_ALREADY_STARTED.with("game", this).format())
             return
+        }
+
+        val playersEvent = BmJoinFindLobbyPlayersIntent(this)
+        Bukkit.getPluginManager().callEvent(playersEvent)
+        for (player in playersEvent.players()) {
+            BmJoinEnterGameIntent.join(this, player)
         }
 
         StartTimer.createTimer(this, e.delay)
@@ -290,6 +339,8 @@ class Game private constructor(val name: String, private var schema: SchemaBuild
     @EventHandler(ignoreCancelled = true, priority = EventPriority.NORMAL)
     fun onPlayerMoveOutOfArena(e: BmPlayerMovedEvent) {
         if (e.game != this)
+            return
+        if (e.inLobby)
             return
         if (!schema.box.contains(e.getTo())) {
             BmPlayerLeaveGameIntent.leave(e.player)
@@ -374,30 +425,17 @@ class Game private constructor(val name: String, private var schema: SchemaBuild
             return Message.of(name)
         return when (args[0].toString()) {
             "name" -> Message.of(name)
-            "spawns" -> CollectionWrapper(spawns.map { object : Formattable {
-                override fun format(args: List<Message>): Message {
-                    require(args.size == 1) { "Spawn format must have one arg" }
-                    return when(args[0].toString().toLowerCase()) {
-                        "world", "w" -> Message.of(it.world?.name ?: "unknown")
-                        "x" -> Message.of(it.x.toInt())
-                        "y" -> Message.of(it.y.toInt())
-                        "z" -> Message.of(it.z.toInt())
-                        else -> throw IllegalArgumentException("Unknown spawn format ${args[0]}")
-                    }
-                }
-            } }).format(args.drop(1))
+            "spawns" -> CollectionWrapper(spawns.map { LocationWrapper(it) }).format(args.drop(1))
             "schema" -> schema.format(args.drop(1))
-            "players" -> CollectionWrapper(players.map { SenderWrapper(it) })
-                    .format(args.drop(1))
+            "players" -> CollectionWrapper(players.map { SenderWrapper(it) }).format(args.drop(1))
             "power" -> Message.of(settings.initialItems.sumBy {
                 if (it?.type == settings.bombItem) { it.amount } else { 0 }})
             "bombs" -> Message.of(settings.initialItems.sumBy {
                 if (it?.type == settings.powerItem) { it.amount } else { 0 }})
             "lives" -> Message.of(settings.lives.toString())
-            "w", "world" -> Message.of(schema.origin.world?.name ?: "unknown")
-            "x" -> Message.of(schema.origin.x.toInt())
-            "y" -> Message.of(schema.origin.y.toInt())
-            "z" -> Message.of(schema.origin.z.toInt())
+            "lobby" -> Message.of(if (lobby == null) "false" else "true")
+            "lobby-location" -> lobby ?. let { LocationWrapper(it).format(args.drop(1)) } ?: Message.empty
+            "location" -> LocationWrapper(schema.origin).format(args.drop(1))
             "running" -> Message.of(if (running) { "true" } else { "false" })
             else -> Message.empty
         }

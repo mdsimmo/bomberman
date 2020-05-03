@@ -33,7 +33,8 @@ public class Bomberman extends JavaPlugin implements Listener {
 		instance = this;
 
 		ConfigurationSerialization.registerClass(GameSettings.class);
-		ConfigurationSerialization.registerClass(BuildFlags.class);
+		ConfigurationSerialization.registerClass(BuildFlags.class,
+				"io.github.mdsimmo.bomberman.game.Game$BuildFlags");
 
 		saveResource("sample_config.yml", true);
 		FileConfiguration config = getConfig();
