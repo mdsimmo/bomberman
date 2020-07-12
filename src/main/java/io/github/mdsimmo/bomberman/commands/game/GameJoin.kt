@@ -4,7 +4,7 @@ import io.github.mdsimmo.bomberman.commands.Cmd
 import io.github.mdsimmo.bomberman.commands.GameCommand
 import io.github.mdsimmo.bomberman.commands.Permission
 import io.github.mdsimmo.bomberman.commands.Permissions
-import io.github.mdsimmo.bomberman.events.BmJoinRequestAccessIntent
+import io.github.mdsimmo.bomberman.events.BmJoinGameIntent
 import io.github.mdsimmo.bomberman.game.Game
 import io.github.mdsimmo.bomberman.messaging.Message
 import io.github.mdsimmo.bomberman.messaging.Text
@@ -28,7 +28,7 @@ class GameJoin(parent: Cmd) : GameCommand(parent) {
                     .sendTo(sender)
             return true
         }
-        val e = BmJoinRequestAccessIntent.join(game, sender)
+        val e = BmJoinGameIntent.join(game, sender)
         e.message?.sendTo(sender)
         return true
     }

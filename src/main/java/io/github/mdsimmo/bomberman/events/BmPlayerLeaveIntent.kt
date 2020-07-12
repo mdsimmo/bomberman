@@ -5,7 +5,7 @@ import org.bukkit.Bukkit
 import org.bukkit.entity.Player
 import org.bukkit.event.HandlerList
 
-class BmPlayerLeaveGameIntent private constructor(val player: Player) : BmEvent(), Intent by BmIntent() {
+class BmPlayerLeaveIntent private constructor(val player: Player) : BmEvent(), Intent by BmIntent() {
 
     var game: Game? = null
         private set
@@ -21,8 +21,8 @@ class BmPlayerLeaveGameIntent private constructor(val player: Player) : BmEvent(
 
     companion object {
         @JvmStatic
-        fun leave(player: Player): BmPlayerLeaveGameIntent {
-            val leave = BmPlayerLeaveGameIntent(player)
+        fun leave(player: Player): BmPlayerLeaveIntent {
+            val leave = BmPlayerLeaveIntent(player)
             Bukkit.getPluginManager().callEvent(leave)
             // Leave event may not be handled if player was not joined
             return leave

@@ -29,6 +29,8 @@ temp-data:
   # Player inventories and spawn information
   player: temp/player
 # Where the translated text file is
+# The default messages are here:
+# https://github.com/mdsimmo/Bomberman/blob/master/src/main/resources/english.yml
 language: 'messages.yml'
 
 # Default settings for new games

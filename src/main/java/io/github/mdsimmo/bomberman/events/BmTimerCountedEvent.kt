@@ -1,6 +1,7 @@
 package io.github.mdsimmo.bomberman.events
 
 import io.github.mdsimmo.bomberman.game.Game
+import io.github.mdsimmo.bomberman.game.Lobby
 import org.bukkit.event.HandlerList
 
 /**

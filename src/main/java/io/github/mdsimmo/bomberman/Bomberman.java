@@ -1,10 +1,7 @@
 package io.github.mdsimmo.bomberman;
 
 import io.github.mdsimmo.bomberman.commands.BaseCommand;
-import io.github.mdsimmo.bomberman.game.BuildFlags;
-import io.github.mdsimmo.bomberman.game.Game;
-import io.github.mdsimmo.bomberman.game.GamePlayer;
-import io.github.mdsimmo.bomberman.game.GameSettings;
+import io.github.mdsimmo.bomberman.game.*;
 import org.bukkit.command.PluginCommand;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.serialization.ConfigurationSerialization;
@@ -33,6 +30,7 @@ public class Bomberman extends JavaPlugin implements Listener {
 		instance = this;
 
 		ConfigurationSerialization.registerClass(GameSettings.class);
+		ConfigurationSerialization.registerClass(LobbySettings.class);
 		ConfigurationSerialization.registerClass(BuildFlags.class,
 				"io.github.mdsimmo.bomberman.game.Game$BuildFlags");
 
@@ -47,9 +45,10 @@ public class Bomberman extends JavaPlugin implements Listener {
 		bukkitBmCmd.setExecutor(bmCmd);
 		bukkitBmCmd.setTabCompleter(bmCmd);
 
+		Lobby.loadLobbies();
 		Game.loadGames();
 
-		GamePlayer.setupLoginWatcher();
+		PlayerStateSaver.setupLoginWatcher();
 	}
 
 	public BmSetting getSettings() {

@@ -11,8 +11,7 @@ import org.bukkit.event.HandlerList
 class BmPlayerMovedEvent(val game: Game,
                          val player: Player,
                          private val from: Location,
-                         private val to: Location,
-                         val inLobby: Boolean) : BmEvent() {
+                         private val to: Location) : BmEvent() {
 
     fun getFrom(): Location {
         return from.clone()

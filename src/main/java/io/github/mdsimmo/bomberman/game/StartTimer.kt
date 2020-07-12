@@ -9,14 +9,14 @@ import org.bukkit.event.EventPriority
 import org.bukkit.event.HandlerList
 import org.bukkit.event.Listener
 
-class StartTimer private constructor(private val game: Game, private var time: Int) : Runnable, Listener {
+class StartTimer private constructor(private val game: Game, private val lobby: Lobby?, private var time: Int) : Runnable, Listener {
 
     companion object {
         private val plugin = Bomberman.instance
 
         fun createTimer(game: Game, time: Int) {
             Bukkit.getPluginManager().registerEvents(
-                    StartTimer(game, time),
+                    StartTimer(game, game.lobby, time),
                     plugin)
         }
     }
@@ -49,7 +49,7 @@ class StartTimer private constructor(private val game: Game, private var time: I
 
     @EventHandler(ignoreCancelled = true, priority = EventPriority.LOW)
     fun onTimerStarted(e: BmRunStartCountDownIntent) {
-        if (e.game != game)
+        if (e.game != game && e.lobby != lobby)
             return
         if (e.override) {
             killSelf()
@@ -59,13 +59,6 @@ class StartTimer private constructor(private val game: Game, private var time: I
                     .with("time", time)
                     .format())
         }
-    }
-
-    @EventHandler(ignoreCancelled = true, priority = EventPriority.LOW)
-    fun onPlayerJoinLobby(e: BmJoinPlayerEnterLobbyEvent) {
-        if (e.game != game)
-            return
-        BmJoinEnterGameIntent.join(game, e.player)
     }
 
     // Must be run before Game::onRunStoppedWhileNotRunning

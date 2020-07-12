@@ -26,11 +26,12 @@ import org.bukkit.event.server.PluginDisableEvent
 import java.io.File
 import java.io.FileOutputStream
 
-class Game private constructor(val name: String,
-                               private var schema: SchemaBuilder,
-                               val settings: GameSettings = plugin.settings.defaultGameSettings(),
-                               var lobby: Location? = null)
-    : Formattable, Listener {
+class Game private constructor(
+        val name: String,
+        private var schema: SchemaBuilder,
+        val settings: GameSettings = plugin.settings.defaultGameSettings(),
+        var lobby: Lobby
+    ): Formattable, Listener {
 
     companion object {
         private val plugin = Bomberman.instance
@@ -55,8 +56,7 @@ class Game private constructor(val name: String,
             val loc = data["origin"] as? Location ?: return null
             val settings = data["settings"] as? GameSettings ?: plugin.settings.defaultGameSettings()
             val flags = data["build-flags"] as? BuildFlags ?: BuildFlags()
-            val lobby = data["lobby"] as? Location
-            return Game(name, SchemaBuilder(File(schema), loc, flags), settings, lobby)
+            return Game(name, SchemaBuilder(File(schema), loc, flags), settings)
         }
 
         fun saveGame(game: Game) {
@@ -66,7 +66,6 @@ class Game private constructor(val name: String,
             file.set("origin", game.schema.origin)
             file.set("settings", game.settings)
             file.set("build-flags", game.schema.flags)
-            file.set("lobby", game.lobby)
             file.save(File(plugin.settings.gameSaves(), "${game.name}.yml"))
         }
 
@@ -238,20 +237,10 @@ class Game private constructor(val name: String,
             e.game = this
     }
 
-    @EventHandler(ignoreCancelled = true, priority = EventPriority.HIGHEST)
-    fun onPlayerRequestAccess(e: BmJoinRequestAccessIntent) {
+    @EventHandler(ignoreCancelled = true, priority = EventPriority.HIGH)
+    fun onPlayerJoin(e: BmJoinGameIntent) {
         if (e.game != this)
             return
-
-        val lobby = lobby
-        if (lobby != null) {
-            e.successOf(Text.JOIN_ADDED_TO_LOBBY
-                    .with("game", this)
-                    .with("player", e.player)
-                    .format())
-            GamePlayer.spawnGamePlayer(e.player, this, lobby)
-            return
-        }
 
         if (running) {
             e.cancelFor(Text.JOIN_GAME_STARTED
@@ -272,37 +261,11 @@ class Game private constructor(val name: String,
         }
 
         GamePlayer.spawnGamePlayer(e.player, this, gameSpawn)
-        BmJoinEnterGameAtSpawnIntent.join(this, e.player, gameSpawn)
+        players.add(e.player)
         e.successOf(Text.JOIN_ADDED_DIRECT
                 .with("game", this)
                 .with("player", e.player)
                 .format())
-    }
-
-    @EventHandler(ignoreCancelled = true, priority = EventPriority.LOW)
-    fun onJoinEnterGameIntent(e: BmJoinEnterGameIntent) {
-        if (e.game != this)
-            return
-
-        // Check if there is spare room
-        val gameSpawn = findSpareSpawn()
-        if (gameSpawn == null) {
-            e.cancelFor(Text.JOIN_GAME_FULL
-                    .with("game", this)
-                    .with("player", e.player)
-                    .format())
-            return
-        }
-
-        BmJoinEnterGameAtSpawnIntent.join(this, e.player, gameSpawn)
-        e.setHandled()
-    }
-
-    @EventHandler(ignoreCancelled = true, priority = EventPriority.LOW)
-    fun onJoinPlayerAtSpawn(e: BmJoinEnterGameAtSpawnIntent) {
-        if (e.game != this)
-            return
-        players.add(e.player)
     }
 
     @EventHandler(ignoreCancelled = true, priority = EventPriority.HIGHEST)
@@ -313,12 +276,6 @@ class Game private constructor(val name: String,
         if (running) {
             e.cancelBecause(Text.START_GAME_ALREADY_STARTED.with("game", this).format())
             return
-        }
-
-        val playersEvent = BmJoinFindLobbyPlayersIntent(this)
-        Bukkit.getPluginManager().callEvent(playersEvent)
-        for (player in playersEvent.players()) {
-            BmJoinEnterGameIntent.join(this, player)
         }
 
         StartTimer.createTimer(this, e.delay)
@@ -340,15 +297,13 @@ class Game private constructor(val name: String,
     fun onPlayerMoveOutOfArena(e: BmPlayerMovedEvent) {
         if (e.game != this)
             return
-        if (e.inLobby)
-            return
         if (!schema.box.contains(e.getTo())) {
-            BmPlayerLeaveGameIntent.leave(e.player)
+            BmPlayerLeaveIntent.leave(e.player)
         }
     }
 
     @EventHandler(ignoreCancelled = true, priority = EventPriority.HIGHEST)
-    fun onPlayerLeave(e: BmPlayerLeaveGameIntent) {
+    fun onPlayerLeave(e: BmPlayerLeaveIntent) {
         if (players.contains(e.player)) {
             players.remove(e.player)
 
@@ -433,8 +388,6 @@ class Game private constructor(val name: String,
             "bombs" -> Message.of(settings.initialItems.sumBy {
                 if (it?.type == settings.powerItem) { it.amount } else { 0 }})
             "lives" -> Message.of(settings.lives.toString())
-            "lobby" -> Message.of(if (lobby == null) "false" else "true")
-            "lobby-location" -> lobby ?. let { LocationWrapper(it).format(args.drop(1)) } ?: Message.empty
             "location" -> LocationWrapper(schema.origin).format(args.drop(1))
             "running" -> Message.of(if (running) { "true" } else { "false" })
             else -> Message.empty

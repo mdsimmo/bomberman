@@ -1,10 +1,11 @@
 package io.github.mdsimmo.bomberman.events
 
 import io.github.mdsimmo.bomberman.game.Game
+import io.github.mdsimmo.bomberman.game.Lobby
 import org.bukkit.entity.Player
 import org.bukkit.event.HandlerList
 
-class BmJoinFindLobbyPlayersIntent(val game: Game) : BmEvent() {
+class BmJoinFindLobbyPlayersIntent(val lobby: Lobby) : BmEvent() {
 
     private val players: MutableMap<Player, Long> = HashMap()
 

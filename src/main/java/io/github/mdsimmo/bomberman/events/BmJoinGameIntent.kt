@@ -9,7 +9,7 @@ import org.bukkit.event.HandlerList
 import java.lang.IllegalStateException
 
 
-class BmJoinRequestAccessIntent private constructor(val game: Game, val player: Player) : BmEvent(),
+class BmJoinGameIntent private constructor(val game: Game, val player: Player) : BmEvent(),
     Cancellable by BmCancellable() {
 
     var message: Message? = null
@@ -35,8 +35,8 @@ class BmJoinRequestAccessIntent private constructor(val game: Game, val player: 
 
     companion object {
         @JvmStatic
-        fun join(game: Game, player: Player): BmJoinRequestAccessIntent {
-            val e = BmJoinRequestAccessIntent(game, player)
+        fun join(game: Game, player: Player): BmJoinGameIntent {
+            val e = BmJoinGameIntent(game, player)
             Bukkit.getPluginManager().callEvent(e)
             e.verifyHandled()
             return e

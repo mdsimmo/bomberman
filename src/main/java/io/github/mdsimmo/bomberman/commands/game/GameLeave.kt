@@ -3,7 +3,7 @@ package io.github.mdsimmo.bomberman.commands.game
 import io.github.mdsimmo.bomberman.commands.Cmd
 import io.github.mdsimmo.bomberman.commands.Permission
 import io.github.mdsimmo.bomberman.commands.Permissions
-import io.github.mdsimmo.bomberman.events.BmPlayerLeaveGameIntent
+import io.github.mdsimmo.bomberman.events.BmPlayerLeaveIntent
 import io.github.mdsimmo.bomberman.messaging.Message
 import io.github.mdsimmo.bomberman.messaging.Text
 import org.bukkit.command.CommandSender
@@ -22,7 +22,7 @@ class GameLeave(parent: Cmd) : Cmd(parent) {
         if (args.isNotEmpty())
             return false
         if (sender is Player) {
-            val e = BmPlayerLeaveGameIntent.leave(sender)
+            val e = BmPlayerLeaveIntent.leave(sender)
             if (e.isHandled()) {
                 Text.LEAVE_SUCCESS
                         .with("player", sender)

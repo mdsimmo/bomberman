@@ -1,6 +1,7 @@
 package io.github.mdsimmo.bomberman.events
 
 import io.github.mdsimmo.bomberman.game.Game
+import io.github.mdsimmo.bomberman.game.Lobby
 import io.github.mdsimmo.bomberman.messaging.Message
 import org.bukkit.Bukkit
 import org.bukkit.event.HandlerList
@@ -10,6 +11,7 @@ import org.bukkit.event.HandlerList
  */
 class BmRunStartCountDownIntent private constructor(
         val game: Game,
+        val lobby: Lobby?,
         var delay: Int,
         val override: Boolean
     ): BmEvent(),
@@ -31,7 +33,7 @@ class BmRunStartCountDownIntent private constructor(
     companion object {
         @JvmStatic
         fun startGame(game: Game, delay: Int, override: Boolean): BmRunStartCountDownIntent {
-            val e = BmRunStartCountDownIntent(game, delay, override)
+            val e = BmRunStartCountDownIntent(game, game.lobby, delay, override)
             Bukkit.getPluginManager().callEvent(e)
             e.verifyHandled()
             return e

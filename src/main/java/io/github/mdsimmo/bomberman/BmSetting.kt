@@ -1,6 +1,7 @@
 package io.github.mdsimmo.bomberman
 
 import io.github.mdsimmo.bomberman.game.GameSettings
+import io.github.mdsimmo.bomberman.game.LobbySettings
 import org.bukkit.configuration.file.FileConfiguration
 import java.io.File
 
@@ -18,6 +19,9 @@ class BmSetting private constructor() {
             (data["default-game-settings"] as? GameSettings?)?.let {
                 settings.defaultGameSettings = it
             }
+            (data["default-lobby-settings"] as? LobbySettings?)?.let {
+                settings.defaultLobbySettings = it
+            }
             (data["language"] as? String?)?.let { settings.language = it }
             return settings
         }
@@ -26,13 +30,23 @@ class BmSetting private constructor() {
     private var schematicsBuiltin: String = "schematics/builtin"
     private var schematicsCustom: String = "schematics/custom"
     private var gameSaves: String = "games"
+    private var lobbySaves: String = "lobbies"
     private var tempGameData: String = "temp/game"
     private var tempPlayerData: String = "temp/player"
     private var defaultGameSettings: GameSettings = GameSettings()
+    private var defaultLobbySettings: LobbySettings = LobbySettings()
     private var language: String = "messages.yml"
 
     fun gameSaves(): File {
         val file = File(Bomberman.instance.dataFolder, gameSaves)
+        if (!file.exists()) {
+            file.mkdirs()
+        }
+        return file
+    }
+
+    fun lobbySaves(): File {
+        val file = File(Bomberman.instance.dataFolder, lobbySaves)
         if (!file.exists()) {
             file.mkdirs()
         }
@@ -77,6 +91,10 @@ class BmSetting private constructor() {
     }
 
     fun defaultGameSettings(): GameSettings {
-        return defaultGameSettings.clone()
+        return defaultGameSettings.copy()
+    }
+
+    fun defaultLobbySettings(): LobbySettings {
+        return defaultLobbySettings.copy()
     }
 }

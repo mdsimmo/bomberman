@@ -3,12 +3,50 @@ package io.github.mdsimmo.bomberman.game
 import io.github.mdsimmo.bomberman.utils.BukkitUtils
 import io.github.mdsimmo.bomberman.utils.RefectAccess
 import org.bukkit.Material
-import org.bukkit.configuration.file.YamlConfiguration
 import org.bukkit.configuration.serialization.ConfigurationSerializable
 import org.bukkit.inventory.ItemStack
 import org.bukkit.potion.PotionType
 
-class GameSettings : ConfigurationSerializable {
+data class GameSettings(
+        var bombItem: Material = Material.TNT,
+        var powerItem: Material = Material.GUNPOWDER,
+        var fireType: Material = Material.FIRE,
+        var blockLoot: Map<Material, Map<ItemStack, Int>> =
+                mapOf(
+                        Pair(ItemStack(Material.TNT, 1), 4),
+                        Pair(ItemStack(Material.GUNPOWDER, 1), 3),
+                        Pair(BukkitUtils.makePotion(PotionType.INSTANT_HEAL, 1), 1),
+                        Pair(BukkitUtils.makePotion(PotionType.SPEED, 1, upgraded = true), 1),
+                        Pair(BukkitUtils.makePotion(PotionType.INVISIBILITY, 1), 1),
+                        Pair(ItemStack(Material.AIR, 0), 100)
+                ).let {
+                    mapOf(
+                            Pair(Material.SNOW_BLOCK, it),
+                            Pair(Material.DIRT, it),
+                            Pair(Material.SAND, it),
+                            Pair(Material.GRAVEL, it)
+                    )
+                },
+        var destructible: Set<Material> = setOf(
+                Material.TNT,
+                Material.SNOW_BLOCK,
+                Material.DIRT,
+                Material.SAND,
+                Material.GRAVEL
+        ),
+        var indestructible: Set<Material> = setOf(),
+        var passKeep: Set<Material> = setOf(),
+        var passDestroy: Set<Material> = setOf(),
+        var initialItems: List<ItemStack?> = listOf<ItemStack?>(
+                ItemStack(bombItem, 3)
+        ),
+        var initialLobbyItems: List<ItemStack?> = listOf(),
+        var lives: Int = 3,
+        var fuseTicks: Int = 40,
+        var fireTicks: Int = 20,
+        var immunityTicks : Int = 21
+) : ConfigurationSerializable {
+
     companion object {
         @RefectAccess
         @JvmStatic
@@ -69,44 +107,6 @@ class GameSettings : ConfigurationSerializable {
         }
     }
 
-    var bombItem: Material = Material.TNT
-    var powerItem: Material = Material.GUNPOWDER
-    var fireType: Material = Material.FIRE
-    var blockLoot: Map<Material, Map<ItemStack, Int>> =
-            mapOf(
-                Pair(ItemStack(Material.TNT, 1), 4),
-                Pair(ItemStack(Material.GUNPOWDER, 1), 3),
-                Pair(BukkitUtils.makePotion(PotionType.INSTANT_HEAL, 1), 1),
-                Pair(BukkitUtils.makePotion(PotionType.SPEED, 1, upgraded = true), 1),
-                Pair(BukkitUtils.makePotion(PotionType.INVISIBILITY, 1), 1),
-                Pair(ItemStack(Material.AIR, 0), 100)
-            ).let {
-                mapOf(
-                    Pair(Material.SNOW_BLOCK, it),
-                    Pair(Material.DIRT, it),
-                    Pair(Material.SAND, it),
-                    Pair(Material.GRAVEL, it)
-                )
-            }
-    var destructible = setOf(
-            Material.TNT,
-            Material.SNOW_BLOCK,
-            Material.DIRT,
-            Material.SAND,
-            Material.GRAVEL
-    )
-    var indestructible = setOf<Material>()
-    var passKeep = setOf<Material>()
-    var passDestroy = setOf<Material>()
-    var initialItems = listOf<ItemStack?>(
-            ItemStack(bombItem, 3)
-    )
-    var initialLobbyItems= listOf<ItemStack?>()
-    var lives = 3
-    var fuseTicks: Int = 40
-    var fireTicks: Int = 20
-    var immunityTicks : Int = 21
-
     override fun serialize(): Map<String, Any> {
         val objs: MutableMap<String, Any> = HashMap()
         objs["bomb"] = bombItem.key.toString()
@@ -142,17 +142,5 @@ class GameSettings : ConfigurationSerializable {
         objs["immunity-ticks"] = immunityTicks
 
         return objs
-    }
-
-    fun clone(): GameSettings {
-        // I'm too lazy to specify all the parameters again. So just serialize and deserialize
-        val configOut = YamlConfiguration()
-        configOut["data"] = this
-
-        val string = configOut.saveToString()
-
-        val configIn = YamlConfiguration()
-        configIn.loadFromString(string)
-        return configIn["data"] as GameSettings
     }
 }
