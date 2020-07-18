@@ -1,25 +1,27 @@
 package io.github.mdsimmo.bomberman.events
 
-import io.github.mdsimmo.bomberman.game.Game
+import io.github.mdsimmo.bomberman.game.GL
 import org.bukkit.Bukkit
 import org.bukkit.event.HandlerList
 
-class BmGameReloadIntent private constructor(val game: Game) : BmEvent(), Intent by BmIntent() {
+/**
+ * Called to find a listing of every joinable game
+ */
+class BmJoinableListIntent : BmEvent() {
+    val gls = mutableSetOf<GL>()
 
     override fun getHandlers(): HandlerList {
         return handlerList
     }
 
     companion object {
-        @JvmStatic
-        fun reload(game: Game) {
-            val e = BmGameReloadIntent(game)
+        fun list(): Set<GL> {
+            val e = BmJoinableListIntent()
             Bukkit.getPluginManager().callEvent(e)
-            e.verifyHandled()
+            return e.gls
         }
 
         @JvmStatic
         val handlerList = HandlerList()
     }
-
 }

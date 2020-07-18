@@ -1,15 +1,15 @@
 package io.github.mdsimmo.bomberman.commands.game
 
 import io.github.mdsimmo.bomberman.commands.Cmd
-import io.github.mdsimmo.bomberman.commands.GameCommand
+import io.github.mdsimmo.bomberman.commands.GLCommand
 import io.github.mdsimmo.bomberman.commands.Permission
 import io.github.mdsimmo.bomberman.commands.Permissions
-import io.github.mdsimmo.bomberman.game.Game
+import io.github.mdsimmo.bomberman.game.GL
 import io.github.mdsimmo.bomberman.messaging.Message
 import io.github.mdsimmo.bomberman.messaging.Text
 import org.bukkit.command.CommandSender
 
-class GameInfo(parent: Cmd) : GameCommand(parent) {
+class GLInfo(parent: Cmd) : GLCommand(parent) {
     override fun name(): Message {
         return Text.INFO_NAME.format()
     }
@@ -18,14 +18,12 @@ class GameInfo(parent: Cmd) : GameCommand(parent) {
         return Permissions.INFO
     }
 
-    override fun gameOptions(args: List<String>): List<String> {
-        return emptyList()
-    }
-
-    override fun gameRun(sender: CommandSender, args: List<String>, flags: Map<String, String>, game: Game): Boolean {
+    override fun glRun(sender: CommandSender, args: List<String>, flags: Map<String, String>, gl: GL): Boolean {
         if (args.isNotEmpty())
             return false
-        context(Text.INFO_DETAILS).with("game", game).sendTo(sender)
+        context(Text.INFO_RESULT)
+                .with("gl", gl)
+                .sendTo(sender)
         return true
     }
 

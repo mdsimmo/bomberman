@@ -88,7 +88,7 @@ class Explosion private constructor(
                 }.toMap()
     }
 
-    @EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = true)
+    @EventHandler(ignoreCancelled = true)
     fun onPlayerMove(e: BmPlayerMovedEvent) {
         if (e.game != game) return
         if (isTouching(e.player, blocks.stream().map { b: BlockPlan -> b.block }.collect(Collectors.toSet()))) {
@@ -96,7 +96,7 @@ class Explosion private constructor(
         }
     }
 
-    @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
+    @EventHandler(ignoreCancelled = true)
     fun onAnotherExplosion(e: BmExplosionEvent) { // Don't double remove blocks
         blocks.removeIf { thisBlock: BlockPlan ->
             e.igniting
@@ -104,7 +104,7 @@ class Explosion private constructor(
         }
     }
 
-    @EventHandler(ignoreCancelled = true, priority = EventPriority.HIGH)
+    @EventHandler(ignoreCancelled = true)
     fun onRunStopped(e: BmRunStoppedIntent) {
         if (e.game != game) return
 

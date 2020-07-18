@@ -1,26 +1,34 @@
 package io.github.mdsimmo.bomberman.commands.game
 
 import io.github.mdsimmo.bomberman.commands.Cmd
-import io.github.mdsimmo.bomberman.commands.GameCommand
+import io.github.mdsimmo.bomberman.commands.GLCommand
 import io.github.mdsimmo.bomberman.commands.Permission
 import io.github.mdsimmo.bomberman.commands.Permissions
 import io.github.mdsimmo.bomberman.events.BmRunStoppedIntent
+import io.github.mdsimmo.bomberman.game.GL
 import io.github.mdsimmo.bomberman.game.Game
 import io.github.mdsimmo.bomberman.messaging.Message
 import io.github.mdsimmo.bomberman.messaging.Text
 import org.bukkit.command.CommandSender
 
-class RunStop(parent: Cmd) : GameCommand(parent) {
+class RunStop(parent: Cmd) : GLCommand(parent) {
     override fun name(): Message {
         return context(Text.STOP_NAME).format()
     }
 
-    override fun gameRun(sender: CommandSender, args: List<String>, flags: Map<String, String>, game: Game): Boolean {
+    override fun glRun(sender: CommandSender, args: List<String>, flags: Map<String, String>, gl: GL): Boolean {
         if (args.isNotEmpty())
             return false
-        val e = BmRunStoppedIntent.stopGame(game)
+
+        if (gl !is Game) {
+            // TODO Stop players from stopping a lobby
+            context(Text.UNIMPLEMENTED).sendTo(sender)
+            return true
+        }
+
+        val e = BmRunStoppedIntent.stopGame(gl)
         if (!e.isCancelled) Text.STOP_SUCCESS
-                .with("game", game)
+                .with("game", gl)
                 .sendTo(sender) else {
             (e.cancelledReason()
                     ?: Text.COMMAND_CANCELLED
@@ -33,10 +41,6 @@ class RunStop(parent: Cmd) : GameCommand(parent) {
 
     override fun permission(): Permission {
         return Permissions.STOP
-    }
-
-    override fun gameOptions(args: List<String>): List<String> {
-        return emptyList()
     }
 
     override fun extra(): Message {

@@ -1,9 +1,6 @@
-package io.github.mdsimmo.bomberman.commands.game
+package io.github.mdsimmo.bomberman.commands
 
 import io.github.mdsimmo.bomberman.Bomberman
-import io.github.mdsimmo.bomberman.commands.Cmd
-import io.github.mdsimmo.bomberman.commands.Permission
-import io.github.mdsimmo.bomberman.commands.Permissions
 import io.github.mdsimmo.bomberman.messaging.Message
 import org.bukkit.Bukkit
 import org.bukkit.ChatColor
@@ -51,7 +48,7 @@ class DevInfo(parent: Cmd) : Cmd(parent) {
                         }
                     }
                 }, 1, 1)
-                sender.sendMessage("Watching for handlers watching for ignored events")
+                sender.sendMessage("Wwatching for ignored events")
                 true
             }
             "handlerwatch" -> {
@@ -62,10 +59,10 @@ class DevInfo(parent: Cmd) : Cmd(parent) {
                     val added = updated.filterNot { handlers.contains(it) }
                     val removed = handlers.filterNot { updated.contains(it) }
                     added.forEach {
-                        sender.sendMessage(" ${ChatColor.RED}+${ChatColor.RESET} " + it.listener)
+                        sender.sendMessage(" ${ChatColor.RED}+${ChatColor.RESET} + ${it.listener} (${it.listener.javaClass})")
                     }
                     removed.forEach {
-                        sender.sendMessage(" ${ChatColor.GREEN}-${ChatColor.RESET} " + it.listener)
+                        sender.sendMessage(" ${ChatColor.GREEN}-${ChatColor.RESET} + ${it.listener} (${it.listener.javaClass})")
                     }
                     if (handlers.size != updated.size) {
                         val countDiff = updated.size - startCount
@@ -104,10 +101,10 @@ class DevInfo(parent: Cmd) : Cmd(parent) {
                     val added = updated.filterNot { tasks.contains(it) }
                     val removed = tasks.filterNot { updated.contains(it) }
                     added.forEach {
-                        sender.sendMessage(  " ${ChatColor.RED}+${ChatColor.RESET} " + it.taskId)
+                        sender.sendMessage(  " ${ChatColor.RED}+${ChatColor.RESET} task " + it.taskId)
                     }
                     removed.forEach {
-                        sender.sendMessage(" ${ChatColor.GREEN}-${ChatColor.RESET} " + it.taskId)
+                        sender.sendMessage(" ${ChatColor.GREEN}-${ChatColor.RESET} task " + it.taskId)
                     }
 
                     if (tasks.size != updated.size) {
@@ -131,7 +128,7 @@ class DevInfo(parent: Cmd) : Cmd(parent) {
     }
 
     override fun permission(): Permission {
-        return Permissions.CREATE
+        return Permissions.NEWGAME
     }
 
     override fun example(): Message {

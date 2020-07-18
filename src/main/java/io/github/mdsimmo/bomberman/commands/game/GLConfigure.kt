@@ -1,10 +1,11 @@
 package io.github.mdsimmo.bomberman.commands.game
 
 import io.github.mdsimmo.bomberman.commands.Cmd
-import io.github.mdsimmo.bomberman.commands.GameCommand
+import io.github.mdsimmo.bomberman.commands.GLCommand
 import io.github.mdsimmo.bomberman.commands.Permission
 import io.github.mdsimmo.bomberman.commands.Permissions
 import io.github.mdsimmo.bomberman.game.Game
+import io.github.mdsimmo.bomberman.game.GL
 import io.github.mdsimmo.bomberman.messaging.Contexted
 import io.github.mdsimmo.bomberman.messaging.Message
 import io.github.mdsimmo.bomberman.messaging.Text
@@ -17,13 +18,9 @@ import java.util.concurrent.atomic.AtomicInteger
 import kotlin.math.max
 import kotlin.math.min
 
-class Configure(parent: Cmd) : GameCommand(parent) {
+class GLConfigure(parent: Cmd) : GLCommand(parent) {
     override fun name(): Message {
         return context(Text.CONFIGURE_NAME).format()
-    }
-
-    override fun gameOptions(args: List<String>): List<String> {
-        return emptyList()
     }
 
     override fun permission(): Permission {
@@ -46,7 +43,12 @@ class Configure(parent: Cmd) : GameCommand(parent) {
         return context(Text.CONFIGURE_USAGE).format()
     }
 
-    override fun gameRun(sender: CommandSender, args: List<String>, flags: Map<String, String>, game: Game): Boolean {
+    override fun glRun(sender: CommandSender, args: List<String>, flags: Map<String, String>, gl: GL): Boolean {
+        if (gl !is Game) {
+            // TODO implement configure Lobby
+            context(Text.UNIMPLEMENTED).sendTo(sender)
+            return true
+        }
         if (args.isNotEmpty())
             return false
         if (sender !is Player) {
@@ -58,7 +60,7 @@ class Configure(parent: Cmd) : GameCommand(parent) {
             return true
         }
 
-        showMainMenu(sender, game)
+        showMainMenu(sender, gl)
         return true
     }
 

@@ -38,8 +38,11 @@ import java.io.FileOutputStream
 import java.lang.IllegalArgumentException
 import java.lang.ref.WeakReference
 
-class Game private constructor(val name: String, private var schema: Arena, val settings: GameSettings = plugin.settings.defaultGameSettings())
-    : Formattable, Listener {
+class Game private constructor(
+        val name: String,
+        private var schema: Arena,
+        val settings: GameSettings = plugin.settings.defaultGameSettings())
+    : Formattable, Listener, GL {
 
     companion object {
         private val plugin = Bomberman.instance
@@ -381,20 +384,33 @@ class Game private constructor(val name: String, private var schema: Arena, val 
         }
     }
 
-    @EventHandler(ignoreCancelled = true, priority = EventPriority.LOW)
-    fun onGameListing(e: BmGameListIntent) {
-        e.games.add(this)
+    @EventHandler(ignoreCancelled = true)
+    fun onGameListing(e: BmJoinableListIntent) {
+        if (settings.lobby.isBlank())
+            e.gls.add(this)
     }
 
-    @EventHandler(ignoreCancelled = true, priority = EventPriority.LOW)
-    fun onGameLookup(e: BmGameLookupIntent) {
+    @EventHandler(ignoreCancelled = true)
+    fun onGameListing(e: BmGLListIntent) {
+        e.gls.add(this)
+    }
+
+    @EventHandler(ignoreCancelled = true)
+    fun onLobbyListGame(e: BmLobbyListGames) {
+        if (e.lobby == settings.lobby) {
+            e.games += this
+        }
+    }
+
+    @EventHandler(ignoreCancelled = true)
+    fun onGameLookup(e: BmGLLookupIntent) {
         if (e.name.equals(name, ignoreCase = true))
-            e.game = this
+            e.gl = this
     }
 
-    @EventHandler(ignoreCancelled = true, priority = EventPriority.HIGHEST)
-    fun onPlayerJoinGame(e: BmPlayerJoinGameIntent) {
-        if (e.game != this)
+    @EventHandler(ignoreCancelled = true)
+    fun onPlayerJoinGame(e: BmPlayerJoinGLIntent) {
+        if (e.gl != this)
             return
 
         if (running) {
@@ -420,7 +436,7 @@ class Game private constructor(val name: String, private var schema: Arena, val 
         e.setHandled()
     }
 
-    @EventHandler(ignoreCancelled = true, priority = EventPriority.HIGHEST)
+    @EventHandler(ignoreCancelled = true)
     fun onRunStartCountDown(e: BmRunStartCountDownIntent) {
         if (e.game != this)
             return
@@ -434,7 +450,7 @@ class Game private constructor(val name: String, private var schema: Arena, val 
         e.setHandled()
     }
 
-    @EventHandler(ignoreCancelled = true, priority = EventPriority.HIGH)
+    @EventHandler(ignoreCancelled = true)
     fun onRunStarted(e: BmRunStartedIntent) {
         if (e.game != this)
             return
@@ -445,17 +461,17 @@ class Game private constructor(val name: String, private var schema: Arena, val 
         e.setHandled()
     }
 
-    @EventHandler(ignoreCancelled = true, priority = EventPriority.NORMAL)
+    @EventHandler(ignoreCancelled = true)
     fun onPlayerMoveOutOfArena(e: BmPlayerMovedEvent) {
         if (e.game != this)
             return
         if (!schema.box.contains(e.getTo())) {
-            BmPlayerLeaveGameIntent.leave(e.player)
+            BmPlayerLeaveGLIntent.leave(e.player)
         }
     }
 
-    @EventHandler(ignoreCancelled = true, priority = EventPriority.HIGHEST)
-    fun onPlayerLeave(e: BmPlayerLeaveGameIntent) {
+    @EventHandler(ignoreCancelled = true, priority = EventPriority.HIGH)
+    fun onPlayerLeave(e: BmPlayerLeaveGLIntent) {
         if (players.contains(e.player)) {
             players.remove(e.player)
 
@@ -470,7 +486,7 @@ class Game private constructor(val name: String, private var schema: Arena, val 
         }
     }
 
-    @EventHandler(ignoreCancelled = true, priority = EventPriority.NORMAL)
+    @EventHandler(ignoreCancelled = true, priority = EventPriority.LOW)
     fun onRunStoppedWhileRunning(e: BmRunStoppedIntent) {
         if (e.game != this)
             return
@@ -479,7 +495,7 @@ class Game private constructor(val name: String, private var schema: Arena, val 
         }
     }
 
-    @EventHandler(ignoreCancelled = true, priority = EventPriority.HIGH)
+    @EventHandler(ignoreCancelled = true)
     fun onRunStopped(e: BmRunStoppedIntent) {
         if (e.game != this)
             return
@@ -489,7 +505,7 @@ class Game private constructor(val name: String, private var schema: Arena, val 
         e.setHandled()
     }
 
-    @EventHandler(ignoreCancelled = true, priority = EventPriority.HIGH)
+    @EventHandler(ignoreCancelled = true)
     fun onGameRebuild(e: BmGameBuildIntent) {
         if (e.game != this)
             return
@@ -499,20 +515,20 @@ class Game private constructor(val name: String, private var schema: Arena, val 
         e.setHandled()
     }
 
-    @EventHandler(ignoreCancelled = true, priority = EventPriority.HIGH)
-    fun onGameTerminated(e: BmGameTerminatedIntent) {
-        if (e.game != this)
+    @EventHandler(ignoreCancelled = true)
+    fun onGameTerminated(e: BmGLTerminatedIntent) {
+        if (e.gl != this)
             return
         BmRunStoppedIntent.stopGame(this)
         HandlerList.unregisterAll(this)
         e.setHandled()
     }
 
-    @EventHandler(ignoreCancelled = true, priority = EventPriority.HIGH)
-    fun onGameDeleted(e: BmGameDeletedIntent) {
-        if (e.game != this)
+    @EventHandler(ignoreCancelled = true)
+    fun onGameDeleted(e: BmGLDeleteIntent) {
+        if (e.gl != this)
             return
-        BmGameTerminatedIntent.terminateGame(this)
+        BmGLTerminatedIntent.terminate(this)
         removeCages(true)
         tempDataFile(this).delete()
         if (e.isDeletingSave)
@@ -520,11 +536,15 @@ class Game private constructor(val name: String, private var schema: Arena, val 
         e.setHandled()
     }
 
-    @EventHandler(ignoreCancelled = true, priority = EventPriority.HIGH)
+    @EventHandler(ignoreCancelled = true)
     fun onServerStop(e: PluginDisableEvent) {
         if (e.plugin != plugin)
             return
-        BmGameTerminatedIntent.terminateGame(this)
+        BmGLTerminatedIntent.terminate(this)
+    }
+
+    override fun name(): String {
+        return name
     }
 
     override fun format(args: List<Message>): Message {
@@ -532,6 +552,7 @@ class Game private constructor(val name: String, private var schema: Arena, val 
             return Message.of(name)
         return when (args[0].toString()) {
             "name" -> Message.of(name)
+            "type" -> Message.of("game")
             "spawns" -> CollectionWrapper(spawns.map { object : Formattable {
                 override fun format(args: List<Message>): Message {
                     require(args.size == 1) { "Spawn format must have one arg" }

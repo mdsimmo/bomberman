@@ -1,24 +1,24 @@
 package io.github.mdsimmo.bomberman.events
 
-import io.github.mdsimmo.bomberman.game.Game
+import io.github.mdsimmo.bomberman.game.GL
 import org.bukkit.Bukkit
 import org.bukkit.event.HandlerList
 
 /**
- * Called to find a listing of every active game
+ * Called to find a listing of every gl
  */
-class BmGameListIntent : BmEvent() {
-    val games = mutableSetOf<Game>()
+class BmGLListIntent : BmEvent() {
+    val gls = mutableSetOf<GL>()
 
     override fun getHandlers(): HandlerList {
         return handlerList
     }
 
     companion object {
-        fun listGames(): Set<Game> {
-            val e = BmGameListIntent()
+        fun list(): Set<GL> {
+            val e = BmGLListIntent()
             Bukkit.getPluginManager().callEvent(e)
-            return e.games
+            return e.gls
         }
 
         @JvmStatic

@@ -27,14 +27,14 @@ class GameProtection private constructor(private val game: Game, private val bou
         }
     }
 
-    @EventHandler(ignoreCancelled = true, priority = EventPriority.LOWEST)
+    @EventHandler(ignoreCancelled = true, priority = EventPriority.LOW)
     fun onBlockBurn(e: BlockBurnEvent) {
         if (bounds.contains(e.block.location)) {
             e.isCancelled = true
         }
     }
 
-    @EventHandler(ignoreCancelled = true, priority = EventPriority.LOWEST)
+    @EventHandler(ignoreCancelled = true, priority = EventPriority.LOW)
     fun onBlockIgnite(e: BlockIgniteEvent) {
         if (e.cause == BlockIgniteEvent.IgniteCause.SPREAD
                 && bounds.contains(e.block.location)) {

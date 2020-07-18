@@ -26,6 +26,7 @@ class BmSetting private constructor() {
     private var schematicsBuiltin: String = "schematics/builtin"
     private var schematicsCustom: String = "schematics/custom"
     private var gameSaves: String = "games"
+    private var lobbySaves: String = "lobby"
     private var tempGameData: String = "temp/game"
     private var tempPlayerData: String = "temp/player"
     private var defaultGameSettings: GameSettings = GameSettings()
@@ -33,6 +34,14 @@ class BmSetting private constructor() {
 
     fun gameSaves(): File {
         val file = File(Bomberman.instance.dataFolder, gameSaves)
+        if (!file.exists()) {
+            file.mkdirs()
+        }
+        return file
+    }
+
+    fun lobbySaves(): File {
+        val file = File(Bomberman.instance.dataFolder, lobbySaves)
         if (!file.exists()) {
             file.mkdirs()
         }

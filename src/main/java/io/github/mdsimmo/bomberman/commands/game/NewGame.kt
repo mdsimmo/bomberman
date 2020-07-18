@@ -8,8 +8,10 @@ import io.github.mdsimmo.bomberman.Bomberman
 import io.github.mdsimmo.bomberman.commands.Cmd
 import io.github.mdsimmo.bomberman.commands.Permission
 import io.github.mdsimmo.bomberman.commands.Permissions
-import io.github.mdsimmo.bomberman.events.BmGameListIntent
-import io.github.mdsimmo.bomberman.events.BmGameLookupIntent
+import io.github.mdsimmo.bomberman.events.BmGLListIntent
+import io.github.mdsimmo.bomberman.events.BmJoinableListIntent
+import io.github.mdsimmo.bomberman.events.BmGLLookupIntent
+import io.github.mdsimmo.bomberman.game.GL
 import io.github.mdsimmo.bomberman.game.Game
 import io.github.mdsimmo.bomberman.game.Game.Companion.buildGameFromRegion
 import io.github.mdsimmo.bomberman.game.Game.Companion.buildGameFromSchema
@@ -21,7 +23,7 @@ import org.bukkit.entity.Player
 import java.io.File
 import java.util.*
 
-class GameCreate(parent: Cmd) : Cmd(parent) {
+class NewGame(parent: Cmd) : Cmd(parent) {
 
     companion object {
         private val bm = Bomberman.instance
@@ -64,12 +66,12 @@ class GameCreate(parent: Cmd) : Cmd(parent) {
     }
 
     override fun name(): Message {
-        return context(Text.CREATE_NAME).format()
+        return context(Text.NEWGAME_NAME).format()
     }
 
     override fun options(sender: CommandSender, args: List<String>): List<String> {
         return when (args.size) {
-            1 -> BmGameListIntent.listGames().map(Game::name).toList()
+            1 -> BmGLListIntent.list().map(GL::name).toList()
             else -> emptyList()
         }
     }
@@ -95,18 +97,18 @@ class GameCreate(parent: Cmd) : Cmd(parent) {
 
     override fun flagDescription(flag: String): Message {
         return when(flag) {
-            F_PLUGIN -> context(Text.CREATE_FLAG_PLUGIN).format()
-            F_SCHEMA -> context(Text.CREATE_FLAG_SCHEMA).format()
-            F_SKIP_AIR -> context(Text.CREATE_FLAG_SKIP_AIR).format()
-            F_VOID_TO_AIR -> context(Text.CREATE_FLAG_VOID_TO_AIR).format()
+            F_PLUGIN -> context(Text.NEWGAME_FLAG_PLUGIN).format()
+            F_SCHEMA -> context(Text.NEWGAME_FLAG_SCHEMA).format()
+            F_SKIP_AIR -> context(Text.NEWGAME_FLAG_SKIP_AIR).format()
+            F_VOID_TO_AIR -> context(Text.NEWGAME_FLAG_VOID_TO_AIR).format()
             else -> Message.empty
         }
     }
 
     override fun flagExtension(flag: String): Message {
         return when(flag) {
-            F_PLUGIN -> context(Text.CREATE_FLAG_PLUGIN_EXT).format()
-            F_SCHEMA -> context(Text.CREATE_FLAG_SCHEMA_EXT).format()
+            F_PLUGIN -> context(Text.NEWGAME_FLAG_PLUGIN_EXT).format()
+            F_SCHEMA -> context(Text.NEWGAME_FLAG_SCHEMA_EXT).format()
             else -> Message.empty
         }
     }
@@ -119,9 +121,9 @@ class GameCreate(parent: Cmd) : Cmd(parent) {
             return true
         }
         val gameName = args[0]
-        BmGameLookupIntent.find(gameName)?.let { game ->
-            context(Text.CREATE_GAME_EXISTS)
-                    .with("game", game)
+        BmGLLookupIntent.find(gameName)?.let { gl ->
+            context(Text.NEWGAME_GL_EXISTS)
+                    .with("gl", gl)
                     .sendTo(sender)
             return true
         }
@@ -164,18 +166,18 @@ class GameCreate(parent: Cmd) : Cmd(parent) {
         val owner: SessionOwner = BukkitAdapter.adapt(sender)
         val session = WorldEdit.getInstance().sessionManager.getIfPresent(owner)
         if (session == null || session.selectionWorld == null) {
-            context(Text.CREATE_NEED_SELECTION).sendTo(sender)
+            context(Text.NEWGAME_NEED_SELECTION).sendTo(sender)
         } else {
             try {
                 val region = session.getSelection(session.selectionWorld)
                 val box = selectionBounds(region)
                 try {
                     val game = buildGameFromRegion(gameName, box, flags)
-                    context(Text.CREATE_SUCCESS)
+                    context(Text.NEWGAME_SUCCESS)
                             .with("game", game)
                             .sendTo(sender)
                 } catch (e: Exception) {
-                    context(Text.CREATE_ERROR)
+                    context(Text.NEWGAME_ERROR)
                             .with("error", e.message ?: "")
                             .sendTo(sender)
                     e.printStackTrace()
@@ -192,39 +194,39 @@ class GameCreate(parent: Cmd) : Cmd(parent) {
             .minBy { it.name.length }?.also { file: File ->
                     try {
                         val game = buildGameFromSchema(gameName, player.location, file, flags)
-                        context(Text.CREATE_SUCCESS)
+                        context(Text.NEWGAME_SUCCESS)
                                 .with("game", game)
                                 .sendTo(player)
                     } catch (e: Exception) {
-                        context(Text.CREATE_ERROR)
+                        context(Text.NEWGAME_ERROR)
                                 .with("error", e.message ?: "")
                                 .sendTo(player)
                         e.printStackTrace()
                     }
             } ?: run {
-                context(Text.CREATE_SCHEMA_NOT_FOUND
+                context(Text.NEWGAME_SCHEMA_NOT_FOUND
                         .with("schema", Message.of(schemaName)))
                         .sendTo(player)
             }
     }
 
     override fun permission(): Permission {
-        return Permissions.CREATE
+        return Permissions.NEWGAME
     }
 
     override fun example(): Message {
-        return context(Text.CREATE_EXAMPLE).format()
+        return context(Text.NEWGAME_EXAMPLE).format()
     }
 
     override fun extra(): Message {
-        return context(Text.CREATE_EXTRA).format()
+        return context(Text.NEWGAME_EXTRA).format()
     }
 
     override fun description(): Message {
-        return context(Text.CREATE_DESCRIPTION).format()
+        return context(Text.NEWGAME_DESCRIPTION).format()
     }
 
     override fun usage(): Message {
-        return context(Text.CREATE_USAGE).format()
+        return context(Text.NEWGAME_USAGE).format()
     }
 }

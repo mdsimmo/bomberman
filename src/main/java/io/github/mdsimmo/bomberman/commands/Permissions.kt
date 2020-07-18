@@ -8,7 +8,8 @@ interface Permission {
 
 enum class Permissions(val permission: String) : Permission {
     BASE("bomberman.bm"),
-    CREATE("bomberman.create"),
+    NEWGAME("bomberman.newgame"),
+    NEWLOBBY("bomberman.newlobby"),
     DELETE("bomberman.delete"),
     RELOAD("bomberman.reload"),
     CONFIGURE("bomberman.configure"),

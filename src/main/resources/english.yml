@@ -62,6 +62,8 @@ command:
   invalid-number: '{number} is not a valid number'
   # Called when a command is cancelled for an unknown reason
   cancelled: Operation cancelled
+  # Called when a command hasn't been fully implemented yet
+  unimplemented: "{#red|{#italic|Command not implemented yet}}"
   # The base command details
   bomberman:
     description: Main command for Bomberman
@@ -120,19 +122,19 @@ command:
   reload:
     name: reload
     description: Reloads the config file and resets the arena
-    usage: /{command|path} <game>
+    usage: /{command|path} <gl>
     example: ''
     extra: ''
     # The game has been reloaded
-    # {game}: the game
-    success: Game {game} reloaded
+    # {gl}: the game
+    success: "{#italic|{gl} reloaded}"
     # Error while loading
-    # {game}: the game
+    # {gl}: the gl
     cannot-load: Error reloading the game's save file
   configure:
     name: configure
-    description: Configure game's settings
-    usage: /{command|path} <game>
+    description: Configure gl's settings
+    usage: /{command|path} <gl>
     example: ''
     extra: '{#gray|{#italic|Creative users only}}'
     # If player tries to edit when not in creative
@@ -171,9 +173,9 @@ command:
       block: Block Types
       item: Drop
       weight: Weighting
-  # Messages relating to '/bm create'
-  create:
-    name: create
+  # Messages relating to '/bm newgame'
+  newgame:
+    name: newgame
     description: Builds a Bomberman game. Defaults to current axe selection. Use -p and -f to use a saved schematic.
     usage: /{command|path} <name> [options]
     example: /{command|path} mygame -p=bm -f=purple
@@ -189,12 +191,12 @@ command:
         description: Skip air blocks
       v:
         description: Replace structure void with air
-    # The game's name is already used
-    # {game}: the game that has the shared name 
-    game-exists: Game {game} already exists
+    # The gl's name is already used
+    # {gl}: the gl that has the shared name
+    gl-exists: "{#italic|{gl}} already exists"
     # The game was built successfully
     # {game}: the game that was built
-    success: Game {game} created{#switch|{game|spawns}|0| but has no spawns. Did you mark spawns with "[spawn]"?}
+    success: "{#italic|{game}} created{#switch|{game|spawns}|0| but has no spawns. Did you mark spawns with \"[spawn]\"?}"
     # An exception was thrown while building
     # {error}: the game that was built
     error: |-
@@ -206,32 +208,49 @@ command:
     # The requested schematic was not found
     # {schema}: the file name that was attempted
     schema-not-found: '{#red|Schematic not found: {#italic|{schema}}}'
+  # Messages relating to '/bm newlobby'
+  newlobby:
+    name: newlobby
+    description: Sets the current point as a lobby.
+    usage: /{command|path} <name>
+    example: /{command|path} mylobby
+    extra: ""
+    # The lobby was created
+    # {lobby} the lobby that was created
+    success: Lobby initialised at ({lobby|x}, {lobby|y}, {lobby|z})
+    # The gl's name is already used
+    # {gl}: the gl that has the shared name
+    gl-exists: "{#italic|{gl}} already exists"
   # Messages relating to '/bm delete'
   delete:
     name: delete
-    description: Deletes a game
-    usage: /{command|path} <game>
+    description: Deletes a gl
+    usage: /{command|path} <gl>
     example: ''
     extra: ''
-    # The game has been deleted
-    # {game}: the game that was deleted (this is still a game object)
-    success: Game {game} destroyed
+    # The gl has been deleted
+    # {gl}: the gl that was deleted
+    success: "{#italic|{gl}} destroyed"
   # Messages relating to '/bm list'
   list:
     name: list
-    description: Shows all existing games
+    description: Shows all existing gl that can be joined
     usage: /{command|path}
     example: ''
     extra: ''
-    # What to show when games are present
-    # {games}: a list of games
-    games: |-
-      {#|format.heading|Games}
-      {#switch|{games|length}|0|{#red|No games present}|{games|sort|command.list.sort|foreach|command.list.game|
+    # The message to return
+    # {gls}: a list of gls
+    result: |-
+      {#|format.heading|GLs}
+      {#switch|{gls|length}|0|{#red|No gls present}|{gls|sort|command.list.sort|foreach|command.list.gl|
       }}
     sort: {arg0|name}
+    gl: |-
+      {#|format.map|{arg0|name}|{#switch|{arg0|type}|game|{#command.list.game|{arg0}}|lobby|{#command.list.lobby|{arg0}}|{#red|error}}}
     game: |-
-      {#|format.map|{arg0|name}|{arg0|players}/{arg0|spawns} ({#switch|{arg0|running}|true|Running|false|Waiting|{#red|?}})}
+      {arg0|players}/{arg0|spawns} ({#switch|{arg0|running}|true|Running|false|Waiting|{#red|?}})
+    lobby: |-
+      {arg0|players} queued
   # Messages relating to '/bm info'
   info:
     name: info
@@ -241,7 +260,7 @@ command:
     extra: ''
     # What info to display about a game
     # {game}: the game
-    details: |-
+    result: |-
       {#|format.heading|Info: {game|name}}
       {#|format.map|Status|{#switch|{game|running}|true|Playing|false|Waiting|{#red|?}}}
       {#|format.map|Players|{game|players}/{game|spawns}}
@@ -255,13 +274,13 @@ command:
   # Commands relating to '/bm join'. Also see 'join.xxx' messages
   join:
     name: join
-    description: Join a game
-    usage: /{command|path} <game>
+    description: Join a gl
+    usage: /{command|path} <gl>
     example: ''
     extra: ''
     # The game has no spare spawn points
     # {game}: the game attempted to be joined
-    game-full: Game {game} is full
+    game-full: "{#italic|{game}} is full"
     # Cannot join because the game has already started
     # {game}: the game that couldn't be joined
     game-started: 'Game has already started'
@@ -269,10 +288,10 @@ command:
     # {game}: the game that couldn't be joined
     # {player}: the player joining
     already-joined: 'You are already part of a game'
-    # A player has joined the game. Sent to all observers of a game
-    # {game}: the game joined
+    # A player has joined the gl.
+    # {gl}: the gl joined
     # {player}: the player who joined
-    success: '{player} joined game {game}{#switch|{=|{game|players}=={game|spawns}}|1|{#exec|bm start {game} -d=10}}'
+    success: '{player} joined {#italic|{gl}}'
   # Messages relating to '/bm leave'
   leave:
     name: leave

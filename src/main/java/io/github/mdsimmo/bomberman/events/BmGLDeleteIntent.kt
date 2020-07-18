@@ -1,13 +1,14 @@
 package io.github.mdsimmo.bomberman.events
 
-import io.github.mdsimmo.bomberman.game.Game
+import io.github.mdsimmo.bomberman.game.GL
 import org.bukkit.Bukkit
 import org.bukkit.event.HandlerList
 
 /**
  * Called when a game is completely deleted from the server
  */
-class BmGameDeletedIntent private constructor(val game: Game) : BmEvent(), IntentCancellable by BmIntentCancellable() {
+class BmGLDeleteIntent private constructor(val gl: GL)
+    : BmEvent(), IntentCancellable by BmIntentCancellable() {
 
     var isDeletingSave = false
 
@@ -17,8 +18,8 @@ class BmGameDeletedIntent private constructor(val game: Game) : BmEvent(), Inten
 
     companion object {
         @JvmStatic
-        fun delete(game: Game, deleteSave: Boolean) {
-            val e = BmGameDeletedIntent(game)
+        fun delete(gl: GL, deleteSave: Boolean) {
+            val e = BmGLDeleteIntent(gl)
             e.isDeletingSave = deleteSave
             Bukkit.getPluginManager().callEvent(e)
             e.verifyHandled()

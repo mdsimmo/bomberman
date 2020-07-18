@@ -39,7 +39,8 @@ permissions:
   bomberman.dictator:
     description: Allows building/configuring games
     children:
-      bomberman.create: true
+      bomberman.newgame: true
+      bomberman.newlobby: true
       bomberman.delete: true
       bomberman.configure: true
   bomberman.bm:
@@ -49,7 +50,7 @@ permissions:
     description: /bm join
     default: true
   bomberman.leave:
-    description: /bm join
+    description: /bm leave
     default: true
   bomberman.info:
     description: /bm info
@@ -66,8 +67,11 @@ permissions:
   bomberman.reload:
     description: /bm reload
     default: op
-  bomberman.create:
-    description: /bm create
+  bomberman.newgame:
+    description: /bm newgame
+    default: op
+  bomberman.newlobby:
+    description: /bm newlobby
     default: op
   bomberman.delete:
     description: /bm delete

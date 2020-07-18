@@ -3,13 +3,13 @@ package io.github.mdsimmo.bomberman.commands.game
 import io.github.mdsimmo.bomberman.commands.Cmd
 import io.github.mdsimmo.bomberman.commands.Permission
 import io.github.mdsimmo.bomberman.commands.Permissions
-import io.github.mdsimmo.bomberman.events.BmPlayerLeaveGameIntent
+import io.github.mdsimmo.bomberman.events.BmPlayerLeaveGLIntent
 import io.github.mdsimmo.bomberman.messaging.Message
 import io.github.mdsimmo.bomberman.messaging.Text
 import org.bukkit.command.CommandSender
 import org.bukkit.entity.Player
 
-class GameLeave(parent: Cmd) : Cmd(parent) {
+class GLLeave(parent: Cmd) : Cmd(parent) {
     override fun name(): Message {
         return context(Text.LEAVE_NAME).format()
     }
@@ -22,11 +22,11 @@ class GameLeave(parent: Cmd) : Cmd(parent) {
         if (args.isNotEmpty())
             return false
         if (sender is Player) {
-            val e = BmPlayerLeaveGameIntent.leave(sender)
+            val e = BmPlayerLeaveGLIntent.leave(sender)
             if (e.isHandled()) {
                 Text.LEAVE_SUCCESS
                         .with("player", sender)
-                        .with("game", e.game ?: Message.error("none"))
+                        .with("gl", e.gl ?: Message.error("none"))
                         .sendTo(sender)
             } else {
                 Text.LEAVE_NOT_JOINED

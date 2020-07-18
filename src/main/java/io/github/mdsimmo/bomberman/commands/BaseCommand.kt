@@ -14,16 +14,17 @@ class BaseCommand : CommandGroup(null), TabCompleter, CommandExecutor {
     init {
         addChildren(
                 DevInfo(this),
-                Configure(this),
-                GameCreate(this),
-                GameInfo(this),
-                GameJoin(this),
-                GameLeave(this),
-                GameDelete(this),
+                GLConfigure(this),
+                NewGame(this),
+                NewLobby(this),
+                GLInfo(this),
+                GLJoin(this),
+                GLLeave(this),
+                GLDelete(this),
                 RunStart(this),
                 RunStop(this),
-                GameList(this),
-                GameReload(this)
+                GLList(this),
+                GLReload(this)
         )
     }
 

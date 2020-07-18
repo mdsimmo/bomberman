@@ -19,19 +19,19 @@ class CommandGroupTest {
 
             override fun description(): Message = Message.of("desc")
 
-            override fun permission(): Permission = Permissions.CREATE
+            override fun permission(): Permission = Permissions.NEWGAME
         }
 
         val child = mock(Cmd::class.java, "child")
         group.addChildren(child)
         `when`(child.name()).thenReturn(Message.of("Child"))
-        `when`(child.permission()).thenReturn(Permissions.CREATE)
+        `when`(child.permission()).thenReturn(Permissions.NEWGAME)
         `when`(child.run(any(), eq(listOf("hello", "world")), eq(emptyMap()))).thenReturn(true)
 
         val child2 = mock(Cmd::class.java, "child2")
         group.addChildren(child2)
         `when`(child2.name()).thenReturn(Message.of("child2"))
-        `when`(child2.permission()).thenReturn(Permissions.CREATE)
+        `when`(child2.permission()).thenReturn(Permissions.NEWGAME)
 
         val sender = mock(CommandSender::class.java, "sender")
         `when`(sender.hasPermission(anyString())).thenReturn(true)
@@ -55,7 +55,7 @@ class CommandGroupTest {
 
             override fun description(): Message = Message.of("desc")
 
-            override fun permission(): Permission = Permissions.CREATE
+            override fun permission(): Permission = Permissions.NEWGAME
         }
 
         val sender = mock(CommandSender::class.java, "sender")

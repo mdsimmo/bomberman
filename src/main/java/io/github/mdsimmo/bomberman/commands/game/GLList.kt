@@ -3,14 +3,15 @@ package io.github.mdsimmo.bomberman.commands.game
 import io.github.mdsimmo.bomberman.commands.Cmd
 import io.github.mdsimmo.bomberman.commands.Permission
 import io.github.mdsimmo.bomberman.commands.Permissions
-import io.github.mdsimmo.bomberman.events.BmGameListIntent
+import io.github.mdsimmo.bomberman.events.BmJoinableListIntent
 import io.github.mdsimmo.bomberman.messaging.Message
 import io.github.mdsimmo.bomberman.messaging.Text
 import org.bukkit.command.CommandSender
 
-class GameList(parent: Cmd?) : Cmd(parent) {
+class GLList(parent: Cmd?) : Cmd(parent) {
+
     override fun name(): Message {
-        return context(Text.GAMELIST_NAME).format()
+        return context(Text.LIST_NAME).format()
     }
 
     override fun options(sender: CommandSender, args: List<String>): List<String> {
@@ -20,9 +21,9 @@ class GameList(parent: Cmd?) : Cmd(parent) {
     override fun run(sender: CommandSender, args: List<String>, flags: Map<String, String>): Boolean {
         if (args.isNotEmpty())
             return false
-        val games = BmGameListIntent.listGames()
-        context(Text.GAMELIST_GAMES)
-                .with("games", games)
+        val gls = BmJoinableListIntent.list()
+        context(Text.LIST_RESULT)
+                .with("gls", gls)
                 .sendTo(sender)
         return true
     }
@@ -32,18 +33,18 @@ class GameList(parent: Cmd?) : Cmd(parent) {
     }
 
     override fun example(): Message {
-        return context(Text.GAMELIST_EXAMPLE).format()
+        return context(Text.LIST_EXAMPLE).format()
     }
 
     override fun extra(): Message {
-        return context(Text.GAMELIST_EXTRA).format()
+        return context(Text.LIST_EXTRA).format()
     }
 
     override fun description(): Message {
-        return context(Text.GAMELIST_DESCRIPTION).format()
+        return context(Text.LIST_DESCRIPTION).format()
     }
 
     override fun usage(): Message {
-        return context(Text.GAMELIST_USAGE).format()
+        return context(Text.LIST_USAGE).format()
     }
 }

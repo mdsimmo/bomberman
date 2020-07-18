@@ -1,26 +1,23 @@
 package io.github.mdsimmo.bomberman.commands.game
 
 import io.github.mdsimmo.bomberman.commands.Cmd
-import io.github.mdsimmo.bomberman.commands.GameCommand
+import io.github.mdsimmo.bomberman.commands.GLCommand
 import io.github.mdsimmo.bomberman.commands.Permission
 import io.github.mdsimmo.bomberman.commands.Permissions
-import io.github.mdsimmo.bomberman.events.BmPlayerJoinGameIntent
-import io.github.mdsimmo.bomberman.game.Game
+import io.github.mdsimmo.bomberman.events.BmPlayerJoinGLIntent
+import io.github.mdsimmo.bomberman.game.GL
 import io.github.mdsimmo.bomberman.messaging.Message
 import io.github.mdsimmo.bomberman.messaging.Text
 import org.bukkit.command.CommandSender
 import org.bukkit.entity.Player
 
-class GameJoin(parent: Cmd) : GameCommand(parent) {
+class GLJoin(parent: Cmd) : GLCommand(parent) {
+
     override fun name(): Message {
         return context(Text.JOIN_NAME).format()
     }
 
-    override fun gameOptions(args: List<String>): List<String> {
-        return emptyList()
-    }
-
-    override fun gameRun(sender: CommandSender, args: List<String>, flags: Map<String, String>, game: Game): Boolean {
+    override fun glRun(sender: CommandSender, args: List<String>, flags: Map<String, String>, gl: GL): Boolean {
         if (args.isNotEmpty())
             return false
         if (sender !is Player) {
@@ -28,7 +25,7 @@ class GameJoin(parent: Cmd) : GameCommand(parent) {
                     .sendTo(sender)
             return true
         }
-        val e = BmPlayerJoinGameIntent.join(game, sender)
+        val e = BmPlayerJoinGLIntent.join(gl, sender)
 
         if (e.isCancelled) {
             e.cancelledReason()
@@ -37,13 +34,12 @@ class GameJoin(parent: Cmd) : GameCommand(parent) {
                     }
                     ?: {
                         context(Text.COMMAND_CANCELLED)
-                                .with("game", game)
                                 .with("player", sender)
                                 .sendTo(sender)
                     }()
         } else {
             context(Text.JOIN_SUCCESS)
-                    .with("game", game)
+                    .with("gl", gl)
                     .with("player", sender)
                     .sendTo(sender)
         }

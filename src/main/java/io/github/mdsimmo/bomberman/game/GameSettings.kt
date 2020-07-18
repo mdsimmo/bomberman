@@ -57,6 +57,7 @@ class GameSettings : ConfigurationSerializable {
             (data["fuse-ticks"] as? Number)?.toInt()?.also { settings.fuseTicks = it.coerceAtLeast(0) }
             (data["fire-ticks"] as? Number)?.toInt()?.also { settings.fireTicks = it.coerceAtLeast(0) }
             (data["immunity-ticks"] as? Number)?.toInt()?.also { settings.immunityTicks = it.coerceAtLeast(0) }
+            (data["lobby"] as? String)?.also { settings.lobby = it }
             return settings
         }
 
@@ -105,6 +106,7 @@ class GameSettings : ConfigurationSerializable {
     var fuseTicks: Int = 40
     var fireTicks: Int = 20
     var immunityTicks : Int = 21
+    var lobby: String = ""
 
     override fun serialize(): Map<String, Any> {
         val objs: MutableMap<String, Any> = HashMap()
@@ -139,6 +141,7 @@ class GameSettings : ConfigurationSerializable {
         objs["fuse-ticks"] = fuseTicks
         objs["fire-ticks"] = fireTicks
         objs["immunity-ticks"] = immunityTicks
+        objs["lobby"] = lobby
 
         return objs
     }

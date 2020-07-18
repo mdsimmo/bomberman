@@ -2,35 +2,41 @@ package io.github.mdsimmo.bomberman.commands.game
 
 import io.github.mdsimmo.bomberman.Bomberman
 import io.github.mdsimmo.bomberman.commands.Cmd
-import io.github.mdsimmo.bomberman.commands.GameCommand
+import io.github.mdsimmo.bomberman.commands.GLCommand
 import io.github.mdsimmo.bomberman.commands.Permission
 import io.github.mdsimmo.bomberman.commands.Permissions
 import io.github.mdsimmo.bomberman.events.BmGameBuildIntent
-import io.github.mdsimmo.bomberman.events.BmGameDeletedIntent
+import io.github.mdsimmo.bomberman.events.BmGLDeleteIntent
+import io.github.mdsimmo.bomberman.game.GL
 import io.github.mdsimmo.bomberman.game.Game
 import io.github.mdsimmo.bomberman.messaging.Message
 import io.github.mdsimmo.bomberman.messaging.Text
 import org.bukkit.command.CommandSender
 import java.io.File
 
-class GameReload(parent: Cmd) : GameCommand(parent) {
+class GLReload(parent: Cmd) : GLCommand(parent) {
     override fun name(): Message {
         return context(Text.RELOAD_NAME).format()
     }
 
-    override fun gameRun(sender: CommandSender, args: List<String>, flags: Map<String, String>, game: Game): Boolean {
+    override fun glRun(sender: CommandSender, args: List<String>, flags: Map<String, String>, gl: GL): Boolean {
         if (args.isNotEmpty())
             return false
-        BmGameDeletedIntent.delete(game, false)
-        val new = Game.loadGame(File(Bomberman.instance.settings.gameSaves(), "${game.name}.yml"))
+        if (gl !is Game) {
+            // TODO reload lobbies
+            context(Text.UNIMPLEMENTED).sendTo(sender)
+            return true
+        }
+        BmGLDeleteIntent.delete(gl, false)
+        val new = Game.loadGame(File(Bomberman.instance.settings.gameSaves(), "${gl.name}.yml"))
         if (new == null) {
             Text.RELOAD_CANNOT_LOAD
-                    .with("game", game)
+                    .with("gl", gl)
                     .sendTo(sender)
         } else {
             BmGameBuildIntent.build(new)
             Text.RELOAD_SUCCESS
-                    .with("game", game)
+                    .with("gl", gl)
                     .sendTo(sender)
         }
         return true
@@ -38,10 +44,6 @@ class GameReload(parent: Cmd) : GameCommand(parent) {
 
     override fun permission(): Permission {
         return Permissions.RELOAD
-    }
-
-    override fun gameOptions(args: List<String>): List<String> {
-        return emptyList()
     }
 
     override fun extra(): Message {
