@@ -13,7 +13,7 @@ class BaseCommand : CommandGroup(null), TabCompleter, CommandExecutor {
 
     init {
         addChildren(
-                DevInfo(this),
+                //DevInfo(this),
                 Configure(this),
                 GameCreate(this),
                 GameInfo(this),
@@ -40,7 +40,7 @@ class BaseCommand : CommandGroup(null), TabCompleter, CommandExecutor {
     }
 
     override fun onCommand(sender: CommandSender, command: Command, s: String, args: Array<String>): Boolean {
-        val (arguments, flags) = seperateFlags(args)
+        val (arguments, flags) = separateFlags(args)
         if (flags.containsKey("?")) {
             help(sender, arguments, flags)
         } else {
@@ -50,7 +50,7 @@ class BaseCommand : CommandGroup(null), TabCompleter, CommandExecutor {
     }
 
     override fun onTabComplete(sender: CommandSender, command: Command, alias: String, args: Array<String>): List<String> {
-        val (arguments, flags) = seperateFlags(args)
+        val (arguments, flags) = separateFlags(args)
         val currentlyTyping = args.last() // Will always have one.
         val allOptions = if (currentlyTyping.startsWith("-")) {
             val splitIndex = currentlyTyping.indexOf('=')
@@ -69,7 +69,7 @@ class BaseCommand : CommandGroup(null), TabCompleter, CommandExecutor {
         }.toList()
     }
 
-    private fun seperateFlags(args: Array<String>) : Pair<List<String>, Map<String, String>> {
+    private fun separateFlags(args: Array<String>) : Pair<List<String>, Map<String, String>> {
         // Strip out options
         val (flagStrings, arguments) = args.partition {
             it.startsWith("-")
