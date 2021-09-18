@@ -37,6 +37,7 @@ import java.io.FileInputStream
 import java.io.FileOutputStream
 import java.lang.IllegalArgumentException
 import java.lang.ref.WeakReference
+import java.util.logging.Level
 
 class Game private constructor(val name: String, private var schema: Arena, val settings: GameSettings = plugin.settings.defaultGameSettings())
     : Formattable, Listener {
@@ -53,11 +54,16 @@ class Game private constructor(val name: String, private var schema: Arena, val 
                     }
                     ?: return
             for (f in files) {
-                loadGame(f)
+                try {
+                    loadGame(f)
+                } catch (e: Exception) {
+                    plugin.logger.log(Level.WARNING, "Cannot load game: " + f.name, e)
+                }
             }
         }
 
         fun loadGame(file: File): Game? {
+            plugin.logger.info("Loading game: " + file.name)
             val data = YamlConfiguration.loadConfiguration(file)
             val name = data["name"] as? String ?: return null
             val schema = data["schema"] as? String ?: return null
@@ -145,12 +151,12 @@ class Game private constructor(val name: String, private var schema: Arena, val 
 
         var boxCache: Box? = null
         val box: Box get() {
-            return boxCache ?: {
+            return boxCache ?: run {
                 val c = loadClipboard()
                 val box = WorldEditUtils.pastedBounds(origin, c)
                 boxCache = box
                 box
-            }()
+            }
         }
         val spawns: Set<Location> by lazy {
             searchSpawns()
@@ -172,9 +178,9 @@ class Game private constructor(val name: String, private var schema: Arena, val 
             this.clipboard = WeakReference(clipboard)
         }
 
-        internal fun loadClipboard() : Clipboard =
-            clipboard?.get() ?: {
-                plugin.logger.info("Reading schematic data")
+        fun loadClipboard() : Clipboard =
+            clipboard?.get() ?: run {
+                plugin.logger.info("Reading schematic data: " + file.name)
                 // Load the schematic
                 val format = ClipboardFormats.findByFile(file)
                         ?: throw IllegalArgumentException("Unknown file format: '${file.path}'")
@@ -184,7 +190,7 @@ class Game private constructor(val name: String, private var schema: Arena, val 
                 clipboard = WeakReference(c)
                 plugin.logger.info("data read")
                 c
-            }()
+            }
 
         private fun searchSpawns(): Set<Location> {
             val clip = loadClipboard()
@@ -273,7 +279,7 @@ class Game private constructor(val name: String, private var schema: Arena, val 
                 ?: schema.spawns
         writeData("spawns", spawns.toList())
 
-        // If game was not shut down cleanly (ie. server died), rebuild the arena
+        // If game was not shut down cleanly (i.e. server died), rebuild the arena
         if (tempData.getBoolean("rebuild-needed", false)) {
             Bukkit.getScheduler().scheduleSyncDelayedTask(plugin) {
                 BmGameBuildIntent.build(this)
@@ -483,9 +489,11 @@ class Game private constructor(val name: String, private var schema: Arena, val 
     fun onRunStopped(e: BmRunStoppedIntent) {
         if (e.game != this)
             return
-        running = false
-        // Reset the arena
-        BmGameBuildIntent.build(this)
+        if (running) {
+            running = false
+            // Reset the arena
+            BmGameBuildIntent.build(this)
+        }
         e.setHandled()
     }
 
@@ -512,11 +520,12 @@ class Game private constructor(val name: String, private var schema: Arena, val 
     fun onGameDeleted(e: BmGameDeletedIntent) {
         if (e.game != this)
             return
+        plugin.logger.info("Deleting $name" + if (e.isDeletingSave) {""} else {" (keeping data)"})
         BmGameTerminatedIntent.terminateGame(this)
-        removeCages(true)
         tempDataFile(this).delete()
-        if (e.isDeletingSave)
+        if (e.isDeletingSave) {
             File(Bomberman.instance.settings.gameSaves(), "${name}.yml").delete()
+        }
         e.setHandled()
     }
 
