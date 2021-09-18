@@ -89,10 +89,10 @@ abstract class CommandGroup(parent: Cmd?) : Cmd(parent) {
     }
 
     override fun format(args: List<Message>): Message {
-        if (args.getOrNull(0).toString().equals("children", ignoreCase = true)) {
-            return CollectionWrapper(children).format(args.drop(1))
+        return if (args.getOrNull(0).toString().equals("children", ignoreCase = true)) {
+            CollectionWrapper(children).format(args.drop(1))
         } else {
-            return super.format(args)
+            super.format(args)
         }
     }
 }

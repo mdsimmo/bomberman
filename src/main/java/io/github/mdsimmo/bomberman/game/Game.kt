@@ -254,7 +254,7 @@ class Game private constructor(val name: String, private var schema: Arena, val 
         }
 
         override fun format(args: List<Message>): Message {
-            return when (args.firstOrNull()?.toString()?.toLowerCase() ?: "name") {
+            return when (args.firstOrNull()?.toString()?.lowercase() ?: "name") {
                 "name" -> Message.of(file.nameWithoutExtension)
                 "file" -> Message.of(file.path)
                 "filename" -> Message.of(file.name)
@@ -269,14 +269,12 @@ class Game private constructor(val name: String, private var schema: Arena, val 
 
     private val players: MutableSet<Player> = HashSet()
     private var running = false
-    private var spawns: Set<Location>
-    private var tempData: YamlConfiguration
+    private val tempData: YamlConfiguration = YamlConfiguration.loadConfiguration(tempDataFile(this))
+    private val spawns: Set<Location> = (tempData.getList("spawns"))
+            ?.filterIsInstance(Location::class.java)?.toSet()
+            ?: schema.spawns
 
     init {
-        tempData = YamlConfiguration.loadConfiguration(tempDataFile(this))
-        spawns = (tempData.getList("spawns"))
-                ?.filterIsInstance(Location::class.java)?.toSet()
-                ?: schema.spawns
         writeData("spawns", spawns.toList())
 
         // If game was not shut down cleanly (i.e. server died), rebuild the arena
@@ -336,7 +334,7 @@ class Game private constructor(val name: String, private var schema: Arena, val 
         }
     }
 
-    private fun removeCages(replaceSpawnSign: Boolean) {
+    private fun removeCages() {
         val clip = schema.loadClipboard()
         WorldEdit.getInstance().editSessionFactory
                 .getEditSession(BukkitAdapter.adapt(schema.origin.world), -1).use { editSession ->
@@ -344,7 +342,7 @@ class Game private constructor(val name: String, private var schema: Arena, val 
                             .subtract(clip.origin)
                     spawnBlocks()
                             .filter { (isSpawn, _) ->
-                                replaceSpawnSign or !isSpawn
+                                !isSpawn
                             }
                             .forEach { (_, block) ->
                                 val loc = block.location
@@ -445,7 +443,7 @@ class Game private constructor(val name: String, private var schema: Arena, val 
         if (e.game != this)
             return
         running = true
-        removeCages(false)
+        removeCages()
         GameProtection.protect(this, schema.box)
         writeData("rebuild-needed", true)
         e.setHandled()
@@ -544,7 +542,7 @@ class Game private constructor(val name: String, private var schema: Arena, val 
             "spawns" -> CollectionWrapper(spawns.map { object : Formattable {
                 override fun format(args: List<Message>): Message {
                     require(args.size == 1) { "Spawn format must have one arg" }
-                    return when(args[0].toString().toLowerCase()) {
+                    return when(args[0].toString().lowercase()) {
                         "world", "w" -> Message.of(it.world?.name ?: "unknown")
                         "x" -> Message.of(it.x.toInt())
                         "y" -> Message.of(it.y.toInt())
@@ -556,9 +554,9 @@ class Game private constructor(val name: String, private var schema: Arena, val 
             "schema" -> schema.format(args.drop(1))
             "players" -> CollectionWrapper(players.map { SenderWrapper(it) })
                     .format(args.drop(1))
-            "power" -> Message.of(settings.initialItems.sumBy {
+            "power" -> Message.of(settings.initialItems.sumOf {
                 if (it?.type == settings.bombItem) { it.amount } else { 0 }})
-            "bombs" -> Message.of(settings.initialItems.sumBy {
+            "bombs" -> Message.of(settings.initialItems.sumOf {
                 if (it?.type == settings.powerItem) { it.amount } else { 0 }})
             "lives" -> Message.of(settings.lives.toString())
             "w", "world" -> Message.of(schema.origin.world?.name ?: "unknown")

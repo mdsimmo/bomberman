@@ -18,7 +18,7 @@ object Expander {
             Pair("#exec", Execute())
     ).also {
         for (color in ChatColor.values()) {
-            it["#${color.name.toLowerCase()}"] = ColorWrapper(color)
+            it["#${color.name.lowercase()}"] = ColorWrapper(color)
         }
     }.toMap()
 
@@ -90,7 +90,7 @@ object Expander {
         keyString = keyString
                 .substring(0, keyString.length - 1)
                 .trim()
-                .toLowerCase()
+                .lowercase()
 
         // Try and look up a key, function or chat color to format with
         val thing = things[keyString]

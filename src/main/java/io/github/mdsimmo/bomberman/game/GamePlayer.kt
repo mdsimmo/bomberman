@@ -35,7 +35,7 @@ class GamePlayer private constructor(private val player: Player, private val gam
             // Record the player stats in file. Use a file so that server can crash
             val dataFile = YamlConfiguration()
             dataFile["location"] = player.location
-            dataFile["gamemode"] = player.gameMode.name.toLowerCase()
+            dataFile["gamemode"] = player.gameMode.name.lowercase()
             dataFile["health"] = player.health
             dataFile["health-scale"] = player.healthScale
             dataFile["health-max"] = player.getAttribute(Attribute.GENERIC_MAX_HEALTH)!!.baseValue
@@ -112,7 +112,7 @@ class GamePlayer private constructor(private val player: Player, private val gam
             val dataFile = YamlConfiguration.loadConfiguration(file)
 
             ((dataFile["gamemode"] as? String?)?.let { try {
-                GameMode.valueOf(it.toUpperCase())
+                GameMode.valueOf(it.uppercase())
             } catch (e: IllegalArgumentException) {
                 null
             }} ?: GameMode.CREATIVE).let { player.gameMode = it }

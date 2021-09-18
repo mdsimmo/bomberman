@@ -22,7 +22,7 @@ class DevInfo(parent: Cmd) : Cmd(parent) {
     }
 
     override fun run(sender: CommandSender, args: List<String>, flags: Map<String, String>): Boolean {
-        return when (args.getOrNull(0).toString().toLowerCase()) {
+        return when (args.getOrNull(0).toString().lowercase()) {
             "watch" -> {
                 run(sender, listOf("nocancelled"), flags)
                 run(sender, listOf("handlerwatch"), flags)
@@ -90,8 +90,7 @@ class DevInfo(parent: Cmd) : Cmd(parent) {
             }
             "taskcount" -> {
                 sender.sendMessage("Tasks: " + Bukkit.getScheduler().pendingTasks
-                        .filter { it.owner == Bomberman.instance}
-                        .count())
+                        .count { it.owner == Bomberman.instance})
                 true
             }
             "taskwatch" -> {

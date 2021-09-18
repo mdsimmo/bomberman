@@ -204,6 +204,7 @@ enum class Text(path: String) : Contexted {
             server = YamlConfiguration()
             try {
                 builtin.load(reader)
+                // Instance may be null when testing
                 Bomberman.instance?.let {
                     val custom = it.settings.language()
                     if (custom.exists())

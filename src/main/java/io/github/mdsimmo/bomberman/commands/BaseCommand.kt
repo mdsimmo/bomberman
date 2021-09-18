@@ -74,7 +74,7 @@ class BaseCommand : CommandGroup(null), TabCompleter, CommandExecutor {
         val (flagStrings, arguments) = args.partition {
             it.startsWith("-")
         }
-        val flags = flagStrings.map {
+        val flags = flagStrings.associate {
             val separator = it.indexOf('=', 0)
             if (separator == -1) {
                 Pair(it.substring(1), "")
@@ -82,7 +82,7 @@ class BaseCommand : CommandGroup(null), TabCompleter, CommandExecutor {
                 // +1s are to skip "-" and "="
                 Pair(it.substring(1, separator), it.substring(separator+1))
             }
-        }.toMap()
+        }
         return Pair(arguments, flags)
     }
 }

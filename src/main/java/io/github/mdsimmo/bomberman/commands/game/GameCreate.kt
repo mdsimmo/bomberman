@@ -33,7 +33,7 @@ class GameCreate(parent: Cmd) : Cmd(parent) {
         private const val F_VOID_TO_AIR = "v"
 
         private fun root(plugin: String): File? {
-            return when (plugin.toLowerCase()) {
+            return when (plugin.lowercase()) {
                 "bomberman", "bm" -> bm.settings.builtinSaves()
                 "worldedit", "we" -> we.getWorkingDirectoryFile(we.configuration.saveDir)
                 else -> null
@@ -41,7 +41,7 @@ class GameCreate(parent: Cmd) : Cmd(parent) {
         }
 
         private fun defaultSchema(plugin: String): String? {
-            return when(plugin.toLowerCase()) {
+            return when(plugin.lowercase()) {
                 "bm", "bomberman" -> "purple"
                 else -> null
             }
@@ -83,9 +83,9 @@ class GameCreate(parent: Cmd) : Cmd(parent) {
             F_PLUGIN -> setOf("we", "bm")
             F_SCHEMA -> {
                 val plugin = flags[F_PLUGIN] ?: "we"
-                root(plugin)?.let {
-                    allFiles(it)
-                            .map { it.path }
+                root(plugin)?.let { fileDir ->
+                    allFiles(fileDir)
+                            .map { file -> file.path }
                             .toSet()
                 } ?: emptySet()
             }
@@ -189,7 +189,7 @@ class GameCreate(parent: Cmd) : Cmd(parent) {
     private fun makeFromFile(gameName: String, schemaName: String, saveDir: File, player: Player, flags: Game.BuildFlags) {
         val matches = saveDir.listFiles { dir: File -> dir.path.contains(schemaName) } ?: emptyArray()
         matches // The minimum length path will be the closest match
-            .minBy { it.name.length }?.also { file: File ->
+            .minByOrNull { it.name.length }?.also { file: File ->
                     try {
                         val game = buildGameFromSchema(gameName, player.location, file, flags)
                         context(Text.CREATE_SUCCESS)
