@@ -101,7 +101,7 @@ class Game private constructor(val name: String, private var schema: Arena, val 
                     }
 
             // Write the clipboard to a schematic file
-            val file = File(plugin.settings.customSaves(), "$name.schematic")
+            val file = File(plugin.settings.customSaves(), "$name.${BuiltInClipboardFormat.SPONGE_SCHEMATIC.primaryFileExtension}")
             BuiltInClipboardFormat.SPONGE_SCHEMATIC.getWriter(FileOutputStream(file)).use {
                 writer -> writer.write(clipboard)
             }
