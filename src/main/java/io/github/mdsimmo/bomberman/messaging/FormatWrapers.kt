@@ -37,7 +37,7 @@ class ItemWrapper(private val item: ItemStack) : Formattable {
 
 class SenderWrapper(private val sender: CommandSender) : Formattable {
     override fun format(args: List<Message>): Message {
-        return when (args.getOrNull(0)?.toString()?.toLowerCase() ?: "name") {
+        return when (args.getOrNull(0)?.toString()?.lowercase() ?: "name") {
             "name" -> Message.of(sender.name)
             "msg" -> {
                 require(args.size >= 2) { "Sending a message requires a second argument" }

@@ -9,8 +9,8 @@ import org.mockito.Mockito.*
 
 class CommandGroupTest {
 
-    fun <T> any(): T = Mockito.any()
-    fun <T> eq(obj: T): T = Mockito.eq(obj)
+    private fun <T> any(): T = Mockito.any()
+    private fun <T> eq(obj: T): T = Mockito.eq(obj)
 
     @Test
     fun testCommandGroupFindsCorrectChildAndGivesCorrectArguments() {

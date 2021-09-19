@@ -234,7 +234,7 @@ class Configure(parent: Cmd) : GameCommand(parent) {
     }
 
     private fun expandSimilarMaterials(mat: Material): Sequence<Material> {
-        val wallVariant = mat.name.toLowerCase()
+        val wallVariant = mat.name.lowercase()
                 .replace("sign", "wall_sign")
                 .replace("banner", "wall_banner")
                 .replace("fan", "wall_fan")
@@ -366,7 +366,7 @@ class Configure(parent: Cmd) : GameCommand(parent) {
                         else -> GuiBuilder.blank
                     }
                 },
-                onClick = {index, _, _ ->
+                onClick = { index, _, _ ->
                     when (index.section) {
                         '<' -> showMainMenu(player, game)
                         'S' -> {

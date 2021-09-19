@@ -80,12 +80,12 @@ class Explosion private constructor(
     private fun planDrops(): Map<Location, Set<ItemStack>> {
         val loot = game.settings.blockLoot
         return blocks
-                .map { b: BlockPlan ->
+                .associate { b: BlockPlan ->
                     Pair(
                             b.block.location,
                             lootSelect(loot[b.prior.type] ?: emptyMap())
                     )
-                }.toMap()
+                }
     }
 
     @EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = true)

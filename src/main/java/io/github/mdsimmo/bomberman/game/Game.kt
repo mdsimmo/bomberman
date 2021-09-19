@@ -32,6 +32,7 @@ import org.bukkit.event.server.PluginDisableEvent
 import java.io.File
 import java.lang.IllegalArgumentException
 import java.lang.ref.WeakReference
+import java.util.logging.Level
 
 class Game private constructor(val name: String, private var schema: Arena, val settings: GameSettings = plugin.settings.defaultGameSettings())
     : Formattable, Listener {
@@ -48,11 +49,16 @@ class Game private constructor(val name: String, private var schema: Arena, val 
                     }
                     ?: return
             for (f in files) {
-                loadGame(f)
+                try {
+                    loadGame(f)
+                } catch (e: Exception) {
+                    plugin.logger.log(Level.WARNING, "Cannot load game: " + f.name, e)
+                }
             }
         }
 
         fun loadGame(file: File): Game? {
+            plugin.logger.info("Loading game: " + file.name)
             val data = YamlConfiguration.loadConfiguration(file)
             val name = data["name"] as? String ?: return null
             val schema = data["schema"] as? String ?: return null
@@ -133,12 +139,12 @@ class Game private constructor(val name: String, private var schema: Arena, val 
 
         var boxCache: Box? = null
         val box: Box get() {
-            return boxCache ?: {
+            return boxCache ?: run {
                 val c = loadClipboard()
                 val box = WorldEditUtils.pastedBounds(origin, c)
                 boxCache = box
                 box
-            }()
+            }
         }
         val spawns: Set<Location> by lazy {
             searchSpawns()
@@ -160,9 +166,9 @@ class Game private constructor(val name: String, private var schema: Arena, val 
             this.clipboard = WeakReference(clipboard)
         }
 
-        internal fun loadClipboard() : CuboidClipboard =
-            clipboard?.get() ?: {
-                plugin.logger.info("Reading schematic data")
+        fun loadClipboard() : CuboidClipboard =
+            clipboard?.get() ?: run {
+                plugin.logger.info("Reading schematic data: " + file.name)
                 // Load the schematic
                 val c = SchematicFormat.MCEDIT.load(file)
 
@@ -170,7 +176,7 @@ class Game private constructor(val name: String, private var schema: Arena, val 
                 clipboard = WeakReference(c)
                 plugin.logger.info("data read")
                 c
-            }()
+            }
 
         private fun searchSpawns(): Set<Location> {
             val clip = loadClipboard()
@@ -220,7 +226,7 @@ class Game private constructor(val name: String, private var schema: Arena, val 
         }
 
         override fun format(args: List<Message>): Message {
-            return when (args.firstOrNull()?.toString()?.toLowerCase() ?: "name") {
+            return when (args.firstOrNull()?.toString()?.lowercase() ?: "name") {
                 "name" -> Message.of(file.nameWithoutExtension)
                 "file" -> Message.of(file.path)
                 "filename" -> Message.of(file.name)
@@ -235,17 +241,15 @@ class Game private constructor(val name: String, private var schema: Arena, val 
 
     private val players: MutableSet<Player> = HashSet()
     private var running = false
-    private var spawns: Set<Location>
-    private var tempData: YamlConfiguration
+    private val tempData: YamlConfiguration = YamlConfiguration.loadConfiguration(tempDataFile(this))
+    private val spawns: Set<Location> = (tempData.getList("spawns"))
+            ?.filterIsInstance(Location::class.java)?.toSet()
+            ?: schema.spawns
 
     init {
-        tempData = YamlConfiguration.loadConfiguration(tempDataFile(this))
-        spawns = (tempData.getList("spawns"))
-                ?.filterIsInstance(Location::class.java)?.toSet()
-                ?: schema.spawns
         writeData("spawns", spawns.toList())
 
-        // If game was not shut down cleanly (ie. server died), rebuild the arena
+        // If game was not shut down cleanly (i.e. server died), rebuild the arena
         if (tempData.getBoolean("rebuild-needed", false)) {
             Bukkit.getScheduler().scheduleSyncDelayedTask(plugin) {
                 BmGameBuildIntent.build(this)
@@ -302,14 +306,15 @@ class Game private constructor(val name: String, private var schema: Arena, val 
         }
     }
 
-    private fun removeCages(replaceSpawnSign: Boolean) {
+    private fun removeCages() {
         val clip = schema.loadClipboard()
+
         val editSession = WorldEdit.getInstance().editSessionFactory
                 .getEditSession(BukkitWorld(schema.origin.world) as World, -1)
         val offset = BlockVector(schema.origin.x, schema.origin.y, schema.origin.z).add(clip.offset)
         spawnBlocks()
                 .filter { (isSpawn, _) ->
-                    replaceSpawnSign or !isSpawn
+                    !isSpawn
                 }
                 .forEach { (_, block) ->
                     val loc = block.location
@@ -409,7 +414,7 @@ class Game private constructor(val name: String, private var schema: Arena, val 
         if (e.game != this)
             return
         running = true
-        removeCages(false)
+        removeCages()
         GameProtection.protect(this, schema.box)
         writeData("rebuild-needed", true)
         e.setHandled()
@@ -453,9 +458,11 @@ class Game private constructor(val name: String, private var schema: Arena, val 
     fun onRunStopped(e: BmRunStoppedIntent) {
         if (e.game != this)
             return
-        running = false
-        // Reset the arena
-        BmGameBuildIntent.build(this)
+        if (running) {
+            running = false
+            // Reset the arena
+            BmGameBuildIntent.build(this)
+        }
         e.setHandled()
     }
 
@@ -482,11 +489,12 @@ class Game private constructor(val name: String, private var schema: Arena, val 
     fun onGameDeleted(e: BmGameDeletedIntent) {
         if (e.game != this)
             return
+        plugin.logger.info("Deleting $name" + if (e.isDeletingSave) {""} else {" (keeping data)"})
         BmGameTerminatedIntent.terminateGame(this)
-        removeCages(true)
         tempDataFile(this).delete()
-        if (e.isDeletingSave)
+        if (e.isDeletingSave) {
             File(Bomberman.instance.settings.gameSaves(), "${name}.yml").delete()
+        }
         e.setHandled()
     }
 
@@ -505,7 +513,7 @@ class Game private constructor(val name: String, private var schema: Arena, val 
             "spawns" -> CollectionWrapper(spawns.map { object : Formattable {
                 override fun format(args: List<Message>): Message {
                     require(args.size == 1) { "Spawn format must have one arg" }
-                    return when(args[0].toString().toLowerCase()) {
+                    return when(args[0].toString().lowercase()) {
                         "world", "w" -> Message.of(it.world?.name ?: "unknown")
                         "x" -> Message.of(it.x.toInt())
                         "y" -> Message.of(it.y.toInt())
@@ -517,9 +525,9 @@ class Game private constructor(val name: String, private var schema: Arena, val 
             "schema" -> schema.format(args.drop(1))
             "players" -> CollectionWrapper(players.map { SenderWrapper(it) })
                     .format(args.drop(1))
-            "power" -> Message.of(settings.initialItems.sumBy {
+            "power" -> Message.of(settings.initialItems.sumOf {
                 if (it?.type == settings.bombItem) { it.amount } else { 0 }})
-            "bombs" -> Message.of(settings.initialItems.sumBy {
+            "bombs" -> Message.of(settings.initialItems.sumOf {
                 if (it?.type == settings.powerItem) { it.amount } else { 0 }})
             "lives" -> Message.of(settings.lives.toString())
             "w", "world" -> Message.of(schema.origin.world?.name ?: "unknown")

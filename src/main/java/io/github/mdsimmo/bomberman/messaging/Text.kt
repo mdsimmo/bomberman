@@ -97,6 +97,7 @@ enum class Text(path: String) : Contexted {
     CREATE_GAME_EXISTS("command.create.game-exists"),
     CREATE_NEED_SELECTION("command.create.need-selection"),
     CREATE_SUCCESS("command.create.success"),
+    CREATE_ERROR("command.create.error"),
     CREATE_SCHEMA_NOT_FOUND("command.create.schema-not-found"),
     CREATE_FLAG_PLUGIN("command.create.flags.p.description"),
     CREATE_FLAG_SCHEMA("command.create.flags.f.description"),
@@ -203,6 +204,7 @@ enum class Text(path: String) : Contexted {
             server = YamlConfiguration()
             try {
                 builtin.load(reader)
+                // Instance may be null when testing
                 Bomberman.instance?.let {
                     val custom = it.settings.language()
                     if (custom.exists())

@@ -208,7 +208,7 @@ class Message private constructor(private val contents: TreeNode) : Formattable 
         override val isRaw: Boolean
             get() = false
 
-        override fun expandTitle(): Title? {
+        override fun expandTitle(): Title {
             val titleCursor = Cursor()
             title.contents.expand(titleCursor)
             val titleString = titleCursor.toString()
@@ -260,7 +260,7 @@ class Message private constructor(private val contents: TreeNode) : Formattable 
             }
             val cursor = Cursor()
             sendContents.expand(cursor)
-            if (!cursor.toString().isBlank()) {
+            if (cursor.toString().isNotBlank()) {
                 sender.sendMessage(cursor.toString())
             }
             // Handle possible title

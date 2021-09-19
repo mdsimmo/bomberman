@@ -35,12 +35,12 @@ class GameJoin(parent: Cmd) : GameCommand(parent) {
                     ?.apply {
                         sendTo(sender)
                     }
-                    ?: {
+                    ?: run {
                         context(Text.COMMAND_CANCELLED)
                                 .with("game", game)
                                 .with("player", sender)
                                 .sendTo(sender)
-                    }()
+                    }
         } else {
             context(Text.JOIN_SUCCESS)
                     .with("game", game)
