@@ -40,11 +40,11 @@ default-game-settings:
   # How many lives each player gets
   lives: 3
   # The item type to use for bomb size calculations
-  power: minecraft:gunpowder
+  power: SULPHUR
   # The block type which explodes
-  bomb: minecraft:tnt
+  bomb: TNT
   # The block type used for flames from tnt
-  fire: minecraft:fire
+  fire: FIRE
 
   # What each player spawns in the game with
   # The item order is preserved in players inventory; pad with nulls
@@ -66,9 +66,11 @@ default-game-settings:
   # Materials without an entry will not drop anything.
   loot-table:
   - blocks:
-    - minecraft:snow_block
-    - minecraft:dirt
-    - minecraft:sand
+    - SNOW_BLOCK
+    - DIRT
+    - SAND
+    - GRAVEL
+    - SANDSTONE
     loot:
     - weight: 4   # The relative weighting of choosing this item
       item:         # What item to drop
@@ -85,7 +87,7 @@ default-game-settings:
       item:
         ==: org.bukkit.inventory.ItemStack
         v: 2230
-        type: GUNPOWDER
+        type: SULPHUR
     - weight: 1
       item:
         ==: org.bukkit.inventory.ItemStack
@@ -155,11 +157,12 @@ default-game-settings:
   # Generally, blocks that are in the loot-table should be destructible
   # Removing tnt from destructible means tnt explosions will not chain together
   destructible:
-  - minecraft:tnt
-  - minecraft:snow_block
-  - minecraft:dirt
-  - minecraft:sand
-  - minecraft:gravel
+    - TNT
+    - SNOW_BLOCK
+    - DIRT
+    - SAND
+    - GRAVEL
+    - SANDSTONE
 
   # Blocks tnt cannot touch.
   # All solid blocks included by default

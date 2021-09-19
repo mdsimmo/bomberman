@@ -94,7 +94,8 @@ class GameSettings : ConfigurationSerializable {
             Material.SNOW_BLOCK,
             Material.DIRT,
             Material.SAND,
-            Material.GRAVEL
+            Material.GRAVEL,
+            Material.SANDSTONE
     )
     var indestructible = setOf<Material>()
     var passKeep = setOf<Material>()
