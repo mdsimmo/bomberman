@@ -6,6 +6,9 @@ import org.bukkit.entity.Player
 import java.util.*
 import javax.annotation.CheckReturnValue
 
+/**
+ * A message is an immutable coloured/formatted expanded string
+ */
 @CheckReturnValue
 class Message private constructor(private val contents: TreeNode) : Formattable {
 
