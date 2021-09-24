@@ -3,8 +3,7 @@ Bomberman
 
 A Bukkit plugin for Minecraft which adds Bomberman.
 
-See more on the bukkit page:
-http://dev.bukkit.org/bukkit-plugins/bomberman/
+https://www.spigotmc.org/resources/bomberman.77616/
 
 ## Building
 
