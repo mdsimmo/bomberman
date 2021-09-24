@@ -15,7 +15,8 @@ object Expander {
             Pair("#sub", SubstringExpander()),
             Pair("#padl", PadLeftExpander()),
             Pair("#padr", PadRightExpander()),
-            Pair("#exec", Execute())
+            Pair("#exec", Execute()),
+            Pair("#rand", RandomExpander())
     ).also {
         for (color in ChatColor.values()) {
             it["#${color.name.lowercase()}"] = ColorWrapper(color)
@@ -41,11 +42,17 @@ object Expander {
                     // Add the basic text we have
                     expanded = expanded.append(Message.of(building.toString()))
                     building.setLength(0)
-                    // Expand and add the brace
-                    val subtext =
-                            toNext(text, '}', i)
+
+                    // Get raw text inside brace
+                    val subtext = toNext(text, '}', i)
                                     ?: throw IllegalArgumentException("Braces unmatched: '$text'")
-                    val expandedBrace = expandBrace(subtext, things)
+                    val expandedBrace = if ( subtext.startsWith("{!") ) {
+                        // Message not to be expanded - just remove the exclaim
+                        Message.of(subtext.replaceFirst("!", ""))
+                    } else {
+                        // Expand the brace
+                        expandBrace(subtext, things)
+                    }
                     expanded = expanded.append(expandedBrace)
                     i += subtext.length - 1 // -1 because starting brace was already counted
                 }

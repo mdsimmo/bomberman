@@ -8,7 +8,7 @@ sourceCompatibility = JavaVersion.VERSION_1_8
 targetCompatibility = JavaVersion.VERSION_1_8
 
 group = 'io.github.mdsimmo'
-version = '0.5.0'
+version = '0.6.0'
 
 repositories {
     mavenCentral()
@@ -21,6 +21,14 @@ repositories {
         // world edit repo
         url "https://maven.enginehub.org/repo"
     }
+    maven {
+        // PlaceholderAPI
+        url = 'https://repo.extendedclip.com/content/repositories/placeholderapi/'
+    }
+    maven {
+        name = "sonatype-oss-snapshots"
+        url = "https://oss.sonatype.org/content/repositories/snapshots/"
+    }
 }
 
 dependencies {
@@ -32,6 +40,9 @@ dependencies {
 
     compileOnly "com.sk89q.worldedit:worldedit-bukkit:7.0.0"
     testImplementation "com.sk89q.worldedit:worldedit-bukkit:7.0.0"
+
+    compileOnly 'me.clip:placeholderapi:2.10+'
+    testImplementation 'me.clip:placeholderapi:2.10+'
 
     testImplementation "junit:junit:4.13.+"
     testImplementation "org.mockito:mockito-core:3.3.+"

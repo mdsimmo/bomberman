@@ -13,7 +13,7 @@ commands:
 
 depend: [WorldEdit]
 # SoftDepend Multiverse so Bomberman is loaded after the Multiverse worlds get loaded
-softdepend: [Multiverse-Core]
+softdepend: [Multiverse-Core, PlaceholderAPI]
 
 permissions:
   bomberman.*:

@@ -13,10 +13,6 @@ format:
   # How to display a list
   # {arg0}: the value of the list
   list: "{#raw}{#switch|{arg0}||| {#gold|*} {arg0}}"
-  # Default expansion of foreach
-  # {arg0}: the value of the list
-  # {arg1}: the index
-  foreach: "({arg1}: {arg0})"
   # How to format an item by default
   # {item}: the item to format
   item: '{item|amount}x{item|type}'
@@ -43,10 +39,8 @@ command:
     {#|format.map|Usage|{command|usage}}
     {#|format.map|Extra|{command|extra}}
     {#|format.map|Flags|{#switch|{command|flags|length}|0|| }}
-    {command|flags|foreach|command.flag-list|
+    {command|flags|foreach|{!#|format.map|   -{it|name}{#switch|{it|ext}|||={it|ext}}|{it|description}}|
     }
-  flag-list: '{#|format.map|   -{arg0|name}{#switch|{arg0|ext}|||={arg0|ext}}|{arg0|description}}'
-  flag-sort: '{arg0|name}'
   # Shown when a player tries to run a command they do not have permission to use
   deny-permission: '{#red|You do not have permission to use /{command|path}!}'
   # Shown when the player uses a command incorrectly
@@ -69,13 +63,11 @@ command:
   group:
     help: |-
       {#|format.heading|Help: {command|name}}
-      {command|children|sort|command.group.sort|foreach|command.group.child|
+      {command|children|sort|{!it|name}|foreach|{!#|format.map|{it|name}|{#switch|{=|{#len|{it|description}}>40}|1|{#sub|{it|description}|0|40}...|{it|description}}}|
       }
     usage: '/{command|path} <subcommand>'
     example: ''
     extra: ''
-    sort: '{arg0|name}'
-    child: '{#|format.map|{arg0|name}|{#switch|{=|{#len|{arg0|description}}>40}|1|{#sub|{arg0|description}|0|40}...|{arg0|description}}}'
   # Commands relating to '/bm start'
   start:
     name: start
@@ -223,15 +215,12 @@ command:
     usage: /{command|path}
     example: ''
     extra: ''
-    # What to show when games are present
+    # The displayed message
     # {games}: a list of games
     games: |-
       {#|format.heading|Games}
-      {#switch|{games|length}|0|{#red|No games present}|{games|sort|command.list.sort|foreach|command.list.game|
+      {#switch|{games|length}|0|{#red|No games present}|{games|sort|{!it|name}|foreach|{!#|format.map|{it|name}|{it|players}/{it|spawns} ({#switch|{it|running}|true|Running|false|Waiting|{#red|?}})}|
       }}
-    sort: {arg0|name}
-    game: |-
-      {#|format.map|{arg0|name}|{arg0|players}/{arg0|spawns} ({#switch|{arg0|running}|true|Running|false|Waiting|{#red|?}})}
   # Messages relating to '/bm info'
   info:
     name: info
@@ -286,7 +275,3 @@ command:
     # Player left successfully
     # {player}: the player that left
     success: '{#gray|{#italic|{player} left game}}{#switch|{=|{game|players}==0}|1|{#exec|bm stop {game}}}'
-# For unit testing
-dev:
-  indexed-list: '({arg1}: {arg0})'
-  second-char: '{#sub|{arg0}|1}'

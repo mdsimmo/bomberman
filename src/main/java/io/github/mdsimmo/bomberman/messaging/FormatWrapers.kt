@@ -7,8 +7,11 @@ import org.bukkit.Bukkit
 import org.bukkit.ChatColor
 import org.bukkit.command.CommandSender
 import org.bukkit.inventory.ItemStack
+import java.lang.RuntimeException
 import java.math.BigDecimal
+import java.util.*
 import kotlin.math.roundToLong
+import kotlin.random.Random
 
 
 class StringWrapper(val text: String) : Formattable {
@@ -69,13 +72,13 @@ class CollectionWrapper<T : Formattable>(private val list: Collection<T>) : Form
         return when (args.getOrNull(0)?.toString() ?: "length") {
             "foreach" -> {
                 // Join all elements by applying arg[1] to each item separated by arg[2]
-                val mapper = args.getOrNull(1)?.toString() ?: "format.foreach"
+                val mapper = args.getOrNull(1)?.toString() ?: "({index}: {it})"
                 val separator = args.getOrNull(2) ?: Message.of(" ")
                 list
                         .mapIndexed {i, item ->
-                            Text.getSection(mapper)
-                                    .with("arg0", item)
-                                    .with("arg1", Message.of(i))
+                            SimpleContext(mapper)
+                                    .with("it", item)
+                                    .with("index", Message.of(i))
                                     .format()
                         }
                         .ifEmpty { listOf(Message.empty) }
@@ -89,9 +92,9 @@ class CollectionWrapper<T : Formattable>(private val list: Collection<T>) : Form
                     }
                 } else {
                     list.withIndex().sortedBy {
-                        Text.getSection(mapper)
-                                .with("arg0", it.value)
-                                .with("arg1", Message.of(it.index))
+                        SimpleContext(mapper)
+                                .with("it", it.value)
+                                .with("index", Message.of(it.index))
                                 .format()
                                 .toString()
                     }.map { it.value }
@@ -99,6 +102,44 @@ class CollectionWrapper<T : Formattable>(private val list: Collection<T>) : Form
                 return CollectionWrapper(sorted).format(args.drop(2))
             }
             "length" -> Message.of(list.size)
+            "filter" -> {
+                val filter = args.getOrNull(1)?.toString() ?: throw IllegalArgumentException("'filter' must have second argument")
+                val filtered =
+                    list.withIndex().filter {
+                        SimpleContext(filter)
+                            .with("it", it.value)
+                            .with("index", Message.of(it.index))
+                            .format()
+                            .toString()
+                            .isNotBlank()
+                    }.map { it.value }
+                return CollectionWrapper(filtered).format(args.drop(2))
+            }
+            "get" -> {
+                val (value, criteria, results) = when (args.size) {
+                    0, 1 ->  throw RuntimeException("Should be impossible")
+                    2 -> Triple(args[1].toString(), "{it}","{it}")
+                    3 -> Triple(args[1].toString(), "{it}", args[2].toString())
+                    4 -> Triple(args[1].toString(), args[2].toString(), args[3].toString())
+                    else -> throw IllegalArgumentException("'=' must have 1-3 arguments afterwards")
+                }
+                val match = list.withIndex().firstOrNull() {
+                    val crit = SimpleContext(criteria)
+                        .with("it", it.value)
+                        .with("index", Message.of(it.index))
+                        .format()
+                        .toString()
+                    crit == value
+                }?.value
+                return if (match == null) {
+                    Message.empty
+                } else {
+                    SimpleContext(results)
+                        .with("it", match)
+                        .format()
+                }
+            }
+
             else -> throw IllegalArgumentException("Unknown list option: " + args[0])
         }
     }
@@ -384,4 +425,25 @@ class PadLeftExpander : PadExpander{
 class PadRightExpander : PadExpander {
     override fun startText(text: String) = text
     override fun endText(text: String) = ""
+}
+
+class RandomExpander : Formattable {
+    override fun format(args: List<Message>): Message {
+        return when (args.size) {
+            0 -> Message.of(Random.nextDouble().toString())
+            1 -> {
+                return args[0].toString().toDoubleOrNull()?.let {  max ->
+                    Message.of(Random.nextDouble(max).toString())
+                } ?: Message.error("Number expected. Got '${args[0]}'")
+            }
+            2 -> {
+                return args[0].toString().toDoubleOrNull()?.let {  min ->
+                    args[1].toString().toDoubleOrNull()?.let { max ->
+                        Message.of(Random.nextDouble(min, max).toString())
+                    }
+                } ?: Message.error("Number expected. Got '${args[0]}', '${args[1]}'")
+            }
+            else -> throw IllegalArgumentException("Rand can have 0-2 arguments")
+        }
+    }
 }

@@ -12,6 +12,26 @@ import org.mockito.ArgumentMatchers
 import org.mockito.Mockito.*
 
 class FormattingTest {
+
+    class NumberName(private val number: Int) : Formattable {
+        override fun format(args: List<Message>): Message {
+            val arg = args.getOrNull(0)?.toString() ?: "text"
+            return when (arg) {
+                "text" -> of(when (number) {
+                    0 -> "Zero"
+                    1 -> "One"
+                    2 -> "Two"
+                    3 -> "Three"
+                    4 -> "Four"
+                    else -> "?"
+                })
+                "val" -> of(number)
+                else -> of("EH?: " + args[0])
+            }
+        }
+
+    }
+
     @Test
     fun testAllEnglishStatementsExistAndHaveNoErrors() {
         for (t in Text.values()) {
@@ -224,18 +244,79 @@ class FormattingTest {
     fun testListForeach() {
         val mylist = listOf(of("Hello"), of("Small"), of("World"))
         val a = expand(
-                "{mylist|foreach|dev.indexed-list|-}",
+                "{mylist|foreach|[\\{index\\}: \\{it\\}]|-}",
                 mapOf(Pair("mylist", CollectionWrapper(mylist))))
-        assertEquals("(0: Hello)-(1: Small)-(2: World)", a.toString())
+        assertEquals("[0: Hello]-[1: Small]-[2: World]", a.toString())
     }
 
     @Test
     fun testListSorted() {
         val mylist = listOf(of("One"), of("Two"), of("Three"))
         val a = expand(
-                "{mylist|sort|dev.second-char|foreach|dev.indexed-list|, }",
+                "{mylist|sort|\\{#sub\\|\\{it\\}\\|1\\}|foreach|(\\{index\\}: \\{it\\})|, }",
                 mapOf(Pair("mylist", CollectionWrapper(mylist))))
         assertEquals("(0: Three), (1: One), (2: Two)", a.toString())
+    }
+
+    @Test
+    fun testExclaimDoesNotEvaluate() {
+        val text = "Hello {!bob}"
+        val result = expand(text, mapOf())
+        assertEquals("Hello {bob}", result.toString())
+    }
+
+    @Test
+    fun testListSortedWithExclaim() {
+        val mylist = listOf(of("One"), of("Two"), of("Three"))
+        val a = expand(
+            "{mylist|sort|{!#sub|{it}|1}|foreach|({!index}: {!it})|, }",
+            mapOf(Pair("mylist", CollectionWrapper(mylist))))
+        assertEquals("(0: Three), (1: One), (2: Two)", a.toString())
+    }
+
+    @Test
+    fun testListFiltered() {
+        val mylist = listOf(of("One"), of("Two"), of("Three"), of("Four"))
+        val a = expand(
+            "{mylist|filter|{!#regex|{it}|[^e]|}|foreach|{!it}|, }",
+            mapOf(Pair("mylist", CollectionWrapper(mylist))))
+        assertEquals("One, Three", a.toString())
+    }
+
+    @Test
+    fun testListGetArg() {
+        val mylist = listOf(NumberName(1), NumberName(2), NumberName(3))
+        val a = expand(
+            "{mylist|get|Two}",
+            mapOf(Pair("mylist", CollectionWrapper(mylist))))
+        assertEquals("Two", a.toString())
+    }
+
+    @Test
+    fun testListGetArgNoMatch() {
+        val mylist = listOf(NumberName(0), NumberName(1), NumberName(3))
+        val a = expand(
+            "{mylist|get|Two|Value: {!it}}",
+            mapOf(Pair("mylist", CollectionWrapper(mylist))))
+        assertEquals("", a.toString())
+    }
+
+    @Test
+    fun testListGetArgWithResult() {
+        val mylist = listOf(NumberName(0), NumberName(1), NumberName(2), NumberName(3))
+        val a = expand(
+            "{mylist|get|Two|Value: {!it|val}}",
+            mapOf(Pair("mylist", CollectionWrapper(mylist))))
+        assertEquals("Value: 2", a.toString())
+    }
+
+    @Test
+    fun testListGetArgWithResultAndPattern() {
+        val mylist = listOf(NumberName(0), NumberName(1), NumberName(2), NumberName(3))
+        val a = expand(
+            "{mylist|get|1|{!it|val}|Got: {!it}}",
+            mapOf(Pair("mylist", CollectionWrapper(mylist))))
+        assertEquals("Got: One", a.toString())
     }
 
     @Test
@@ -243,6 +324,33 @@ class FormattingTest {
         val mylist = listOf(of("Hello"), of("Small"), of("World"))
         val a = expand("{mylist|length}", mapOf(Pair("mylist", CollectionWrapper(mylist))))
         assertEquals("3", a.toString())
+    }
+
+    @Test
+    fun testEmbeddedLists() {
+        val myList = listOf(
+            object: Formattable {
+                override fun format(args: List<Message>): Message {
+                    return if (args.getOrNull(0).toString() == "inner") {
+                        CollectionWrapper(listOf(NumberName(0), NumberName(1), NumberName(2)))
+                            .format(args.drop(1))
+                    } else {
+                        of("Bad call")
+                    }
+                }
+            },
+            object: Formattable {
+                override fun format(args: List<Message>): Message {
+                    return if (args.getOrNull(0).toString() == "inner") {
+                        CollectionWrapper(listOf(NumberName(3), NumberName(4)))
+                            .format(args.drop(1))
+                    } else {
+                        of("Bad call")
+                    }
+                }
+            })
+        val result = expand("[{list|foreach|[{!it|inner|foreach|{!it|text}|, }]|, }]", mapOf(Pair("list", CollectionWrapper(myList))))
+        assertEquals("[[Zero, One, Two], [Three, Four]]", result.toString())
     }
 
     @Test

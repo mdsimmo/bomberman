@@ -172,21 +172,11 @@ enum class Text(path: String) : Contexted {
         fun getSection(path: String): Contexted {
             val text = YAMLLanguage.server?.getString(path)
                     ?: YAMLLanguage.builtin.getString(path)
-            val things = mutableMapOf<String, Formattable>()
-            return object : Contexted {
-                override fun with(key: String, thing: Formattable): Contexted {
-                    things[key] = thing
-                    return this
-                }
 
-                override fun format(): Message {
-                    return if (text == null) {
-                        Message.error("{${path}}")
-                    } else {
-                        Expander.expand(text, things)
-                    }
-                }
-
+            return if (text == null) {
+                ErrorContext("{${path}}")
+            } else {
+                SimpleContext(text)
             }
         }
     }

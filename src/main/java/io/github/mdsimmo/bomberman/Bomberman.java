@@ -45,8 +45,8 @@ public class Bomberman extends JavaPlugin implements Listener {
 		bukkitBmCmd.setExecutor(bmCmd);
 		bukkitBmCmd.setTabCompleter(bmCmd);
 
+		BmPlaceholder.register();
 		Game.loadGames();
-
 		GamePlayer.setupLoginWatcher();
 	}
 
