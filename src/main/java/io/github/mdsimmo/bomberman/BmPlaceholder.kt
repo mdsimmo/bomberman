@@ -6,21 +6,9 @@ import io.github.mdsimmo.bomberman.messaging.Message
 import io.github.mdsimmo.bomberman.messaging.SenderWrapper
 import io.github.mdsimmo.bomberman.messaging.SimpleContext
 import me.clip.placeholderapi.expansion.PlaceholderExpansion
-import org.bukkit.Bukkit
-import org.bukkit.OfflinePlayer
-import org.bukkit.command.CommandSender
 import org.bukkit.entity.Player
 
 class BmPlaceholder : PlaceholderExpansion() {
-
-    companion object {
-        @JvmStatic
-        fun register() {
-            if (Bukkit.getPluginManager().getPlugin("PlaceholderAPI") != null) {
-                BmPlaceholder().register()
-            }
-        }
-    }
 
     override fun getIdentifier(): String = "bomberman"
 
