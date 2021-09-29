@@ -23,6 +23,7 @@ permissions:
       bomberman.dictator: true
       bomberman.operator: true
       bomberman.player: true
+    default: op
   bomberman.player:
     description: Allows join/leave/info
     children:
@@ -30,48 +31,51 @@ permissions:
       bomberman.leave: true
       bomberman.info: true
       bomberman.list: true
+    default: true
   bomberman.operator:
     description: Allows control of games (start/stop)
     children:
       bomberman.start: true
       bomberman.stop: true
       bomberman.reload: true
+    default: op
   bomberman.dictator:
     description: Allows building/configuring games
     children:
       bomberman.create: true
       bomberman.delete: true
       bomberman.configure: true
+    default: op
   bomberman.bm:
     description: Root bomberman command (/bm)
     default: true
   bomberman.join:
     description: /bm join
-    default: true
+    default: false
   bomberman.leave:
     description: /bm join
-    default: true
+    default: false
   bomberman.info:
     description: /bm info
-    default: true
+    default: false
   bomberman.list:
     description: /bm list
-    default: true
+    default: false
   bomberman.start:
     description: /bm start
-    default: op
+    default: false
   bomberman.stop:
     description: /bm stop
-    default: op
+    default: false
   bomberman.reload:
     description: /bm reload
-    default: op
+    default: false
   bomberman.create:
     description: /bm create
-    default: op
+    default: false
   bomberman.delete:
     description: /bm delete
-    default: op
+    default: false
   bomberman.configure:
     description: /bm configure
-    default: op
+    default: false

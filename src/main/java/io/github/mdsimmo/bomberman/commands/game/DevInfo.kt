@@ -5,6 +5,7 @@ import io.github.mdsimmo.bomberman.commands.Cmd
 import io.github.mdsimmo.bomberman.commands.Permission
 import io.github.mdsimmo.bomberman.commands.Permissions
 import io.github.mdsimmo.bomberman.messaging.Message
+import io.github.mdsimmo.bomberman.messaging.SimpleContext
 import org.bukkit.Bukkit
 import org.bukkit.ChatColor
 import org.bukkit.command.CommandSender
@@ -18,7 +19,7 @@ class DevInfo(parent: Cmd) : Cmd(parent) {
 
     override fun options(sender: CommandSender, args: List<String>): List<String> {
         return listOf("handlerlist", "handlercount", "handlerwatch", "nocancelled",
-                "tasklist", "taskcount", "taskwatch", "watch")
+                "tasklist", "taskcount", "taskwatch", "watch", "permissions")
     }
 
     override fun run(sender: CommandSender, args: List<String>, flags: Map<String, String>): Boolean {
@@ -123,6 +124,16 @@ class DevInfo(parent: Cmd) : Cmd(parent) {
                 sender.sendMessage("Watching for new tasks")
                 true
             }
+            "permissions" -> {
+                if (args.size == 1) {
+                    sender.effectivePermissions.forEach {
+                        sender.sendMessage(" - ${it.permission}")
+                    }
+                } else {
+                    sender.sendMessage(args[1] + " : " + sender.hasPermission(args[1]))
+                }
+                true
+            }
             else -> {
                 false
             }
@@ -130,7 +141,7 @@ class DevInfo(parent: Cmd) : Cmd(parent) {
     }
 
     override fun permission(): Permission {
-        return Permissions.CREATE
+        return Permissions.BASE
     }
 
     override fun example(): Message {

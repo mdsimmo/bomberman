@@ -3,6 +3,7 @@ package io.github.mdsimmo.bomberman.game
 import io.github.mdsimmo.bomberman.Bomberman
 import io.github.mdsimmo.bomberman.events.*
 import io.github.mdsimmo.bomberman.messaging.Text
+import io.github.mdsimmo.bomberman.utils.BukkitUtils
 import org.bukkit.Bukkit
 import org.bukkit.GameMode
 import org.bukkit.Location
@@ -17,9 +18,13 @@ import org.bukkit.event.entity.EntityDamageEvent
 import org.bukkit.event.entity.EntityRegainHealthEvent
 import org.bukkit.event.player.*
 import org.bukkit.inventory.ItemStack
+import org.bukkit.permissions.PermissibleBase
+import org.bukkit.permissions.PermissionAttachment
+import org.bukkit.permissions.PermissionAttachmentInfo
 import org.bukkit.potion.PotionEffect
 import org.bukkit.potion.PotionEffectType
 import java.io.File
+import java.util.regex.Pattern
 
 class GamePlayer private constructor(private val player: Player, private val game: Game) : Listener {
 
@@ -72,6 +77,10 @@ class GamePlayer private constructor(private val player: Player, private val gam
 
             // Add tag for customisation
             player.addScoreboardTag("bm_player")
+
+            // Add a permission group for WorldGuard compatibility
+            val playerPermissions = BukkitUtils.getPermissibleBase(player)
+            playerPermissions?.addAttachment(plugin, "group.bomberman", true)
         }
 
         fun bombStrength(game: Game, player: Player): Int {
@@ -133,6 +142,10 @@ class GamePlayer private constructor(private val player: Player, private val gam
             player.teleport(location)
 
             player.removeScoreboardTag("bm_player")
+
+            val playerPermissions = BukkitUtils.getPermissibleBase(player)
+            playerPermissions?.addAttachment(plugin, "group.bomberman", false)
+
             file.delete()
 
             removePotionEffects(player)
