@@ -463,13 +463,18 @@ class Game private constructor(val name: String, private var schema: Arena, val 
         if (players.contains(e.player)) {
             players.remove(e.player)
 
-            if (running && players.size <= 1) {
+            // If not running (but might be counting down) or no players left, stop the game immediately
+            if (players.size < 1 || !this.running) {
+                BmRunStoppedIntent.stopGame(this)
+            } else if (players.size == 1) {
+                // Tell remaining player they won
                 players.forEach {
                     Bukkit.getPluginManager().callEvent(BmPlayerWonEvent(this, it))
                 }
+                // Let player celebrate for 5 seconds, then stop the game
                 Bukkit.getScheduler().scheduleSyncDelayedTask(plugin, {
                     BmRunStoppedIntent.stopGame(this)
-                }, players.size * 20*5L)
+                }, 5*20L) // 5 seconds to see messages
             }
         }
     }
