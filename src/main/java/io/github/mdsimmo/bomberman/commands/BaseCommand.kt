@@ -23,7 +23,8 @@ class BaseCommand : CommandGroup(null), TabCompleter, CommandExecutor {
                 RunStart(this),
                 RunStop(this),
                 GameList(this),
-                GameReload(this)
+                GameReload(this),
+                UndoBuild(this)
         )
     }
 

@@ -44,6 +44,7 @@ permissions:
     children:
       bomberman.create: true
       bomberman.delete: true
+      bomberman.undo: true
       bomberman.configure: true
     default: op
   bomberman.bm:
@@ -75,6 +76,9 @@ permissions:
     default: false
   bomberman.delete:
     description: /bm delete
+    default: false
+  bomberman.undo:
+    description: /bm undo
     default: false
   bomberman.configure:
     description: /bm configure

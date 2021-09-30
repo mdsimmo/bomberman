@@ -208,6 +208,22 @@ command:
     # The game has been deleted
     # {game}: the game that was deleted (this is still a game object)
     success: Game {game} destroyed
+  # Messages relating to '/bm undo'
+  undo:
+    name: undo
+    description: Reverts the schematic to its pre-create state and deletes the game (if not already deleted)
+    usage: /{command|path} <game>
+    example: ''
+    extra: Can only undo games built in the last 10 minutes. Does not work for games built with a wand.
+    # The game arena was restored to previous state
+    # {game}: the game name that was reset (NOT a valid object; it is just the name)
+    success: Game {game} schematic reverted
+    # The game was deleted
+    # {game}: the game that was deleted (this is a game object)
+    deleted: Game {game} deleted
+    # Game was not in the memory
+    # {game}: the game name requested (NOT a valid game)
+    unknown-game: No previous state of {game} stored - was it created more than 10 minutes ago or by using a wand?
   # Messages relating to '/bm list'
   list:
     name: list

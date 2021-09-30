@@ -14,6 +14,7 @@ import com.sk89q.worldedit.math.BlockVector3
 import com.sk89q.worldedit.session.ClipboardHolder
 import com.sk89q.worldedit.world.block.BlockTypes
 import io.github.mdsimmo.bomberman.Bomberman
+import io.github.mdsimmo.bomberman.commands.game.UndoBuild
 import io.github.mdsimmo.bomberman.events.*
 import io.github.mdsimmo.bomberman.messaging.*
 import io.github.mdsimmo.bomberman.utils.Box
@@ -108,6 +109,7 @@ class Game private constructor(val name: String, private var schema: Arena, val 
 
             // Make the Game
             val game = Game(name, Arena(file, BukkitUtils.boxLoc1(box), clipboard, flags))
+            UndoBuild.retainHistory(name, null) // delete any old history
             // TODO when building from selection, only need to build cages
             BmGameBuildIntent.build(game)
             return game
@@ -115,6 +117,7 @@ class Game private constructor(val name: String, private var schema: Arena, val 
 
         fun buildGameFromSchema(name: String, loc: Location, file: File, flags: BuildFlags): Game {
             val game = Game(name, Arena(file, loc, flags))
+            UndoBuild.retainHistory(game.name, game.schema.box)
             BmGameBuildIntent.build(game)
             return game
         }
@@ -244,11 +247,6 @@ class Game private constructor(val name: String, private var schema: Arena, val 
                                     BlockPattern(BlockTypes.AIR!!.defaultState)
                             )
                         }
-
-                        // TODO undo arena build
-                        // this undoes the building, but it should also delete the game
-                        //if (user != null)
-                        //    WorldEdit.getInstance().sessionManager.get(BukkitAdapter.adapt(user))?.remember(editSession)
                     }
             plugin.logger.info("Rebuild done")
         }
