@@ -18,13 +18,10 @@ import org.bukkit.event.entity.EntityDamageEvent
 import org.bukkit.event.entity.EntityRegainHealthEvent
 import org.bukkit.event.player.*
 import org.bukkit.inventory.ItemStack
-import org.bukkit.permissions.PermissibleBase
-import org.bukkit.permissions.PermissionAttachment
-import org.bukkit.permissions.PermissionAttachmentInfo
 import org.bukkit.potion.PotionEffect
 import org.bukkit.potion.PotionEffectType
 import java.io.File
-import java.util.regex.Pattern
+import java.util.logging.Level
 
 class GamePlayer private constructor(private val player: Player, private val game: Game) : Listener {
 
@@ -49,6 +46,15 @@ class GamePlayer private constructor(private val player: Player, private val gam
             dataFile["is-flying"] = player.isFlying
             dataFile.save(tempDataFile(player))
 
+            // Add a permission group for WorldGuard compatibility (must be done before teleporting)
+            // Wrap in try loop because it is quite dodgy how other plugins implement
+            try {
+                val playerPermissions = BukkitUtils.getPermissibleBase(player)
+                playerPermissions?.addAttachment(plugin, "group.bomberman", true)
+            } catch (e: Exception) {
+                plugin.logger.log(Level.WARNING, "Unable to add permissions", e)
+            }
+
             // Clear the landing area of items (there should never be any, but we don't want no cheating)
             start.world!!.getNearbyEntities(start, 2.0, 3.0, 2.0)
                     .filterIsInstance<Item>()
@@ -63,7 +69,12 @@ class GamePlayer private constructor(private val player: Player, private val gam
                 // delayed because it seems to reduce client side death screen glitch
                 player.healthScale = game.settings.lives * 2.toDouble()
             }
-            player.teleport(start.clone().add(0.5, 0.01, 0.5))
+            if (!player.teleport(start.clone().add(0.5, 0.01, 0.5))) {
+                // Teleport failed, revert player state in next tick
+                Bukkit.getScheduler().scheduleSyncDelayedTask(plugin) {
+                    BmPlayerLeaveGameIntent.leave(player)
+                }
+            }
             player.gameMode = GameMode.SURVIVAL
             player.exhaustion = 0f
             player.foodLevel = 100000 // just a big number
@@ -77,10 +88,6 @@ class GamePlayer private constructor(private val player: Player, private val gam
 
             // Add tag for customisation
             player.addScoreboardTag("bm_player")
-
-            // Add a permission group for WorldGuard compatibility
-            val playerPermissions = BukkitUtils.getPermissibleBase(player)
-            playerPermissions?.addAttachment(plugin, "group.bomberman", true)
         }
 
         fun bombStrength(game: Game, player: Player): Int {
@@ -143,8 +150,12 @@ class GamePlayer private constructor(private val player: Player, private val gam
 
             player.removeScoreboardTag("bm_player")
 
-            val playerPermissions = BukkitUtils.getPermissibleBase(player)
-            playerPermissions?.addAttachment(plugin, "group.bomberman", false)
+            try {
+                val playerPermissions = BukkitUtils.getPermissibleBase(player)
+                playerPermissions?.addAttachment(plugin, "group.bomberman", false)
+            } catch (e: Exception) {
+                plugin.logger.log(Level.WARNING, "Unable to remove permissions", e)
+            }
 
             file.delete()
 
