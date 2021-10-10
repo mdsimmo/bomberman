@@ -1,7 +1,7 @@
 plugins {
+    id 'com.github.johnrengelman.shadow' version '7.1.0'
     id 'java'
-    id "org.jetbrains.kotlin.jvm" version "1.5.21"
-    id 'idea'
+    id "org.jetbrains.kotlin.jvm" version "1.5.31"
 }
 
 sourceCompatibility = JavaVersion.VERSION_1_8
@@ -29,11 +29,15 @@ repositories {
         name = "sonatype-oss-snapshots"
         url = "https://oss.sonatype.org/content/repositories/snapshots/"
     }
+    maven {
+        url 'https://libraries.minecraft.net/'
+    }
 }
 
 dependencies {
-    implementation 'org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.5.21'
+    implementation 'org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.5.31'
     implementation "net.objecthunter:exp4j:0.4.8"
+    //implementation "me.lucko:commodore:1.10"
 
     compileOnly "org.bukkit:bukkit:1.8-R0.1-SNAPSHOT"
     testImplementation "org.bukkit:bukkit:1.8-R0.1-SNAPSHOT"
@@ -48,14 +52,18 @@ dependencies {
     testImplementation "org.mockito:mockito-core:3.3.+"
 }
 
+shadowJar {
+    relocate 'net.objecthunter', 'io.github.mdsimmo.bomberman.lib.net.objecthunter'
+    //relocate 'me.lucko', 'io.github.mdsimmo.bomberman.lib.me.lucko'
+    relocate 'com.mojang', 'io.github.mdsimmo.bomberman.lib.com.mojang'
+    relocate 'org.jetbrains', 'io.github.mdsimmo.bomberman.lib.org.jetbrains'
+}
+
 processResources  {
      // auto assign values in the plugin.yml
-    // Do not filter schematics as they get corrupted when trying to be read as text
-    filesNotMatching("**.schem") {
+    filesMatching("plugin.yml") {
         filter {
-            line ->
-                line
-                        .replace('${version}', version)
+            line -> line.replace('${version}', version)
         }
     }
 }
@@ -72,21 +80,13 @@ task clearOldPluginJar( type: Delete ) {
 task copyToServer(type: Copy, dependsOn: clearOldPluginJar ) {
     description 'Copies the plugin to the server'
     if ( project.hasProperty("serverLocation" ) ) {
-        from jar
+        from shadowJar
         into "$serverLocation/plugins/update"
     }
 }
 
-task install( dependsOn: [build, copyToServer] ) {
+task install( dependsOn: [shadowJar, copyToServer] ) {
     description 'Compiles, tests and copies the code to the server'
-}
-
-jar {
-    from {
-        configurations.runtimeClasspath.collect {
-            it.isDirectory() ? it : zipTree(it)
-        }
-    }
 }
 
 tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile).configureEach {
