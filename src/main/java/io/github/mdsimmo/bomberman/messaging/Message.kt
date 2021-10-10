@@ -33,8 +33,8 @@ class Message private constructor(private val contents: TreeNode) : Formattable 
             return of(s).color(ChatColor.RED)
         }
 
-        fun lazyExpand(text: String, context: Map<String, Formattable>): Message {
-            return Message(LazyNode(text, context))
+        fun lazyExpand(text: String, context: Map<String, Formattable>, elevated: Boolean): Message {
+            return Message(LazyNode(text, context, elevated))
         }
     }
 
@@ -223,9 +223,9 @@ class Message private constructor(private val contents: TreeNode) : Formattable 
 
     }
 
-    private class LazyNode (val text: String, val context: Map<String, Formattable>) : TreeNode {
+    private class LazyNode (val text: String, val context: Map<String, Formattable>, elevated: Boolean) : TreeNode {
         val content: TreeNode by lazy {
-            Expander.expand(text, context).contents
+            Expander.expand(text, context, elevated).contents
         }
 
         override fun expand(cursor: Cursor) {
@@ -248,7 +248,7 @@ class Message private constructor(private val contents: TreeNode) : Formattable 
         return Message(Joined(contents, text.contents))
     }
 
-    override fun format(args: List<Message>): Message {
+    override fun format(args: List<Message>, elevated: Boolean): Message {
         return this
     }
 

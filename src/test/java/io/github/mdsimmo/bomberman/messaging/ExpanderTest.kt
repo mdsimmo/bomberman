@@ -47,7 +47,7 @@ class ExpanderTest {
         val message =
                 expand("Steve likes {steve|girlfriend}", mapOf(
                         Pair("steve", object : Formattable {
-                            override fun format(args: List<Message>): Message {
+                            override fun format(args: List<Message>, elevated: Boolean): Message {
                                 return if (args.size != 1 || args[0].toString() != "girlfriend")
                                     Message.of(args.toString()) // for debug
                                 else
@@ -159,7 +159,7 @@ class ExpanderTest {
     @Test
     fun testMessagesLazyExpanded() {
         val badExpand = mock(Formattable::class.java)
-        `when`(badExpand.format(anyList())).thenReturn(Message.of("no no"))
+        `when`(badExpand.format(anyList(),)).thenReturn(Message.of("no no"))
 
         val a = expand("{#switch|0|0|choose me|{bad}}", mapOf(Pair("bad", badExpand)))
 

@@ -9,14 +9,13 @@ import org.bukkit.command.CommandSender
 import org.bukkit.inventory.ItemStack
 import java.lang.RuntimeException
 import java.math.BigDecimal
-import java.util.*
 import kotlin.math.roundToLong
 import kotlin.random.Random
 
 
 class StringWrapper(val text: String) : Formattable {
 
-    override fun format(args: List<Message>): Message {
+    override fun format(args: List<Message>, elevated: Boolean): Message {
         return Message.of(text)
     }
 
@@ -24,7 +23,7 @@ class StringWrapper(val text: String) : Formattable {
 
 class ItemWrapper(private val item: ItemStack) : Formattable {
 
-    override fun format(args: List<Message>): Message {
+    override fun format(args: List<Message>, elevated: Boolean): Message {
         return if (args.isEmpty()) {
             Text.ITEM_FORMAT
                     .with("item", this)
@@ -39,7 +38,7 @@ class ItemWrapper(private val item: ItemStack) : Formattable {
 }
 
 class SenderWrapper(private val sender: CommandSender) : Formattable {
-    override fun format(args: List<Message>): Message {
+    override fun format(args: List<Message>, elevated: Boolean): Message {
         return when (args.getOrNull(0)?.toString()?.lowercase() ?: "name") {
             "name" -> Message.of(sender.name)
             "msg" -> {
@@ -61,14 +60,14 @@ class SenderWrapper(private val sender: CommandSender) : Formattable {
 }
 
 class ColorWrapper(private val color: ChatColor) : Formattable {
-    override fun format(args: List<Message>): Message {
+    override fun format(args: List<Message>, elevated: Boolean): Message {
         require (args.size == 1) { "Colors format is {<color>|text}" }
         return args[0].color(color)
     }
 }
 
 class CollectionWrapper<T : Formattable>(private val list: Collection<T>) : Formattable {
-    override fun format(args: List<Message>): Message {
+    override fun format(args: List<Message>, elevated: Boolean): Message {
         return when (args.getOrNull(0)?.toString() ?: "length") {
             "foreach" -> {
                 // Join all elements by applying arg[1] to each item separated by arg[2]
@@ -76,7 +75,7 @@ class CollectionWrapper<T : Formattable>(private val list: Collection<T>) : Form
                 val separator = args.getOrNull(2) ?: Message.of(" ")
                 list
                         .mapIndexed {i, item ->
-                            SimpleContext(mapper)
+                            SimpleContext(mapper, elevated)
                                     .with("it", item)
                                     .with("index", Message.of(i))
                                     .format()
@@ -92,28 +91,28 @@ class CollectionWrapper<T : Formattable>(private val list: Collection<T>) : Form
                     }
                 } else {
                     list.withIndex().sortedBy {
-                        SimpleContext(mapper)
+                        SimpleContext(mapper,  elevated)
                                 .with("it", it.value)
                                 .with("index", Message.of(it.index))
                                 .format()
                                 .toString()
                     }.map { it.value }
                 }
-                return CollectionWrapper(sorted).format(args.drop(2))
+                return CollectionWrapper(sorted).format(args.drop(2), elevated)
             }
             "length" -> Message.of(list.size)
             "filter" -> {
                 val filter = args.getOrNull(1)?.toString() ?: throw IllegalArgumentException("'filter' must have second argument")
                 val filtered =
                     list.withIndex().filter {
-                        SimpleContext(filter)
+                        SimpleContext(filter, elevated)
                             .with("it", it.value)
                             .with("index", Message.of(it.index))
                             .format()
                             .toString()
                             .isNotBlank()
                     }.map { it.value }
-                return CollectionWrapper(filtered).format(args.drop(2))
+                return CollectionWrapper(filtered).format(args.drop(2), elevated)
             }
             "get" -> {
                 val (value, criteria, results) = when (args.size) {
@@ -124,7 +123,7 @@ class CollectionWrapper<T : Formattable>(private val list: Collection<T>) : Form
                     else -> throw IllegalArgumentException("'=' must have 1-3 arguments afterwards")
                 }
                 val match = list.withIndex().firstOrNull() {
-                    val crit = SimpleContext(criteria)
+                    val crit = SimpleContext(criteria, elevated)
                         .with("it", it.value)
                         .with("index", Message.of(it.index))
                         .format()
@@ -134,7 +133,7 @@ class CollectionWrapper<T : Formattable>(private val list: Collection<T>) : Form
                 return if (match == null) {
                     Message.empty
                 } else {
-                    SimpleContext(results)
+                    SimpleContext(results, elevated)
                         .with("it", match)
                         .format()
                 }
@@ -146,14 +145,14 @@ class CollectionWrapper<T : Formattable>(private val list: Collection<T>) : Form
 }
 
 class RawExpander : Formattable {
-    override fun format(args: List<Message>): Message {
+    override fun format(args: List<Message>, elevated: Boolean): Message {
         require(args.isEmpty()) { "Raw format is {#raw}" }
         return Message.rawFlag
     }
 }
 
 class TitleExpander : Formattable {
-    override fun format(args: List<Message>): Message {
+    override fun format(args: List<Message>, elevated: Boolean): Message {
         require(args.isNotEmpty()) { "Title format is {#title|title|subtitle=''|fadeIn=0|stay=20|fadeOut=0}" }
         val text = args[0]
         val subtitle = if (args.size >= 2) args[1] else Message.empty
@@ -165,7 +164,7 @@ class TitleExpander : Formattable {
 }
 
 class Switch : Formattable {
-    override fun format(args: List<Message>): Message {
+    override fun format(args: List<Message>, elevated: Boolean): Message {
         val size = args.size
         val value = args[0].toString()
         var i = 1
@@ -186,7 +185,7 @@ class Switch : Formattable {
 }
 
 class Execute : Formattable {
-    override fun format(args: List<Message>): Message {
+    override fun format(args: List<Message>, elevated: Boolean): Message {
         require(args.size == 1) { "Execute format is {#exec|command}" }
         Bukkit.getServer().dispatchCommand(Bukkit.getConsoleSender(), args[0].toString())
         return Message.empty
@@ -194,7 +193,7 @@ class Execute : Formattable {
 }
 
 class Equation : Formattable {
-    override fun format(args: List<Message>): Message {
+    override fun format(args: List<Message>, elevated: Boolean): Message {
         require (args.size == 1) { "Equation format is {#=|equation}" }
         return try {
             val answer = ExpressionBuilder(args[0].toString())
@@ -330,7 +329,7 @@ private val round : Function =
         }
 
 class CustomPath : Formattable {
-    override fun format(args: List<Message>): Message {
+    override fun format(args: List<Message>, elevated: Boolean): Message {
         require(args.isNotEmpty()) { "Custom format is {#|path|args...}" }
         val text = Text.getSection(args[0].toString())
         return args.drop(1)
@@ -342,7 +341,7 @@ class CustomPath : Formattable {
 }
 
 class RegexExpander : Formattable {
-    override fun format(args: List<Message>): Message {
+    override fun format(args: List<Message>, elevated: Boolean): Message {
         require(args.size == 3) { "Regex format is {#regex|text|pattern|replace}" }
         val text = args[0].toString()
         val pattern = args[1].toString()
@@ -352,14 +351,14 @@ class RegexExpander : Formattable {
 }
 
 class LengthExpander : Formattable {
-    override fun format(args: List<Message>): Message {
+    override fun format(args: List<Message>, elevated: Boolean): Message {
         require(args.size == 1) { "Length format is {#len|text}" }
         return Message.of(args[0].toString().length)
     }
 }
 
 class SubstringExpander : Formattable {
-    override fun format(args: List<Message>): Message {
+    override fun format(args: List<Message>, elevated: Boolean): Message {
         require(args.size == 2 || args.size == 3) { "Substring format is {#sub|text|start|length}"}
         val text = args[0].toString()
         var start = args[1].toString().toInt().let {
@@ -393,7 +392,7 @@ class SubstringExpander : Formattable {
 }
 
 interface PadExpander : Formattable {
-    override fun format(args: List<Message>): Message {
+    override fun format(args: List<Message>, elevated: Boolean): Message {
         require(args.size >= 2) { "Pad format is {#pad|text|length|padtext=' '}"}
         val length = args[1].toString().toInt()
         val padText = args.getOrNull(2)?.toString()?.ifEmpty{ " " } ?: " "
@@ -428,7 +427,7 @@ class PadRightExpander : PadExpander {
 }
 
 class RandomExpander : Formattable {
-    override fun format(args: List<Message>): Message {
+    override fun format(args: List<Message>, elevated: Boolean): Message {
         return when (args.size) {
             0 -> Message.of(Random.nextDouble().toString())
             1 -> {

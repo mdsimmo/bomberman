@@ -251,7 +251,7 @@ class Game private constructor(val name: String, private var schema: Arena, val 
             plugin.logger.info("Rebuild done")
         }
 
-        override fun format(args: List<Message>): Message {
+        override fun format(args: List<Message>, elevated: Boolean): Message {
             return when (args.firstOrNull()?.toString()?.lowercase() ?: "name") {
                 "name" -> Message.of(file.nameWithoutExtension)
                 "file" -> Message.of(file.path)
@@ -539,13 +539,13 @@ class Game private constructor(val name: String, private var schema: Arena, val 
         BmGameTerminatedIntent.terminateGame(this)
     }
 
-    override fun format(args: List<Message>): Message {
+    override fun format(args: List<Message>, elevated: Boolean): Message {
         if (args.isEmpty())
             return Message.of(name)
         return when (args[0].toString()) {
             "name" -> Message.of(name)
             "spawns" -> CollectionWrapper(spawns.map { object : Formattable {
-                override fun format(args: List<Message>): Message {
+                override fun format(args: List<Message>, elevated: Boolean): Message {
                     require(args.size == 1) { "Spawn format must have one arg" }
                     return when(args[0].toString().lowercase()) {
                         "world", "w" -> Message.of(it.world?.name ?: "unknown")
@@ -555,10 +555,10 @@ class Game private constructor(val name: String, private var schema: Arena, val 
                         else -> throw IllegalArgumentException("Unknown spawn format ${args[0]}")
                     }
                 }
-            } }).format(args.drop(1))
-            "schema" -> schema.format(args.drop(1))
+            } }).format(args.drop(1), elevated)
+            "schema" -> schema.format(args.drop(1), elevated)
             "players" -> CollectionWrapper(players.map { SenderWrapper(it) })
-                    .format(args.drop(1))
+                    .format(args.drop(1), elevated)
             "power" -> Message.of(settings.initialItems.sumOf {
                 if (it?.type == settings.bombItem) { it.amount } else { 0 }})
             "bombs" -> Message.of(settings.initialItems.sumOf {

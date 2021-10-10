@@ -80,7 +80,7 @@ processResources  {
 }
 
 task minify(type: proguard.gradle.ProGuardTask, dependsOn: shadowJar) {
-    injars "build/libs/Bomberman-${version}-all.jar"
+    injars shadowJar.outputs.files
     outjars "build/libs/Bomberman-${version}-min.jar"
 
     libraryjars "${System.getProperty('java.home')}/jmods/java.base.jmod"

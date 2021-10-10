@@ -98,7 +98,7 @@ abstract class Cmd(protected var parent: Cmd?) : Formattable {
         return text.with("command", this)
     }
 
-    override fun format(args: List<Message>): Message {
+    override fun format(args: List<Message>, elevated: Boolean): Message {
         return when (args.getOrElse(0) { "name" }.toString()) {
             "name" -> name()
             "path" -> Message.of(path())
@@ -108,7 +108,7 @@ abstract class Cmd(protected var parent: Cmd?) : Formattable {
             "description" -> description()
             "flags" -> CollectionWrapper(flags(Bukkit.getConsoleSender(), listOf(), mapOf())
                     .map { flag -> object: Formattable {
-                        override fun format(args: List<Message>): Message {
+                        override fun format(args: List<Message>, elevated: Boolean): Message {
                             return when ((args.firstOrNull() ?: "name").toString()) {
                                 "name" -> Message.of(flag)
                                 "ext" -> flagExtension(flag)
@@ -116,7 +116,7 @@ abstract class Cmd(protected var parent: Cmd?) : Formattable {
                                 else -> throw RuntimeException("Unknown flag value '" + args[0] + "'")
                             }
                         }
-                    } }).format(args.drop(1))
+                    } }).format(args.drop(1), elevated)
             else -> throw RuntimeException("Unknown command value '" + args[0] + "'")
         }
     }

@@ -24,11 +24,11 @@ class BmPlaceholder : PlaceholderExpansion() {
             "info" -> {
                 val gameName = content.getOrNull(1) ?: return "info <name> <stat>"
                 val game = BmGameLookupIntent.find(gameName)
-                return game?.format(content.drop(2).map { Message.of(it) })?.toString() ?: ""
+                return game?.format(content.drop(2).map { Message.of(it) }, false)?.toString() ?: ""
             }
             "msg" -> {
                 return try {
-                    SimpleContext(params.substring("msg_".length))
+                    SimpleContext(params.substring("msg_".length), false)
                         .with("games", BmGameListIntent.listGames())
                         .let {
                             if (player != null)

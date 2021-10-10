@@ -6,7 +6,7 @@ import javax.annotation.CheckReturnValue
 
 @CheckReturnValue
 
-class SimpleContext(private val text: String) : Contexted {
+class SimpleContext(private val text: String, private val elevatedPermission: Boolean) : Contexted {
 
     private val things = mutableMapOf<String, Formattable>()
 
@@ -16,6 +16,6 @@ class SimpleContext(private val text: String) : Contexted {
     }
 
     override fun format(): Message {
-        return Expander.expand(text, things)
+        return Expander.expand(text, things, elevatedPermission)
     }
 }

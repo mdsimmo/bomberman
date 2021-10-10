@@ -167,13 +167,13 @@ enum class Text(path: String) : Contexted {
             }
 
             override fun format(): Message {
-                return Expander.expand(text, things)
+                return Expander.expand(text, things, true)
             }
         }.with(key, thing)
     }
 
     override fun format(): Message {
-        return Expander.expand(text, mapOf())
+        return Expander.expand(text, mapOf(), true)
     }
 
     companion object {
@@ -184,7 +184,7 @@ enum class Text(path: String) : Contexted {
             return if (text == null) {
                 ErrorContext("{${path}}")
             } else {
-                SimpleContext(text)
+                SimpleContext(text, true)
             }
         }
     }

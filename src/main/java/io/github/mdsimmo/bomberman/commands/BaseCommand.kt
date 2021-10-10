@@ -13,7 +13,7 @@ class BaseCommand : CommandGroup(null), TabCompleter, CommandExecutor {
 
     init {
         addChildren(
-                //DevInfo(this),
+                DevInfo(this),
                 Configure(this),
                 GameCreate(this),
                 GameInfo(this),

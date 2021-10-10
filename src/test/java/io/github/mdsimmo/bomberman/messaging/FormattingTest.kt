@@ -14,7 +14,7 @@ import org.mockito.Mockito.*
 class FormattingTest {
 
     class NumberName(private val number: Int) : Formattable {
-        override fun format(args: List<Message>): Message {
+        override fun format(args: List<Message>, elevated: Boolean): Message {
             val arg = args.getOrNull(0)?.toString() ?: "text"
             return when (arg) {
                 "text" -> of(when (number) {
@@ -203,8 +203,8 @@ class FormattingTest {
     fun testSwitchEvaluatesOnlyTheSelectedArgument() {
         val no = mock(Formattable::class.java)
         val yes = mock(Formattable::class.java)
-        `when`(no.format(anyList())).thenReturn(of("No"))
-        `when`(yes.format(anyList())).thenReturn(of("Yes"))
+        `when`(no.format(anyList(),)).thenReturn(of("No"))
+        `when`(yes.format(anyList(),)).thenReturn(of("Yes"))
 
         val a = expand("{#switch|1|0|{no}|1|{yes}|2|{no}|{no}}", mapOf(
                 Pair("no", no),
@@ -212,7 +212,7 @@ class FormattingTest {
         ))
 
         assertEquals("Yes", a.toString())
-        verify(yes).format(emptyList())
+        verify(yes).format(emptyList(),)
         verifyNoMoreInteractions(yes)
         verifyNoInteractions(no)
     }
@@ -222,9 +222,9 @@ class FormattingTest {
         val one = mock(Formattable::class.java)
         val two = mock(Formattable::class.java)
         val three = mock(Formattable::class.java)
-        `when`(one.format(anyList())).thenReturn(of("1"))
-        `when`(two.format(anyList())).thenReturn(of("2"))
-        `when`(three.format(anyList())).thenReturn(of("3"))
+        `when`(one.format(anyList(),)).thenReturn(of("1"))
+        `when`(two.format(anyList(),)).thenReturn(of("2"))
+        `when`(three.format(anyList(),)).thenReturn(of("3"))
 
         val a = expand("{#switch|2|{one}|One|{two}|Two|{three}|Three|Four+}", mapOf(
                 Pair("one", one),
@@ -233,9 +233,9 @@ class FormattingTest {
         ))
 
         assertEquals("Two", a.toString())
-        verify(one).format(emptyList())
+        verify(one).format(emptyList(),)
         verifyNoMoreInteractions(one)
-        verify(two).format(emptyList())
+        verify(two).format(emptyList(),)
         verifyNoMoreInteractions(two)
         verifyNoInteractions(three)
     }
@@ -330,20 +330,20 @@ class FormattingTest {
     fun testEmbeddedLists() {
         val myList = listOf(
             object: Formattable {
-                override fun format(args: List<Message>): Message {
+                override fun format(args: List<Message>, elevated: Boolean): Message {
                     return if (args.getOrNull(0).toString() == "inner") {
                         CollectionWrapper(listOf(NumberName(0), NumberName(1), NumberName(2)))
-                            .format(args.drop(1))
+                            .format(args.drop(1),)
                     } else {
                         of("Bad call")
                     }
                 }
             },
             object: Formattable {
-                override fun format(args: List<Message>): Message {
+                override fun format(args: List<Message>, elevated: Boolean): Message {
                     return if (args.getOrNull(0).toString() == "inner") {
                         CollectionWrapper(listOf(NumberName(3), NumberName(4)))
-                            .format(args.drop(1))
+                            .format(args.drop(1),)
                     } else {
                         of("Bad call")
                     }
