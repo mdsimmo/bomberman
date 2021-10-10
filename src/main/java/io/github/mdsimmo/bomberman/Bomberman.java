@@ -9,6 +9,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.command.PluginCommand;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.serialization.ConfigurationSerialization;
+import org.bukkit.entity.Player;
 import org.bukkit.event.Listener;
 import org.bukkit.plugin.java.JavaPlugin;
 
@@ -52,8 +53,11 @@ public class Bomberman extends JavaPlugin implements Listener {
 		bukkitBmCmd.setExecutor(bmCmd);
 		bukkitBmCmd.setTabCompleter(bmCmd);
 
-		Game.loadGames();
+		if (Bukkit.getPluginManager().getPlugin("PlaceholderAPI") != null) {
+			new BmPlaceholder().register();
+		}
 
+		Game.loadGames();
 		GamePlayer.setupLoginWatcher();
 	}
 

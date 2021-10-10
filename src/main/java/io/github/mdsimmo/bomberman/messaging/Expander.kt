@@ -15,7 +15,8 @@ object Expander {
             Pair("#sub", SubstringExpander()),
             Pair("#padl", PadLeftExpander()),
             Pair("#padr", PadRightExpander()),
-            Pair("#exec", Execute())
+            Pair("#exec", Execute()), // TODO remove me
+            Pair("#rand", RandomExpander())
     ).also {
         for (color in ChatColor.values()) {
             it["#${color.name.lowercase()}"] = ColorWrapper(color)
@@ -29,7 +30,7 @@ object Expander {
      * @return the expanded text
      */
     @JvmStatic
-    fun expand(text: String, things: Map<String, Formattable>): Message {
+    fun expand(text: String, things: Map<String, Formattable>, elevatedPermissions: Boolean): Message {
         var expanded: Message = Message.empty
         val building = StringBuilder()
         var ignoreNextSpecial = false
@@ -41,11 +42,17 @@ object Expander {
                     // Add the basic text we have
                     expanded = expanded.append(Message.of(building.toString()))
                     building.setLength(0)
-                    // Expand and add the brace
-                    val subtext =
-                            toNext(text, '}', i)
+
+                    // Get raw text inside brace
+                    val subtext = toNext(text, '}', i)
                                     ?: throw IllegalArgumentException("Braces unmatched: '$text'")
-                    val expandedBrace = expandBrace(subtext, things)
+                    val expandedBrace = if ( subtext.startsWith("{!") ) {
+                        // Message not to be expanded - just remove the exclaim
+                        Message.of(subtext.replaceFirst("!", ""))
+                    } else {
+                        // Expand the brace
+                        expandBrace(subtext, things, elevatedPermissions)
+                    }
                     expanded = expanded.append(expandedBrace)
                     i += subtext.length - 1 // -1 because starting brace was already counted
                 }
@@ -70,7 +77,7 @@ object Expander {
      * @param text the text to expands formatted as "{ key | arg1 | ... | argN }"
      * @return the expanded string
      */
-    private fun expandBrace(text: String, things: Map<String, Formattable>): Message {
+    private fun expandBrace(text: String, things: Map<String, Formattable>, elevatedPermissions: Boolean): Message {
         if (text[0] != '{' || text[text.length - 1] != '}')
             throw RuntimeException("expandBrace() must start and end with a brace")
 
@@ -82,7 +89,7 @@ object Expander {
         val args = mutableListOf<Message>()
         generateSequence { toNext(text, '|', i.get()) }
                 .forEach { subArg ->
-                    args.add(Message.lazyExpand(subArg.substring(1, subArg.length - 1), things))
+                    args.add(Message.lazyExpand(subArg.substring(1, subArg.length - 1), things, elevatedPermissions))
                     // -1 because the first '|' would get counted twice
                     i.addAndGet(subArg.length - 1)
                 }
@@ -92,11 +99,15 @@ object Expander {
                 .trim()
                 .lowercase()
 
+        // TODO remove {#exec|...}
+        if (keyString == "#exec" && !elevatedPermissions) {
+            return Message.empty
+        }
         // Try and look up a key, function or chat color to format with
         val thing = things[keyString]
                 ?: functions[keyString]
                 ?: Message.error(text)
-        return thing.format(args)
+        return thing.format(args, elevatedPermissions)
     }
 
     /**

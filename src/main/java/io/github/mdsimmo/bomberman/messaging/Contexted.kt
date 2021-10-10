@@ -4,8 +4,11 @@ import org.bukkit.command.CommandSender
 import org.bukkit.inventory.ItemStack
 import javax.annotation.CheckReturnValue
 
-@CheckReturnValue
 
+/**
+ * A Contexted is a string that can have Formattables attached to it and then expanded into a message
+ */
+@CheckReturnValue
 interface Contexted {
 
     fun with(key: String, thing: Formattable): Contexted

@@ -13,7 +13,7 @@ class BaseCommand : CommandGroup(null), TabCompleter, CommandExecutor {
 
     init {
         addChildren(
-                //DevInfo(this),
+                // DevInfo(this),
                 Configure(this),
                 GameCreate(this),
                 GameInfo(this),
@@ -23,7 +23,8 @@ class BaseCommand : CommandGroup(null), TabCompleter, CommandExecutor {
                 RunStart(this),
                 RunStop(this),
                 GameList(this),
-                GameReload(this)
+                GameReload(this),
+                UndoBuild(this)
         )
     }
 

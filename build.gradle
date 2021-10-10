@@ -1,13 +1,22 @@
+buildscript {
+    repositories {
+        mavenCentral()
+    }
+    dependencies {
+        classpath 'com.guardsquare:proguard-gradle:7.1.0'
+    }
+}
+
 plugins {
+    id 'com.github.johnrengelman.shadow' version '7.1.0'
     id 'java'
-    id "org.jetbrains.kotlin.jvm" version "1.5.21"
-    id 'idea'
+    id "org.jetbrains.kotlin.jvm" version "1.5.31"
 }
 sourceCompatibility = JavaVersion.VERSION_1_8
 targetCompatibility = JavaVersion.VERSION_1_8
 
 group = 'io.github.mdsimmo'
-version = '0.5.0-1.12.2-R1'
+version = '0.6.4-1.12.2-R1'
 
 repositories {
     mavenCentral()
@@ -20,11 +29,23 @@ repositories {
         // world edit repo
         url "https://maven.enginehub.org/repo"
     }
+    maven {
+        // PlaceholderAPI
+        url = 'https://repo.extendedclip.com/content/repositories/placeholderapi/'
+    }
+    maven {
+        name = "sonatype-oss-snapshots"
+        url = "https://oss.sonatype.org/content/repositories/snapshots/"
+    }
+    maven {
+        url 'https://libraries.minecraft.net/'
+    }
 }
 
 dependencies {
-    implementation 'org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.5.21'
+    implementation 'org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.5.31'
     implementation "net.objecthunter:exp4j:0.4.8"
+    //implementation "me.lucko:commodore:1.10"
 
     compileOnly "org.bukkit:bukkit:1.12.2-R0.1-SNAPSHOT"
     testImplementation "org.bukkit:bukkit:1.12.2-R0.1-SNAPSHOT"
@@ -33,21 +54,43 @@ dependencies {
     compileOnly "com.sk89q.worldedit:worldedit-bukkit:6.1.5"
     testImplementation "com.sk89q.worldedit:worldedit-bukkit:6.1.5"
 
+    compileOnly 'me.clip:placeholderapi:2.10+'
+    testImplementation 'me.clip:placeholderapi:2.10+'
+
     testImplementation "junit:junit:4.13.+"
     testImplementation "org.mockito:mockito-core:3.3.+"
 }
-
+shadowJar {
+    relocate 'net.objecthunter', 'io.github.mdsimmo.bomberman.lib.net.objecthunter'
+    //relocate 'me.lucko', 'io.github.mdsimmo.bomberman.lib.me.lucko'
+    relocate 'com.mojang', 'io.github.mdsimmo.bomberman.lib.com.mojang'
+    relocate 'kotlin', 'io.github.mdsimmo.bomberman.lib.kotlin'
+    relocate 'org.jetbrains', 'io.github.mdsimmo.bomberman.lib.org.jetbrains'
+    relocate 'org.intellij', 'io.github.mdsimmo.bomberman.lib.org.intellij'
+}
 
 processResources  {
      // auto assign values in the plugin.yml
-    // Do not filter schematics as they get corrupted when trying to be read as text
-    filesNotMatching(["**.schematic"]) {
+    filesMatching("plugin.yml") {
         filter {
-            line ->
-                line
-                        .replace('${version}', version)
+            line -> line.replace('${version}', version)
         }
     }
+}
+
+task minify(type: proguard.gradle.ProGuardTask, dependsOn: shadowJar) {
+    injars shadowJar.outputs.files
+    outjars "build/libs/Bomberman-${version}-min.jar"
+
+    libraryjars "${System.getProperty('java.home')}/jmods/java.base.jmod"
+    libraryjars "${System.getProperty('java.home')}/jmods/java.logging.jmod"
+    libraryjars configurations.findByName('compileOnly').getFiles()
+
+    // only remove unused library code (mostly kotlin)
+    keep "public class !io.github.mdsimmo.bomberman.lib.** { *; }"
+
+    // Don't rename anything
+    dontobfuscate
 }
 
 task clearOldPluginJar( type: Delete ) {
@@ -62,21 +105,13 @@ task clearOldPluginJar( type: Delete ) {
 task copyToServer(type: Copy, dependsOn: clearOldPluginJar ) {
     description 'Copies the plugin to the server'
     if ( project.hasProperty("serverLocation" ) ) {
-        from jar
+        from minify
         into "$serverLocation/plugins/update"
     }
 }
 
-task install( dependsOn: [build, copyToServer] ) {
+task install( dependsOn: [minify, copyToServer] ) {
     description 'Compiles, tests and copies the code to the server'
-}
-
-jar {
-    from {
-        configurations.runtimeClasspath.collect {
-            it.isDirectory() ? it : zipTree(it)
-        }
-    }
 }
 
 tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile).configureEach {

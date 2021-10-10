@@ -11,6 +11,7 @@ import com.sk89q.worldedit.regions.CuboidRegion
 import com.sk89q.worldedit.schematic.SchematicFormat
 import com.sk89q.worldedit.world.World
 import io.github.mdsimmo.bomberman.Bomberman
+import io.github.mdsimmo.bomberman.commands.game.UndoBuild
 import io.github.mdsimmo.bomberman.events.*
 import io.github.mdsimmo.bomberman.messaging.*
 import io.github.mdsimmo.bomberman.utils.Box
@@ -30,6 +31,7 @@ import org.bukkit.event.HandlerList
 import org.bukkit.event.Listener
 import org.bukkit.event.server.PluginDisableEvent
 import java.io.File
+import java.io.FileInputStream
 import java.lang.IllegalArgumentException
 import java.lang.ref.WeakReference
 import java.util.logging.Level
@@ -96,6 +98,7 @@ class Game private constructor(val name: String, private var schema: Arena, val 
 
             // Make the Game
             val game = Game(name, Arena(file, BukkitUtils.boxLoc1(box), clipboard, flags))
+            UndoBuild.retainHistory(name, null) // delete any old history
             // TODO when building from selection, only need to build cages
             BmGameBuildIntent.build(game)
             return game
@@ -103,6 +106,7 @@ class Game private constructor(val name: String, private var schema: Arena, val 
 
         fun buildGameFromSchema(name: String, loc: Location, file: File, flags: BuildFlags): Game {
             val game = Game(name, Arena(file, loc, flags))
+            UndoBuild.retainHistory(game.name, game.schema.box)
             BmGameBuildIntent.build(game)
             return game
         }
@@ -166,7 +170,7 @@ class Game private constructor(val name: String, private var schema: Arena, val 
             this.clipboard = WeakReference(clipboard)
         }
 
-        fun loadClipboard() : CuboidClipboard =
+        fun loadClipboard() : CuboidClipboard  =
             clipboard?.get() ?: run {
                 plugin.logger.info("Reading schematic data: " + file.name)
                 // Load the schematic
@@ -218,14 +222,10 @@ class Game private constructor(val name: String, private var schema: Arena, val 
             clip.paste(editSession, BlockVector(origin.blockX, origin.blockY, origin.blockZ), flags.skipAir)
             editSession.flushQueue()
 
-            // TODO undo arena build
-            // this undoes the building, but it should also delete the game
-            //if (user != null)
-            //    WorldEdit.getInstance().sessionManager.get(BukkitAdapter.adapt(user))?.remember(editSession)
             plugin.logger.info("Rebuild done")
         }
 
-        override fun format(args: List<Message>): Message {
+        override fun format(args: List<Message>, elevated: Boolean): Message {
             return when (args.firstOrNull()?.toString()?.lowercase() ?: "name") {
                 "name" -> Message.of(file.nameWithoutExtension)
                 "file" -> Message.of(file.path)
@@ -323,6 +323,7 @@ class Game private constructor(val name: String, private var schema: Arena, val 
                     val blockState = clip.getBlock(clipLocation)
                     editSession.setBlock(blockVec, blockState)
                 }
+        editSession.flushQueue()
     }
 
     private fun makeCages() {
@@ -434,13 +435,20 @@ class Game private constructor(val name: String, private var schema: Arena, val 
         if (players.contains(e.player)) {
             players.remove(e.player)
 
-            if (running && players.size <= 1) {
+            // If not running (but might be counting down) or no players left, stop the game immediately
+            if (players.size < 1 || !this.running) {
+                Bukkit.getScheduler().scheduleSyncDelayedTask(plugin) {
+                    BmRunStoppedIntent.stopGame(this)
+                }
+            } else if (players.size == 1) {
+                // Tell remaining player they won
                 players.forEach {
                     Bukkit.getPluginManager().callEvent(BmPlayerWonEvent(this, it))
                 }
+                // Let player celebrate for 5 seconds, then stop the game
                 Bukkit.getScheduler().scheduleSyncDelayedTask(plugin, {
                     BmRunStoppedIntent.stopGame(this)
-                }, players.size * 20*5L)
+                }, 5*20L) // 5 seconds to see messages
             }
         }
     }
@@ -505,13 +513,13 @@ class Game private constructor(val name: String, private var schema: Arena, val 
         BmGameTerminatedIntent.terminateGame(this)
     }
 
-    override fun format(args: List<Message>): Message {
+    override fun format(args: List<Message>, elevated: Boolean): Message {
         if (args.isEmpty())
             return Message.of(name)
         return when (args[0].toString()) {
             "name" -> Message.of(name)
             "spawns" -> CollectionWrapper(spawns.map { object : Formattable {
-                override fun format(args: List<Message>): Message {
+                override fun format(args: List<Message>, elevated: Boolean): Message {
                     require(args.size == 1) { "Spawn format must have one arg" }
                     return when(args[0].toString().lowercase()) {
                         "world", "w" -> Message.of(it.world?.name ?: "unknown")
@@ -521,10 +529,10 @@ class Game private constructor(val name: String, private var schema: Arena, val 
                         else -> throw IllegalArgumentException("Unknown spawn format ${args[0]}")
                     }
                 }
-            } }).format(args.drop(1))
-            "schema" -> schema.format(args.drop(1))
+            } }).format(args.drop(1), elevated)
+            "schema" -> schema.format(args.drop(1), elevated)
             "players" -> CollectionWrapper(players.map { SenderWrapper(it) })
-                    .format(args.drop(1))
+                    .format(args.drop(1), elevated)
             "power" -> Message.of(settings.initialItems.sumOf {
                 if (it?.type == settings.bombItem) { it.amount } else { 0 }})
             "bombs" -> Message.of(settings.initialItems.sumOf {

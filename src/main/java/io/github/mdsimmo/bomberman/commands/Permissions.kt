@@ -10,6 +10,7 @@ enum class Permissions(val permission: String) : Permission {
     BASE("bomberman.bm"),
     CREATE("bomberman.create"),
     DELETE("bomberman.delete"),
+    UNDO("bomberman.undo"),
     RELOAD("bomberman.reload"),
     CONFIGURE("bomberman.configure"),
     START("bomberman.start"),

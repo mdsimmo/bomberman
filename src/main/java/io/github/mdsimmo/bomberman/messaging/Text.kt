@@ -111,6 +111,14 @@ enum class Text(path: String) : Contexted {
     DELETE_EXAMPLE("command.delete.example"),
     DELETE_EXTRA("command.delete.extra"),
     DELETE_SUCCESS("command.delete.success"),
+    UNDO_NAME("command.undo.name"),
+    UNDO_DESCRIPTION("command.undo.description"),
+    UNDO_USAGE("command.undo.usage"),
+    UNDO_EXAMPLE("command.undo.example"),
+    UNDO_EXTRA("command.undo.extra"),
+    UNDO_DELETED("command.undo.deleted"),
+    UNDO_SUCCESS("command.undo.success"),
+    UNDO_UNKNOWN_GAME("command.undo.unknown-game"),
     GAMELIST_NAME("command.list.name"),
     GAMELIST_DESCRIPTION("command.list.description"),
     GAMELIST_USAGE("command.list.usage"),
@@ -159,34 +167,24 @@ enum class Text(path: String) : Contexted {
             }
 
             override fun format(): Message {
-                return Expander.expand(text, things)
+                return Expander.expand(text, things, true)
             }
         }.with(key, thing)
     }
 
     override fun format(): Message {
-        return Expander.expand(text, mapOf())
+        return Expander.expand(text, mapOf(), true)
     }
 
     companion object {
         fun getSection(path: String): Contexted {
             val text = YAMLLanguage.server?.getString(path)
                     ?: YAMLLanguage.builtin.getString(path)
-            val things = mutableMapOf<String, Formattable>()
-            return object : Contexted {
-                override fun with(key: String, thing: Formattable): Contexted {
-                    things[key] = thing
-                    return this
-                }
 
-                override fun format(): Message {
-                    return if (text == null) {
-                        Message.error("{${path}}")
-                    } else {
-                        Expander.expand(text, things)
-                    }
-                }
-
+            return if (text == null) {
+                ErrorContext("{${path}}")
+            } else {
+                SimpleContext(text, true)
             }
         }
     }
