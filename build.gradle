@@ -1,3 +1,12 @@
+buildscript {
+    repositories {
+        mavenCentral()
+    }
+    dependencies {
+        classpath 'com.guardsquare:proguard-gradle:7.1.0'
+    }
+}
+
 plugins {
     id 'com.github.johnrengelman.shadow' version '7.1.0'
     id 'java'
@@ -56,7 +65,9 @@ shadowJar {
     relocate 'net.objecthunter', 'io.github.mdsimmo.bomberman.lib.net.objecthunter'
     //relocate 'me.lucko', 'io.github.mdsimmo.bomberman.lib.me.lucko'
     relocate 'com.mojang', 'io.github.mdsimmo.bomberman.lib.com.mojang'
+    relocate 'kotlin', 'io.github.mdsimmo.bomberman.lib.kotlin'
     relocate 'org.jetbrains', 'io.github.mdsimmo.bomberman.lib.org.jetbrains'
+    relocate 'org.intellij', 'io.github.mdsimmo.bomberman.lib.org.intellij'
 }
 
 processResources  {
@@ -66,6 +77,21 @@ processResources  {
             line -> line.replace('${version}', version)
         }
     }
+}
+
+task minify(type: proguard.gradle.ProGuardTask, dependsOn: shadowJar) {
+    injars "build/libs/Bomberman-${version}-all.jar"
+    outjars "build/libs/Bomberman-${version}-min.jar"
+
+    libraryjars "${System.getProperty('java.home')}/jmods/java.base.jmod"
+    libraryjars "${System.getProperty('java.home')}/jmods/java.logging.jmod"
+    libraryjars configurations.findByName('compileOnly').getFiles()
+
+    // only remove unused library code (mostly kotlin)
+    keep "public class !io.github.mdsimmo.bomberman.lib.** { *; }"
+
+    // Don't rename anything
+    dontobfuscate
 }
 
 task clearOldPluginJar( type: Delete ) {
@@ -80,12 +106,12 @@ task clearOldPluginJar( type: Delete ) {
 task copyToServer(type: Copy, dependsOn: clearOldPluginJar ) {
     description 'Copies the plugin to the server'
     if ( project.hasProperty("serverLocation" ) ) {
-        from shadowJar
+        from minify
         into "$serverLocation/plugins/update"
     }
 }
 
-task install( dependsOn: [shadowJar, copyToServer] ) {
+task install( dependsOn: [minify, copyToServer] ) {
     description 'Compiles, tests and copies the code to the server'
 }
 
