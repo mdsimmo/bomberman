@@ -42,11 +42,6 @@ repositories {
         url 'https://libraries.minecraft.net/'
     }
 
-    maven {
-        // NBT-API
-        name = 'CodeMC'
-        url = 'https://repo.codemc.org/repository/maven-public/'
-    }
 }
 
 dependencies {
@@ -63,22 +58,17 @@ dependencies {
     compileOnly 'me.clip:placeholderapi:2.10+'
     testImplementation 'me.clip:placeholderapi:2.10+'
 
-    implementation group: 'de.tr7zw', name: 'item-nbt-api-plugin', version: '2.8.0'
-
     testImplementation "junit:junit:4.13.+"
     testImplementation "org.mockito:mockito-core:3.3.+"
 }
 
 shadowJar {
     relocate 'net.objecthunter', 'io.github.mdsimmo.bomberman.lib.net.objecthunter'
-    //relocate 'me.lucko', 'io.github.mdsimmo.bomberman.lib.me.lucko'
+    // relocate 'me.lucko', 'io.github.mdsimmo.bomberman.lib.me.lucko'
     // relocate 'com.mojang', 'io.github.mdsimmo.bomberman.lib.com.mojang'
     relocate 'kotlin', 'io.github.mdsimmo.bomberman.lib.kotlin'
     relocate 'org.jetbrains', 'io.github.mdsimmo.bomberman.lib.org.jetbrains'
     relocate 'org.intellij', 'io.github.mdsimmo.bomberman.lib.org.intellij'
-
-    // don't appl proguard to this
-    relocate 'de.tr7zw', 'io.github.mdsimmo.bomberman.rawlib.de.tr7zw'
 }
 
 processResources  {
@@ -96,8 +86,6 @@ task minify(type: proguard.gradle.ProGuardTask, dependsOn: shadowJar) {
 
     libraryjars "${System.getProperty('java.home')}/jmods/java.base.jmod"
     libraryjars "${System.getProperty('java.home')}/jmods/java.logging.jmod"
-    libraryjars "${System.getProperty('java.home')}/jmods/java.instrument.jmod"
-    libraryjars "${System.getProperty('java.home')}/jmods/java.management.jmod"
     libraryjars configurations.findByName('compileOnly').getFiles()
 
     // only remove unused library code (mostly kotlin)
@@ -106,10 +94,6 @@ task minify(type: proguard.gradle.ProGuardTask, dependsOn: shadowJar) {
     // Don't rename anything
     dontobfuscate
     dontoptimize
-    dontwarn "com.sun.**"
-    dontwarn "org.bukkit.**"
-    dontwarn "java.applet.**"
-    dontwarn "com.mojang.**"
 }
 
 task clearOldPluginJar( type: Delete ) {

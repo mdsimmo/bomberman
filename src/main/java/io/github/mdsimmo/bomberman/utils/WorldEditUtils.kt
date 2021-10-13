@@ -39,15 +39,4 @@ object WorldEditUtils {
 
         return Box(BukkitAdapter.adapt(region.world), convert(min), convert(max))
     }
-
-    @JvmStatic
-    fun iterateTags(list: ListTag) = sequence<Tag> {
-        var i = 0
-        var item = list.getIfExists(i)
-        while (item != null) {
-            yield(item)
-            item = list.getIfExists(++i)
-        }
-    }
-
 }

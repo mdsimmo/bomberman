@@ -1,5 +1,6 @@
 package io.github.mdsimmo.bomberman.game
 
+import com.sk89q.jnbt.StringTag
 import com.sk89q.worldedit.bukkit.BukkitAdapter
 import io.github.mdsimmo.bomberman.Bomberman
 import io.github.mdsimmo.bomberman.events.*
@@ -255,13 +256,11 @@ class GamePlayer private constructor(private val player: Player, private val gam
         // Note - we do not put the player in Adventure because then they cannot place blocks
         val key = e.clickedBlock?.blockData?.material?.key?.toString()
         if (e.item != null && key != null) {
-            val data = BukkitAdapter.adapt(e.item).nbtData?.getListTag("CanDestroy")
-            if (data != null) {
-                if (WorldEditUtils.iterateTags(data)
-                        .map { it.value }
-                        .filterIsInstance<String>()
-                        .filter { key.equals(it, ignoreCase = true) }
-                        .any()
+            val list = BukkitAdapter.adapt(e.item).nbtData?.getList("CanDestroy", StringTag::class.java)
+            if (!list.isNullOrEmpty()) {
+                if (list
+                    .map { it.value }
+                    .any { key.equals(it, ignoreCase = true) }
                 ) {
                     // allow breakage
                     return
@@ -277,8 +276,27 @@ class GamePlayer private constructor(private val player: Player, private val gam
         e.player.addPotionEffect(PotionEffect(PotionEffectType.SLOW_DIGGING, 20, 1))
     }
 
-    @EventHandler(ignoreCancelled = true, priority = EventPriority.HIGHEST)
+    @EventHandler(ignoreCancelled = true, priority = EventPriority.LOW)
     fun onPlayerPlaceBlock(e: BlockPlaceEvent) {
+        if (e.player != player)
+            return
+
+        // if the block has the CanPlaceOn tag, restrict it to those types
+        val key = e.blockAgainst.blockData.material.key.toString()
+        val tagList = BukkitAdapter.adapt(e.itemInHand).nbtData?.getList("CanPlaceOn", StringTag::class.java)
+        if (!tagList.isNullOrEmpty()) {
+            if (tagList
+                    .map { it.value }
+                    .none { key.equals(it, ignoreCase = true) }
+            ) {
+                // stop breakage
+                e.isCancelled = true
+            }
+        }
+    }
+
+    @EventHandler(ignoreCancelled = true, priority = EventPriority.HIGHEST)
+    fun onPlayerPlaceTNT(e: BlockPlaceEvent) {
         if (e.player !== player) return
         val b = e.block
         // create a bomb when placing tnt
