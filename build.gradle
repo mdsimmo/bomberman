@@ -16,7 +16,7 @@ sourceCompatibility = JavaVersion.VERSION_1_8
 targetCompatibility = JavaVersion.VERSION_1_8
 
 group = 'io.github.mdsimmo'
-version = '0.6.4-1.12.2-R1'
+version = '0.6.5-1.12.2-R1'
 
 repositories {
     mavenCentral()

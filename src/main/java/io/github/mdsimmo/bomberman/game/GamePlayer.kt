@@ -131,12 +131,15 @@ class GamePlayer private constructor(private val player: Player, private val gam
                 GameMode.valueOf(it.uppercase())
             } catch (e: IllegalArgumentException) {
                 null
-            }} ?: GameMode.CREATIVE).let { player.gameMode = it }
+            }} ?: GameMode.SURVIVAL).let { player.gameMode = it }
             (dataFile["health-scale"] as? Number? ?: 20).let { player.healthScale = it.toDouble() }
-            val maxHealth = player.getAttribute(Attribute.GENERIC_MAX_HEALTH)
-            maxHealth?.baseValue = (dataFile["health-max"] as? Number? ?: 20.0).toDouble()
-            maxHealth?.modifiers?.forEach { maxHealth.removeModifier(it) }
-            (dataFile["health"] as? Number? ?: 20).let { player.health = it.toDouble() }
+            val maxHealth = player.getAttribute(Attribute.GENERIC_MAX_HEALTH)!!
+            maxHealth.baseValue = (dataFile["health-max"] as? Number? ?: 20.0).toDouble()
+            maxHealth.modifiers.forEach { maxHealth.removeModifier(it) }
+            (dataFile["health"] as? Number? ?: 20).let { player.health =
+                // Health may be greater than max health if modifiers were applied before joining
+                it.toDouble().coerceAtMost(maxHealth.value)
+            }
             (dataFile["food-level"] as? Number? ?: 20).let { player.foodLevel = it.toInt() }
             (dataFile["inventory"] as? List<Any?> ?: emptyList())
                     .map {

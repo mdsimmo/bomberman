@@ -11,13 +11,13 @@ assignees: mdsimmo
 A clear and concise description of what the bug is.
 
 **To Reproduce**
-Steps to reproduce the behavior:
+Steps to reproduce the behaviour:
 1. ...
 
-**Expected behavior**
+**Expected behaviour**
 A clear and concise description of what you expected to happen.
 
-**Version infomation**
+**Version information**
  - Bomberman Version:
  - Server version: 
  - Installed plugins: 
