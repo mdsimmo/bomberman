@@ -1,9 +1,11 @@
 package io.github.mdsimmo.bomberman.game
 
+import com.sk89q.worldedit.bukkit.BukkitAdapter
 import io.github.mdsimmo.bomberman.Bomberman
 import io.github.mdsimmo.bomberman.events.*
 import io.github.mdsimmo.bomberman.messaging.Text
 import io.github.mdsimmo.bomberman.utils.BukkitUtils
+import io.github.mdsimmo.bomberman.utils.WorldEditUtils
 import org.bukkit.Bukkit
 import org.bukkit.GameMode
 import org.bukkit.Location
@@ -247,9 +249,27 @@ class GamePlayer private constructor(private val player: Player, private val gam
             // Only care about block breaking events
             return
         }
-        // TODO only let player break block if they have used the correct tool
-        // Maybe use CanDestroy tag? - That requires NBT though...
-        // Cannot break things with hand
+
+        // Players can only break block if they have used the correct tool
+        // This simulates Adventure Mode with the CanDestroy nbt tags
+        // Note - we do not put the player in Adventure because then they cannot place blocks
+        val key = e.clickedBlock?.blockData?.material?.key?.toString()
+        if (e.item != null && key != null) {
+            val data = BukkitAdapter.adapt(e.item).nbtData?.getListTag("CanDestroy")
+            if (data != null) {
+                if (WorldEditUtils.iterateTags(data)
+                        .map { it.value }
+                        .filterIsInstance<String>()
+                        .filter { key.equals(it, ignoreCase = true) }
+                        .any()
+                ) {
+                    // allow breakage
+                    return
+                }
+            }
+        }
+
+        // Cancel break event
         e.isCancelled = true
         e.setUseInteractedBlock(Event.Result.DENY)
         e.setUseItemInHand(Event.Result.DENY)

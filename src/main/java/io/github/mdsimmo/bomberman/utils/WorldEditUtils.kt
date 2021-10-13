@@ -1,5 +1,7 @@
 package io.github.mdsimmo.bomberman.utils
 
+import com.sk89q.jnbt.ListTag
+import com.sk89q.jnbt.Tag
 import com.sk89q.worldedit.bukkit.BukkitAdapter
 import com.sk89q.worldedit.extent.clipboard.Clipboard
 import com.sk89q.worldedit.math.BlockVector3
@@ -36,6 +38,16 @@ object WorldEditUtils {
         val max = region.maximumPoint
 
         return Box(BukkitAdapter.adapt(region.world), convert(min), convert(max))
+    }
+
+    @JvmStatic
+    fun iterateTags(list: ListTag) = sequence<Tag> {
+        var i = 0
+        var item = list.getIfExists(i)
+        while (item != null) {
+            yield(item)
+            item = list.getIfExists(++i)
+        }
     }
 
 }
