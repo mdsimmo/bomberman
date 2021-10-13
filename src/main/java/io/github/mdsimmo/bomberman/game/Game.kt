@@ -432,6 +432,11 @@ class Game private constructor(val name: String, private var schema: Arena, val 
             return
         }
 
+        if (players.size == 0) {
+            e.cancelBecause(Text.GAME_NO_PLAYERS.with("game", this).format())
+            return
+        }
+
         StartTimer.createTimer(this, e.delay)
         e.setHandled()
     }

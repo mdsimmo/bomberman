@@ -43,6 +43,7 @@ enum class Text(path: String) : Contexted {
     START_FLAG_DELAY_EXT("command.start.flags.d.ext"),
     GAME_ALREADY_STARTED("command.start.already-started"),
     GAME_ALREADY_COUNTING("command.start.already-counting"),
+    GAME_NO_PLAYERS("command.start.no-players"),
     GAME_START_SUCCESS("command.start.success"),
     STOP_NAME("command.stop.name"),
     STOP_DESCRIPTION("command.stop.description"),
