@@ -26,6 +26,7 @@ enum class Text(path: String) : Contexted {
     UNKNOWN_COMMAND("command.unknown-command"),
     MUST_BE_PLAYER("command.must-be-player"),
     INVALID_NUMBER("command.invalid-number"),
+    INVALID_PLAYER("command.invalid-player"),
     COMMAND_GROUP_HELP("command.group.help"),
     COMMAND_GROUP_USAGE("command.group.usage"),
     COMMAND_GROUP_EXAMPLE("command.group.example"),

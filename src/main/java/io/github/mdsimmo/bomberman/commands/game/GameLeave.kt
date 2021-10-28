@@ -6,36 +6,65 @@ import io.github.mdsimmo.bomberman.commands.Permissions
 import io.github.mdsimmo.bomberman.events.BmPlayerLeaveGameIntent
 import io.github.mdsimmo.bomberman.messaging.Message
 import io.github.mdsimmo.bomberman.messaging.Text
+import org.bukkit.Bukkit
 import org.bukkit.command.CommandSender
+import org.bukkit.entity.Entity
 import org.bukkit.entity.Player
 
 class GameLeave(parent: Cmd) : Cmd(parent) {
+
+    companion object {
+        private const val F_TARGET = "t"
+    }
+
     override fun name(): Message {
         return context(Text.LEAVE_NAME).format()
     }
 
     override fun options(sender: CommandSender, args: List<String>): List<String> {
-        return emptyList()
+        return listOf(F_TARGET)
+    }
+
+    override fun flags(sender: CommandSender, args: List<String>, flags: Map<String, String>): Set<String> {
+        return setOf(F_TARGET)
+    }
+
+    override fun flagOptions(sender: CommandSender, flag: String, args: List<String>, flags: Map<String, String>): Set<String> {
+        return when (flag) {
+            F_TARGET -> Bukkit.getOnlinePlayers().map { it.name }.toSet()
+            else -> emptySet()
+        }
     }
 
     override fun run(sender: CommandSender, args: List<String>, flags: Map<String, String>): Boolean {
         if (args.isNotEmpty())
             return false
-        if (sender is Player) {
-            val e = BmPlayerLeaveGameIntent.leave(sender)
+
+        val target = flags[F_TARGET]?.let { name ->
+            GameJoin.select(name, sender)
+                ?: run {
+                    Text.INVALID_PLAYER
+                        .with("player", name)
+                        .sendTo(sender)
+                    return true
+                }
+        } ?: sender
+
+        if (target is Player) {
+            val e = BmPlayerLeaveGameIntent.leave(target)
             if (e.isHandled()) {
                 Text.LEAVE_SUCCESS
-                        .with("player", sender)
+                        .with("player", target)
                         .with("game", e.game ?: Message.error("none"))
-                        .sendTo(sender)
+                        .sendTo(target)
             } else {
                 Text.LEAVE_NOT_JOINED
-                        .with("player", sender)
-                        .sendTo(sender)
+                        .with("player", target)
+                        .sendTo(target)
             }
         } else {
             context(Text.MUST_BE_PLAYER)
-                    .sendTo(sender)
+                    .sendTo(target)
         }
         return true
     }

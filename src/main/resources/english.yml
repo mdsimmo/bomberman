@@ -51,6 +51,9 @@ command:
   unknown-command: '{#red|Unknown command: {attempt}}'
   # Shown to the console when it tries to run a command that needs to be done as a player 
   must-be-player: You must be a player
+  # Shown when a command needs a player but they typed something else
+  # {player}: the string of what they typed (this will _not_ be a player)
+  invalid-player: '{player} is not a valid player'
   # Shown when a command needs a number but they typed something else
   # {number}: the string of what they typed (this will _not_ be a number)
   invalid-number: '{number} is not a valid number'
