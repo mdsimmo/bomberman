@@ -32,6 +32,7 @@ import org.bukkit.event.EventHandler
 import org.bukkit.event.EventPriority
 import org.bukkit.event.HandlerList
 import org.bukkit.event.Listener
+import org.bukkit.event.entity.EntityDamageEvent
 import org.bukkit.event.server.PluginDisableEvent
 import java.io.File
 import java.io.FileInputStream
@@ -420,6 +421,69 @@ class Game private constructor(val name: String, private var schema: Arena, val 
         GamePlayer.spawnGamePlayer(e.player, this, gameSpawn)
         players.add(e.player)
         e.setHandled()
+    }
+
+    @EventHandler(ignoreCancelled = true, priority = EventPriority.LOWEST)
+    fun onPlayerDamaged(e: EntityDamageEvent) {
+        if (!players.contains(e.entity))
+            return
+
+        // Find any changes to apply to this event based on cause
+        val damageChanges = this.settings.damageSources
+            .filterKeys { e.cause.toString().matches(Regex(it, RegexOption.IGNORE_CASE)) }
+            .map { it.value }
+
+        // If none specified, assume cancel event, except CUSTOM (which is what our plugin uses)
+        if (damageChanges.isEmpty() && e.cause != EntityDamageEvent.DamageCause.CUSTOM) {
+            e.isCancelled = true
+            return
+        }
+
+        // Special check to test if event should be cancelled
+        damageChanges
+            .forEach { change ->
+                val cancelExpression = change.entries.firstOrNull { it.key.equals("cancel", ignoreCase = true) }?.value
+                    ?: return@forEach
+                val result = Expander.expand(cancelExpression, mapOf(
+                    Pair("base", Message.of(e.damage)),
+                    Pair("final", Message.of(e.finalDamage)),
+                    Pair("cause", Message.of(e.cause.toString())),
+                    Pair("player", SenderWrapper(e.entity)),
+                    Pair("game", this),
+                ), true).toString()
+                val asDouble = result.toDoubleOrNull() ?: return@forEach
+                if (asDouble > 0.000001 || asDouble < -0.000001) {
+                    e.isCancelled = true
+                    return
+                }
+            }
+
+        damageChanges
+            // Each change has a set of rules which apply to individual modifiers
+            .forEach { rules ->
+                // All other rules affect the modifiers
+                EntityDamageEvent.DamageModifier.values()
+                    .filter { e.isApplicable(it) } // not-applicable modifiers cause crashes
+                    .forEach { modifier ->
+                        // find rules that apply to this modifier (regex match)
+                        rules.filterKeys { modifier.toString().matches(Regex(it, RegexOption.IGNORE_CASE)) }
+                            // apply rule
+                            .forEach {
+                                val result = Expander.expand(it.value, mapOf(
+                                    Pair("base", Message.of(e.damage)),
+                                    Pair("damage", Message.of(e.getDamage(modifier))),
+                                    Pair("finalDamage", Message.of(e.finalDamage)),
+                                    Pair("cause", Message.of(e.cause.toString())),
+                                    Pair("player", SenderWrapper(e.entity)),
+                                    Pair("game", this),
+                                    Pair("modifier", Message.of(modifier.toString())),
+                                ), true)
+                                result.toString().toDoubleOrNull()?.also { damage ->
+                                    e.setDamage(modifier, damage)
+                                }
+                            }
+                    }
+            }
     }
 
     @EventHandler(ignoreCancelled = true, priority = EventPriority.HIGHEST)

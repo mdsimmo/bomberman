@@ -362,17 +362,6 @@ class GamePlayer private constructor(private val player: Player, private val gam
         e.setHandled()
     }
 
-    @EventHandler(ignoreCancelled = true, priority = EventPriority.LOWEST)
-    fun onPlayerDamaged(e: EntityDamageEvent) {
-        if (e.entity !== player)
-            return
-        // Allow custom damage events (ie. from our plugin)
-        if (e.cause == EntityDamageEvent.DamageCause.CUSTOM)
-            return
-        // Player cannot be burnt or hurt during game play
-        e.isCancelled = true
-    }
-
     @EventHandler(ignoreCancelled = true, priority = EventPriority.HIGH)
     fun onPlayerKilledInGame(e: BmPlayerKilledIntent) {
         if (e.player !== player) return

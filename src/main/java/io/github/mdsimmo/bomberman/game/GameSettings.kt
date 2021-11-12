@@ -57,6 +57,25 @@ class GameSettings : ConfigurationSerializable {
             (data["fuse-ticks"] as? Number)?.toInt()?.also { settings.fuseTicks = it.coerceAtLeast(0) }
             (data["fire-ticks"] as? Number)?.toInt()?.also { settings.fireTicks = it.coerceAtLeast(0) }
             (data["immunity-ticks"] as? Number)?.toInt()?.also { settings.immunityTicks = it.coerceAtLeast(0) }
+            (data["damage-source"] as? Map<*, *>)
+                ?.map { entry ->
+                    Pair(entry.key.toString(), entry.value.let { cause ->
+                        when (cause) {
+                            is Map<*, *> ->
+                                cause.map { Pair(it.key.toString(), it.value.toString()) }
+                                    .toMap(mutableMapOf()) //  use mutable map to avoid instance references
+                            null ->
+                                mutableMapOf()
+                            else ->
+                                mapOf(Pair("base", cause.toString()))
+                        }
+                    })
+                }
+                ?.toMap()
+                ?.also {
+                    settings.damageSources = it
+                }
+
             return settings
         }
 
@@ -105,6 +124,7 @@ class GameSettings : ConfigurationSerializable {
     var fuseTicks: Int = 40
     var fireTicks: Int = 20
     var immunityTicks : Int = 21
+    var damageSources: Map<String, Map<String, String>> = emptyMap()
 
     override fun serialize(): Map<String, Any> {
         val objs: MutableMap<String, Any> = HashMap()
@@ -139,6 +159,10 @@ class GameSettings : ConfigurationSerializable {
         objs["fuse-ticks"] = fuseTicks
         objs["fire-ticks"] = fireTicks
         objs["immunity-ticks"] = immunityTicks
+
+        objs["damage-source"] = damageSources
+        objs["damage-sourcesa"] = mutableMapOf<String, String>()
+        objs["damage-sourcesb"] = mutableMapOf<String, String>()
 
         return objs
     }

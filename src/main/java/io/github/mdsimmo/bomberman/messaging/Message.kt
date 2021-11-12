@@ -17,7 +17,7 @@ class Message private constructor(private val contents: TreeNode) : Formattable 
             return Message(StringNode(text))
         }
 
-        fun of(num: Int): Message {
+        fun of(num: Number): Message {
             return of(num.toString())
         }
 

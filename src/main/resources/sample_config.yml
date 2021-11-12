@@ -131,6 +131,36 @@ default-game-settings:
         amount: 0
       weight: 10.0
 
+  # By default, bomberman players cannot be hurt by anything except TNT
+  # By configuring the below, specific damage causes can be allowed
+  # The possible damage causes are listed here https://hub.spigotmc.org/javadocs/spigot/org/bukkit/event/entity/EntityDamageEvent.DamageCause.html
+  # Values are specified as a regex and not case-sensitive.
+  #
+  # Each damage cause can be altered with different modifiers listed here: https://hub.spigotmc.org/javadocs/bukkit/org/bukkit/event/entity/EntityDamageEvent.DamageModifier.html
+  # Modifiers can be matched by regex (case-insensitive). Modifiers not matched will not be altered.
+  # Modifiers that reduce damage taken will be negative.
+  # If the value is specified on the damage cause, only the 'base' modifier will be altered.
+  #
+  # A special 'cancel' value can be specified that will cancel the event if a non-zero number is given.
+  #
+  # The damage specified is evaluated as a localisation message with the following arguments:
+  #  - game: the current game data
+  #  - player: the player affected
+  #  - cause: the damage cause
+  #  - final: the total damage that will be dealt
+  #  - base: the damage done by the base modifier
+  #  - damage: the modifiers damage to do (not applicable for 'cancel')
+  #  - modifier: the modifier being altered (not applicable for 'cancel')
+  damage-source:
+    CUSTOM: {}                   # damage from bomberman explosions. 'Custom' is the only cause enabled by default
+  # SUICIDE: {}                  # Allow use of the /kill command
+  # HOT_FLOOR|CONTACT: 1         # Take one heart base damage from magma blocks and cactus and such
+  # ENTITY_ATTACK:               # Allow players to attack each other with tools only (hands deal 1.5 max). Each hit will deal 1 heart
+  #   base: '{#=|{damage}>=2}'
+  #   (?!base).+: 0              # Disable other modifiers (e.g. armour)
+  #   cancel: '{=|!{final}}'     # Cancel the event when not damaged
+  # '*': {}                      # Allow everything
+
 
   # Bomberman has four types of blocks:
   #  1. indestructible: tnt will not effect the block
