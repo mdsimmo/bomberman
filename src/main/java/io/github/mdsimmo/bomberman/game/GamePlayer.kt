@@ -5,8 +5,6 @@ import com.sk89q.worldedit.bukkit.BukkitAdapter
 import io.github.mdsimmo.bomberman.Bomberman
 import io.github.mdsimmo.bomberman.events.*
 import io.github.mdsimmo.bomberman.messaging.Text
-import io.github.mdsimmo.bomberman.utils.BukkitUtils
-import io.github.mdsimmo.bomberman.utils.WorldEditUtils
 import org.bukkit.Bukkit
 import org.bukkit.GameMode
 import org.bukkit.Location
@@ -50,10 +48,8 @@ class GamePlayer private constructor(private val player: Player, private val gam
             dataFile.save(tempDataFile(player))
 
             // Add a permission group for WorldGuard compatibility (must be done before teleporting)
-            // Wrap in try loop because it is quite dodgy how other plugins implement
             try {
-                val playerPermissions = BukkitUtils.getPermissibleBase(player)
-                playerPermissions?.addAttachment(plugin, "group.bomberman", true)
+                player.addAttachment(plugin, "group.bomberman", true)
             } catch (e: Exception) {
                 plugin.logger.log(Level.WARNING, "Unable to add permissions", e)
             }
@@ -157,8 +153,7 @@ class GamePlayer private constructor(private val player: Player, private val gam
             player.removeScoreboardTag("bm_player")
 
             try {
-                val playerPermissions = BukkitUtils.getPermissibleBase(player)
-                playerPermissions?.addAttachment(plugin, "group.bomberman", false)
+                player.addAttachment(plugin, "group.bomberman", false)
             } catch (e: Exception) {
                 plugin.logger.log(Level.WARNING, "Unable to remove permissions", e)
             }
