@@ -45,7 +45,8 @@ class GameJoin(parent: Cmd) : GameCommand(parent) {
     }
 
     override fun flags(sender: CommandSender, args: List<String>, flags: Map<String, String>): Set<String> {
-        return setOf(F_TARGET)
+        //return setOf(F_TARGET)
+        return emptySet()
     }
 
     override fun flagOptions(sender: CommandSender, flag: String, args: List<String>, flags: Map<String, String>): Set<String> {
@@ -59,7 +60,7 @@ class GameJoin(parent: Cmd) : GameCommand(parent) {
         if (args.isNotEmpty())
             return false
 
-        val target = flags[F_TARGET]?.let { name ->
+        val target = sender /*flags[F_TARGET]?.let { name ->
             select(name, sender)
                 ?: run {
                     Text.INVALID_PLAYER
@@ -67,7 +68,7 @@ class GameJoin(parent: Cmd) : GameCommand(parent) {
                         .sendTo(sender)
                     return true
                 }
-        } ?: sender
+        } ?: sender*/
 
         if (target !is Player) {
             context(Text.MUST_BE_PLAYER)
