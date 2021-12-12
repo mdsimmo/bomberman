@@ -55,8 +55,13 @@ dependencies {
     compileOnly "com.sk89q.worldedit:worldedit-bukkit:7.0.0"
     testImplementation "com.sk89q.worldedit:worldedit-bukkit:7.0.0"
 
+<<<<<<< HEAD
     compileOnly 'me.clip:placeholderapi:2.10.9'
     testImplementation 'me.clip:placeholderapi:2.10.9'
+=======
+    compileOnly 'me.clip:placeholderapi:2.9+'
+    testImplementation 'me.clip:placeholderapi:2.9+'
+>>>>>>> 0.6.6
 
     testImplementation "junit:junit:4.13.+"
     testImplementation "org.mockito:mockito-core:3.3.+"
