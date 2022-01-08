@@ -38,10 +38,7 @@ class UndoBuild(parent: Cmd) : Cmd(parent) {
                 // Copy the blocks to a clipboard
                 val region = WorldEditUtils.convert(box)
                 val clipboard = BlockArrayClipboard(region)
-                WorldEdit.getInstance().editSessionFactory.getEditSession(
-                    BukkitAdapter.adapt(box.world),
-                    -1
-                )
+                WorldEdit.getInstance().newEditSession(BukkitAdapter.adapt(box.world))
                     .use { editSession ->
                         val forwardExtentCopy = ForwardExtentCopy(
                             editSession, region, clipboard, region.minimumPoint
@@ -99,7 +96,7 @@ class UndoBuild(parent: Cmd) : Cmd(parent) {
         }
 
         // Paste the old clipboard
-        WorldEdit.getInstance().editSessionFactory.getEditSession(BukkitAdapter.adapt(origin.world), -1)
+        WorldEdit.getInstance().newEditSession(BukkitAdapter.adapt(origin.world))
             .use { editSession ->
 
                 val operation = ClipboardHolder(clipboard)
@@ -109,7 +106,7 @@ class UndoBuild(parent: Cmd) : Cmd(parent) {
                     .build()
                 Operations.complete(operation)
 
-                editSession.flushSession()
+                editSession.close()
             }
 
         // Remove memory of game

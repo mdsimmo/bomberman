@@ -35,7 +35,7 @@ class GameCreate(parent: Cmd) : Cmd(parent) {
         private fun root(plugin: String): File? {
             return when (plugin.lowercase()) {
                 "bomberman", "bm" -> bm.settings.builtinSaves()
-                "worldedit", "we" -> we.getWorkingDirectoryFile(we.configuration.saveDir)
+                "worldedit", "we" -> we.getWorkingDirectoryPath(we.configuration.saveDir).toFile()
                 else -> null
             }
         }

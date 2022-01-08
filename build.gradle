@@ -1,9 +1,11 @@
+import proguard.gradle.ProGuardTask
+
 buildscript {
     repositories {
         mavenCentral()
     }
     dependencies {
-        classpath 'com.guardsquare:proguard-gradle:7.1.0'
+        classpath 'com.guardsquare:proguard-gradle:7.2.0-beta5' // need 7.2 to support java 17. Currently no stable release
     }
 }
 
@@ -17,11 +19,10 @@ sourceCompatibility = JavaVersion.VERSION_1_8
 targetCompatibility = JavaVersion.VERSION_1_8
 
 group = 'io.github.mdsimmo'
-version = '0.7.1'
+version = '0.8.0'
 
 repositories {
     mavenCentral()
-    jcenter()
     maven {
         // bukkits repo
         url "https://hub.spigotmc.org/nexus/content/repositories/snapshots/"
@@ -47,16 +48,15 @@ repositories {
 dependencies {
     implementation 'org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.5.31'
     implementation "net.objecthunter:exp4j:0.4.8"
-    //implementation "me.lucko:commodore:1.10"
 
-    compileOnly "org.bukkit:bukkit:1.8-R0.1-SNAPSHOT"
-    testImplementation "org.bukkit:bukkit:1.8-R0.1-SNAPSHOT"
+    compileOnly "org.bukkit:bukkit:1.13.2-R0.1-SNAPSHOT"
+    testImplementation "org.bukkit:bukkit:1.13.2-R0.1-SNAPSHOT"
 
-    compileOnly "com.sk89q.worldedit:worldedit-bukkit:7.0.0"
-    testImplementation "com.sk89q.worldedit:worldedit-bukkit:7.0.0"
+    compileOnly "com.sk89q.worldedit:worldedit-bukkit:7.2.8"
+    testImplementation "com.sk89q.worldedit:worldedit-bukkit:7.2.8"
 
-    compileOnly 'me.clip:placeholderapi:2.9+'
-    testImplementation 'me.clip:placeholderapi:2.9+'
+    compileOnly 'me.clip:placeholderapi:2.11+'
+    testImplementation 'me.clip:placeholderapi:2.11+'
 
     testImplementation "junit:junit:4.13.+"
     testImplementation "org.mockito:mockito-core:3.3.+"
@@ -64,8 +64,6 @@ dependencies {
 
 shadowJar {
     relocate 'net.objecthunter', 'io.github.mdsimmo.bomberman.lib.net.objecthunter'
-    // relocate 'me.lucko', 'io.github.mdsimmo.bomberman.lib.me.lucko'
-    // relocate 'com.mojang', 'io.github.mdsimmo.bomberman.lib.com.mojang'
     relocate 'kotlin', 'io.github.mdsimmo.bomberman.lib.kotlin'
     relocate 'org.jetbrains', 'io.github.mdsimmo.bomberman.lib.org.jetbrains'
     relocate 'org.intellij', 'io.github.mdsimmo.bomberman.lib.org.intellij'
@@ -80,16 +78,16 @@ processResources  {
     }
 }
 
-task minify(type: proguard.gradle.ProGuardTask, dependsOn: shadowJar) {
+task minify(type: ProGuardTask, dependsOn: shadowJar) {
     injars shadowJar.outputs.files
     outjars "build/libs/Bomberman-${version}-min.jar"
 
     libraryjars "${System.getProperty('java.home')}/jmods/java.base.jmod"
     libraryjars "${System.getProperty('java.home')}/jmods/java.logging.jmod"
-    libraryjars configurations.findByName('compileOnly').getFiles()
+    libraryjars files(configurations.compileOnly.collect())
 
     // only remove unused library code (mostly kotlin)
-    keep "public class !io.github.mdsimmo.bomberman.lib.** { *; }"
+    keep(["includedescriptorclasses": true], "public class !io.github.mdsimmo.bomberman.lib.** { *; }")
 
     // Don't rename anything
     dontobfuscate
@@ -110,6 +108,9 @@ task copyToServer(type: Copy, dependsOn: clearOldPluginJar ) {
     if ( project.hasProperty("serverLocation" ) ) {
         from minify
         into "$serverLocation/plugins/update"
+        logger.info("Installing to '$serverLocation/plugins/update'")
+    } else {
+        logger.warn("No server location defined")
     }
 }
 

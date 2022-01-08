@@ -9,7 +9,6 @@ import com.sk89q.worldedit.extent.clipboard.io.ClipboardFormats
 import com.sk89q.worldedit.function.mask.BlockTypeMask
 import com.sk89q.worldedit.function.operation.ForwardExtentCopy
 import com.sk89q.worldedit.function.operation.Operations
-import com.sk89q.worldedit.function.pattern.BlockPattern
 import com.sk89q.worldedit.math.BlockVector3
 import com.sk89q.worldedit.session.ClipboardHolder
 import com.sk89q.worldedit.world.block.BlockTypes
@@ -94,7 +93,7 @@ class Game private constructor(val name: String, private var schema: Arena, val 
             // Copy the blocks to a clipboard
             val region = WorldEditUtils.convert(box)
             val clipboard = BlockArrayClipboard(region)
-            WorldEdit.getInstance().editSessionFactory.getEditSession(BukkitAdapter.adapt(box.world), -1)
+            WorldEdit.getInstance().newEditSession(BukkitAdapter.adapt(box.world))
                     .use { editSession ->
                         val forwardExtentCopy = ForwardExtentCopy(
                                 editSession, region, clipboard, region.minimumPoint
@@ -229,7 +228,7 @@ class Game private constructor(val name: String, private var schema: Arena, val 
                     .forEach{ it.remove() }
 
             // Paste the schematic
-            WorldEdit.getInstance().editSessionFactory.getEditSession(BukkitAdapter.adapt(box.world), -1)
+            WorldEdit.getInstance().newEditSession(BukkitAdapter.adapt(box.world))
                     .use { editSession ->
 
                         val operation = ClipboardHolder(clip)
@@ -240,12 +239,12 @@ class Game private constructor(val name: String, private var schema: Arena, val 
                                 .build()
                         Operations.complete(operation)
 
-                        editSession.flushSession()
+                        editSession.close()
 
                         if (flags.deleteVoid) {
                             editSession.replaceBlocks(WorldEditUtils.convert(box),
                                     BlockTypeMask(editSession, BlockTypes.STRUCTURE_VOID),
-                                    BlockPattern(BlockTypes.AIR!!.defaultState)
+                                    BlockTypes.AIR!!.defaultState
                             )
                         }
                     }
@@ -335,8 +334,8 @@ class Game private constructor(val name: String, private var schema: Arena, val 
 
     private fun removeCages() {
         val clip = schema.loadClipboard()
-        WorldEdit.getInstance().editSessionFactory
-                .getEditSession(BukkitAdapter.adapt(schema.origin.world), -1).use { editSession ->
+        WorldEdit.getInstance().newEditSession(BukkitAdapter.adapt(schema.origin.world))
+                .use { editSession ->
                     val offset = BlockVector3.at(schema.origin.x, schema.origin.y, schema.origin.z)
                             .subtract(clip.origin)
                     spawnBlocks()
