@@ -9,29 +9,20 @@ import io.github.mdsimmo.bomberman.game.Game
 import io.github.mdsimmo.bomberman.messaging.Message
 import io.github.mdsimmo.bomberman.messaging.Text
 import org.bukkit.Bukkit
-import org.bukkit.Location
-import org.bukkit.command.BlockCommandSender
-import org.bukkit.command.Command
 import org.bukkit.command.CommandSender
-import org.bukkit.entity.Entity
 import org.bukkit.entity.Player
+import java.lang.IllegalArgumentException
 
 class GameJoin(parent: Cmd) : GameCommand(parent) {
 
     companion object {
         private const val F_TARGET = "t"
 
-        fun select(name: String, source: CommandSender): CommandSender? {
-            return if (name.equals("@p", ignoreCase = true)) {
-                // closest player to source
-                val location = when (source) {
-                    is Entity -> source.location
-                    is BlockCommandSender -> source.block.location
-                    else -> return null
-                }
-                location.world?.players?.minByOrNull { location.distanceSquared(it.location) }
-            } else {
-                Bukkit.getOnlinePlayers().firstOrNull { name.equals(it.name, ignoreCase = true) }
+        fun select(target: String, source: CommandSender): Result<List<Player>> {
+            return try {
+                Result.success(Bukkit.selectEntities(source, target).filterIsInstance<Player>())
+            } catch (e: IllegalArgumentException) {
+                Result.failure(e)
             }
         }
     }
@@ -45,14 +36,27 @@ class GameJoin(parent: Cmd) : GameCommand(parent) {
     }
 
     override fun flags(sender: CommandSender, args: List<String>, flags: Map<String, String>): Set<String> {
-        //return setOf(F_TARGET)
-        return emptySet()
+        return setOf(F_TARGET)
     }
 
     override fun flagOptions(sender: CommandSender, flag: String, args: List<String>, flags: Map<String, String>): Set<String> {
         return when (flag) {
-            F_TARGET -> Bukkit.getOnlinePlayers().map { it.name }.toSet()
+            F_TARGET -> Bukkit.getOnlinePlayers().map { it.name }.toSet().plus(arrayOf("@a", "@p", "@r", "@s"))
             else -> emptySet()
+        }
+    }
+
+    override fun flagDescription(flag: String): Message {
+        return when(flag) {
+            F_TARGET -> context(Text.JOIN_FLAG_TARGET).format()
+            else -> Message.empty
+        }
+    }
+
+    override fun flagExtension(flag: String): Message {
+        return when(flag) {
+            F_TARGET -> context(Text.JOIN_FLAG_TARGET_EXT).format()
+            else -> Message.empty
         }
     }
 
@@ -60,39 +64,56 @@ class GameJoin(parent: Cmd) : GameCommand(parent) {
         if (args.isNotEmpty())
             return false
 
-        val target = sender /*flags[F_TARGET]?.let { name ->
-            select(name, sender)
-                ?: run {
-                    Text.INVALID_PLAYER
-                        .with("player", name)
+        // Get the targeted player (if not specified, defaults to the sender)
+        val targets = if (flags[F_TARGET] != null) {
+            val selection = flags[F_TARGET]!!
+
+            // Deny permissions if not allowed to select others
+            if (!Permissions.JOIN_REMOTE.isAllowedBy(sender)) {
+                context(Text.DENY_PERMISSION)
+                    .sendTo(sender)
+                return true
+            }
+
+            // select the targets
+            select(selection, sender).fold(
+                onSuccess = { it },
+                onFailure = {
+                    Text.INVALID_TARGET_SELECTOR
+                        .with("selector", selection)
                         .sendTo(sender)
                     return true
                 }
-        } ?: sender*/
-
-        if (target !is Player) {
-            context(Text.MUST_BE_PLAYER)
-                    .sendTo(sender)
-            return true
+            )
+        } else {
+            // no target selector, apply to sender
+            if (sender !is Player) {
+                context(Text.MUST_BE_PLAYER).sendTo(sender)
+                return true
+            }
+            listOf(sender)
         }
-        val e = BmPlayerJoinGameIntent.join(game, target)
 
-        if (e.isCancelled) {
-            e.cancelledReason()
+        targets.forEach { target ->
+            val e = BmPlayerJoinGameIntent.join(game, target)
+
+            if (e.isCancelled) {
+                e.cancelledReason()
                     ?.apply {
                         sendTo(sender)
                     }
                     ?: run {
                         context(Text.COMMAND_CANCELLED)
-                                .with("game", game)
-                                .with("player", target)
-                                .sendTo(target)
+                            .with("game", game)
+                            .with("player", target)
+                            .sendTo(target)
                     }
-        } else {
-            context(Text.JOIN_SUCCESS)
+            } else {
+                context(Text.JOIN_SUCCESS)
                     .with("game", game)
                     .with("player", target)
                     .sendTo(target)
+            }
         }
         return true
     }

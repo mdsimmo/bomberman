@@ -26,7 +26,7 @@ enum class Text(path: String) : Contexted {
     UNKNOWN_COMMAND("command.unknown-command"),
     MUST_BE_PLAYER("command.must-be-player"),
     INVALID_NUMBER("command.invalid-number"),
-    INVALID_PLAYER("command.invalid-player"),
+    INVALID_TARGET_SELECTOR("command.invalid-target-selector"),
     COMMAND_GROUP_HELP("command.group.help"),
     COMMAND_GROUP_USAGE("command.group.usage"),
     COMMAND_GROUP_EXAMPLE("command.group.example"),
@@ -138,6 +138,8 @@ enum class Text(path: String) : Contexted {
     JOIN_USAGE("command.join.usage"),
     JOIN_EXAMPLE("command.join.example"),
     JOIN_EXTRA("command.join.extra"),
+    JOIN_FLAG_TARGET("command.join.flags.t.description"),
+    JOIN_FLAG_TARGET_EXT("command.join.flags.t.ext"),
     JOIN_GAME_STARTED("command.join.game-started"),
     JOIN_ALREADY_JOINED("command.join.already-joined"),
     JOIN_GAME_FULL("command.join.game-full"),
@@ -147,6 +149,8 @@ enum class Text(path: String) : Contexted {
     LEAVE_USAGE("command.leave.usage"),
     LEAVE_EXAMPLE("command.leave.example"),
     LEAVE_EXTRA("command.leave.extra"),
+    LEAVE_FLAG_TARGET("command.leave.flags.t.description"),
+    LEAVE_FLAG_TARGET_EXT("command.leave.flags.t.ext"),
     LEAVE_SUCCESS("command.leave.success"),
     LEAVE_NOT_JOINED("command.leave.not-joined");
 

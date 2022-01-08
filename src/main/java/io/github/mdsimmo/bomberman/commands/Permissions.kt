@@ -18,7 +18,9 @@ enum class Permissions(val permission: String) : Permission {
     INFO("bomberman.info"),
     LIST("bomberman.list"),
     JOIN("bomberman.join"),
-    LEAVE("bomberman.leave");
+    JOIN_REMOTE("bomberman.join.remote"),
+    LEAVE("bomberman.leave"),
+    LEAVE_REMOTE("bomberman.leave.remote");
 
     override fun isAllowedBy(sender: CommandSender): Boolean {
         return sender.hasPermission(permission)

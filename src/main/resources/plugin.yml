@@ -23,6 +23,7 @@ permissions:
       bomberman.dictator: true
       bomberman.operator: true
       bomberman.player: true
+      bomberman.remote: true
     default: op
   bomberman.player:
     description: Allows join/leave/info
@@ -47,14 +48,26 @@ permissions:
       bomberman.undo: true
       bomberman.configure: true
     default: op
+  bomberman.remote:
+    description: Allows executing commands on behalf of other players
+    children:
+      bomberman.join.remote: true
+      bomberman.leave.remote: true
+    default: op
   bomberman.bm:
     description: Root bomberman command (/bm)
     default: true
   bomberman.join:
     description: /bm join
     default: false
+  bomberman.join.remote:
+    description: /bm join -t=...
+    default: false
   bomberman.leave:
     description: /bm join
+    default: false
+  bomberman.leave.remote:
+    description: /bm leave -t=...
     default: false
   bomberman.info:
     description: /bm info

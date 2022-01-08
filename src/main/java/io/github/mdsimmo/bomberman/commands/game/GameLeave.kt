@@ -8,7 +8,6 @@ import io.github.mdsimmo.bomberman.messaging.Message
 import io.github.mdsimmo.bomberman.messaging.Text
 import org.bukkit.Bukkit
 import org.bukkit.command.CommandSender
-import org.bukkit.entity.Entity
 import org.bukkit.entity.Player
 
 class GameLeave(parent: Cmd) : Cmd(parent) {
@@ -22,7 +21,7 @@ class GameLeave(parent: Cmd) : Cmd(parent) {
     }
 
     override fun options(sender: CommandSender, args: List<String>): List<String> {
-        return listOf(F_TARGET)
+        return listOf()
     }
 
     override fun flags(sender: CommandSender, args: List<String>, flags: Map<String, String>): Set<String> {
@@ -31,8 +30,22 @@ class GameLeave(parent: Cmd) : Cmd(parent) {
 
     override fun flagOptions(sender: CommandSender, flag: String, args: List<String>, flags: Map<String, String>): Set<String> {
         return when (flag) {
-            F_TARGET -> Bukkit.getOnlinePlayers().map { it.name }.toSet()
+            F_TARGET -> Bukkit.getOnlinePlayers().map { it.name }.toSet().plus(arrayOf("@a", "@p", "@r", "@s"))
             else -> emptySet()
+        }
+    }
+
+    override fun flagDescription(flag: String): Message {
+        return when(flag) {
+            F_TARGET -> context(Text.LEAVE_FLAG_TARGET).format()
+            else -> Message.empty
+        }
+    }
+
+    override fun flagExtension(flag: String): Message {
+        return when(flag) {
+            F_TARGET -> context(Text.LEAVE_FLAG_TARGET_EXT).format()
+            else -> Message.empty
         }
     }
 
@@ -40,17 +53,37 @@ class GameLeave(parent: Cmd) : Cmd(parent) {
         if (args.isNotEmpty())
             return false
 
-        val target = flags[F_TARGET]?.let { name ->
-            GameJoin.select(name, sender)
-                ?: run {
-                    Text.INVALID_PLAYER
-                        .with("player", name)
+        // Get the targeted player (if not specified, defaults to the sender)
+        val targets = if (flags[F_TARGET] != null) {
+            val selection = flags[F_TARGET]!!
+
+            // Deny permissions if not allowed to select others
+            if (!Permissions.LEAVE_REMOTE.isAllowedBy(sender)) {
+                context(Text.DENY_PERMISSION)
+                    .sendTo(sender)
+                return true
+            }
+
+            // select the targets
+            GameJoin.select(selection, sender).fold(
+                onSuccess = { it },
+                onFailure = {
+                    Text.INVALID_TARGET_SELECTOR
+                        .with("selector", selection)
                         .sendTo(sender)
                     return true
                 }
-        } ?: sender
+            )
+        } else {
+            // no target selector, apply to sender
+            if (sender !is Player) {
+                context(Text.MUST_BE_PLAYER).sendTo(sender)
+                return true
+            }
+            listOf(sender)
+        }
 
-        if (target is Player) {
+        targets.forEach { target ->
             val e = BmPlayerLeaveGameIntent.leave(target)
             if (e.isHandled()) {
                 Text.LEAVE_SUCCESS
@@ -62,9 +95,6 @@ class GameLeave(parent: Cmd) : Cmd(parent) {
                         .with("player", target)
                         .sendTo(target)
             }
-        } else {
-            context(Text.MUST_BE_PLAYER)
-                    .sendTo(target)
         }
         return true
     }

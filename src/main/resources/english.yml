@@ -42,7 +42,7 @@ command:
     {command|flags|foreach|{!#|format.map|   -{it|name}{#switch|{it|ext}|||={it|ext}}|{it|description}}|
     }
   # Shown when a player tries to run a command they do not have permission to use
-  deny-permission: '{#red|You do not have permission to use /{command|path}!}'
+  deny-permission: '{#red|You do not have permission to use /{command|path}}'
   # Shown when the player uses a command incorrectly
   # {attempt}: the list of arguments that the player typed
   incorrect-usage: '{#red|Incorrect usage: {command|usage}}'
@@ -51,9 +51,9 @@ command:
   unknown-command: '{#red|Unknown command: {attempt}}'
   # Shown to the console when it tries to run a command that needs to be done as a player 
   must-be-player: You must be a player
-  # Shown when a command needs a player but they typed something else
-  # {player}: the string of what they typed (this will _not_ be a player)
-  invalid-player: '{player} is not a valid player'
+  # Shown when a command uses a target selector, but the selecting is invalid
+  # {selector}: the string of what they typed
+  invalid-target-selector: '{#red|{selector}} is invalid'
   # Shown when a command needs a number but they typed something else
   # {number}: the string of what they typed (this will _not_ be a number)
   invalid-number: '{number} is not a valid number'
@@ -270,6 +270,10 @@ command:
     usage: /{command|path} <game>
     example: ''
     extra: ''
+    flags:
+      t:
+        description: Target selector to apply command to. All standard minecraft selectors work, but only players can be selected. This flag requires additional permissions.
+        ext: "<selector>"
     # The game has no spare spawn points
     # {game}: the game attempted to be joined
     game-full: Game {game} is full
@@ -291,6 +295,10 @@ command:
     usage: /{command|path}
     example: ''
     extra: ''
+    flags:
+      t:
+        description: Target selector to apply command to. All standard minecraft selectors work, but only players can be selected. This flag requires additional permissions.
+        ext: "<selector>"
     # The player is not part of any game
     # {player}: player who isn't joined
     not-joined: You're not part of a game
