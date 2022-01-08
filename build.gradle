@@ -5,7 +5,9 @@ buildscript {
         mavenCentral()
     }
     dependencies {
-        classpath 'com.guardsquare:proguard-gradle:7.2.0-beta5' // need 7.2 to support java 17. Currently no stable release
+        // Proguard 7.2 supports jdk 17, but not jdk 8. Proguard 7.1 supports jdk 8, but not jdk 17
+        // Not sure if this is an issue just in beta - proguard is built in CI with jdk 8, so don't see why new version breaks here?
+        classpath 'com.guardsquare:proguard-gradle:' + (JavaVersion.current().isCompatibleWith(JavaVersion.VERSION_11) ? '7.2.0-beta5' : '7.1.0')
     }
 }
 
