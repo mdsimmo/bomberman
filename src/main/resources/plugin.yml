@@ -4,6 +4,9 @@ version: ${version}
 api-version: 1.13
 load: POSTWORLD
 
+author: mdsimmo
+website: https://github.com/mdsimmo/bomberman
+
 commands:
   bomberman:
     description: Main command for Bomberman
