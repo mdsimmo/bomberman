@@ -92,7 +92,9 @@ class Game constructor(private val save: GameSave) : Formattable, Listener {
 
     private val origin: Location get() = save.origin
     private val clipboard: Clipboard get() = save.getSchematic()
-    private val box = WorldEditUtils.pastedBounds(origin, clipboard)
+    private val box: Box by lazy {
+        WorldEditUtils.pastedBounds(origin, clipboard)
+    }
     private val players: MutableSet<Player> = HashSet()
     private var running = false
     private val tempData: YamlConfiguration = tempDataFile(this).let { path ->
@@ -104,13 +106,13 @@ class Game constructor(private val save: GameSave) : Formattable, Listener {
     }
 
     // Spawns are saved in temporary file to avoid needing to read the schematic on server load
-    private val spawns: Set<Location> = (tempData.getList("spawns"))
+    private val spawns: Set<Location> by lazy {
+        (tempData.getList("spawns"))
             ?.filterIsInstance(Location::class.java)?.toSet()
-            ?: searchSpawns()
+            ?: searchSpawns().also { writeTempData("spawns", it.toList()) }
+    }
 
     init {
-        writeTempData("spawns", spawns.toList())
-
         // If game was not shut down cleanly (i.e. server died), rebuild the arena
         if (tempData.getBoolean("rebuild-needed", false)) {
             Bukkit.getScheduler().scheduleSyncDelayedTask(plugin) {
