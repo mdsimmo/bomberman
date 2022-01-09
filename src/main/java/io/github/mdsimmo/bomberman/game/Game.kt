@@ -4,9 +4,12 @@ import com.sk89q.worldedit.WorldEdit
 import com.sk89q.worldedit.bukkit.BukkitAdapter
 import com.sk89q.worldedit.extent.clipboard.BlockArrayClipboard
 import com.sk89q.worldedit.extent.clipboard.Clipboard
+import com.sk89q.worldedit.function.mask.BlockTypeMask
 import com.sk89q.worldedit.function.operation.ForwardExtentCopy
 import com.sk89q.worldedit.function.operation.Operations
 import com.sk89q.worldedit.math.BlockVector3
+import com.sk89q.worldedit.session.ClipboardHolder
+import com.sk89q.worldedit.world.block.BlockTypes
 import io.github.mdsimmo.bomberman.Bomberman
 import io.github.mdsimmo.bomberman.commands.game.UndoBuild
 import io.github.mdsimmo.bomberman.events.*
@@ -18,6 +21,7 @@ import org.bukkit.Bukkit
 import org.bukkit.Location
 import org.bukkit.Material
 import org.bukkit.configuration.file.YamlConfiguration
+import org.bukkit.entity.Item
 import org.bukkit.entity.Player
 import org.bukkit.event.EventHandler
 import org.bukkit.event.EventPriority
@@ -40,7 +44,7 @@ class Game constructor(private val save: GameSave) : Formattable, Listener {
             return plugin.settings.tempGameData().resolve("${game.name}.yml")
         }
 
-        fun buildGameFromRegion(name: String, box: Box, flags: BuildFlags): Game {
+        fun buildGameFromRegion(name: String, box: Box, settings: GameSettings): Game {
 
             // Copy the blocks to a clipboard
             val region = WorldEditUtils.convert(box)
@@ -56,8 +60,9 @@ class Game constructor(private val save: GameSave) : Formattable, Listener {
             // Save all data
             val save = GameSave.createNewSave(
                 name,
-                GameSettingsBuilder().build(),
-                Arena(BukkitUtils.boxLoc1(box), flags, clipboard)
+                BukkitUtils.boxLoc1(box),
+                settings,
+                clipboard
             )
 
             // Delete history from previous games with the same name
@@ -69,22 +74,25 @@ class Game constructor(private val save: GameSave) : Formattable, Listener {
             return game
         }
 
-        fun buildGameFromSchema(name: String, loc: Location, clipboard: Clipboard, flags: BuildFlags): Game {
-            val save = GameSave.createNewSave(name, GameSettingsBuilder().build(), Arena(loc, flags, clipboard))
+        fun buildGameFromSchema(name: String, loc: Location, clipboard: Clipboard, settings: GameSettings): Game {
+            val save = GameSave.createNewSave(name, loc, settings, clipboard)
             val game = Game(save)
-            UndoBuild.retainHistory(game.name, game.schema.box)
+            UndoBuild.retainHistory(game.name, game.box)
             BmGameBuildIntent.build(game)
             return game
         }
     }
 
-    val name = save.getName()
-    val schema: Arena get() = save.getArena()
+    val name = save.name
     var settings: GameSettings
         get() = save.getSettings()
         set(value) {
             save.updateSettings(value)
         }
+
+    private val origin: Location get() = save.origin
+    private val clipboard: Clipboard get() = save.getSchematic()
+    private val box = WorldEditUtils.pastedBounds(origin, clipboard)
     private val players: MutableSet<Player> = HashSet()
     private var running = false
     private val tempData: YamlConfiguration = tempDataFile(this).let { path ->
@@ -98,7 +106,7 @@ class Game constructor(private val save: GameSave) : Formattable, Listener {
     // Spawns are saved in temporary file to avoid needing to read the schematic on server load
     private val spawns: Set<Location> = (tempData.getList("spawns"))
             ?.filterIsInstance(Location::class.java)?.toSet()
-            ?: schema.spawns
+            ?: searchSpawns()
 
     init {
         writeTempData("spawns", spawns.toList())
@@ -149,6 +157,26 @@ class Game constructor(private val save: GameSave) : Formattable, Listener {
 //        schema.build(false)
 //    }
 
+    private fun searchSpawns(): Set<Location> {
+        plugin.logger.info("Searching for spawns...")
+        val spawns = mutableSetOf<Location>()
+        for (loc in clipboard.region) {
+            val block = clipboard.getFullBlock(loc)
+            block.nbtData?.let {
+                if (
+                    it.getString("Text1").contains("[spawn]", ignoreCase = true) or
+                    it.getString("Text2").contains("[spawn]", ignoreCase = true) or
+                    it.getString("Text3").contains("[spawn]", ignoreCase = true) or
+                    it.getString("Text4").contains("[spawn]", ignoreCase = true)
+                ) {
+                    spawns += BukkitAdapter.adapt(box.world, loc.subtract(clipboard.origin)).add(origin)
+                }
+            }
+        }
+        plugin.logger.info("  ${spawns.size} spawns found")
+        return spawns
+    }
+
     private fun findSpareSpawn(): Location? {
         return spawns.firstOrNull { spawn ->
             players.map { it.location }.none { playerLocation ->
@@ -160,10 +188,10 @@ class Game constructor(private val save: GameSave) : Formattable, Listener {
     }
 
     private fun removeCages() {
-        WorldEdit.getInstance().newEditSession(BukkitAdapter.adapt(schema.origin.world))
+        WorldEdit.getInstance().newEditSession(BukkitAdapter.adapt(save.origin.world))
                 .use { editSession ->
-                    val offset = BlockVector3.at(schema.origin.x, schema.origin.y, schema.origin.z)
-                            .subtract(schema.clipboard.origin)
+                    val offset = BlockVector3.at(save.origin.x, save.origin.y, save.origin.z)
+                            .subtract(save.getSchematic().origin)
                     spawnBlocks()
                             .filter { (isSpawn, _) ->
                                 !isSpawn
@@ -172,7 +200,7 @@ class Game constructor(private val save: GameSave) : Formattable, Listener {
                                 val loc = block.location
                                 val blockVec = BlockVector3.at(loc.x, loc.y, loc.z)
                                 val clipLocation = blockVec.subtract(offset)
-                                val blockState = schema.clipboard.getFullBlock(clipLocation)
+                                val blockState = save.getSchematic().getFullBlock(clipLocation)
                                 editSession.setBlock(blockVec, blockState)
                             }
                 }
@@ -194,7 +222,7 @@ class Game constructor(private val save: GameSave) : Formattable, Listener {
                 for (j in -1..2) {
                     for (k in -1..1) {
                         val blockLoc = location.clone().add(i.toDouble(), j.toDouble(), k.toDouble())
-                        if(!schema.box.contains(blockLoc)) {
+                        if(!box.contains(blockLoc)) {
                             continue
                         }
                         val b = blockLoc.block
@@ -336,7 +364,7 @@ class Game constructor(private val save: GameSave) : Formattable, Listener {
             return
         running = true
         removeCages()
-        GameProtection.protect(this, schema.box)
+        GameProtection.protect(this, box)
         writeTempData("rebuild-needed", true)
         e.setHandled()
     }
@@ -345,7 +373,7 @@ class Game constructor(private val save: GameSave) : Formattable, Listener {
     fun onPlayerMoveOutOfArena(e: BmPlayerMovedEvent) {
         if (e.game != this)
             return
-        if (!schema.box.contains(e.getTo())) {
+        if (!box.contains(e.getTo())) {
             BmPlayerLeaveGameIntent.leave(e.player)
         }
     }
@@ -398,8 +426,39 @@ class Game constructor(private val save: GameSave) : Formattable, Listener {
     fun onGameRebuild(e: BmGameBuildIntent) {
         if (e.game != this)
             return
-        schema.build()
+
+        plugin.logger.info("Building schematic ...")
+
+        // cleanup any dropped items
+        box.world.getNearbyEntities(BukkitUtils.convert(box))
+            .filterIsInstance<Item>()
+            .forEach{ it.remove() }
+
+        // Paste the schematic
+        WorldEdit.getInstance().newEditSession(BukkitAdapter.adapt(box.world))
+            .use { editSession ->
+
+                val operation = ClipboardHolder(clipboard)
+                    .createPaste(editSession)
+                    .to(BlockVector3.at(origin.blockX, origin.blockY, origin.blockZ))
+                    .copyEntities(true)
+                    .ignoreAirBlocks(save.getSettings().skipAir)
+                    .build()
+                Operations.complete(operation)
+
+                editSession.close()
+
+                if (save.getSettings().deleteVoid) {
+                    editSession.replaceBlocks(
+                        WorldEditUtils.convert(box),
+                        BlockTypeMask(editSession, BlockTypes.STRUCTURE_VOID),
+                        BlockTypes.AIR!!.defaultState
+                    )
+                }
+            }
         makeCages()
+
+        plugin.logger.info("Rebuild done")
         writeTempData("rebuild-needed", false)
         e.setHandled()
     }
@@ -450,7 +509,6 @@ class Game constructor(private val save: GameSave) : Formattable, Listener {
                     }
                 }
             } }).format(args.drop(1), elevated)
-            "schema" -> schema.format(args.drop(1), elevated)
             "players" -> CollectionWrapper(players.map { SenderWrapper(it) })
                     .format(args.drop(1), elevated)
             "power" -> Message.of(settings.initialItems.sumOf {
@@ -458,11 +516,15 @@ class Game constructor(private val save: GameSave) : Formattable, Listener {
             "bombs" -> Message.of(settings.initialItems.sumOf {
                 if (it?.type == settings.powerItem) { it.amount } else { 0 }})
             "lives" -> Message.of(settings.lives.toString())
-            "w", "world" -> Message.of(schema.origin.world?.name ?: "unknown")
-            "x" -> Message.of(schema.origin.x.toInt())
-            "y" -> Message.of(schema.origin.y.toInt())
-            "z" -> Message.of(schema.origin.z.toInt())
+            "w", "world" -> Message.of(origin.world?.name ?: "unknown")
+            "x" -> Message.of(origin.x.toInt())
+            "y" -> Message.of(origin.y.toInt())
+            "z" -> Message.of(origin.z.toInt())
+            "xsize" -> Message.of(box.size.x)
+            "ysize" -> Message.of(box.size.y)
+            "zsize" -> Message.of(box.size.z)
             "running" -> Message.of(if (running) { "true" } else { "false" })
+            "schema" -> format(args.drop(1), elevated) // for backwards compatibility
             else -> Message.empty
         }
     }

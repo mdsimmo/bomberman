@@ -2,6 +2,7 @@ package io.github.mdsimmo.bomberman;
 
 import io.github.mdsimmo.bomberman.commands.BaseCommand;
 import io.github.mdsimmo.bomberman.game.*;
+import io.github.mdsimmo.bomberman.utils.DataRestorer;
 import org.bukkit.Bukkit;
 import org.bukkit.command.PluginCommand;
 import org.bukkit.configuration.file.FileConfiguration;
@@ -25,8 +26,7 @@ public class Bomberman extends JavaPlugin implements Listener {
 		instance = this;
 
 		ConfigurationSerialization.registerClass(GameSettings.class);
-		ConfigurationSerialization.registerClass(BuildFlags.class, "io.github.mdsimmo.bomberman.game.Game$BuildFlags"); // pre v0.8.0
-		ConfigurationSerialization.registerClass(Arena.ArenaSettings.class);
+		ConfigurationSerialization.registerClass(DataRestorer.class, "io.github.mdsimmo.bomberman.game.Game$BuildFlags");
 
 		saveResource("sample_config.yml", true);
 		FileConfiguration config = getConfig();

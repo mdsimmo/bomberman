@@ -125,7 +125,7 @@ command:
     # {game}: the game
     success: Game {game} reloaded
     # Error while loading
-    # {game}: the game
+    # {game}: the old game's name (not an actual game)
     cannot-load: Error reloading the game's save file
   configure:
     name: configure

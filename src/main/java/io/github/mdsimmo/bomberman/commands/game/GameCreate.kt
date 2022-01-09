@@ -13,8 +13,9 @@ import io.github.mdsimmo.bomberman.commands.Permission
 import io.github.mdsimmo.bomberman.commands.Permissions
 import io.github.mdsimmo.bomberman.events.BmGameListIntent
 import io.github.mdsimmo.bomberman.events.BmGameLookupIntent
-import io.github.mdsimmo.bomberman.game.BuildFlags
 import io.github.mdsimmo.bomberman.game.Game
+import io.github.mdsimmo.bomberman.game.GameSettings
+import io.github.mdsimmo.bomberman.game.GameSettingsBuilder
 import io.github.mdsimmo.bomberman.messaging.Message
 import io.github.mdsimmo.bomberman.messaging.Text
 import io.github.mdsimmo.bomberman.utils.WorldEditUtils.selectionBounds
@@ -34,7 +35,7 @@ import kotlin.io.path.pathString
 class GameCreate(parent: Cmd) : Cmd(parent) {
 
     companion object {
-        private val bm = Bomberman.instance
+        private val plugin = Bomberman.instance
         private val we = WorldEdit.getInstance()
 
         private const val F_PLUGIN = "p"
@@ -130,13 +131,14 @@ class GameCreate(parent: Cmd) : Cmd(parent) {
         }
 
         // Read the build flags
-        val buildFlags = BuildFlags()
-        buildFlags.skipAir = flags.containsKey(F_SKIP_AIR)
-        buildFlags.deleteVoid = flags.containsKey(F_VOID_TO_AIR)
+        val settings = GameSettingsBuilder().also {
+            it.skipAir = flags.containsKey(F_SKIP_AIR)
+            it.deleteVoid = flags.containsKey(F_VOID_TO_AIR)
+        }.build()
 
         // Build from wand selection
         if (flags.containsKey(F_WAND)) {
-            makeFromSelection(gameName, sender, buildFlags)
+            makeFromSelection(gameName, sender, settings)
             return true
         }
 
@@ -151,10 +153,10 @@ class GameCreate(parent: Cmd) : Cmd(parent) {
                     )
                         .sendTo(sender)
                 } else {
-                    Bomberman.instance.logger.info("Reading default schematic: $schema")
+                    plugin.logger.info("Reading default schematic: $schema")
                     makeFromSchema(gameName, input().use { inputStream ->
                         BuiltInClipboardFormat.SPONGE_SCHEMATIC.getReader(inputStream).use { it.read() }
-                    }, sender, buildFlags)
+                    }, sender, settings)
                     return true
                 }
             }
@@ -167,12 +169,12 @@ class GameCreate(parent: Cmd) : Cmd(parent) {
                 .minByOrNull { it.name.length }?.also { file: Path ->
                     // load schema
                     try {
-                        Bomberman.instance.logger.info("Reading schematic data: $file")
+                        plugin.logger.info("Reading schematic data: $file")
                         val format = ClipboardFormats.findByFile(file.toFile())
                             ?: throw IllegalArgumentException("Unknown file format: '${file}'")
                         val clipboard = format.getReader(Files.newInputStream(file)).use { it.read() }
-                        Bomberman.instance.logger.info("Schematic read")
-                        makeFromSchema(gameName, clipboard, sender, buildFlags)
+                        plugin.logger.info("Schematic read")
+                        makeFromSchema(gameName, clipboard, sender, settings)
                     } catch (e: Exception) {
                         context(Text.CREATE_ERROR)
                             .with("error", e.message ?: "")
@@ -190,7 +192,7 @@ class GameCreate(parent: Cmd) : Cmd(parent) {
         return false
     }
 
-    private fun makeFromSelection(gameName: String, sender: CommandSender, flags: BuildFlags) {
+    private fun makeFromSelection(gameName: String, sender: CommandSender, settings: GameSettings) {
         if (sender !is Player) {
             context(Text.MUST_BE_PLAYER).sendTo(sender)
             return
@@ -204,7 +206,7 @@ class GameCreate(parent: Cmd) : Cmd(parent) {
                 val region = session.getSelection(session.selectionWorld)
                 val box = selectionBounds(region)
                 try {
-                    val game = Game.buildGameFromRegion(gameName, box, flags)
+                    val game = Game.buildGameFromRegion(gameName, box, settings)
                     context(Text.CREATE_SUCCESS)
                             .with("game", game)
                             .sendTo(sender)
@@ -218,14 +220,14 @@ class GameCreate(parent: Cmd) : Cmd(parent) {
                 context(Text.CREATE_NEED_SELECTION).sendTo(sender)
 
                 // This should never happen
-                Bomberman.instance.logger.log(Level.WARNING, "Could not get selection", e)
+                plugin.logger.log(Level.WARNING, "Could not get selection", e)
             }
         }
     }
 
-    private fun makeFromSchema(gameName: String, schema: Clipboard, player: Player, flags: BuildFlags) {
+    private fun makeFromSchema(gameName: String, schema: Clipboard, player: Player, settings: GameSettings) {
         // Create the game
-        val game = Game.buildGameFromSchema(gameName, player.location, schema, flags)
+        val game = Game.buildGameFromSchema(gameName, player.location, schema, settings)
         context(Text.CREATE_SUCCESS)
                 .with("game", game)
                 .sendTo(player)

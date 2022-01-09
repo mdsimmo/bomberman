@@ -24,7 +24,9 @@ data class GameSettings(
     val fuseTicks: Int,
     val fireTicks: Int,
     val immunityTicks : Int,
-    val damageSources: Map<String, Map<String, String>>
+    val damageSources: Map<String, Map<String, String>>,
+    val skipAir: Boolean,
+    val deleteVoid: Boolean,
 ) : ConfigurationSerializable {
 
     companion object {
@@ -93,6 +95,8 @@ data class GameSettings(
                 ?.also {
                     builder.damageSources = it
                 }
+            (data["skip-air"] as? Boolean)?.let { builder.skipAir = it }
+            (data["delete-void"] as? Boolean)?.let { builder.deleteVoid = it }
             return builder.build()
         }
 
@@ -142,6 +146,8 @@ data class GameSettings(
         objs["damage-source"] = damageSources
         objs["damage-sourcesa"] = mutableMapOf<String, String>()
         objs["damage-sourcesb"] = mutableMapOf<String, String>()
+        objs["skip-air"] = skipAir
+        objs["delete-void"] = deleteVoid
 
         return objs
     }
@@ -184,7 +190,9 @@ class GameSettingsBuilder(
     var fuseTicks: Int = 40,
     var fireTicks: Int = 20,
     var immunityTicks : Int = 21,
-    var damageSources: Map<String, Map<String, String>> = emptyMap()
+    var damageSources: Map<String, Map<String, String>> = emptyMap(),
+    var skipAir: Boolean = false,
+    var deleteVoid: Boolean = false,
 ) {
 
     constructor(settings: GameSettings) :this(
@@ -201,7 +209,9 @@ class GameSettingsBuilder(
         settings.fuseTicks,
         settings.fireTicks,
         settings.immunityTicks,
-        settings.damageSources
+        settings.damageSources,
+        settings.skipAir,
+        settings.deleteVoid,
     )
 
     fun build(): GameSettings =
@@ -219,6 +229,8 @@ class GameSettingsBuilder(
             fuseTicks,
             fireTicks,
             immunityTicks,
-            damageSources
+            damageSources,
+            skipAir,
+            deleteVoid
         )
 }

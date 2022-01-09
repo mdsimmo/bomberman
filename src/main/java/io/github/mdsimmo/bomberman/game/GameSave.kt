@@ -1,5 +1,6 @@
 package io.github.mdsimmo.bomberman.game
 
+import com.sk89q.worldedit.extent.clipboard.Clipboard
 import com.sk89q.worldedit.extent.clipboard.io.BuiltInClipboardFormat
 import com.sk89q.worldedit.extent.clipboard.io.ClipboardFormats
 import io.github.mdsimmo.bomberman.Bomberman
@@ -15,15 +16,27 @@ import java.nio.file.Files
 import java.nio.file.Path
 import java.nio.file.StandardCopyOption
 import java.util.logging.Level
-import kotlin.io.path.deleteIfExists
-import kotlin.io.path.exists
-import kotlin.io.path.listDirectoryEntries
-import kotlin.io.path.reader
+import kotlin.io.path.*
 
 /**
  * Handles reading/writing a game's data to disk
  */
-class GameSave(private val zipPath: Path) {
+class GameSave private constructor(val name: String, val origin: Location, private val zipPath: Path) {
+
+    /*
+     * Games are saved into a zip file with the following structure
+     *
+     * arena.schem
+     *      The World Edit schematic
+     * settings.yml
+     *      All settings for configuring the game. If the schematic is copied, these settings are generally wanted too
+     * config.yml
+     *      Settings specific to this game (name and location)
+     *
+     * The zip file name is "thegamesname.game.zip". thegamesname is the same as the game's name with the following exceptions:
+     *   - it is all lowercase
+     *   - Al characters except a-z, and 0-9 are replaced with '_'
+     */
 
     companion object {
         private val plugin = Bomberman.instance
@@ -31,23 +44,17 @@ class GameSave(private val zipPath: Path) {
         /**
          * Writes data to disk (overriding anything existing) and returns a valid save file
          */
-        fun createNewSave(name: String, settings: GameSettings, arena: Arena): GameSave {
-            val zipPath = plugin.settings.gameSaves().resolve("$name.game.zip")
+        fun createNewSave(name: String, origin: Location, settings: GameSettings, schematic: Clipboard): GameSave {
+            val zipPath = plugin.settings.gameSaves().resolve("${name.lowercase().replace(Regex("[^a-z0-9]"), "_")}.game.zip")
             FileSystems.newFileSystem(zipPath, mapOf(Pair("create", !zipPath.exists()))).use { fs ->
 
                 // Write the schematic
                 val arenaPath = fs.getPath("arena.schem")
                 Files.newOutputStream(arenaPath).use { os ->
                     BuiltInClipboardFormat.SPONGE_SCHEMATIC.getWriter(os).use {
-                            writer -> writer.write(arena.clipboard)
+                            writer -> writer.write(schematic)
                     }
                 }
-
-                // Write the arena data
-                val arenaDataPath = fs.getPath("arena.yml")
-                val arenaYML = YamlConfiguration()
-                arenaYML.set("config", arena.settings)
-                Files.writeString(arenaDataPath, arenaYML.saveToString())
 
                 // Write the settings
                 val settingsPath = fs.getPath("settings.yml")
@@ -55,17 +62,18 @@ class GameSave(private val zipPath: Path) {
                 settingsYML.set("settings", settings)
                 Files.writeString(settingsPath, settingsYML.saveToString())
 
-                // Write additional config data
+                // Write config data
                 val configPath = fs.getPath("config.yml")
                 val configYML = YamlConfiguration()
                 configYML.set("name", name)
+                configYML.set("origin", origin)
                 Files.writeString(configPath, configYML.saveToString())
             }
 
-            val save = GameSave(zipPath)
+            val save = GameSave(name, origin, zipPath)
 
-            save.nameCache = name
-            save.arenaCache = WeakReference(arena)
+            // Set the cache so it doesn't have to read it out again
+            save.schematicCache = WeakReference(schematic)
             save.settingsCache = settings
 
             return save
@@ -77,9 +85,32 @@ class GameSave(private val zipPath: Path) {
             val files = data.listDirectoryEntries("*.game.zip")
             for (f in files) {
                 try {
-                    Game(GameSave(f))
+                    loadGame(f)
                 } catch (e: Exception) {
                     plugin.logger.log(Level.WARNING, "Exception occurred while loading: $f", e)
+                }
+            }
+        }
+
+        /**
+         * Loads a game from the give path
+         * @throws IOException if the given ZipFile cannot be read
+         */
+        @Throws(IOException::class)
+        fun loadGame(zipFile: Path): Game {
+            plugin.logger.info("Reading ${zipFile.pathString}")
+            // Open the zip
+            return FileSystems.newFileSystem(zipFile).use { fs ->
+                // Read the config
+                val configPath = fs.getPath("config.yml")
+                Files.newBufferedReader(configPath).use { reader ->
+                    val configYml = YamlConfiguration.loadConfiguration(reader)
+                    val name = configYml.getString("name") ?: throw IOException("Cannot read 'name' from 'config.yml' in '${zipFile.pathString}'")
+                    val origin = configYml.getSerializable("origin", Location::class.java) ?: throw IOException("Cannot read 'origin' from 'config.yml' in '${zipFile.pathString}'")
+
+                    plugin.logger.info("  Data read")
+
+                    Game(GameSave(name, origin, zipFile))
                 }
             }
         }
@@ -101,8 +132,11 @@ class GameSave(private val zipPath: Path) {
                     val name = config.getString("name")
                     val schema = config.getString("schema")
                     val origin = config.getSerializable("origin", Location::class.java)
-                    val settings = config.getSerializable("settings", GameSettings::class.java) ?: GameSettingsBuilder().build()
-                    val buildFlags = config.getSerializable("build-flags", BuildFlags::class.java) ?: BuildFlags()
+                    val settings = (config.getSerializable("settings", GameSettings::class.java) ?: GameSettingsBuilder().build()).copy(
+                        // copy out build flags which were in a separate section
+                        skipAir = config.getBoolean("build-flags.skip-air", false),
+                        deleteVoid = config.getBoolean("build-flags.delete-void", false),
+                    )
 
                     if (name == null || schema == null || origin == null) {
                         // This data cannot be fudged
@@ -117,7 +151,7 @@ class GameSave(private val zipPath: Path) {
 
                         // Create the new save file
                         // Note - this will not load the game, it will just create the save file.
-                        createNewSave(name, settings, Arena(origin, buildFlags, clipboard))
+                        createNewSave(name, origin, settings, clipboard)
 
                         // delete the old save file
                         file.deleteIfExists()
@@ -131,8 +165,7 @@ class GameSave(private val zipPath: Path) {
         }
     }
 
-    private var nameCache: String? = null
-    private var arenaCache: WeakReference<Arena>? = null
+    private var schematicCache: WeakReference<Clipboard>? = null
     private var settingsCache: GameSettings? = null
 
     /**
@@ -140,9 +173,9 @@ class GameSave(private val zipPath: Path) {
      * @throws IOException if the file cannot be read for any reason
      */
     @Throws(NoSuchFileException::class)
-    fun getArena() : Arena {
+    fun getSchematic() : Clipboard {
         // Return the cache, or fetch if not existing
-        return arenaCache?.get() ?: run {
+        return schematicCache?.get() ?: run {
             plugin.logger.info("Reading schematic data: " + zipPath.fileName)
 
             // Open the zip
@@ -153,24 +186,16 @@ class GameSave(private val zipPath: Path) {
                     BuiltInClipboardFormat.SPONGE_SCHEMATIC.getReader(reader).use { it.read() }
                 }
 
-                // Read the settings
-                val arenaDataPath = fs.getPath("arena.yml")
-                val arenaSettings = Files.newBufferedReader(arenaDataPath).use { reader ->
-                    val arenaYML = YamlConfiguration.loadConfiguration(reader)
-                    arenaYML.getSerializable("config", Arena.ArenaSettings::class.java)!!
-                }
-
                 plugin.logger.info("Data read")
 
-                val arena = Arena(arenaSettings, schematic)
-                arenaCache = WeakReference(arena)
-                arena
+                schematicCache = WeakReference(schematic)
+                schematic
             }
         }
     }
 
     /**
-     * Reads the game settings from disk
+     * Reads the game settings from disk (maybe cached)
      * If the settings do not exist, then default settings will be used
     * @throws IOException if the file is formatted badly and cannot be read
     */
@@ -192,32 +217,6 @@ class GameSave(private val zipPath: Path) {
                     plugin.logger.info("Data read")
 
                     settings
-                }
-            }
-        }
-    }
-
-    /**
-    * Reads the game config from disk
-    * @throws IOException if the config does not exist or cannot be read for any reason
-    */
-    @Throws(NoSuchFileException::class)
-    fun getName() : String {
-        return nameCache ?: run {
-            plugin.logger.info("Reading game config: " + zipPath.fileName)
-
-            // Open the zip
-            FileSystems.newFileSystem(zipPath).use { fs ->
-                // Read the config
-                val configPath = fs.getPath("config.yml")
-                Files.newBufferedReader(configPath).use { reader ->
-                    val configYML = YamlConfiguration.loadConfiguration(reader)
-                    val name = configYML.getString("name") ?: throw IOException("Cannot read 'name' from config.yml")
-                    nameCache = name
-
-                    plugin.logger.info("Data read")
-
-                    name
                 }
             }
         }

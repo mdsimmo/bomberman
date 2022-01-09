@@ -24,14 +24,15 @@ class GameReload(parent: Cmd) : GameCommand(parent) {
             return false
         BmGameDeletedIntent.delete(game, false)
         try {
-            val game = Game(GameSave(Bomberman.instance.settings.gameSaves().resolve("${game.name}.game.zip")))
-            BmGameBuildIntent.build(game)
+            // TODO game name may not match the actual file as it can change with special characters
+            val newGame = GameSave.loadGame(Bomberman.instance.settings.gameSaves().resolve("${game.name}.game.zip"))
+            BmGameBuildIntent.build(newGame)
             Text.RELOAD_SUCCESS
-                .with("game", game)
+                .with("game", newGame)
                 .sendTo(sender)
         } catch (e: IOException) {
             Text.RELOAD_CANNOT_LOAD
-                .with("game", game)
+                .with("game", game.name)
                 .sendTo(sender)
         }
         return true
