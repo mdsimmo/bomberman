@@ -29,38 +29,38 @@ class UndoBuild(parent: Cmd) : Cmd(parent) {
         // A collection of games that have the old state remembered
         private val gameMemory = mutableMapOf<String, Triple<Location, Clipboard, Int>>()
 
-        fun retainHistory(name: String, box: Box?) {
-            if (box == null) {
-                // delete memory
-                gameMemory.remove(name)
-            } else {
+        fun retainHistory(name: String, box: Box) {
+            // Copy the blocks to a clipboard
+            val region = WorldEditUtils.convert(box)
+            val clipboard = BlockArrayClipboard(region)
+            WorldEdit.getInstance().newEditSession(BukkitAdapter.adapt(box.world))
+                .use { editSession ->
+                    val forwardExtentCopy = ForwardExtentCopy(
+                        editSession, region, clipboard, region.minimumPoint
+                    )
+                    Operations.complete(forwardExtentCopy)
+                }
 
-                // Copy the blocks to a clipboard
-                val region = WorldEditUtils.convert(box)
-                val clipboard = BlockArrayClipboard(region)
-                WorldEdit.getInstance().newEditSession(BukkitAdapter.adapt(box.world))
-                    .use { editSession ->
-                        val forwardExtentCopy = ForwardExtentCopy(
-                            editSession, region, clipboard, region.minimumPoint
-                        )
-                        Operations.complete(forwardExtentCopy)
-                    }
+            // remove the memory after a delay
+            var handle = 0
+            handle = Bukkit.getScheduler().scheduleSyncDelayedTask(Bomberman.instance, {
+                // check if same task handler (in case same game name has been destroyed/created multiple times)
+                if (gameMemory[name]?.third == handle) {
+                    gameMemory.remove(name)
+                    Bomberman.instance.logger.info("Game '$name' undo history expired")
+                }
+            }, 10 * 60 * 20L) // 10 minutes
 
-                // remove the memory after a delay
-                var handle = 0
-                handle = Bukkit.getScheduler().scheduleSyncDelayedTask(Bomberman.instance, {
-                    // check if same task handler (in case same game name has been destroyed/created multiple times)
-                    if (gameMemory[name]?.third == handle) {
-                        gameMemory.remove(name)
-                        Bomberman.instance.logger.info("Game '$name' undo history expired")
-                    }
-                }, 10 * 60 * 20L) // 10 minutes
+            // Retain the games memory
+            gameMemory[name] = Triple(BukkitUtils.boxLoc1(box), clipboard, handle)
+        }
 
-                // Retain the games memory
-                gameMemory[name] = Triple(BukkitUtils.boxLoc1(box), clipboard, handle)
-            }
+        fun removeHistory(name: String) {
+            gameMemory.remove(name)
         }
     }
+
+
 
     override fun name(): Message {
         return context(Text.UNDO_NAME).format()

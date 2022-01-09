@@ -7,6 +7,7 @@ buildscript {
     dependencies {
         // Proguard 7.2 supports jdk 17, but not jdk 8. Proguard 7.1 supports jdk 8, but not jdk 17
         // Not sure if this is an issue just in beta - proguard is built in CI with jdk 8, so don't see why new version breaks here?
+        // TODO this fixes builds, but the binary will not be compatable with both jdk8 and jdk 17
         classpath 'com.guardsquare:proguard-gradle:' + (JavaVersion.current().isCompatibleWith(JavaVersion.VERSION_11) ? '7.2.0-beta5' : '7.1.0')
     }
 }

@@ -4,28 +4,20 @@ import com.sk89q.worldedit.WorldEdit
 import com.sk89q.worldedit.bukkit.BukkitAdapter
 import com.sk89q.worldedit.extent.clipboard.BlockArrayClipboard
 import com.sk89q.worldedit.extent.clipboard.Clipboard
-import com.sk89q.worldedit.extent.clipboard.io.BuiltInClipboardFormat
-import com.sk89q.worldedit.extent.clipboard.io.ClipboardFormats
-import com.sk89q.worldedit.function.mask.BlockTypeMask
 import com.sk89q.worldedit.function.operation.ForwardExtentCopy
 import com.sk89q.worldedit.function.operation.Operations
 import com.sk89q.worldedit.math.BlockVector3
-import com.sk89q.worldedit.session.ClipboardHolder
-import com.sk89q.worldedit.world.block.BlockTypes
 import io.github.mdsimmo.bomberman.Bomberman
 import io.github.mdsimmo.bomberman.commands.game.UndoBuild
 import io.github.mdsimmo.bomberman.events.*
 import io.github.mdsimmo.bomberman.messaging.*
 import io.github.mdsimmo.bomberman.utils.Box
 import io.github.mdsimmo.bomberman.utils.BukkitUtils
-import io.github.mdsimmo.bomberman.utils.RefectAccess
 import io.github.mdsimmo.bomberman.utils.WorldEditUtils
 import org.bukkit.Bukkit
 import org.bukkit.Location
 import org.bukkit.Material
 import org.bukkit.configuration.file.YamlConfiguration
-import org.bukkit.configuration.serialization.ConfigurationSerializable
-import org.bukkit.entity.Item
 import org.bukkit.entity.Player
 import org.bukkit.event.EventHandler
 import org.bukkit.event.EventPriority
@@ -33,59 +25,19 @@ import org.bukkit.event.HandlerList
 import org.bukkit.event.Listener
 import org.bukkit.event.entity.EntityDamageEvent
 import org.bukkit.event.server.PluginDisableEvent
-import java.io.File
-import java.io.FileInputStream
-import java.io.FileOutputStream
-import java.lang.IllegalArgumentException
-import java.lang.ref.WeakReference
-import java.util.logging.Level
+import java.nio.file.Path
+import kotlin.io.path.deleteIfExists
+import kotlin.io.path.exists
+import kotlin.io.path.reader
+import kotlin.io.path.writer
 
-class Game private constructor(val name: String, private var schema: Arena, val settings: GameSettings = plugin.settings.defaultGameSettings())
-    : Formattable, Listener {
+class Game constructor(private val save: GameSave) : Formattable, Listener {
 
     companion object {
         private val plugin = Bomberman.instance
 
-        @JvmStatic
-        fun loadGames() {
-            val data = plugin.settings.gameSaves()
-            val files = data
-                    .listFiles { _, name ->
-                        name.endsWith(".yml")
-                    }
-                    ?: return
-            for (f in files) {
-                try {
-                    loadGame(f)
-                } catch (e: Exception) {
-                    plugin.logger.log(Level.WARNING, "Cannot load game: " + f.name, e)
-                }
-            }
-        }
-
-        fun loadGame(file: File): Game? {
-            plugin.logger.info("Loading game: " + file.name)
-            val data = YamlConfiguration.loadConfiguration(file)
-            val name = data["name"] as? String ?: return null
-            val schema = data["schema"] as? String ?: return null
-            val loc = data["origin"] as? Location ?: return null
-            val settings = data["settings"] as? GameSettings ?: plugin.settings.defaultGameSettings()
-            val flags = data["build-flags"] as? BuildFlags ?: BuildFlags()
-            return Game(name, Arena(File(schema), loc, flags), settings)
-        }
-
-        fun saveGame(game: Game) {
-            val file = YamlConfiguration()
-            file.set("name", game.name)
-            file.set("schema", game.schema.file.path)
-            file.set("origin", game.schema.origin)
-            file.set("settings", game.settings)
-            file.set("build-flags", game.schema.flags)
-            file.save(File(plugin.settings.gameSaves(), "${game.name}.yml"))
-        }
-
-        private fun tempDataFile(game: Game): File {
-            return File(plugin.settings.tempGameData(), "${game.name}.yml")
+        private fun tempDataFile(game: Game): Path {
+            return plugin.settings.tempGameData().resolve("${game.name}.yml")
         }
 
         fun buildGameFromRegion(name: String, box: Box, flags: BuildFlags): Game {
@@ -101,179 +53,55 @@ class Game private constructor(val name: String, private var schema: Arena, val 
                         Operations.complete(forwardExtentCopy)
                     }
 
-            // Write the clipboard to a schematic file
-            val file = File(plugin.settings.customSaves(), "$name.${BuiltInClipboardFormat.SPONGE_SCHEMATIC.primaryFileExtension}")
-            BuiltInClipboardFormat.SPONGE_SCHEMATIC.getWriter(FileOutputStream(file)).use {
-                writer -> writer.write(clipboard)
-            }
+            // Save all data
+            val save = GameSave.createNewSave(
+                name,
+                plugin.settings.defaultGameSettings(),
+                Arena(BukkitUtils.boxLoc1(box), flags, clipboard)
+            )
 
-            // Make the Game
-            val game = Game(name, Arena(file, BukkitUtils.boxLoc1(box), clipboard, flags))
-            UndoBuild.retainHistory(name, null) // delete any old history
-            // TODO when building from selection, only need to build cages
-            BmGameBuildIntent.build(game)
+            // Delete history from previous games with the same name
+            UndoBuild.removeHistory(name)
+
+            // Create a new game
+            val game = Game(save)
+            game.makeCages()
             return game
         }
 
-        fun buildGameFromSchema(name: String, loc: Location, file: File, flags: BuildFlags): Game {
-            val game = Game(name, Arena(file, loc, flags))
+        fun buildGameFromSchema(name: String, loc: Location, clipboard: Clipboard, flags: BuildFlags): Game {
+            val save = GameSave.createNewSave(name, plugin.settings.defaultGameSettings(), Arena(loc, flags, clipboard))
+            val game = Game(save)
             UndoBuild.retainHistory(game.name, game.schema.box)
             BmGameBuildIntent.build(game)
             return game
         }
     }
 
-    class BuildFlags : ConfigurationSerializable {
-        var skipAir = false
-        var deleteVoid = false
-
-        override fun serialize(): Map<String, Any> {
-            return mapOf(
-                    Pair("skip-air", skipAir),
-                    Pair("delete-void", deleteVoid)
-            )
+    val name = save.getName()
+    val schema: Arena get() = save.getArena()
+    var settings: GameSettings
+        get() = save.getSettings()
+        set(value) {
+            save.updateSettings(value)
         }
-
-        companion object {
-            @JvmStatic
-            @RefectAccess
-            fun deserialize(data: Map<String, Any?>): BuildFlags {
-                val buildFlags = BuildFlags()
-                (data["skip-air"] as? Boolean)?.let { buildFlags.skipAir = it }
-                (data["delete-void"] as? Boolean)?.let { buildFlags.deleteVoid = it }
-                return buildFlags
-            }
-        }
-    }
-
-    private class Arena : Formattable {
-
-        val origin: Location
-        val file: File
-        val flags: BuildFlags
-
-        var boxCache: Box? = null
-        val box: Box get() {
-            return boxCache ?: run {
-                val c = loadClipboard()
-                val box = WorldEditUtils.pastedBounds(origin, c)
-                boxCache = box
-                box
-            }
-        }
-        val spawns: Set<Location> by lazy {
-            searchSpawns()
-        }
-
-        private var clipboard: WeakReference<Clipboard>? = null
-
-        constructor(file: File, origin: Location, flags: BuildFlags) {
-            this.file = file
-            this.flags = flags
-            this.origin = BukkitUtils.blockLoc(origin)
-        }
-
-        constructor(file: File, origin: Location, clipboard: Clipboard, flags: BuildFlags) {
-            this.file = file
-            this.flags = flags
-            this.origin = BukkitUtils.blockLoc(origin)
-            this.boxCache =  WorldEditUtils.pastedBounds(origin, clipboard)
-            this.clipboard = WeakReference(clipboard)
-        }
-
-        fun loadClipboard() : Clipboard =
-            clipboard?.get() ?: run {
-                plugin.logger.info("Reading schematic data: " + file.name)
-                // Load the schematic
-                val format = ClipboardFormats.findByFile(file)
-                        ?: throw IllegalArgumentException("Unknown file format: '${file.path}'")
-                val c = format.getReader(FileInputStream(file)).use { it.read() }
-
-                // cache the schematic
-                clipboard = WeakReference(c)
-                plugin.logger.info("data read")
-                c
-            }
-
-        private fun searchSpawns(): Set<Location> {
-            val clip = loadClipboard()
-
-            plugin.logger.info("Searching for spawns...")
-            val spawns = mutableSetOf<Location>()
-            for (loc in clip.region) {
-                val block = clip.getFullBlock(loc)
-                block.nbtData?.let {
-                    if (
-                            it.getString("Text1").contains("[spawn]", ignoreCase = true) or
-                            it.getString("Text2").contains("[spawn]", ignoreCase = true) or
-                            it.getString("Text3").contains("[spawn]", ignoreCase = true) or
-                            it.getString("Text4").contains("[spawn]", ignoreCase = true)
-                    ) {
-                        spawns += BukkitAdapter.adapt(box.world, loc.subtract(clip.origin)).add(origin)
-                    }
-                }
-            }
-            plugin.logger.info("  ${spawns.size} spawns found")
-            return spawns
-        }
-
-        fun build() {
-
-            plugin.logger.info("Building schematic ...")
-            val clip = loadClipboard()
-
-            // cleanup any dropped items
-            box.world.getNearbyEntities(BukkitUtils.convert(box))
-                    .filterIsInstance<Item>()
-                    .forEach{ it.remove() }
-
-            // Paste the schematic
-            WorldEdit.getInstance().newEditSession(BukkitAdapter.adapt(box.world))
-                    .use { editSession ->
-
-                        val operation = ClipboardHolder(clip)
-                                .createPaste(editSession)
-                                .to(BlockVector3.at(origin.blockX, origin.blockY, origin.blockZ))
-                                .copyEntities(true)
-                                .ignoreAirBlocks(flags.skipAir)
-                                .build()
-                        Operations.complete(operation)
-
-                        editSession.close()
-
-                        if (flags.deleteVoid) {
-                            editSession.replaceBlocks(WorldEditUtils.convert(box),
-                                    BlockTypeMask(editSession, BlockTypes.STRUCTURE_VOID),
-                                    BlockTypes.AIR!!.defaultState
-                            )
-                        }
-                    }
-            plugin.logger.info("Rebuild done")
-        }
-
-        override fun format(args: List<Message>, elevated: Boolean): Message {
-            return when (args.firstOrNull()?.toString()?.lowercase() ?: "name") {
-                "name" -> Message.of(file.nameWithoutExtension)
-                "file" -> Message.of(file.path)
-                "filename" -> Message.of(file.name)
-                "parent" -> Message.of(file.parent ?: "")
-                "xsize" -> Message.of(box.size.x)
-                "ysize" -> Message.of(box.size.y)
-                "zsize" -> Message.of(box.size.z)
-                else -> Message.empty
-            }
-        }
-    }
-
     private val players: MutableSet<Player> = HashSet()
     private var running = false
-    private val tempData: YamlConfiguration = YamlConfiguration.loadConfiguration(tempDataFile(this))
+    private val tempData: YamlConfiguration = tempDataFile(this).let { path ->
+        if (path.exists()) {
+            path.reader().use { YamlConfiguration.loadConfiguration(it) }
+        } else {
+            YamlConfiguration()
+        }
+    }
+
+    // Spawns are saved in temporary file to avoid needing to read the schematic on server load
     private val spawns: Set<Location> = (tempData.getList("spawns"))
             ?.filterIsInstance(Location::class.java)?.toSet()
             ?: schema.spawns
 
     init {
-        writeData("spawns", spawns.toList())
+        writeTempData("spawns", spawns.toList())
 
         // If game was not shut down cleanly (i.e. server died), rebuild the arena
         if (tempData.getBoolean("rebuild-needed", false)) {
@@ -283,12 +111,11 @@ class Game private constructor(val name: String, private var schema: Arena, val 
         }
 
         Bukkit.getPluginManager().registerEvents(this, plugin)
-        saveGame(this)
     }
 
-    private fun writeData(path: String, obj: Any?) {
+    private fun writeTempData(path: String, obj: Any?) {
         tempData.set(path, obj)
-        tempData.save(tempDataFile(this))
+        tempDataFile(this).writer().use { it.write(tempData.saveToString()) }
     }
 
     /*
@@ -333,11 +160,10 @@ class Game private constructor(val name: String, private var schema: Arena, val 
     }
 
     private fun removeCages() {
-        val clip = schema.loadClipboard()
         WorldEdit.getInstance().newEditSession(BukkitAdapter.adapt(schema.origin.world))
                 .use { editSession ->
                     val offset = BlockVector3.at(schema.origin.x, schema.origin.y, schema.origin.z)
-                            .subtract(clip.origin)
+                            .subtract(schema.clipboard.origin)
                     spawnBlocks()
                             .filter { (isSpawn, _) ->
                                 !isSpawn
@@ -346,7 +172,7 @@ class Game private constructor(val name: String, private var schema: Arena, val 
                                 val loc = block.location
                                 val blockVec = BlockVector3.at(loc.x, loc.y, loc.z)
                                 val clipLocation = blockVec.subtract(offset)
-                                val blockState = clip.getFullBlock(clipLocation)
+                                val blockState = schema.clipboard.getFullBlock(clipLocation)
                                 editSession.setBlock(blockVec, blockState)
                             }
                 }
@@ -511,7 +337,7 @@ class Game private constructor(val name: String, private var schema: Arena, val 
         running = true
         removeCages()
         GameProtection.protect(this, schema.box)
-        writeData("rebuild-needed", true)
+        writeTempData("rebuild-needed", true)
         e.setHandled()
     }
 
@@ -574,7 +400,7 @@ class Game private constructor(val name: String, private var schema: Arena, val 
             return
         schema.build()
         makeCages()
-        writeData("rebuild-needed", false)
+        writeTempData("rebuild-needed", false)
         e.setHandled()
     }
 
@@ -593,9 +419,9 @@ class Game private constructor(val name: String, private var schema: Arena, val 
             return
         plugin.logger.info("Deleting $name" + if (e.isDeletingSave) {""} else {" (keeping data)"})
         BmGameTerminatedIntent.terminateGame(this)
-        tempDataFile(this).delete()
+        tempDataFile(this).deleteIfExists()
         if (e.isDeletingSave) {
-            File(Bomberman.instance.settings.gameSaves(), "${name}.yml").delete()
+            plugin.settings.gameSaves().resolve("${name}.game.zip").deleteIfExists()
         }
         e.setHandled()
     }

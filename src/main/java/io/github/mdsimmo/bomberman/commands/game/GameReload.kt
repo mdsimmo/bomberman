@@ -8,10 +8,11 @@ import io.github.mdsimmo.bomberman.commands.Permissions
 import io.github.mdsimmo.bomberman.events.BmGameBuildIntent
 import io.github.mdsimmo.bomberman.events.BmGameDeletedIntent
 import io.github.mdsimmo.bomberman.game.Game
+import io.github.mdsimmo.bomberman.game.GameSave
 import io.github.mdsimmo.bomberman.messaging.Message
 import io.github.mdsimmo.bomberman.messaging.Text
 import org.bukkit.command.CommandSender
-import java.io.File
+import java.io.IOException
 
 class GameReload(parent: Cmd) : GameCommand(parent) {
     override fun name(): Message {
@@ -22,16 +23,16 @@ class GameReload(parent: Cmd) : GameCommand(parent) {
         if (args.isNotEmpty())
             return false
         BmGameDeletedIntent.delete(game, false)
-        val new = Game.loadGame(File(Bomberman.instance.settings.gameSaves(), "${game.name}.yml"))
-        if (new == null) {
-            Text.RELOAD_CANNOT_LOAD
-                    .with("game", game)
-                    .sendTo(sender)
-        } else {
-            BmGameBuildIntent.build(new)
+        try {
+            val game = Game(GameSave(Bomberman.instance.settings.gameSaves().resolve("${game.name}.game.zip")))
+            BmGameBuildIntent.build(game)
             Text.RELOAD_SUCCESS
-                    .with("game", game)
-                    .sendTo(sender)
+                .with("game", game)
+                .sendTo(sender)
+        } catch (e: IOException) {
+            Text.RELOAD_CANNOT_LOAD
+                .with("game", game)
+                .sendTo(sender)
         }
         return true
     }

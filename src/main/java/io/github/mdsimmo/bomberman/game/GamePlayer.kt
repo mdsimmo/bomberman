@@ -15,14 +15,14 @@ import org.bukkit.entity.Player
 import org.bukkit.event.*
 import org.bukkit.event.block.Action
 import org.bukkit.event.block.BlockPlaceEvent
-import org.bukkit.event.entity.EntityDamageEvent
 import org.bukkit.event.entity.EntityRegainHealthEvent
 import org.bukkit.event.player.*
 import org.bukkit.inventory.ItemStack
 import org.bukkit.potion.PotionEffect
 import org.bukkit.potion.PotionEffectType
-import java.io.File
+import java.nio.file.Path
 import java.util.logging.Level
+import kotlin.io.path.*
 
 class GamePlayer private constructor(private val player: Player, private val game: Game) : Listener {
 
@@ -45,7 +45,7 @@ class GamePlayer private constructor(private val player: Player, private val gam
             dataFile["food-level"] = player.foodLevel
             dataFile["inventory"] = player.inventory.contents.toList()
             dataFile["is-flying"] = player.isFlying
-            dataFile.save(tempDataFile(player))
+            tempDataFile(player).writer().use { it.write(dataFile.saveToString()) }
 
             // Add a permission group for WorldGuard compatibility (must be done before teleporting)
             try {
@@ -124,7 +124,7 @@ class GamePlayer private constructor(private val player: Player, private val gam
         private fun reset(player: Player): Location {
             // Give player StuffBack
             val file =  tempDataFile(player)
-            val dataFile = YamlConfiguration.loadConfiguration(file)
+            val dataFile = file.reader().use { YamlConfiguration.loadConfiguration(it) }
 
             ((dataFile["gamemode"] as? String?)?.let { try {
                 GameMode.valueOf(it.uppercase())
@@ -158,7 +158,7 @@ class GamePlayer private constructor(private val player: Player, private val gam
                 plugin.logger.log(Level.WARNING, "Unable to remove permissions", e)
             }
 
-            file.delete()
+            file.deleteIfExists()
 
             removePotionEffects(player)
             return location
@@ -173,8 +173,8 @@ class GamePlayer private constructor(private val player: Player, private val gam
             }
         }
 
-        private fun tempDataFile(player: Player): File {
-            return File(plugin.settings.tempPlayerData(), "${player.name}.yml")
+        private fun tempDataFile(player: Player): Path {
+            return plugin.settings.tempPlayerData().resolve("${player.name}.yml")
         }
     }
 

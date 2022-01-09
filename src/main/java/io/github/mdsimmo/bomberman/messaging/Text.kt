@@ -7,7 +7,9 @@ import java.io.BufferedReader
 import java.io.IOException
 import java.io.InputStreamReader
 import java.io.Reader
+import java.nio.file.Files
 import java.util.*
+import kotlin.io.path.exists
 
 /**
  * A list of Contexteds that are defined in english.yml in the resource folder.
@@ -103,6 +105,7 @@ enum class Text(path: String) : Contexted {
     CREATE_SCHEMA_NOT_FOUND("command.create.schema-not-found"),
     CREATE_FLAG_PLUGIN("command.create.flags.p.description"),
     CREATE_FLAG_SCHEMA("command.create.flags.f.description"),
+    CREATE_FLAG_WAND("command.create.flags.w.description"),
     CREATE_FLAG_SKIP_AIR("command.create.flags.a.description"),
     CREATE_FLAG_VOID_TO_AIR("command.create.flags.v.description"),
     CREATE_FLAG_PLUGIN_EXT("command.create.flags.p.ext"),
@@ -209,10 +212,10 @@ enum class Text(path: String) : Contexted {
             try {
                 builtin.load(reader)
                 // Instance may be null when testing
-                Bomberman.instance?.let {
-                    val custom = it.settings.language()
+                Bomberman.instance?.let { plugin ->
+                    val custom = plugin.settings.language()
                     if (custom.exists())
-                        server.load(custom)
+                        Files.newBufferedReader(custom).use { server.load(it) }
                 }
             } catch (e: IOException) {
                 e.printStackTrace()

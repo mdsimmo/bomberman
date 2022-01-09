@@ -2,7 +2,9 @@ package io.github.mdsimmo.bomberman
 
 import io.github.mdsimmo.bomberman.game.GameSettings
 import org.bukkit.configuration.file.FileConfiguration
-import java.io.File
+import java.nio.file.Path
+import kotlin.io.path.createDirectories
+import kotlin.io.path.exists
 
 class BmSetting private constructor() {
 
@@ -31,49 +33,32 @@ class BmSetting private constructor() {
     private var defaultGameSettings: GameSettings = GameSettings()
     private var language: String = "messages.yml"
 
-    fun gameSaves(): File {
-        val file = File(Bomberman.instance.dataFolder, gameSaves)
-        if (!file.exists()) {
-            file.mkdirs()
+    fun gameSaves(): Path {
+        val dir = Bomberman.instance.dataFolder.toPath().resolve(gameSaves)
+        if (!dir.exists()) {
+            dir.createDirectories()
         }
-        return file
+        return dir
     }
 
-    fun tempGameData(): File {
-        val file = File(Bomberman.instance.dataFolder, tempGameData)
-        if (!file.exists()) {
-            file.mkdirs()
+    fun tempGameData(): Path {
+        val dir = Bomberman.instance.dataFolder.toPath().resolve(tempGameData)
+        if (!dir.exists()) {
+            dir.createDirectories()
         }
-        return file
+        return dir
     }
 
-    fun tempPlayerData(): File {
-        val file = File(Bomberman.instance.dataFolder, tempPlayerData)
-        if (!file.exists()) {
-            file.mkdirs()
+    fun tempPlayerData(): Path {
+        val dir = Bomberman.instance.dataFolder.toPath().resolve(tempPlayerData)
+        if (!dir.exists()) {
+            dir.createDirectories()
         }
-        return file
+        return dir
     }
 
-
-    fun builtinSaves(): File {
-        val file = File(Bomberman.instance.dataFolder, schematicsBuiltin)
-        if (!file.exists()) {
-            file.mkdirs()
-        }
-        return file
-    }
-
-    fun customSaves(): File {
-        val file = File(Bomberman.instance.dataFolder, schematicsCustom)
-        if (!file.exists()) {
-            file.mkdirs()
-        }
-        return file
-    }
-
-    fun language(): File {
-        return File(Bomberman.instance.dataFolder, language)
+    fun language(): Path {
+        return Bomberman.instance.dataFolder.toPath().resolve(language)
     }
 
     fun defaultGameSettings(): GameSettings {

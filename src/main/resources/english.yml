@@ -172,17 +172,19 @@ command:
   # Messages relating to '/bm create'
   create:
     name: create
-    description: Builds a Bomberman game. Defaults to current axe selection. Use -p and -f to use a saved schematic.
+    description: Builds a Bomberman game. Use -p, -f or -w to select what to build.
     usage: /{command|path} <name> [options]
-    example: /{command|path} mygame -p=bm -f=purple
+    example: /{command|path} mygame -p=purple
     extra: 'Mark spawns by writing {#gray|{#italic|[spawn]}} on signs'
     flags:
       p:
-        description: Plugin to load schem from (default=WorldEdit)
-        ext: [bm|we]
+        description: Builds a default schematic from the plugin
+        ext: [purple]
       f:
-        description: The schematic file to load
+        description: Builds a schematic saved with WorldEdit
         ext: <file>
+      w:
+        description: Uses the current wand's selection
       a:
         description: Skip air blocks
       v:

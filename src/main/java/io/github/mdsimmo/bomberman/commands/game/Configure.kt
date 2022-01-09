@@ -151,7 +151,7 @@ class Configure(parent: Cmd) : GameCommand(parent) {
                             'g' -> settings.powerItem = item!!.type
                         }
                     }
-                    Game.saveGame(game)
+                    game.settings = settings
                 }
         )
     }
@@ -226,7 +226,9 @@ class Configure(parent: Cmd) : GameCommand(parent) {
                         expandSimilarMaterials(mat)
                     }.toSet()
                     result(blocks)
-                    Game.saveGame(game)
+
+                    // save settings
+                    game.settings = settings
                 }
         )
     }
@@ -286,7 +288,9 @@ class Configure(parent: Cmd) : GameCommand(parent) {
                         }
                     }
                     game.settings.initialItems = closingItems.asList()
-                    Game.saveGame(game)
+
+                    // Save settings
+                    game.settings = game.settings
                 }
         )
     }
@@ -408,7 +412,9 @@ class Configure(parent: Cmd) : GameCommand(parent) {
                         mats.flatMap { expandSimilarMaterials(it).toList() }
                                 .map { Pair(it, itemWeights.toMap()) }
                     }.toMap()
-                    Game.saveGame(game)
+
+                    // Save settings
+                    game.settings = game.settings
                 }
         )
     }
