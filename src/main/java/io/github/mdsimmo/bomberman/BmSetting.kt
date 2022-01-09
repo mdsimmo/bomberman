@@ -1,6 +1,7 @@
 package io.github.mdsimmo.bomberman
 
 import io.github.mdsimmo.bomberman.game.GameSettings
+import io.github.mdsimmo.bomberman.game.GameSettingsBuilder
 import org.bukkit.configuration.file.FileConfiguration
 import java.nio.file.Path
 import kotlin.io.path.createDirectories
@@ -17,9 +18,6 @@ class BmSetting private constructor() {
             (data["game-saves"] as? String?)?.let { settings.gameSaves = it }
             (data["temp-data.game"] as? String?)?.let { settings.tempGameData = it }
             (data["temp-data.player"] as? String?)?.let { settings.tempPlayerData = it }
-            (data["default-game-settings"] as? GameSettings?)?.let {
-                settings.defaultGameSettings = it
-            }
             (data["language"] as? String?)?.let { settings.language = it }
             return settings
         }
@@ -30,7 +28,6 @@ class BmSetting private constructor() {
     private var gameSaves: String = "games"
     private var tempGameData: String = "temp/game"
     private var tempPlayerData: String = "temp/player"
-    private var defaultGameSettings: GameSettings = GameSettings()
     private var language: String = "messages.yml"
 
     fun gameSaves(): Path {
@@ -61,7 +58,4 @@ class BmSetting private constructor() {
         return Bomberman.instance.dataFolder.toPath().resolve(language)
     }
 
-    fun defaultGameSettings(): GameSettings {
-        return defaultGameSettings.clone()
-    }
 }

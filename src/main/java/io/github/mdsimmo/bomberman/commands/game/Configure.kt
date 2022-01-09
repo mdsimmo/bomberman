@@ -5,6 +5,7 @@ import io.github.mdsimmo.bomberman.commands.GameCommand
 import io.github.mdsimmo.bomberman.commands.Permission
 import io.github.mdsimmo.bomberman.commands.Permissions
 import io.github.mdsimmo.bomberman.game.Game
+import io.github.mdsimmo.bomberman.game.GameSettingsBuilder
 import io.github.mdsimmo.bomberman.messaging.Contexted
 import io.github.mdsimmo.bomberman.messaging.Message
 import io.github.mdsimmo.bomberman.messaging.Text
@@ -92,7 +93,7 @@ class Configure(parent: Cmd) : GameCommand(parent) {
     }
 
     private fun showGeneralConfig(player: Player, game: Game) {
-        val settings = game.settings
+        val settings = GameSettingsBuilder(game.settings)
         GuiBuilder.show(player, Text.CONFIGURE_TITLE_GENERAL.format().toString(), arrayOf(
                 "  ^^^^   ",
                 "< lfbitg ",
@@ -151,19 +152,19 @@ class Configure(parent: Cmd) : GameCommand(parent) {
                             'g' -> settings.powerItem = item!!.type
                         }
                     }
-                    game.settings = settings
+                    game.settings = settings.build()
                 }
         )
     }
 
     private fun showBlockSettings(player: Player, game: Game) {
         showBlockSettings(player, game, 0, stringify(Text.CONFIGURE_DESTRUCTIBLE_DESC),
-                game.settings.destructible) { game.settings.destructible = it }
+                game.settings.destructible) { game.settings = game.settings.copy(destructible = it) }
     }
 
     private fun showBlockSettings(player: Player, game: Game, selected: Int, description: String, types: Set<Material>, result: (Set<Material>) -> Unit) {
         val typesList = types.filter { it.isItem }.filter { it.isBlock }.toList()
-        val settings = game.settings
+        val settings = GameSettingsBuilder(game.settings)
         GuiBuilder.show(player, Text.CONFIGURE_TITLE_BLOCKS.format().toString(), arrayOf(
                 "<d s p n ",
                 " c cEc c ",
@@ -228,7 +229,7 @@ class Configure(parent: Cmd) : GameCommand(parent) {
                     result(blocks)
 
                     // save settings
-                    game.settings = settings
+                    game.settings = settings.build()
                 }
         )
     }
@@ -287,10 +288,7 @@ class Configure(parent: Cmd) : GameCommand(parent) {
                             'i' -> closingItems[9+index.secIndex] = item
                         }
                     }
-                    game.settings.initialItems = closingItems.asList()
-
-                    // Save settings
-                    game.settings = game.settings
+                    game.settings = game.settings.copy(initialItems = closingItems.asList())
                 }
         )
     }
@@ -407,14 +405,12 @@ class Configure(parent: Cmd) : GameCommand(parent) {
                         }
                     }.toList())
 
-                    // Map to standard form to save
-                    game.settings.blockLoot = loot.flatMap {(mats, itemWeights) ->
+                    // Map to standard form and save
+                    game.settings = game.settings.copy(blockLoot = loot.flatMap {(mats, itemWeights) ->
                         mats.flatMap { expandSimilarMaterials(it).toList() }
                                 .map { Pair(it, itemWeights.toMap()) }
-                    }.toMap()
+                    }.toMap())
 
-                    // Save settings
-                    game.settings = game.settings
                 }
         )
     }

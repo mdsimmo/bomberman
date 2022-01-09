@@ -101,7 +101,7 @@ class GameSave(private val zipPath: Path) {
                     val name = config.getString("name")
                     val schema = config.getString("schema")
                     val origin = config.getSerializable("origin", Location::class.java)
-                    val settings = config.getSerializable("settings", GameSettings::class.java) ?: GameSettings()
+                    val settings = config.getSerializable("settings", GameSettings::class.java) ?: GameSettingsBuilder().build()
                     val buildFlags = config.getSerializable("build-flags", BuildFlags::class.java) ?: BuildFlags()
 
                     if (name == null || schema == null || origin == null) {
@@ -186,7 +186,7 @@ class GameSave(private val zipPath: Path) {
                 Files.newBufferedReader(settingsPath).use { reader ->
                     val settingsYML = YamlConfiguration.loadConfiguration(reader)
                     val settings = settingsYML.getSerializable("settings", GameSettings::class.java)
-                        ?: plugin.settings.defaultGameSettings()
+                        ?: GameSettingsBuilder().build()
                     settingsCache = settings
 
                     plugin.logger.info("Data read")
@@ -221,15 +221,6 @@ class GameSave(private val zipPath: Path) {
                 }
             }
         }
-    }
-
-    /**
-     * Removes the cache so that the next reads will match the file
-     */
-    fun reload() {
-        nameCache = null
-        arenaCache = null
-        settingsCache = null
     }
 
     /**

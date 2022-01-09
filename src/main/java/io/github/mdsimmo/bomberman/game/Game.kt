@@ -56,7 +56,7 @@ class Game constructor(private val save: GameSave) : Formattable, Listener {
             // Save all data
             val save = GameSave.createNewSave(
                 name,
-                plugin.settings.defaultGameSettings(),
+                GameSettingsBuilder().build(),
                 Arena(BukkitUtils.boxLoc1(box), flags, clipboard)
             )
 
@@ -70,7 +70,7 @@ class Game constructor(private val save: GameSave) : Formattable, Listener {
         }
 
         fun buildGameFromSchema(name: String, loc: Location, clipboard: Clipboard, flags: BuildFlags): Game {
-            val save = GameSave.createNewSave(name, plugin.settings.defaultGameSettings(), Arena(loc, flags, clipboard))
+            val save = GameSave.createNewSave(name, GameSettingsBuilder().build(), Arena(loc, flags, clipboard))
             val game = Game(save)
             UndoBuild.retainHistory(game.name, game.schema.box)
             BmGameBuildIntent.build(game)
