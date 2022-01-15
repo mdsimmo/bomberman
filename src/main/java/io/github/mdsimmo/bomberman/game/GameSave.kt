@@ -93,11 +93,11 @@ class GameSave private constructor(val name: String, val origin: Location, priva
         }
 
         /**
-         * Loads a game from the give path
+         * Loads a game's save from the given path. The GameSave is just the data, so the Game will not be created
          * @throws IOException if the given ZipFile cannot be read
          */
         @Throws(IOException::class)
-        fun loadGame(zipFile: Path): Game {
+        fun loadSave(zipFile: Path): GameSave {
             plugin.logger.info("Reading ${zipFile.pathString}")
             // Open the zip
             return FileSystems.newFileSystem(zipFile).use { fs ->
@@ -110,9 +110,17 @@ class GameSave private constructor(val name: String, val origin: Location, priva
 
                     plugin.logger.info("  Data read")
 
-                    Game(GameSave(name, origin, zipFile))
+                    GameSave(name, origin, zipFile)
                 }
             }
+        }
+        /**
+         * Loads a game from the given path
+         * @throws IOException if the given ZipFile cannot be read
+         */
+        @Throws(IOException::class)
+        fun loadGame(zipFile: Path): Game {
+            return Game(loadSave(zipFile))
         }
 
         /**

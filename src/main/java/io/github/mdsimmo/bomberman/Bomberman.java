@@ -29,6 +29,7 @@ public class Bomberman extends JavaPlugin implements Listener {
 		ConfigurationSerialization.registerClass(DataRestorer.class, "io.github.mdsimmo.bomberman.game.Game$BuildFlags");
 
 		saveResource("sample_config.yml", true);
+		saveResource("games/templates/purple.game.zip", true);
 		FileConfiguration config = getConfig();
 		settings = BmSetting.load(config);
 

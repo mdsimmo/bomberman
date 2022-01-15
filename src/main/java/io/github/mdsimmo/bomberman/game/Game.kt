@@ -29,6 +29,7 @@ import org.bukkit.event.HandlerList
 import org.bukkit.event.Listener
 import org.bukkit.event.entity.EntityDamageEvent
 import org.bukkit.event.server.PluginDisableEvent
+import java.io.IOException
 import java.nio.file.Path
 import kotlin.io.path.deleteIfExists
 import kotlin.io.path.exists
@@ -91,7 +92,7 @@ class Game constructor(private val save: GameSave) : Formattable, Listener {
         }
 
     private val origin: Location get() = save.origin
-    private val clipboard: Clipboard get() = save.getSchematic()
+    val clipboard: Clipboard @Throws(IOException::class) get() = save.getSchematic() // TODO make private
     private val box: Box by lazy {
         WorldEditUtils.pastedBounds(origin, clipboard)
     }

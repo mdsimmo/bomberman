@@ -18,7 +18,7 @@ format:
   item: '{item|amount}x{item|type}'
 game-play:
   # Informs all the other players not involved that a player died
-  # {player}: the player who died 
+  # {player}: the player who died
   player-killed: '{player} is out!'
   # The winning text message
   # {player}: the winner
@@ -38,6 +38,7 @@ command:
     {command|description}
     {#|format.map|Usage|{command|usage}}
     {#|format.map|Extra|{command|extra}}
+    {#|format.map|Example|{command|example}}
     {#|format.map|Flags|{#switch|{command|flags|length}|0|| }}
     {command|flags|foreach|{!#|format.map|   -{it|name}{#switch|{it|ext}|||={it|ext}}|{it|description}}|
     }
@@ -49,7 +50,7 @@ command:
   # Shown when a player types a command that does not exist
   # {attempt}: the cmd that the player typed
   unknown-command: '{#red|Unknown command: {attempt}}'
-  # Shown to the console when it tries to run a command that needs to be done as a player 
+  # Shown to the console when it tries to run a command that needs to be done as a player
   must-be-player: You must be a player
   # Shown when a command uses a target selector, but the selecting is invalid
   # {selector}: the string of what they typed
@@ -172,23 +173,24 @@ command:
   # Messages relating to '/bm create'
   create:
     name: create
-    description: Builds a Bomberman game. Use -p, -f or -w to select what to build.
+    description: |-
+      Builds a Bomberman game. Use {#gray|-s}, {#gray|-w}, or {#gray|-c} to select what to build.
+      Options {#gray|-s}, {#gray|-c} must be specified as one of:
+       - {#gray|g:<name>} will copy another game. 
+       - {#gray|bm:<file>} will copy a file in the games templates directory, or a built in example game. 
+       - {#gray|we:<file>} will copy a file in world edit saves directory.
     usage: /{command|path} <name> [options]
-    example: /{command|path} mygame -p=purple
+    example: /{command|path} mygame -f=bm:purple
     extra: 'Mark spawns by writing {#gray|{#italic|[spawn]}} on signs'
     flags:
-      p:
-        description: Builds a default schematic from the plugin
-        ext: [purple]
-      f:
-        description: Builds a schematic saved with WorldEdit
+      s:
+        description: Specify the game's schematic to use. Cannot be used with {#gray|-w}. Defaults to {#gray|-c}. File must be a {#gray|.schem} or {#gray|.game.zip}
+        ext: <file>
+      c:
+        description: Specify the game's config to use. Defaults to {#gray|-s}, or generic settings. File must be a {#gray|.yml} or {#gray|.game.zip}
         ext: <file>
       w:
-        description: Uses the current wand's selection
-      a:
-        description: Skip air blocks
-      v:
-        description: Replace structure void with air
+        description: Uses the current wand's selection. Cannot be used with {#gray|-s}
     # The game's name is already used
     # {game}: the game that has the shared name 
     game-exists: Game {game} already exists
