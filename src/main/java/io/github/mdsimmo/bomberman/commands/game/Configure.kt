@@ -207,13 +207,13 @@ class Configure(parent: Cmd) : GameCommand(parent) {
                     when (index.section) {
                         '<' -> showMainMenu(player, game)
                         'd' -> if (selected != 0) showBlockSettings(player, game, 0, stringify(Text.CONFIGURE_DESTRUCTIBLE_DESC),
-                                settings.destructible) { settings.destructible = it}
+                                settings.destructible) { game.settings = game.settings.copy(destructible = it) }
                         's' -> if (selected != 1) showBlockSettings(player, game, 1, stringify(Text.CONFIGURE_INDESTRUCTIBLE_DESC),
-                                settings.indestructible) {settings.indestructible = it}
+                                settings.indestructible) { game.settings = game.settings.copy(indestructible = it) }
                         'p' -> if (selected != 2) showBlockSettings(player, game, 2, stringify(Text.CONFIGURE_PASS_DESTROY_DESC),
-                                settings.passDestroy) {settings.passDestroy = it}
+                                settings.passDestroy) { game.settings = game.settings.copy(passDestroy = it) }
                         'n' -> if (selected != 3) showBlockSettings(player, game, 3, stringify(Text.CONFIGURE_PASS_KEEP_DESC),
-                                settings.passKeep) {settings.passKeep = it}
+                                settings.passKeep) { game.settings = game.settings.copy(passKeep = it) }
                     }
                 },
                 onClose = {
