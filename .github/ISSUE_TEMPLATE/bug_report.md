@@ -19,7 +19,8 @@ A clear and concise description of what you expected to happen.
 
 **Version information**
  - Bomberman Version:
- - Server version: 
+ - MC Server version: 
+ - Java Version:
  - Installed plugins: 
 
 
