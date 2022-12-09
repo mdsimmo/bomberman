@@ -42,7 +42,7 @@ class Game constructor(private val save: GameSave) : Formattable, Listener {
         private val plugin = Bomberman.instance
 
         private fun tempDataFile(game: Game): Path {
-            return plugin.tempGameData().resolve("${game.name}.yml")
+            return plugin.tempGameData().resolve("${game.name.replace(Regex("[^a-z0-9]"), "_")}.yml")
         }
 
         fun buildGameFromRegion(name: String, box: Box, settings: GameSettings): Game {
