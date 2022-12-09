@@ -41,8 +41,6 @@ data class GameSettings(
                 defaultSettings
             }
 
-            println("Skip air" + data["skip-air"])
-
             return GameSettings(
                 bombItem = (data["bomb"] as? String?)?.let { Material.matchMaterial(it) } ?: default!!.bombItem,
                 powerItem = (data["power"] as? String?)?.let { Material.matchMaterial(it)} ?: default!!.powerItem,
