@@ -192,7 +192,7 @@ command:
     description: |-
       Builds a Bomberman game. Use {#gray|-schem} or {#gray|-wand} to select what to build.
     usage: /{command|path} <name> [options]
-    example: /{command|path} mygame -schem=t:purple
+    example: /{command|path} mygame -schem=t:purple.game.zip
     extra: 'Custom schematics need all spawns marked by writing {#gray|{#italic|[spawn]}} on signs. Do NOT put spawn cages in the schematic.'
     flags:
       schem:
