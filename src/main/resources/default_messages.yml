@@ -190,26 +190,27 @@ command:
   create:
     name: create
     description: |-
-      Builds a Bomberman game. Use {#gray|-s}, {#gray|-w}, or {#gray|-c} to select what to build.
-      Options {#gray|-s}, {#gray|-c} must be specified as one of:
-       - {#gray|g:<name>} will copy another game. 
-       - {#gray|bm:<file>} will copy a file in the games templates directory, or a built in example game. 
-       - {#gray|we:<file>} will copy a file in world edit saves directory.
+      Builds a Bomberman game. Use {#gray|-schem} or {#gray|-wand} to select what to build.
     usage: /{command|path} <name> [options]
-    example: /{command|path} mygame -f=bm:purple
-    extra: 'Mark spawns by writing {#gray|{#italic|[spawn]}} on signs'
+    example: /{command|path} mygame -schem=t:purple
+    extra: 'Custom schematics need all spawns marked by writing {#gray|{#italic|[spawn]}} on signs. Do NOT put spawn cages in the schematic.'
     flags:
-      s:
-        description: Specify the game's schematic to use. Cannot be used with {#gray|-w}. Defaults to {#gray|-c}. File must be a {#gray|.schem} or {#gray|.game.zip}
-        ext: <file>
-      c:
-        description: Specify the game's config to use. Defaults to {#gray|-s}, or generic settings. File must be a {#gray|.yml} or {#gray|.game.zip}
-        ext: <file>
-      w:
-        description: Uses the current wand's selection. Cannot be used with {#gray|-s}
+      schem:
+        description: |-
+          Specify the game's schematic to use. Value must be given as one of:
+          - {#gray|g:<name>} copy another game's settings.
+          - {#gray|t:<name>} copy a game in the templates directory. 
+          - {#gray|we:<file>} use a saved World Edit schematic.
+        ext: '[g|t|we]:<file>'
+      wand:
+        description: Uses the current World Edit wand selection.
     # The game's name is already used
     # {game}: the game that has the shared name 
     game-exists: Game {game} already exists
+    # The game's file name conflicts with an already existing game
+    # {game}: the name of the game that tried to be created
+    # {file}: the filename in conflict
+    file-conflict: Game {game} conflicts with file {file}
     # The game was built successfully
     # {game}: the game that was built
     success: Game {game} created{#switch|{game|spawns}|0| but has no spawns. Did you mark spawns with "[spawn]"?}

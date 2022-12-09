@@ -34,9 +34,12 @@ class GameCreate(parent: Cmd) : Cmd(parent) {
         private val plugin = Bomberman.instance
         private val we = WorldEdit.getInstance()
 
-        private const val F_SCHEMA = "s"
-        private const val F_CONFIG = "c"
-        private const val F_WAND = "w"
+        private const val F_SCHEMA = "schem"
+        private const val F_WAND = "wand"
+
+        private const val S_GAME = "g"
+        private const val S_TEMPLATE = "t"
+        private const val S_WORLDEDIT = "we"
 
         /**
          * Gets all files (excluding directories) in the give directory recursively
@@ -70,26 +73,25 @@ class GameCreate(parent: Cmd) : Cmd(parent) {
     }
 
     override fun flags(sender: CommandSender, args: List<String>, flags: Map<String, String>): Set<String> {
-        return setOf(F_SCHEMA, F_CONFIG, F_WAND)
+        return setOf(F_SCHEMA, F_WAND)
     }
 
     override fun flagOptions(sender: CommandSender, flag: String, args: List<String>, flags: Map<String, String>): Set<String> {
-        val validExtensions = when(flag) {
-            F_SCHEMA -> BuiltInClipboardFormat.values().flatMap { it.fileExtensions }.toSet().plus("game.zip")
-            F_CONFIG -> setOf(".yml", ".game.zip")
-            else -> setOf()
-        }
         return when (flag) {
-            F_SCHEMA, F_CONFIG -> {
-                arrayOf(
-                    Pair("bm", plugin.templates()),
-                    Pair("we", we.getWorkingDirectoryPath(we.configuration.saveDir))
-                )
-                .flatMap { (type, dir) -> allFiles(dir, dir).map { file -> "$type:${file.pathString}" } }
-                .filter { fileName -> validExtensions.any { ext -> fileName.endsWith(ext) } }
-                .plus("bm:purple")
-                .plus(BmGameListIntent.listGames().map { "g:${it.name}" })
-                .toSet()
+            F_SCHEMA -> {
+                val templatesDir = plugin.templates()
+                val weDir = we.getWorkingDirectoryPath(we.configuration.saveDir)
+                val schemaExtensions = BuiltInClipboardFormat.values().flatMap { it.fileExtensions }
+                BmGameListIntent.listGames().map { "${S_GAME}:${it.name}" }
+                    .plus(
+                        allFiles(templatesDir, templatesDir).map { file -> "${S_TEMPLATE}:${file.pathString}" }
+                            .filter { fileName -> fileName.endsWith(".game.zip") }
+                    )
+                    .plus(
+                        allFiles(weDir, weDir).map { file -> "${S_WORLDEDIT}:${file.pathString}" }
+                            .filter { fileName -> schemaExtensions.any { ext -> fileName.endsWith(ext) } }
+                    )
+                    .toSet()
             }
             else -> emptySet()
         }
@@ -98,7 +100,6 @@ class GameCreate(parent: Cmd) : Cmd(parent) {
     override fun flagDescription(flag: String): Message {
         return when(flag) {
             F_SCHEMA -> context(Text.CREATE_FLAG_SCHEMA).format()
-            F_CONFIG -> context(Text.CREATE_FLAG_CONFIG).format()
             F_WAND -> context(Text.CREATE_FLAG_WAND).format()
             else -> Message.empty
         }
@@ -107,7 +108,6 @@ class GameCreate(parent: Cmd) : Cmd(parent) {
     override fun flagExtension(flag: String): Message {
         return when(flag) {
             F_SCHEMA -> context(Text.CREATE_FLAG_SCHEMA_EXT).format()
-            F_CONFIG -> context(Text.CREATE_FLAG_CONFIG_EXT).format()
             else -> Message.empty
         }
     }
@@ -127,104 +127,73 @@ class GameCreate(parent: Cmd) : Cmd(parent) {
                         .sendTo(sender)
                 return true
             }
+            // Also make sure the save file is safe to use (in case file names have been altered or special characters used)
+            if (plugin.gameSaves().resolve(GameSave.sanitize("${gameName}.game.zip")).exists()) {
+                context(Text.CREATE_GAME_FILE_CONFLICT)
+                    .with("game", gameName)
+                    .with("file", GameSave.sanitize("${gameName}.game.zip"))
+                    .sendTo(sender)
+                return true
+            }
 
             // cannot use -s and -w together
             if (flags[F_SCHEMA] != null && flags[F_WAND] != null) {
                 return false
             }
 
-            // Get config to use
-            val settings = (
-                    flags[F_CONFIG]
-                    ?: flags[F_SCHEMA]?.let { if (it.endsWith(".game.zip")) { it } else { null }  }
-            )?.let { arg ->
-                val parts = arg.split(':', ignoreCase = true, limit = 2)
-                if (parts.size < 2)
-                    return false
-
-                val type = parts[0].lowercase()
-                val file = parts[1]
-                when (parts[0].lowercase()) {
-                    "bm", "we" -> {
-                        val base = if (type == "bm")
-                            plugin.templates()
-                        else
-                            we.getWorkingDirectoryPath(we.configuration.saveDir)
-
-                        val path = base.resolve(file)
-                        if (!path.exists()) {
-                            throw FileNotFoundException(path.pathString)
-                        } else if (file.endsWith(".game.zip", ignoreCase = true)) {
-                            GameSave.loadSave(path).getSettings()
-                        } else if (file.endsWith(".yml", ignoreCase = true)) {
-                            path.reader().use {
-                                YamlConfiguration.loadConfiguration(it)
-                            }
-                                .getSerializable("settings", GameSettings::class.java)
-                                ?: throw IllegalArgumentException("The YML file does not contains game settings")
-                        } else {
-                            throw IllegalArgumentException("Unknown file type: ${path.fileName}")
-                        }
-                    }
-                    "g" -> {
-                        val game = BmGameLookupIntent.find(parts[0]) ?: return false
-                        game.settings
-                    }
-                    else -> return false
-                }
-            } ?: GameSettingsBuilder().build()
-
-
             // Build from wand selection
             if (flags.containsKey(F_WAND)) {
-                makeFromSelection(gameName, sender, settings)
+                makeFromSelection(gameName, sender, GameSettingsBuilder().build())
                 return true
             }
 
-            // Load clipboard
-            val clipboard = (flags[F_SCHEMA]
-                    ?: flags[F_CONFIG]?.let { if (it.endsWith(".game.zip")) { it } else { null }  }
-                    ?: "bm:purple.game.zip"
-            ).let { arg ->
+            // Get config to use
+            flags[F_SCHEMA]?.let { arg ->
                 val parts = arg.split(':', ignoreCase = true, limit = 2)
                 if (parts.size < 2)
                     return false
 
                 val type = parts[0].lowercase()
                 val file = parts[1]
-                when (type) {
-                    "bm", "we" -> {
-                        val base = if (type == "bm")
-                            plugin.templates()
-                        else
-                            we.getWorkingDirectoryPath(we.configuration.saveDir)
-
-                        val path = base.resolve(file)
+                val (schema, settings) = when (type.lowercase()) {
+                    S_WORLDEDIT -> {
+                        // Load schematic from path
+                        val path = we.getWorkingDirectoryPath(we.configuration.saveDir).resolve(file)
                         if (!path.exists()) {
                             throw FileNotFoundException(path.pathString)
-                        } else if (file.endsWith(".game.zip")) {
-                            GameSave.loadSave(path).getSchematic()
-                        } else {
-                            val hjg = path.toFile()
-                            println("$hjg " + hjg.absoluteFile )
-                            val format = ClipboardFormats.findByFile(path.toFile())
-                                ?: throw IllegalArgumentException("Unknown file format: '${file}'")
-                            format.getReader(Files.newInputStream(path)).use { it.read() }
                         }
+                        val format = ClipboardFormats.findByFile(path.toFile())
+                            ?: throw IllegalArgumentException("Unknown file format: '${file}'")
+                        val clipboard = format.getReader(Files.newInputStream(path)).use { it.read() }
+
+                        Pair(clipboard, GameSettingsBuilder().build())
                     }
-                    "g" -> {
-                        val game = BmGameLookupIntent.find(file) ?: return false
-                        game.clipboard
+                    S_GAME -> {
+                        val existingGame = BmGameLookupIntent.find(file) ?: return false
+                        Pair(existingGame.clipboard, existingGame.settings)
                     }
-                    else -> return false
+                    S_TEMPLATE -> {
+                        val path = plugin.templates().resolve(file)
+                        if (!path.exists()) {
+                            throw FileNotFoundException(path.pathString)
+                        }
+                        val save = GameSave.loadSave(path)
+                        Pair(save.getSchematic(), save.getSettings())
+                    }
+                    else -> {
+                        return false
+                    }
                 }
+                val game = Game.buildGameFromSchema(gameName, sender.location, schema, settings)
+                context(Text.CREATE_SUCCESS)
+                    .with("game", game)
+                    .sendTo(sender)
+                return true
             }
 
-            // Create the game
-            val game = Game.buildGameFromSchema(gameName, sender.location, clipboard, settings)
-            context(Text.CREATE_SUCCESS)
-                .with("game", game)
-                .sendTo(sender)
+            // Must specify either -s or -w
+            return false
+
         } catch (e: Exception) {
             context(Text.CREATE_ERROR)
                 .with("error", e.message ?: "")
