@@ -295,6 +295,7 @@ class Configure(parent: Cmd) : GameCommand(parent) {
 
     private fun showLootSettings(player: Player, game: Game) {
         val gameLoot = game.settings.blockLoot
+
         // manipulate the loot into a format that can be shown visually
         // Need to group blocks with duplicate loot by flipping key/values
         val lootBlock = mutableMapOf<Map<ItemStack, Int>, MutableSet<Material>>()
@@ -302,33 +303,28 @@ class Configure(parent: Cmd) : GameCommand(parent) {
             lootBlock.getOrPut(loot) { mutableSetOf() }.add(mat)
         }
         // Flip the key/values back
-        val loot = lootBlock
+        val blockLoot = lootBlock
                 .map { (loot, matList) ->
-                    Pair(matList.toList(), loot.toList())
+
+                    // Split items with weighting over 64 into multiple stacks
+                    val lootList = loot.toList()
+                        .flatMap {(stack, weight) ->
+                            var brokenWeight = weight
+                            val list = mutableListOf<Pair<ItemStack, Int>>()
+                            do {
+                                list.add(Pair(stack, min(brokenWeight, 64)))
+                                brokenWeight -= 64
+                            } while (brokenWeight > 0)
+                            list
+                        }
+
+                    Pair(matList.toList(), lootList)
                 }.toMutableList()
 
-        showLootSettings(player, game, 0, loot)
+        showLootSettings(player, game, 0, blockLoot)
     }
 
     private fun showLootSettings(player: Player, game: Game, slot: Int, loot: MutableList<Pair<List<Material>, List<Pair<ItemStack, Int>>>>) {
-        // split out stacks with weight over 64
-        val (mats, items) = loot.getOrElse(slot) {
-            Pair(arrayListOf(), arrayListOf())
-        }.let { (mats, items) ->
-            Pair(
-                    mats.filter { it.isBlock && it.isItem },
-                    items.flatMap {(stack, weight) ->
-                        var brokenWeight = weight
-                        val list = mutableListOf<Pair<ItemStack, Int>>()
-                        do {
-                            list.add(Pair(stack, min(brokenWeight, 64)))
-                            brokenWeight -= 64
-                        } while (brokenWeight > 0)
-                        list
-                    }
-            )
-        }
-
         GuiBuilder.show(player, stringify(Text.CONFIGURE_TITLE_LOOT), arrayOf(
                 "<SSSSSSSS",
                 "Kkkkkkkkk",
@@ -356,13 +352,13 @@ class Configure(parent: Cmd) : GameCommand(parent) {
                         }
                         'K' -> GuiBuilder.ItemSlot(Material.EMERALD)
                                 .unMovable().displayName(stringify(Text.CONFIGURE_LOOT_BLOCK.with("slot", slot)))
-                        'k' -> GuiBuilder.ItemSlot(mats.getOrNull(index.secIndex)?.let { ItemStack(it) })
+                        'k' -> GuiBuilder.ItemSlot(loot.getOrNull(slot)?.first?.getOrNull(index.secIndex)?.let { ItemStack(it) })
                         'V' -> GuiBuilder.ItemSlot(Material.EMERALD)
                                 .unMovable().displayName(stringify(Text.CONFIGURE_LOOT_ITEM.with("slot", slot)))
-                        'v' -> GuiBuilder.ItemSlot(items.getOrNull(index.secIndex)?.first)
+                        'v' -> GuiBuilder.ItemSlot(loot.getOrNull(slot)?.second?.getOrNull(index.secIndex)?.first)
                         'W' -> GuiBuilder.ItemSlot(Material.EMERALD)
                                 .unMovable().displayName(stringify(Text.CONFIGURE_LOOT_WEIGHT.with("slot", slot)))
-                        'w' -> GuiBuilder.ItemSlot(Material.GOLD_NUGGET, items.getOrNull(index.secIndex)?.second ?: 0)
+                        'w' -> GuiBuilder.ItemSlot(Material.GOLD_NUGGET, loot.getOrNull(slot)?.second?.getOrNull(index.secIndex)?.second ?: 0)
                         else -> GuiBuilder.blank
                     }
                 },
@@ -373,7 +369,6 @@ class Configure(parent: Cmd) : GameCommand(parent) {
                             // Trying to reload the same slot causes ghost bugs
                             // (because closing previous screen happens AFTER loading new screen)
                             showLootSettings(player, game, index.secIndex, loot)
-                            // TODO the colored tiles are one cycle behind because of the close-load order
                         }
                     }
                 },

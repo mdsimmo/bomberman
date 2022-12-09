@@ -20,11 +20,17 @@ import java.util.concurrent.atomic.AtomicInteger
 class GuiBuilder : Listener {
 
     data class Index (
+            // X Position in the inventory
             val x: Int,
+            // Y Position in the inventory
             val y: Int,
+            // Index in the inventory
             val invIndex: Int,
+            // Section identifier
             val section: Char,
+            // Index number in the section
             val secIndex: Int,
+            // Containing inventory
             val inventory: Inventory
     )
 
@@ -62,7 +68,9 @@ class GuiBuilder : Listener {
             val size = contents.size*9
             // Create a dummy inventory to hold the data
             val inventory = Bukkit.createInventory(null, size, name)
+            val view = player.openInventory(inventory) ?: return
 
+            // Populate the inventory
             val slotLookup = ArrayList<Index>()
             val sectionCount = mutableMapOf<Char, AtomicInteger>()
             for (i in 0 until size) {
@@ -70,19 +78,18 @@ class GuiBuilder : Listener {
                 val y = i / 9
                 val c = contents[y][x]
                 val index =
-                        Index(
-                                x = i % 9,
-                                y = i / 9,
-                                invIndex = i,
-                                secIndex = sectionCount.getOrPut(c) { AtomicInteger(0) }.getAndIncrement(),
-                                section = c,
-                                inventory = inventory
-                        )
+                    Index(
+                        x = i % 9,
+                        y = i / 9,
+                        invIndex = i,
+                        secIndex = sectionCount.getOrPut(c) { AtomicInteger(0) }.getAndIncrement(),
+                        section = c,
+                        inventory = inventory
+                    )
                 slotLookup += index
                 val slot = onInit(index)
                 inventory.setItem(i, slot.item)
             }
-            val view = player.openInventory(inventory) ?: return
             lookup[view] = InvMemory(slotLookup, onClick, onClose)
         }
 
