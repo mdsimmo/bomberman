@@ -82,7 +82,7 @@ class GameCreate(parent: Cmd) : Cmd(parent) {
         return when (flag) {
             F_SCHEMA, F_CONFIG -> {
                 arrayOf(
-                    Pair("bm", plugin.settings.templates()),
+                    Pair("bm", plugin.templates()),
                     Pair("we", we.getWorkingDirectoryPath(we.configuration.saveDir))
                 )
                 .flatMap { (type, dir) -> allFiles(dir, dir).map { file -> "$type:${file.pathString}" } }
@@ -147,7 +147,7 @@ class GameCreate(parent: Cmd) : Cmd(parent) {
                 when (parts[0].lowercase()) {
                     "bm", "we" -> {
                         val base = if (type == "bm")
-                            plugin.settings.templates()
+                            plugin.templates()
                         else
                             we.getWorkingDirectoryPath(we.configuration.saveDir)
 
@@ -195,7 +195,7 @@ class GameCreate(parent: Cmd) : Cmd(parent) {
                 when (type) {
                     "bm", "we" -> {
                         val base = if (type == "bm")
-                            plugin.settings.templates()
+                            plugin.templates()
                         else
                             we.getWorkingDirectoryPath(we.configuration.saveDir)
 

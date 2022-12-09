@@ -174,7 +174,7 @@ class GamePlayer private constructor(private val player: Player, private val gam
         }
 
         private fun tempDataFile(player: Player): Path {
-            return plugin.settings.tempPlayerData().resolve("${player.name}.yml")
+            return plugin.tempPlayerData().resolve("${player.name}.yml")
         }
     }
 

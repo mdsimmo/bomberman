@@ -1,11 +1,12 @@
 package io.github.mdsimmo.bomberman.game
 
-import io.github.mdsimmo.bomberman.utils.BukkitUtils
+import io.github.mdsimmo.bomberman.Bomberman
 import io.github.mdsimmo.bomberman.utils.RefectAccess
 import org.bukkit.Material
+import org.bukkit.configuration.file.YamlConfiguration
 import org.bukkit.configuration.serialization.ConfigurationSerializable
 import org.bukkit.inventory.ItemStack
-import org.bukkit.potion.PotionType
+import java.io.InputStreamReader
 
 /**
  * Defines the settings for how a game operates. Class is immutable
@@ -33,71 +34,74 @@ data class GameSettings(
         @RefectAccess
         @JvmStatic
         fun deserialize(data: Map<String?, Any?>): GameSettings {
-            val builder = GameSettingsBuilder()
-            (data["bomb"] as? String?)?.let { Material.matchMaterial(it) } ?.also { builder.bombItem = it }
-            (data["power"] as? String?)?.let { Material.matchMaterial(it)} ?.also { builder.powerItem = it }
-            (data["fire"] as? String?)?.let { Material.matchMaterial(it)} ?.also { builder.fireType = it }
-            (data["loot-table"] as? List<*>?)
-                ?.filterIsInstance<Map<*, *>>()
-                ?.flatMap { section ->
-                    val blocks = (section["blocks"] as? List<*>)
-                        ?.filterIsInstance<String>()
-                        ?.mapNotNull { Material.matchMaterial(it) }
-                    val loot = (section["loot"] as? List<*>)
-                        ?.filterIsInstance<Map<*,*>>()
-                        ?.mapNotNull { itemWeight ->
-                            val weight = (itemWeight["weight"] as? Number)?.toInt()
-                            val itemStack = itemWeight["item"] as? ItemStack
-                            if (itemStack == null || weight == null || weight <= 0) {
-                                null
-                            } else {
-                                Pair(itemStack, weight)
+
+            val default = if (loadingDefault) {
+                null
+            } else {
+                defaultSettings
+            }
+
+            println("Skip air" + data["skip-air"])
+
+            return GameSettings(
+                bombItem = (data["bomb"] as? String?)?.let { Material.matchMaterial(it) } ?: default!!.bombItem,
+                powerItem = (data["power"] as? String?)?.let { Material.matchMaterial(it)} ?: default!!.powerItem,
+                fireType = (data["fire"] as? String?)?.let { Material.matchMaterial(it)} ?: default!!.fireType,
+                blockLoot = (data["loot-table"] as? List<*>?)
+                    ?.filterIsInstance<Map<*, *>>()
+                    ?.flatMap { section ->
+                        val blocks = (section["blocks"] as? List<*>)
+                            ?.filterIsInstance<String>()
+                            ?.mapNotNull { Material.matchMaterial(it) }
+                        val loot = (section["loot"] as? List<*>)
+                            ?.filterIsInstance<Map<*,*>>()
+                            ?.mapNotNull { itemWeight ->
+                                val weight = (itemWeight["weight"] as? Number)?.toInt()
+                                val itemStack = itemWeight["item"] as? ItemStack
+                                if (itemStack == null || weight == null || weight <= 0) {
+                                    null
+                                } else {
+                                    Pair(itemStack, weight)
+                                }
                             }
+                            ?.toMap()
+                        if (blocks == null || loot == null || blocks.isEmpty() || loot.isEmpty()) {
+                            emptyList()
+                        } else {
+                            blocks.map { b-> Pair(b, loot) }
                         }
-                        ?.toMap()
-                    if (blocks == null || loot == null || blocks.isEmpty() || loot.isEmpty()) {
-                        emptyList()
-                    } else {
-                        blocks.map { b-> Pair(b, loot) }
+                    }?.toMap()
+                    ?: default!!.blockLoot,
+                destructible = readMaterials(data["destructible"]) ?: default!!.destructible,
+                indestructible = readMaterials(data["indestructible"]) ?: default!!.indestructible,
+                passKeep = readMaterials(data["pass-keep"]) ?: default!!.passKeep,
+                passDestroy = readMaterials(data["pass-destroy"]) ?: default!!.passDestroy,
+                initialItems = (data["initial-items"] as? List<*>)
+                    ?.map { it as? ItemStack }
+                    ?: default!!.initialItems,
+                lives = (data["lives"] as? Number)?.toInt() ?: default!!.lives,
+                fuseTicks = (data["fuse-ticks"] as? Number)?.toInt()?.coerceAtLeast(0) ?: default!!.fuseTicks,
+                fireTicks = (data["fire-ticks"] as? Number)?.toInt()?.coerceAtLeast(0) ?: default!!.fireTicks,
+                immunityTicks = (data["immunity-ticks"] as? Number)?.toInt()?.coerceAtLeast(0) ?: default!!.immunityTicks,
+                damageSources = (data["damage-source"] as? Map<*, *>)
+                    ?.map { entry ->
+                        Pair(entry.key.toString(), entry.value.let { cause ->
+                            when (cause) {
+                                is Map<*, *> ->
+                                    cause.map { Pair(it.key.toString(), it.value.toString()) }
+                                        .toMap(mutableMapOf()) //  use mutable map to avoid instance references
+                                null ->
+                                    mutableMapOf()
+                                else ->
+                                    mapOf(Pair("base", cause.toString()))
+                            }
+                        })
                     }
-                }?.toMap()
-                ?.also {
-                    builder.blockLoot = it
-                }
-            readMaterials(data["destructible"])?.also { builder.destructible = it }
-            readMaterials(data["indestructible"])?.also { builder.indestructible = it }
-            readMaterials(data["pass-keep"])?.also { builder.passKeep = it }
-            readMaterials(data["pass-destroy"])?.also { builder.passDestroy = it }
-            (data["initial-items"] as? List<*>)
-                ?.map { it as? ItemStack }
-                ?.also {
-                    builder.initialItems = it
-                }
-            (data["lives"] as? Number)?.toInt()?.also { builder.lives = it }
-            (data["fuse-ticks"] as? Number)?.toInt()?.also { builder.fuseTicks = it.coerceAtLeast(0) }
-            (data["fire-ticks"] as? Number)?.toInt()?.also { builder.fireTicks = it.coerceAtLeast(0) }
-            (data["immunity-ticks"] as? Number)?.toInt()?.also { builder.immunityTicks = it.coerceAtLeast(0) }
-            (data["damage-source"] as? Map<*, *>)
-                ?.map { entry ->
-                    Pair(entry.key.toString(), entry.value.let { cause ->
-                        when (cause) {
-                            is Map<*, *> ->
-                                cause.map { Pair(it.key.toString(), it.value.toString()) }
-                                    .toMap(mutableMapOf()) //  use mutable map to avoid instance references
-                            null ->
-                                mutableMapOf()
-                            else ->
-                                mapOf(Pair("base", cause.toString()))
-                        }
-                    })
-                }
-                ?.toMap()
-                ?.also {
-                    builder.damageSources = it
-                }
-            (data["skip-air"] as? Boolean)?.let { builder.skipAir = it }
-            (data["delete-void"] as? Boolean)?.let { builder.deleteVoid = it }
-            return builder.build()
+                    ?.toMap()
+                    ?: default!!.damageSources,
+                skipAir = (data["skip-air"] as? Boolean) ?: default!!.skipAir,
+                deleteVoid = (data["delete-void"] as? Boolean) ?: default!!.deleteVoid,
+            )
         }
 
         private fun readMaterials(data: Any?): Set<Material>? {
@@ -154,46 +158,25 @@ data class GameSettings(
 }
 
 class GameSettingsBuilder(
-    var bombItem: Material = Material.TNT,
-    var powerItem: Material = Material.GUNPOWDER,
-    var fireType: Material = Material.FIRE,
-    var blockLoot: Map<Material, Map<ItemStack, Int>> =
-        mapOf(
-            Pair(ItemStack(Material.TNT, 1), 4),
-            Pair(ItemStack(Material.GUNPOWDER, 1), 3),
-            Pair(BukkitUtils.makePotion(PotionType.INSTANT_HEAL, 1), 1),
-            Pair(BukkitUtils.makePotion(PotionType.SPEED, 1, upgraded = true), 1),
-            Pair(BukkitUtils.makePotion(PotionType.INVISIBILITY, 1), 1),
-            Pair(ItemStack(Material.AIR, 0), 100)
-        ).let {
-            mapOf(
-                Pair(Material.SNOW_BLOCK, it),
-                Pair(Material.DIRT, it),
-                Pair(Material.SAND, it),
-                Pair(Material.GRAVEL, it)
-            )
-        },
-    var destructible: Set<Material> = setOf(
-        Material.TNT,
-        Material.SNOW_BLOCK,
-        Material.DIRT,
-        Material.SAND,
-        Material.GRAVEL
-    ),
-    var indestructible: Set<Material> = setOf(),
-    var passKeep: Set<Material> = setOf(),
-    var passDestroy: Set<Material> = setOf(),
-    var initialItems: List<ItemStack?> = listOf<ItemStack?>(
-        ItemStack(bombItem, 3)
-    ),
-    var lives: Int = 3,
-    var fuseTicks: Int = 40,
-    var fireTicks: Int = 20,
-    var immunityTicks : Int = 21,
-    var damageSources: Map<String, Map<String, String>> = emptyMap(),
-    var skipAir: Boolean = false,
-    var deleteVoid: Boolean = false,
+    var bombItem: Material,
+    var powerItem: Material,
+    var fireType: Material,
+    var blockLoot: Map<Material, Map<ItemStack, Int>>,
+    var destructible: Set<Material>,
+    var indestructible: Set<Material>,
+    var passKeep: Set<Material>,
+    var passDestroy: Set<Material>,
+    var initialItems: List<ItemStack?>,
+    var lives: Int,
+    var fuseTicks: Int,
+    var fireTicks: Int,
+    var immunityTicks : Int,
+    var damageSources: Map<String, Map<String, String>>,
+    var skipAir: Boolean,
+    var deleteVoid: Boolean,
 ) {
+
+    constructor() : this(defaultSettings)
 
     constructor(settings: GameSettings) :this(
         settings.bombItem,
@@ -233,4 +216,17 @@ class GameSettingsBuilder(
             skipAir,
             deleteVoid
         )
+}
+
+private var loadingDefault = false
+
+private val defaultSettings: GameSettings by lazy {
+    Bomberman.instance.getResource("games/README.yml")!!.use { resource ->
+        InputStreamReader(resource).use {
+            loadingDefault = true
+            val result = YamlConfiguration.loadConfiguration(it).getSerializable("settings", GameSettings::class.java)!!
+            loadingDefault = false
+            result
+        }
+    }
 }

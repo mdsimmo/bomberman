@@ -12,7 +12,8 @@ import java.util.*
 import kotlin.io.path.exists
 
 /**
- * A list of Contexteds that are defined in english.yml in the resource folder.
+ * A list of Contexteds that are defined in messages.yml. If messages.yml has not been created, then it will default to
+ * default_messages.yml in the resource folder.
  */
 enum class Text(path: String) : Contexted {
     MESSAGE_FORMAT("format.message"),
@@ -202,7 +203,7 @@ enum class Text(path: String) : Contexted {
         val server: YamlConfiguration?
 
         init {
-            val input = Text::class.java.classLoader.getResourceAsStream("english.yml")!!
+            val input = Text::class.java.classLoader.getResourceAsStream("default_messages.yml")!!
             val reader: Reader =
                     BufferedReader(InputStreamReader(input))
             builtin = YamlConfiguration()
@@ -211,7 +212,7 @@ enum class Text(path: String) : Contexted {
                 builtin.load(reader)
                 // Instance may be null when testing
                 Bomberman.instance?.let { plugin ->
-                    val custom = plugin.settings.language()
+                    val custom = plugin.language()
                     if (custom.exists())
                         Files.newBufferedReader(custom).use { server.load(it) }
                 }

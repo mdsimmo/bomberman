@@ -32,10 +32,12 @@ class GameSave private constructor(val name: String, val origin: Location, priva
      *      All settings for configuring the game. If the schematic is copied, these settings are generally wanted too
      * config.yml
      *      Settings specific to this game (name and location)
+     * README.txt
+     *      A readme file - a copy of 'zip README.txt' in the resource directory
      *
-     * The zip file name is "thegamesname.game.zip". thegamesname is the same as the game's name with the following exceptions:
+     * The zip file name is "<name>.game.zip". <name> is the same as the game's name with the following exceptions:
      *   - it is all lowercase
-     *   - Al characters except a-z, and 0-9 are replaced with '_'
+     *   - All characters except a-z, and 0-9 are replaced with '_'
      */
 
     companion object {
@@ -45,7 +47,7 @@ class GameSave private constructor(val name: String, val origin: Location, priva
          * Writes data to disk (overriding anything existing) and returns a valid save file
          */
         fun createNewSave(name: String, origin: Location, settings: GameSettings, schematic: Clipboard): GameSave {
-            val zipPath = plugin.settings.gameSaves().resolve("${name.lowercase().replace(Regex("[^a-z0-9]"), "_")}.game.zip")
+            val zipPath = plugin.gameSaves().resolve("${name.lowercase().replace(Regex("[^a-z0-9]"), "_")}.game.zip")
             FileSystems.newFileSystem(zipPath, mapOf(Pair("create", !zipPath.exists()))).use { fs ->
 
                 // Write the schematic
@@ -68,6 +70,12 @@ class GameSave private constructor(val name: String, val origin: Location, priva
                 configYML.set("name", name)
                 configYML.set("origin", origin)
                 Files.writeString(configPath, configYML.saveToString())
+
+                // Write a readme
+                val readmePath = fs.getPath("README.txt")
+                plugin.getResource("zip README.txt")!!.use {
+                    Files.copy(it, readmePath)
+                }
             }
 
             val save = GameSave(name, origin, zipPath)
@@ -81,7 +89,7 @@ class GameSave private constructor(val name: String, val origin: Location, priva
 
         @JvmStatic
         fun loadGames() {
-            val data = plugin.settings.gameSaves()
+            val data = plugin.gameSaves()
             val files = data.listDirectoryEntries("*.game.zip")
             for (f in files) {
                 try {
@@ -129,7 +137,7 @@ class GameSave private constructor(val name: String, val origin: Location, priva
         @JvmStatic
         fun updatePre080Saves() {
             // Find old game files
-            val files = plugin.settings.gameSaves().listDirectoryEntries("*.yml")
+            val files = plugin.gameSaves().listDirectoryEntries("*.yml")
             files.forEach { file ->
                 try {
                     // Convert the old file into the new format
