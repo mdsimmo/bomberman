@@ -47,7 +47,7 @@ class GameSave private constructor(val name: String, val origin: Location, priva
          * Writes data to disk (overriding anything existing) and returns a valid save file
          */
         fun createNewSave(name: String, origin: Location, settings: GameSettings, schematic: Clipboard): GameSave {
-            val zipPath = plugin.gameSaves().resolve("${name.lowercase().replace(Regex("[^a-z0-9]"), "_")}.game.zip")
+            val zipPath = plugin.gameSaves().resolve(sanitize("${name}.game.zip"))
             FileSystems.newFileSystem(zipPath, mapOf(Pair("create", !zipPath.exists()))).use { fs ->
 
                 // Write the schematic
@@ -178,6 +178,10 @@ class GameSave private constructor(val name: String, val origin: Location, priva
                     plugin.logger.log(Level.WARNING, "Exception occurred while updating $file", e)
                 }
             }
+        }
+
+        fun sanitize(filename: String): String {
+            return filename.lowercase().replace(Regex("[^a-z0-9._-]"), "_")
         }
     }
 

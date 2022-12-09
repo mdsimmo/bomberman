@@ -24,8 +24,7 @@ class GameReload(parent: Cmd) : GameCommand(parent) {
             return false
         BmGameDeletedIntent.delete(game, false)
         try {
-            // TODO game name may not match the actual file as it can change with special characters
-            val newGame = GameSave.loadGame(Bomberman.instance.gameSaves().resolve("${game.name}.game.zip"))
+            val newGame = GameSave.loadGame(Bomberman.instance.gameSaves().resolve(GameSave.sanitize("${game.name}.game.zip")))
             BmGameBuildIntent.build(newGame)
             Text.RELOAD_SUCCESS
                 .with("game", newGame)

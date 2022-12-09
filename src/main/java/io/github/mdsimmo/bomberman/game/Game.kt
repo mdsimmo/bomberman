@@ -42,7 +42,7 @@ class Game constructor(private val save: GameSave) : Formattable, Listener {
         private val plugin = Bomberman.instance
 
         private fun tempDataFile(game: Game): Path {
-            return plugin.tempGameData().resolve("${game.name.replace(Regex("[^a-z0-9]"), "_")}.yml")
+            return plugin.tempGameData().resolve(GameSave.sanitize("${game.name}.yml"))
         }
 
         fun buildGameFromRegion(name: String, box: Box, settings: GameSettings): Game {
@@ -483,7 +483,7 @@ class Game constructor(private val save: GameSave) : Formattable, Listener {
         BmGameTerminatedIntent.terminateGame(this)
         tempDataFile(this).deleteIfExists()
         if (e.isDeletingSave) {
-            plugin.gameSaves().resolve("${name}.game.zip").deleteIfExists()
+            plugin.gameSaves().resolve(GameSave.sanitize("${name}.game.zip")).deleteIfExists()
         }
         e.setHandled()
     }
