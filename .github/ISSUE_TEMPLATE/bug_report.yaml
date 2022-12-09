@@ -1,0 +1,52 @@
+name: Bug report
+description: Create a report to help us improve
+labels: ["Status: Waiting", "Type: Bug"]
+assignees: 
+  - mdsimmo
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to fill out this bug report!
+  - type: textarea
+    id: description
+    attributes:
+      label: What happened?
+      description: Also tell us, what did you expect to happen?
+      placeholder: Tell us what you see!
+    validations:
+      required: true
+  - type: textarea
+    id: error-dump
+    attributes:
+      label: Console Errors
+      description: Copy-Paste any errors that appeared in the server console 
+      placeholder: Copy-paste console errors
+    validations:
+      required: false
+  - type: input
+    id: bomberman-version
+    attributes:
+      label: Bomberman Version
+    validations:
+      required: true
+  - type: input
+    id: minecraft-version
+    attributes:
+      description: Please include build number if known
+      label: Minecraft Version
+    validations:
+      required: true
+  - type: input
+    id: java-version
+    attributes:
+      label: Java Version
+    validations:
+      required: false
+  - type: textarea
+    id: plugins
+    attributes:
+      description: List all other plugins on server 
+      label: Installed Plugins
+    validations:
+      required: false 
