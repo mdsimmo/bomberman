@@ -101,6 +101,7 @@ enum class Text(path: String) : Contexted {
     CREATE_EXTRA("command.create.extra"),
     CREATE_GAME_EXISTS("command.create.game-exists"),
     CREATE_GAME_FILE_CONFLICT("command.create.file-conflict"),
+    CREATE_GAME_FILE_NOT_FOUND("command.create.file-not-found"),
     CREATE_NEED_SELECTION("command.create.need-selection"),
     CREATE_SUCCESS("command.create.success"),
     CREATE_ERROR("command.create.error"),

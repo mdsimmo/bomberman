@@ -211,6 +211,10 @@ command:
     # {game}: the name of the game that tried to be created
     # {file}: the filename in conflict
     file-conflict: Game {game} conflicts with file {file}
+    # The referenced file name could not be found
+    # {file}: the file (including path) that does not exist
+    # {filename}: just the filename
+    file-not-found: Can not find '{file}'
     # The game was built successfully
     # {game}: the game that was built
     success: Game {game} created{#switch|{game|spawns}|0| but has no spawns. Did you mark spawns with "[spawn]"?}

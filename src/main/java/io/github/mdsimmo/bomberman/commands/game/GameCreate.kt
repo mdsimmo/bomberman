@@ -160,7 +160,11 @@ class GameCreate(parent: Cmd) : Cmd(parent) {
                         // Load schematic from path
                         val path = we.getWorkingDirectoryPath(we.configuration.saveDir).resolve(file)
                         if (!path.exists()) {
-                            throw FileNotFoundException(path.pathString)
+                            context(Text.CREATE_GAME_FILE_NOT_FOUND)
+                                .with("file", path.toString())
+                                .with("filename", path.name)
+                                .sendTo(sender)
+                            return true
                         }
                         val format = ClipboardFormats.findByFile(path.toFile())
                             ?: throw IllegalArgumentException("Unknown file format: '${file}'")
@@ -175,7 +179,11 @@ class GameCreate(parent: Cmd) : Cmd(parent) {
                     S_TEMPLATE -> {
                         val path = plugin.templates().resolve(file)
                         if (!path.exists()) {
-                            throw FileNotFoundException(path.pathString)
+                            context(Text.CREATE_GAME_FILE_NOT_FOUND)
+                                .with("file", path.toString())
+                                .with("filename", path.name)
+                                .sendTo(sender)
+                            return true
                         }
                         val save = GameSave.loadSave(path)
                         Pair(save.getSchematic(), save.getSettings())
