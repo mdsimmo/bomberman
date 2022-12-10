@@ -3,8 +3,11 @@
 #                        BOMBERMAN MESSAGES                            #
 #                                                                      #
 #   This file is where overrides to messages are placed.               #
+#                                                                      #
 #   A list of default messages and parameters are specified in         #
 #   default_messages.yml.                                              #
+#                                                                      #
+#   For changes to take effect, the server must be reloaded.           #
 #                                                                      #
 # -------------------------------------------------------------------- #
 
