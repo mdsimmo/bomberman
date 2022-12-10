@@ -27,6 +27,7 @@ import java.nio.file.LinkOption
 import java.nio.file.Path
 import java.util.logging.Level
 import kotlin.io.path.*
+import kotlin.time.measureTime
 
 class GameCreate(parent: Cmd) : Cmd(parent) {
 
@@ -34,12 +35,11 @@ class GameCreate(parent: Cmd) : Cmd(parent) {
         private val plugin = Bomberman.instance
         private val we = WorldEdit.getInstance()
 
-        private const val F_SCHEMA = "schem"
-        private const val F_WAND = "wand"
-
-        private const val S_GAME = "g"
-        private const val S_TEMPLATE = "t"
-        private const val S_WORLDEDIT = "we"
+        private const val F_SCHEMA = "s"
+        private const val F_TEMPLATE = "t"
+        private const val F_GAME = "g"
+        private const val F_WAND = "w"
+        private const val F_PLUGIN = "p" // for backwards compatibility
 
         /**
          * Gets all files (excluding directories) in the give directory recursively
@@ -73,24 +73,28 @@ class GameCreate(parent: Cmd) : Cmd(parent) {
     }
 
     override fun flags(sender: CommandSender, args: List<String>, flags: Map<String, String>): Set<String> {
-        return setOf(F_SCHEMA, F_WAND)
+        return setOf(F_SCHEMA, F_WAND, F_GAME, F_TEMPLATE)
     }
 
     override fun flagOptions(sender: CommandSender, flag: String, args: List<String>, flags: Map<String, String>): Set<String> {
         return when (flag) {
             F_SCHEMA -> {
-                val templatesDir = plugin.templates()
                 val weDir = we.getWorkingDirectoryPath(we.configuration.saveDir)
                 val schemaExtensions = BuiltInClipboardFormat.values().flatMap { it.fileExtensions }
-                BmGameListIntent.listGames().map { "${S_GAME}:${it.name}" }
-                    .plus(
-                        allFiles(templatesDir, templatesDir).map { file -> "${S_TEMPLATE}:${file.pathString}" }
-                            .filter { fileName -> fileName.endsWith(".game.zip") }
-                    )
-                    .plus(
-                        allFiles(weDir, weDir).map { file -> "${S_WORLDEDIT}:${file.pathString}" }
-                            .filter { fileName -> schemaExtensions.any { ext -> fileName.endsWith(ext) } }
-                    )
+
+                allFiles(weDir, weDir).map { it.pathString }
+                        .filter { fileName -> schemaExtensions.any { ext -> fileName.endsWith(ext) } }
+                        .toSet()
+            }
+            F_TEMPLATE -> {
+                val templatesDir = plugin.templates()
+                allFiles(templatesDir, templatesDir).map { it.pathString }
+                    .filter { fileName -> fileName.endsWith(".game.zip") }
+                    .map { it.replace(Regex("(.*)\\.game.zip"), "$1") }
+                    .toSet()
+            }
+            F_GAME -> {
+                BmGameListIntent.listGames().map { it.name }
                     .toSet()
             }
             else -> emptySet()
@@ -100,6 +104,8 @@ class GameCreate(parent: Cmd) : Cmd(parent) {
     override fun flagDescription(flag: String): Message {
         return when(flag) {
             F_SCHEMA -> context(Text.CREATE_FLAG_SCHEMA).format()
+            F_TEMPLATE -> context(Text.CREATE_FLAG_TEMPLATE).format()
+            F_GAME -> context(Text.CREATE_FLAG_GAME).format()
             F_WAND -> context(Text.CREATE_FLAG_WAND).format()
             else -> Message.empty
         }
@@ -108,6 +114,8 @@ class GameCreate(parent: Cmd) : Cmd(parent) {
     override fun flagExtension(flag: String): Message {
         return when(flag) {
             F_SCHEMA -> context(Text.CREATE_FLAG_SCHEMA_EXT).format()
+            F_TEMPLATE -> context(Text.CREATE_FLAG_TEMPLATE_EXT).format()
+            F_GAME -> context(Text.CREATE_FLAG_GAME_EXT).format()
             else -> Message.empty
         }
     }
@@ -136,10 +144,14 @@ class GameCreate(parent: Cmd) : Cmd(parent) {
                 return true
             }
 
-            // cannot use -s and -w together
-            if (flags[F_SCHEMA] != null && flags[F_WAND] != null) {
+            // Check that exactly one flag is set
+            if (1 !=
+                (if (flags.containsKey(F_WAND))     1 else 0) +
+                (if (flags.containsKey(F_GAME))     1 else 0) +
+                (if (flags.containsKey(F_TEMPLATE)) 1 else 0) +
+                (if (flags.containsKey(F_SCHEMA))   1 else 0) +
+                (if (flags.containsKey(F_PLUGIN))   1 else 0))
                 return false
-            }
 
             // Build from wand selection
             if (flags.containsKey(F_WAND)) {
@@ -147,60 +159,63 @@ class GameCreate(parent: Cmd) : Cmd(parent) {
                 return true
             }
 
-            // Get config to use
-            flags[F_SCHEMA]?.let { arg ->
-                val parts = arg.split(':', ignoreCase = true, limit = 2)
-                if (parts.size < 2)
-                    return false
-
-                val type = parts[0].lowercase()
-                val file = parts[1]
-                val (schema, settings) = when (type.lowercase()) {
-                    S_WORLDEDIT -> {
-                        // Load schematic from path
-                        val path = we.getWorkingDirectoryPath(we.configuration.saveDir).resolve(file)
-                        if (!path.exists()) {
-                            context(Text.CREATE_GAME_FILE_NOT_FOUND)
-                                .with("file", path.toString())
-                                .with("filename", path.name)
-                                .sendTo(sender)
-                            return true
-                        }
-                        val format = ClipboardFormats.findByFile(path.toFile())
-                            ?: throw IllegalArgumentException("Unknown file format: '${file}'")
-                        val clipboard = format.getReader(Files.newInputStream(path)).use { it.read() }
-
-                        Pair(clipboard, GameSettingsBuilder().build())
+            // Get config/schema to use from the selected flag
+            val (schema, settings) =
+                flags[F_SCHEMA]?.let { file ->
+                    if (file == "")
+                        return false
+                    // Load schematic from path
+                    val path = we.getWorkingDirectoryPath(we.configuration.saveDir).resolve(file)
+                    if (!path.exists()) {
+                        context(Text.CREATE_GAME_FILE_NOT_FOUND)
+                            .with("file", path.toString())
+                            .with("filename", path.name)
+                            .sendTo(sender)
+                        return true
                     }
-                    S_GAME -> {
-                        val existingGame = BmGameLookupIntent.find(file) ?: return false
-                        Pair(existingGame.clipboard, existingGame.settings)
+                    val format = ClipboardFormats.findByFile(path.toFile())
+                        ?: throw IllegalArgumentException("Unknown file format: '${file}'")
+                    val clipboard = format.getReader(Files.newInputStream(path)).use { it.read() }
+
+                    Pair(clipboard, GameSettingsBuilder().build())
+                } ?: flags[F_GAME]?.let { name ->
+                    // Cope existing game
+                    val existingGame = BmGameLookupIntent.find(name) ?: return false
+                    Pair(existingGame.clipboard, existingGame.settings)
+                } ?: flags[F_TEMPLATE]?.let { file ->
+                    if (file == "")
+                        return false
+                    // Load template file
+                    val fullFileName = if (file.endsWith(".game.zip", ignoreCase = true))
+                        file
+                    else
+                        file.plus(".game.zip")
+                    val path = plugin.templates().resolve(fullFileName)
+                    if (!path.exists()) {
+                        context(Text.CREATE_GAME_FILE_NOT_FOUND)
+                            .with("file", path.toString())
+                            .with("filename", path.name)
+                            .sendTo(sender)
+                        return true
                     }
-                    S_TEMPLATE -> {
-                        val path = plugin.templates().resolve(file)
-                        if (!path.exists()) {
-                            context(Text.CREATE_GAME_FILE_NOT_FOUND)
-                                .with("file", path.toString())
-                                .with("filename", path.name)
-                                .sendTo(sender)
-                            return true
-                        }
+                    val save = GameSave.loadSave(path)
+                    Pair(save.getSchematic(), save.getSettings())
+                } ?: flags[F_PLUGIN]?.let { value ->
+                    // `\bm create <name> -p=bm` used to be advertised a lot, so keep it for backwards compatibility
+                    if (value.lowercase() == "bm") {
+                        val path = plugin.templates().resolve("purple.game.zip")
                         val save = GameSave.loadSave(path)
                         Pair(save.getSchematic(), save.getSettings())
-                    }
-                    else -> {
+                    } else {
                         return false
                     }
-                }
+                } ?: throw RuntimeException("This should never happen")
+
                 val game = Game.buildGameFromSchema(gameName, sender.location, schema, settings)
                 context(Text.CREATE_SUCCESS)
                     .with("game", game)
                     .sendTo(sender)
                 return true
-            }
-
-            // Must specify either -s or -w
-            return false
 
         } catch (e: Exception) {
             context(Text.CREATE_ERROR)
