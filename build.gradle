@@ -5,10 +5,7 @@ buildscript {
         mavenCentral()
     }
     dependencies {
-        // Proguard 7.2 supports jdk 17, but not jdk 8. Proguard 7.1 supports jdk 8, but not jdk 17
-        // Not sure if this is an issue just in beta - proguard is built in CI with jdk 8, so don't see why new version breaks here?
-        // TODO this fixes builds, but the binary will not be compatable with both jdk8 and jdk 17
-        classpath 'com.guardsquare:proguard-gradle:' + (JavaVersion.current().isCompatibleWith(JavaVersion.VERSION_11) ? '7.2.0-beta5' : '7.1.0')
+        classpath 'com.guardsquare:proguard-gradle:7.2.2'
     }
 }
 
@@ -85,8 +82,16 @@ task minify(type: ProGuardTask, dependsOn: shadowJar) {
     injars shadowJar.outputs.files
     outjars "build/libs/Bomberman-${version}-min.jar"
 
-    libraryjars "${System.getProperty('java.home')}/jmods/java.base.jmod"
-    libraryjars "${System.getProperty('java.home')}/jmods/java.logging.jmod"
+    // Automatically handle the Java version of this build.
+    if (System.getProperty('java.version').startsWith('1.')) {
+        // Before Java 9, the runtime classes were packaged in a single jar file.
+        libraryjars "${System.getProperty('java.home')}/lib/rt.jar"
+    } else {
+        // As of Java 9, the runtime classes are packaged in modular jmod files.
+        libraryjars "${System.getProperty('java.home')}/jmods/java.base.jmod", jarfilter: '!**.jar', filter: '!module-info.class'
+        libraryjars "${System.getProperty('java.home')}/jmods/java.logging.jmod", jarfilter: '!**.jar', filter: '!module-info.class'
+    }
+
     libraryjars files(configurations.compileOnly.collect())
 
     // only remove unused library code (mostly kotlin)

@@ -11,6 +11,7 @@ import java.io.File
 import java.io.FileInputStream
 import java.io.IOException
 import java.lang.ref.WeakReference
+import java.net.URI
 import java.nio.file.FileSystems
 import java.nio.file.Files
 import java.nio.file.Path
@@ -48,7 +49,9 @@ class GameSave private constructor(val name: String, val origin: Location, priva
          */
         fun createNewSave(name: String, origin: Location, settings: GameSettings, schematic: Clipboard): GameSave {
             val zipPath = plugin.gameSaves().resolve(sanitize("${name}.game.zip"))
-            FileSystems.newFileSystem(zipPath, mapOf(Pair("create", !zipPath.exists()))).use { fs ->
+            val fileUri = zipPath.toUri()
+            val zipUri = URI("jar:" + fileUri.scheme, fileUri.path, null)
+            FileSystems.newFileSystem(zipUri, mapOf(Pair("create", !zipPath.exists()))).use { fs ->
 
                 // Write the schematic
                 val arenaPath = fs.getPath("arena.schem")
@@ -62,14 +65,14 @@ class GameSave private constructor(val name: String, val origin: Location, priva
                 val settingsPath = fs.getPath("settings.yml")
                 val settingsYML = YamlConfiguration()
                 settingsYML.set("settings", settings)
-                Files.writeString(settingsPath, settingsYML.saveToString())
+                Files.write(settingsPath, listOf(settingsYML.saveToString()))
 
                 // Write config data
                 val configPath = fs.getPath("config.yml")
                 val configYML = YamlConfiguration()
                 configYML.set("name", name)
                 configYML.set("origin", origin)
-                Files.writeString(configPath, configYML.saveToString())
+                Files.write(configPath, listOf(configYML.saveToString()))
 
                 // Write a readme
                 val readmePath = fs.getPath("README.txt")
@@ -108,7 +111,7 @@ class GameSave private constructor(val name: String, val origin: Location, priva
         fun loadSave(zipFile: Path): GameSave {
             plugin.logger.info("Reading ${zipFile.pathString}")
             // Open the zip
-            return FileSystems.newFileSystem(zipFile).use { fs ->
+            return FileSystems.newFileSystem(zipFile, null as ClassLoader?).use { fs ->
                 // Read the config
                 val configPath = fs.getPath("config.yml")
                 Files.newBufferedReader(configPath).use { reader ->
@@ -199,7 +202,7 @@ class GameSave private constructor(val name: String, val origin: Location, priva
             plugin.logger.info("Reading schematic data: " + zipPath.fileName)
 
             // Open the zip
-            FileSystems.newFileSystem(zipPath).use { fs ->
+            FileSystems.newFileSystem(zipPath, null as ClassLoader?).use { fs ->
                 // Load the schematic
                 val arenaPath = fs.getPath("arena.schem")
                 val schematic = Files.newInputStream(arenaPath).use { reader ->
@@ -225,7 +228,7 @@ class GameSave private constructor(val name: String, val origin: Location, priva
             plugin.logger.info("Reading game settings: " + zipPath.fileName)
 
             // Open the zip
-            FileSystems.newFileSystem(zipPath).use { fs ->
+            FileSystems.newFileSystem(zipPath, null as ClassLoader?).use { fs ->
                 // Read the settings
                 val settingsPath = fs.getPath("settings.yml")
                 Files.newBufferedReader(settingsPath).use { reader ->
@@ -256,7 +259,7 @@ class GameSave private constructor(val name: String, val origin: Location, priva
         val ymlString = yml.saveToString()
 
         // Copy the yml string into the zip file
-        FileSystems.newFileSystem(zipPath).use { fs ->
+        FileSystems.newFileSystem(zipPath, null as ClassLoader?).use { fs ->
             val zipConfigPath: Path = fs.getPath("settings.yml")
             Files.copy(ByteArrayInputStream(ymlString.toByteArray()), zipConfigPath, StandardCopyOption.REPLACE_EXISTING)
         }
