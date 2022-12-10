@@ -19,7 +19,7 @@ class RunStart(parent: Cmd) : GameCommand(parent) {
         return emptyList()
     }
 
-    override fun flags(sender: CommandSender, args: List<String>, flags: Map<String, String>): Set<String> {
+    override fun flags(sender: CommandSender): Set<String> {
         return setOf("d", "o")
     }
 

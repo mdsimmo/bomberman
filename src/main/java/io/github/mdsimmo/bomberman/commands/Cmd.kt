@@ -24,9 +24,13 @@ abstract class Cmd(protected var parent: Cmd?) : Formattable {
      */
     abstract fun options(sender: CommandSender, args: List<String>): List<String>
 
-    open fun flags(sender: CommandSender, args: List<String>, flags: Map<String, String>): Set<String> = emptySet()
+    open fun flags(sender: CommandSender): Set<String> = emptySet()
 
-    open fun flagOptions(sender: CommandSender, flag: String, args: List<String>, flags: Map<String, String>): Set<String> = emptySet()
+    open fun flagOptions(flag: String): Set<String> = emptySet()
+
+    open fun flagExtension(flag: String): Message  = Message.empty
+
+    open fun flagDescription(flag: String): Message = Message.empty
 
     /**
      * Execute the command
@@ -36,30 +40,6 @@ abstract class Cmd(protected var parent: Cmd?) : Formattable {
      * @return true if correctly typed. False will display info
      */
     abstract fun run(sender: CommandSender, args: List<String>, flags: Map<String, String>): Boolean
-
-    /**
-     * Execute the command. Checks for permissions
-     * @return true if success. false to show usage
-     */
-    fun execute(sender: CommandSender, args: List<String>, flags: Map<String, String>) {
-        if (permission().isAllowedBy(sender)) {
-            if (!run(sender, args, flags)) {
-                incorrectUsage(sender, args)
-                help(sender, args, flags)
-            }
-        } else {
-            context(Text.DENY_PERMISSION).sendTo(sender)
-        }
-    }
-
-    /**
-     * Sends help to the sender
-     *
-     * @param sender the player to help
-     */
-    open fun help(sender: CommandSender, args: List<String>, flags: Map<String, String>) {
-        context(Text.COMMAND_HELP).sendTo(sender)
-    }
 
     abstract fun extra(): Message
     abstract fun example(): Message
@@ -86,14 +66,6 @@ abstract class Cmd(protected var parent: Cmd?) : Formattable {
         return path
     }
 
-    private fun incorrectUsage(sender: CommandSender, args: List<String>) {
-        context(Text.INCORRECT_USAGE)
-                .with("attempt", CollectionWrapper(
-                        args.map { Message.of(it) }
-                ))
-                .sendTo(sender)
-    }
-
     fun context(text: Contexted): Contexted {
         return text.with("command", this)
     }
@@ -106,7 +78,7 @@ abstract class Cmd(protected var parent: Cmd?) : Formattable {
             "extra" -> extra()
             "example" -> example()
             "description" -> description()
-            "flags" -> CollectionWrapper(flags(Bukkit.getConsoleSender(), listOf(), mapOf())
+            "flags" -> CollectionWrapper(flags(Bukkit.getConsoleSender())
                     .map { flag -> object: Formattable {
                         override fun format(args: List<Message>, elevated: Boolean): Message {
                             return when ((args.firstOrNull() ?: "name").toString()) {
@@ -119,14 +91,6 @@ abstract class Cmd(protected var parent: Cmd?) : Formattable {
                     } }).format(args.drop(1), elevated)
             else -> throw RuntimeException("Unknown command value '" + args[0] + "'")
         }
-    }
-
-    open fun flagExtension(flag: String): Message {
-        return Message.empty
-    }
-
-    open fun flagDescription(flag: String): Message {
-        return Message.empty
     }
 
 }

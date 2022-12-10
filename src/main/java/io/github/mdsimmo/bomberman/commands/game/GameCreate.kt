@@ -19,15 +19,12 @@ import io.github.mdsimmo.bomberman.messaging.Message
 import io.github.mdsimmo.bomberman.messaging.Text
 import io.github.mdsimmo.bomberman.utils.WorldEditUtils.selectionBounds
 import org.bukkit.command.CommandSender
-import org.bukkit.configuration.file.YamlConfiguration
 import org.bukkit.entity.Player
-import java.io.FileNotFoundException
 import java.nio.file.Files
 import java.nio.file.LinkOption
 import java.nio.file.Path
 import java.util.logging.Level
 import kotlin.io.path.*
-import kotlin.time.measureTime
 
 class GameCreate(parent: Cmd) : Cmd(parent) {
 
@@ -72,11 +69,11 @@ class GameCreate(parent: Cmd) : Cmd(parent) {
         }
     }
 
-    override fun flags(sender: CommandSender, args: List<String>, flags: Map<String, String>): Set<String> {
+    override fun flags(sender: CommandSender): Set<String> {
         return setOf(F_SCHEMA, F_WAND, F_GAME, F_TEMPLATE)
     }
 
-    override fun flagOptions(sender: CommandSender, flag: String, args: List<String>, flags: Map<String, String>): Set<String> {
+    override fun flagOptions(flag: String): Set<String> {
         return when (flag) {
             F_SCHEMA -> {
                 val weDir = we.getWorkingDirectoryPath(we.configuration.saveDir)

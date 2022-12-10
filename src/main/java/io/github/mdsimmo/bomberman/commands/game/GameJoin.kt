@@ -35,11 +35,11 @@ class GameJoin(parent: Cmd) : GameCommand(parent) {
         return emptyList()
     }
 
-    override fun flags(sender: CommandSender, args: List<String>, flags: Map<String, String>): Set<String> {
+    override fun flags(sender: CommandSender): Set<String> {
         return setOf(F_TARGET)
     }
 
-    override fun flagOptions(sender: CommandSender, flag: String, args: List<String>, flags: Map<String, String>): Set<String> {
+    override fun flagOptions(flag: String): Set<String> {
         return when (flag) {
             F_TARGET -> Bukkit.getOnlinePlayers().map { it.name }.toSet().plus(arrayOf("@a", "@p", "@r", "@s"))
             else -> emptySet()
