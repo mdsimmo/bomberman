@@ -106,7 +106,7 @@ task clearOldPluginJar( type: Delete ) {
     }
 }
 
-task copyToServer(type: Copy, dependsOn: clearOldPluginJar ) {
+task copyToServer(type: Copy, dependsOn: [minify, clearOldPluginJar] ) {
     description 'Copies the plugin to the server'
     if ( project.hasProperty("serverLocation" ) ) {
         from minify
