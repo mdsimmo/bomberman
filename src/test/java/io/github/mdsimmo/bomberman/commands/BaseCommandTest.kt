@@ -98,7 +98,7 @@ class BaseCommandTest {
         base.addChildren(subCommand)
         val result = base.onTabComplete(sender, mock(Command::class.java), "", arrayOf("dummy", "-"))
 
-        assertArrayEquals(arrayOf( "-?", "-a=", "-b"), result.toSortedSet().toTypedArray())
+        assertArrayEquals(arrayOf( "-?", "-a", "-b"), result.toSortedSet().toTypedArray())
     }
 
 }

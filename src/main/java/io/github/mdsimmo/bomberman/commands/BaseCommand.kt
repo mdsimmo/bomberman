@@ -94,7 +94,6 @@ class BaseCommand : Cmd, TabCompleter, CommandExecutor {
     }
 
     override fun onTabComplete(sender: CommandSender, command: Command, alias: String, args: Array<String>): List<String> {
-        println("Request tab complete")
         val (arguments, _) = separateFlags(args)
         val currentlyTyping = args.last() // Will always have one.
 
