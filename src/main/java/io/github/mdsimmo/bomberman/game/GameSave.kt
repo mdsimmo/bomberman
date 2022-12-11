@@ -5,6 +5,7 @@ import com.sk89q.worldedit.extent.clipboard.io.BuiltInClipboardFormat
 import com.sk89q.worldedit.extent.clipboard.io.ClipboardFormats
 import io.github.mdsimmo.bomberman.Bomberman
 import org.bukkit.Location
+import org.bukkit.Material
 import org.bukkit.configuration.file.YamlConfiguration
 import java.io.ByteArrayInputStream
 import java.io.File
@@ -153,8 +154,7 @@ class GameSave private constructor(val name: String, val origin: Location, priva
                     val origin = config.getSerializable("origin", Location::class.java)
                     val settings = (config.getSerializable("settings", GameSettings::class.java) ?: GameSettingsBuilder().build()).copy(
                         // copy out build flags which were in a separate section
-                        skipAir = config.getBoolean("build-flags.skip-air", false),
-                        deleteVoid = config.getBoolean("build-flags.delete-void", false),
+                        sourceMask = if (config.getBoolean("build-flags.skip-air", false)) setOf(Material.AIR) else emptySet()
                     )
 
                     if (name == null || schema == null || origin == null) {

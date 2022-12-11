@@ -26,8 +26,7 @@ data class GameSettings(
     val fireTicks: Int,
     val immunityTicks : Int,
     val damageSources: Map<String, Map<String, String>>,
-    val skipAir: Boolean,
-    val deleteVoid: Boolean,
+    val sourceMask: Set<Material>,
 ) : ConfigurationSerializable {
 
     companion object {
@@ -97,8 +96,7 @@ data class GameSettings(
                     }
                     ?.toMap()
                     ?: default!!.damageSources,
-                skipAir = (data["skip-air"] as? Boolean) ?: default!!.skipAir,
-                deleteVoid = (data["delete-void"] as? Boolean) ?: default!!.deleteVoid,
+                sourceMask = readMaterials(data["source-mask"]) ?: default!!.sourceMask
             )
         }
 
@@ -144,12 +142,9 @@ data class GameSettings(
         objs["fuse-ticks"] = fuseTicks
         objs["fire-ticks"] = fireTicks
         objs["immunity-ticks"] = immunityTicks
-
         objs["damage-source"] = damageSources
-        objs["damage-sourcesa"] = mutableMapOf<String, String>()
-        objs["damage-sourcesb"] = mutableMapOf<String, String>()
-        objs["skip-air"] = skipAir
-        objs["delete-void"] = deleteVoid
+        objs["source-mask"] = sourceMask
+            .map { it.key.toString()}
 
         return objs
     }
@@ -170,8 +165,7 @@ class GameSettingsBuilder(
     var fireTicks: Int,
     var immunityTicks : Int,
     var damageSources: Map<String, Map<String, String>>,
-    var skipAir: Boolean,
-    var deleteVoid: Boolean,
+    var sourceMask: Set<Material>,
 ) {
 
     constructor() : this(defaultSettings)
@@ -191,8 +185,7 @@ class GameSettingsBuilder(
         settings.fireTicks,
         settings.immunityTicks,
         settings.damageSources,
-        settings.skipAir,
-        settings.deleteVoid,
+        settings.sourceMask
     )
 
     fun build(): GameSettings =
@@ -211,8 +204,7 @@ class GameSettingsBuilder(
             fireTicks,
             immunityTicks,
             damageSources,
-            skipAir,
-            deleteVoid
+            sourceMask
         )
 }
 

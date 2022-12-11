@@ -5,6 +5,7 @@ import com.sk89q.worldedit.bukkit.BukkitAdapter
 import com.sk89q.worldedit.extent.clipboard.BlockArrayClipboard
 import com.sk89q.worldedit.extent.clipboard.Clipboard
 import com.sk89q.worldedit.function.mask.BlockTypeMask
+import com.sk89q.worldedit.function.mask.Masks
 import com.sk89q.worldedit.function.operation.ForwardExtentCopy
 import com.sk89q.worldedit.function.operation.Operations
 import com.sk89q.worldedit.math.BlockVector3
@@ -445,19 +446,12 @@ class Game constructor(private val save: GameSave) : Formattable, Listener {
                     .createPaste(editSession)
                     .to(BlockVector3.at(origin.blockX, origin.blockY, origin.blockZ))
                     .copyEntities(true)
-                    .ignoreAirBlocks(save.getSettings().skipAir)
+                    .maskSource(Masks.negate(BlockTypeMask(editSession,
+                        save.getSettings().sourceMask.mapNotNull { BlockTypes.get(it.key.toString()) })))
                     .build()
                 Operations.complete(operation)
 
                 editSession.close()
-
-                if (save.getSettings().deleteVoid) {
-                    editSession.replaceBlocks(
-                        WorldEditUtils.convert(box),
-                        BlockTypeMask(editSession, BlockTypes.STRUCTURE_VOID),
-                        BlockTypes.AIR!!.defaultState
-                    )
-                }
             }
         makeCages()
 
