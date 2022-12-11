@@ -215,7 +215,7 @@ class Game constructor(private val save: GameSave) : Formattable, Listener {
             if (sign) {
                 block.type = Material.AIR
             } else if (block.isPassable) {
-                block.type = Material.WHITE_STAINED_GLASS
+                block.type = settings.cageBlock
             }
         }
     }

@@ -27,6 +27,7 @@ data class GameSettings(
     val immunityTicks : Int,
     val damageSources: Map<String, Map<String, String>>,
     val sourceMask: Set<Material>,
+    val cageBlock: Material,
 ) : ConfigurationSerializable {
 
     companion object {
@@ -96,7 +97,8 @@ data class GameSettings(
                     }
                     ?.toMap()
                     ?: default!!.damageSources,
-                sourceMask = readMaterials(data["source-mask"]) ?: default!!.sourceMask
+                sourceMask = readMaterials(data["source-mask"]) ?: default!!.sourceMask,
+                cageBlock = (data["cage-block"] as? String?)?.let { Material.matchMaterial(it)} ?: default!!.cageBlock,
             )
         }
 
@@ -145,6 +147,7 @@ data class GameSettings(
         objs["damage-source"] = damageSources
         objs["source-mask"] = sourceMask
             .map { it.key.toString()}
+        objs["cage-block"] = cageBlock.key.toString()
 
         return objs
     }
@@ -166,6 +169,7 @@ class GameSettingsBuilder(
     var immunityTicks : Int,
     var damageSources: Map<String, Map<String, String>>,
     var sourceMask: Set<Material>,
+    var cageBlock: Material,
 ) {
 
     constructor() : this(defaultSettings)
@@ -185,7 +189,8 @@ class GameSettingsBuilder(
         settings.fireTicks,
         settings.immunityTicks,
         settings.damageSources,
-        settings.sourceMask
+        settings.sourceMask,
+        settings.cageBlock
     )
 
     fun build(): GameSettings =
@@ -204,7 +209,8 @@ class GameSettingsBuilder(
             fireTicks,
             immunityTicks,
             damageSources,
-            sourceMask
+            sourceMask,
+            cageBlock
         )
 }
 

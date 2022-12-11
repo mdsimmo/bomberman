@@ -156,7 +156,9 @@ settings:
   # This is useful in irregular shaped buildings to keep e.g. the ground material.
   # It could also be used to keep some blocks from being reset each game.
   source-mask: []
-  
+
+  # Sets the block that surrounds spawn points
+  cage-block: minecraft:iron_bars
 
   # Bomberman has four types of blocks:
   #  1. indestructible: tnt will not affect the block
