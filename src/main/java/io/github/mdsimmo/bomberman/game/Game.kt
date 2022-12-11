@@ -108,7 +108,7 @@ class Game constructor(private val save: GameSave) : Formattable, Listener {
 
     // Spawns are saved in temporary file to avoid needing to read the schematic on server load
     private val spawns: Set<Location> by lazy {
-        (tempData.getList("spawns"))
+        (tempData.getList("spawn-points"))
             ?.filterIsInstance(Location::class.java)?.toSet()
             ?: searchSpawns().also { writeTempData("spawns", it.toList()) }
     }
@@ -172,7 +172,7 @@ class Game constructor(private val save: GameSave) : Formattable, Listener {
                     it.getString("Text3").contains("[spawn]", ignoreCase = true) or
                     it.getString("Text4").contains("[spawn]", ignoreCase = true)
                 ) {
-                    spawns += BukkitAdapter.adapt(box.world, loc.subtract(clipboard.origin)).add(origin)
+                    spawns += BukkitAdapter.adapt(box.world, loc.subtract(clipboard.origin)).add(origin).block.location
                 }
             }
         }
