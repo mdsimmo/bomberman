@@ -69,6 +69,7 @@ public class Bomberman extends JavaPlugin implements Listener {
 		saveResource("messages.yml", false );
 		saveResource("default_messages.yml", true);
 		saveResource("games/templates/purple.game.zip", true);
+		saveResource("games/templates/experimental.game.zip", true);
 		saveResource("games/README.yml", true);
 		saveResource("games/templates/README.txt", true);
 		saveResource("temp/README.txt", true);
