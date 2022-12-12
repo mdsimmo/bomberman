@@ -158,13 +158,13 @@ class Configure(parent: Cmd) : GameCommand(parent) {
     }
 
     private fun showBlockSettings(player: Player, game: Game) {
-        showBlockSettings(player, game, 0, stringify(Text.CONFIGURE_DESTRUCTIBLE_DESC),
-                game.settings.destructible) { game.settings = game.settings.copy(destructible = it) }
+        val builder = GameSettingsBuilder(game.settings)
+        showBlockSettings(player, game, builder, 0, stringify(Text.CONFIGURE_DESTRUCTIBLE_DESC),
+                game.settings.destructible) { builder.destructible = it }
     }
 
-    private fun showBlockSettings(player: Player, game: Game, selected: Int, description: String, types: Set<Material>, result: (Set<Material>) -> Unit) {
+    private fun showBlockSettings(player: Player, game: Game, builder: GameSettingsBuilder, selected: Int, description: String, types: Set<Material>, result: (Set<Material>) -> Unit) {
         val typesList = types.filter { it.isItem }.filter { it.isBlock }.toList()
-        val settings = GameSettingsBuilder(game.settings)
         GuiBuilder.show(player, Text.CONFIGURE_TITLE_BLOCKS.format().toString(), arrayOf(
                 "<d s p n ",
                 " c cEc c ",
@@ -206,14 +206,14 @@ class Configure(parent: Cmd) : GameCommand(parent) {
                 onClick = { index, _, _->
                     when (index.section) {
                         '<' -> showMainMenu(player, game)
-                        'd' -> if (selected != 0) showBlockSettings(player, game, 0, stringify(Text.CONFIGURE_DESTRUCTIBLE_DESC),
-                                settings.destructible) { game.settings = game.settings.copy(destructible = it) }
-                        's' -> if (selected != 1) showBlockSettings(player, game, 1, stringify(Text.CONFIGURE_INDESTRUCTIBLE_DESC),
-                                settings.indestructible) { game.settings = game.settings.copy(indestructible = it) }
-                        'p' -> if (selected != 2) showBlockSettings(player, game, 2, stringify(Text.CONFIGURE_PASS_DESTROY_DESC),
-                                settings.passDestroy) { game.settings = game.settings.copy(passDestroy = it) }
-                        'n' -> if (selected != 3) showBlockSettings(player, game, 3, stringify(Text.CONFIGURE_PASS_KEEP_DESC),
-                                settings.passKeep) { game.settings = game.settings.copy(passKeep = it) }
+                        'd' -> if (selected != 0) showBlockSettings(player, game, builder, 0, stringify(Text.CONFIGURE_DESTRUCTIBLE_DESC),
+                                builder.destructible) { builder.destructible = it }
+                        's' -> if (selected != 1) showBlockSettings(player, game, builder, 1, stringify(Text.CONFIGURE_INDESTRUCTIBLE_DESC),
+                                builder.indestructible) { builder.indestructible = it }
+                        'p' -> if (selected != 2) showBlockSettings(player, game, builder, 2, stringify(Text.CONFIGURE_PASS_DESTROY_DESC),
+                                builder.passDestroy) { builder.passDestroy = it }
+                        'n' -> if (selected != 3) showBlockSettings(player, game, builder, 3, stringify(Text.CONFIGURE_PASS_KEEP_DESC),
+                                builder.passKeep) { builder.passKeep = it }
                     }
                 },
                 onClose = {
@@ -229,7 +229,7 @@ class Configure(parent: Cmd) : GameCommand(parent) {
                     result(blocks)
 
                     // save settings
-                    game.settings = settings.build()
+                    game.settings = builder.build()
                 }
         )
     }
