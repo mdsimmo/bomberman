@@ -435,8 +435,11 @@ class Game constructor(private val save: GameSave) : Formattable, Listener {
 
         // cleanup any dropped items
         box.world.getNearbyEntities(BukkitUtils.convert(box))
-            .filterIsInstance<Item>()
-            .forEach{ it.remove() }
+            .filter { it !is Player }
+            .forEach{
+                //println("DELETE ENTITY: " + it.type + " " + it.location)
+                //println("  box: " + box)
+                it.remove() }
 
         // Paste the schematic
         WorldEdit.getInstance().newEditSession(BukkitAdapter.adapt(box.world))
