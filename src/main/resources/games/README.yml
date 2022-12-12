@@ -158,7 +158,7 @@ settings:
   source-mask: []
 
   # Sets the block that surrounds spawn points
-  cage-block: minecraft:iron_bars
+  cage-block: minecraft:white_stained_glass
 
   # Bomberman has four types of blocks:
   #  1. indestructible: tnt will not affect the block
