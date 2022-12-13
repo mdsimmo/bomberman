@@ -329,7 +329,7 @@ class Game constructor(private val save: GameSave) : Formattable, Listener {
                                 val result = Expander.expand(it.value, mapOf(
                                     Pair("base", Message.of(e.damage)),
                                     Pair("damage", Message.of(e.getDamage(modifier))),
-                                    Pair("finalDamage", Message.of(e.finalDamage)),
+                                    Pair("final", Message.of(e.finalDamage)),
                                     Pair("cause", Message.of(e.cause.toString())),
                                     Pair("player", SenderWrapper(e.entity)),
                                     Pair("game", this),
