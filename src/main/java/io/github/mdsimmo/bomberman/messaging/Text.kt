@@ -17,9 +17,6 @@ import kotlin.io.path.exists
  */
 enum class Text(path: String) : Contexted {
     MESSAGE_FORMAT("format.message"),
-    HEADING_FORMAT("format.heading"),
-    MAP_FORMAT("format.map"),
-    LIST_FORMAT("format.list"),
     ITEM_FORMAT("format.item"),
     PLAYER_WON("game-play.player-won"),
     GAME_COUNT("game-play.count"),

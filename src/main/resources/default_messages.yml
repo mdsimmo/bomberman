@@ -13,12 +13,13 @@
 #                                                                      #
 # -------------------------------------------------------------------- #
 
-
 format:
   # How a basic message looks
-  # TODO remove need for empty message check
   # {message}: the message being sent
   message: '{#switch|{message}|||{#green|[Bomberman]} {message}}'
+  # How to format an item by default
+  # {item}: the item to format
+  item: '{item|amount}x{item|type}'  
   # How to format a heading
   # {arg0}: The title
   heading: '{#raw}{#yellow|--------} {arg0} {#yellow|---------------}'
@@ -29,13 +30,32 @@ format:
   # How to display a list
   # {arg0}: the value of the list
   list: "{#raw}{#switch|{arg0}||| {#gold|*} {arg0}}"
-  # How to format an item by default
-  # {item}: the item to format
-  item: '{item|amount}x{item|type}'
+  # How code/commands are formatted
+  # {arg0}: the code
+  code: '{#gray|{#italic|{arg0}}}'
+  # How errors are displayed
+  # {arg0}: the error
+  error: '{#red|{arg0}}'
+  # How names of things are displayed
+  # {arg0}: the name
+  name: '{#italic|{arg0}}'
+  # How quotes should be formatted
+  # {arg0}: the code
+  quote: "'{arg0}'"
+
+# Format shortcodes
+heading: '{#|format.heading|{arg0}}'
+map: '{#|format.map|{arg0}|{arg1}}'
+list: '{#|format.list|{arg0}}'
+code: '{#|format.code|{arg0}}'
+error: '{#|format.error|{arg0}}'
+name: '{#|format.name|{arg0}}'
+quote: '{#|format.quote|{arg0}}'
+
 game-play:
   # Informs all the other players not involved that a player died
   # {player}: the player who died
-  player-killed: '{player} is out!'
+  player-killed: '{#|name|{player}} is out!'
   # The winning text message
   # {player}: the winner
   player-won: '{#title|{#gold|WIN!}||0|60|20}'
@@ -50,30 +70,30 @@ command:
   # How to display command help
   # {command}: The command
   help: |-
-    {#|format.heading|Help: {command|name}}
+    {#|heading|Help: {command|name}}
     {command|description}
-    {#|format.map|Usage|{command|usage}}
-    {#|format.map|Extra|{command|extra}}
-    {#|format.map|Example|{command|example}}
-    {#|format.map|Flags|{#switch|{command|flags|length}|0|| }}
-    {command|flags|foreach|{!#|format.map|   -{it|name}{#switch|{it|ext}|||={it|ext}}|{it|description}}|
+    {#|map|Usage|{#|code|{command|usage}}}
+    {#|map|Extra|{command|extra}}
+    {#|map|Example|{command|example}}
+    {#|map|Flags|{#switch|{command|flags|length}|0|| }}
+    {command|flags|foreach|{!#|map|   -{it|name}{#switch|{it|ext}|||={it|ext}}|{it|description}}|
     }
   # Shown when a player tries to run a command they do not have permission to use
-  deny-permission: '{#red|You do not have permission to use /{command|path}}'
+  deny-permission: '{#|error|You do not have permission to use {#|code|/{command|path}}}'
   # Shown when the player uses a command incorrectly
   # {attempt}: the list of arguments that the player typed
-  incorrect-usage: '{#red|Incorrect usage: {command|usage}}'
+  incorrect-usage: '{#|error|Incorrect usage: {#|code|{command|usage}}}'
   # Shown when a player types a command that does not exist
   # {attempt}: the cmd that the player typed
-  unknown-command: '{#red|Unknown command: {attempt}}'
+  unknown-command: '{#|error|Unknown command: {#|quote|{attempt}}}'
   # Shown to the console when it tries to run a command that needs to be done as a player
   must-be-player: You must be a player
   # Shown when a command uses a target selector, but the selecting is invalid
   # {selector}: the string of what they typed
-  invalid-target-selector: '{#red|{selector}} is invalid'
+  invalid-target-selector: '{#|error|{#|quote|{selector}} is invalid}'
   # Shown when a command needs a number but they typed something else
   # {number}: the string of what they typed (this will _not_ be a number)
-  invalid-number: '{number} is not a valid number'
+  invalid-number: '{#|error|{#|quote|{number}} is not a valid number}'
   # Called when a command is cancelled for an unknown reason
   cancelled: Operation cancelled
   # The base command details
@@ -82,8 +102,8 @@ command:
   # Details for commands which group other commands
   group:
     help: |-
-      {#|format.heading|Help: {command|name}}
-      {command|children|sort|{!it|name}|foreach|{!#|format.map|{it|name}|{#switch|{=|{#len|{it|description}}>40}|1|{#sub|{it|description}|0|40}...|{it|description}}}|
+      {#|heading|Help: {command|name}}
+      {command|children|sort|{!it|name}|foreach|{!#|map|{it|name}|{#switch|{=|{#len|{it|description}}>40}|1|{#sub|{it|description}|0|40}...|{it|description}}}|
       }
     usage: '/{command|path} <subcommand>'
     example: ''
@@ -103,17 +123,17 @@ command:
         description: 'Override existing timers (default=false)'
     # Message when a player starts an already started arena
     # {game}: the game attempted to be started
-    already-started: Game {game} already started
+    already-started: Game {#|name|{game}} already started
     # Called if game start was called when a timer was already running
     # {game}: the game attempted to be started
     # {time}: the time remaining
-    already-counting: Game {game} already counting
+    already-counting: Game {#|name|{game}} already counting
     # Called if game start was called when no players had joined
     # {game}: the game attempted to be started
-    no-players: Game {game} has no players
+    no-players: Game {#|name|{game}} has no players
     # The game has been started
     # {game}: the game that has been started
-    success: Game {game} starting
+    success: Game {#|name|{game}} starting
   # Messages relating to '/bm stop'
   stop:
     name: stop
@@ -123,10 +143,10 @@ command:
     extra: ''
     # The game hasn't been started so the game cannot be stopped
     # {game}: the game
-    not-started: Game {game} hasn't started
+    not-started: Game {#|name|{game}} hasn't started
     # The game has stopped
     # {game}: the game
-    success: Game {game} stopped
+    success: Game {#|name|{game}} stopped
     # The timer stopped
     # {game}: the game
     # {time}: time before it would have started
@@ -140,7 +160,7 @@ command:
     extra: ''
     # The game has been reloaded
     # {game}: the game
-    success: Game {game} reloaded
+    success: Game {#|name|{game}} reloaded
     # Error while loading
     # {game}: the old game's name (not an actual game)
     cannot-load: Error reloading the game's save file
@@ -152,7 +172,7 @@ command:
     extra: '{#gray|{#italic|Creative users only}}'
     # If player tries to edit when not in creative
     # {player}: the player
-    prompt-creative: '{#red|You must be in creative}'
+    prompt-creative: '{#|error|You must be in creative}'
     # Various labels in the pop-up menu (no args)
     title:
       main: 'Game Settings'
@@ -190,10 +210,10 @@ command:
   create:
     name: create
     description: |-
-      Builds a Bomberman game. Use one of {#gray|-g}, {#gray|-t}, {#gray|-s} or {#gray|-w} to select what to build.
+      Builds a Bomberman game. Use one of {#|code|-g}, {#|code|-t}, {#|code|-s} or {#|code|-w} to select what to build.
     usage: /{command|path} <name> [options]
     example: /{command|path} mygame -t=purple
-    extra: 'Custom schematics need all spawns marked by writing {#gray|{#italic|[spawn]}} on signs.'
+    extra: 'Custom schematics need all spawns marked by writing {#|code|[spawn]} on signs.'
     flags:
       s:
         description: Build using a World Edit schematic
@@ -207,23 +227,23 @@ command:
       w:
         description: Uses the current World Edit wand selection.
     # The game's name is already used
-    # {game}: the game that has the shared name 
-    game-exists: Game {game} already exists
+    # {game}: the game that has the shared name
+    game-exists: Game {#|name|{game}} already exists
     # The game's file name conflicts with an already existing game
     # {game}: the name of the game that tried to be created
     # {file}: the filename in conflict
-    file-conflict: Game {game} conflicts with file {file}
+    file-conflict: Game {#|name|{game}} conflicts with file {#|quote|{file}}
     # The referenced file name could not be found
     # {file}: the file (including path) that does not exist
     # {filename}: just the filename
-    file-not-found: Can not find '{file}'
+    file-not-found: Can not find {#|quote|{file}}
     # The game was built successfully
     # {game}: the game that was built
-    success: Game {game} created{#switch|{game|spawns}|0| but has no spawns. Did you mark spawns with "[spawn]"?}
+    success: Game {#|name|{game}} created{#switch|{game|spawns}|0| but has no spawns. Did you mark spawns with "[spawn]"?}
     # An exception was thrown while building
-    # {error}: the game that was built
+    # {error}: the error message
     error: |-
-      {#red|Build Error: '{error}'
+      {#|error|Build Error: {#|quote|{error}}
       See console for details. Game creation may be incomplete.
       Was the schematic made in a different WorldEdit version?}
     # Player needs to use WorldEdit to select something to create the game from
@@ -240,7 +260,7 @@ command:
     extra: ''
     # The game has been deleted
     # {game}: the game that was deleted (this is still a game object)
-    success: Game {game} destroyed
+    success: Game {#|name|{game}} destroyed
   # Messages relating to '/bm undo'
   undo:
     name: undo
@@ -250,13 +270,13 @@ command:
     extra: Can only undo games built in the last 10 minutes. Does not work for games built with a wand.
     # The game arena was restored to previous state
     # {game}: the game name that was reset (NOT a valid object; it is just the name)
-    success: Game {game} schematic reverted
+    success: Game {#|name|{game}} schematic reverted
     # The game was deleted
     # {game}: the game that was deleted (this is a game object)
-    deleted: Game {game} deleted
+    deleted: Game {#|name|{game}} deleted
     # Game was not in the memory
     # {game}: the game name requested (NOT a valid game)
-    unknown-game: No previous state of {game} stored - was it created more than 10 minutes ago or by using a wand?
+    unknown-game: No previous state of {#|name|{game}} stored - was it created more than 10 minutes ago or by using a wand?
   # Messages relating to '/bm list'
   list:
     name: list
@@ -267,8 +287,8 @@ command:
     # The displayed message
     # {games}: a list of games
     games: |-
-      {#|format.heading|Games}
-      {#switch|{games|length}|0|{#red|No games present}|{games|sort|{!it|name}|foreach|{!#|format.map|{it|name}|{it|players}/{it|spawns} ({#switch|{it|running}|true|Running|false|Waiting|{#red|?}})}|
+      {#|heading|Games}
+      {#switch|{games|length}|0|{#red|No games present}|{games|sort|{!it|name}|foreach|{!#|map|{it|name}|{it|players}/{it|spawns} ({#switch|{it|running}|true|Running|false|Waiting|{#red|?}})}|
       }}
   # Messages relating to '/bm info'
   info:
@@ -280,15 +300,15 @@ command:
     # What info to display about a game
     # {game}: the game
     details: |-
-      {#|format.heading|Info: {game|name}}
-      {#|format.map|Status|{#switch|{game|running}|true|Playing|false|Waiting|{#red|?}}}
-      {#|format.map|Players|{game|players}/{game|spawns}}
-      {#|format.map|Init lives|{game|lives}}
-      {#|format.map|Init bombs|{game|bombs}}
-      {#|format.map|Init power|{game|power}}
-      {#|format.map|Location|({game|x}, {game|y}, {game|z})}
-      {#|format.map|Schema|{game|schema|name}}
-      {#|format.map|Size|[{game|schema|xsize}x{game|schema|ysize}x{game|schema|zsize}]}
+      {#|heading|Info: {game|name}}
+      {#|map|Status|{#switch|{game|running}|true|Playing|false|Waiting|{#red|?}}}
+      {#|map|Players|{game|players}/{game|spawns}}
+      {#|map|Init lives|{game|lives}}
+      {#|map|Init bombs|{game|bombs}}
+      {#|map|Init power|{game|power}}
+      {#|map|Location|({game|x}, {game|y}, {game|z})}
+      {#|map|Schema|{game|schema|name}}
+      {#|map|Size|[{game|schema|xsize}x{game|schema|ysize}x{game|schema|zsize}]}
 
   # Commands relating to '/bm join'. Also see 'join.xxx' messages
   join:
@@ -303,7 +323,7 @@ command:
         ext: "<selector>"
     # The game has no spare spawn points
     # {game}: the game attempted to be joined
-    game-full: Game {game} is full
+    game-full: Game {#|name|{game}} is full
     # Cannot join because the game has already started
     # {game}: the game that couldn't be joined
     game-started: 'Game has already started'
@@ -314,7 +334,7 @@ command:
     # A player has joined the game. Sent to all observers of a game
     # {game}: the game joined
     # {player}: the player who joined
-    success: '{player} joined game {game}{#switch|{=|{game|players}=={game|spawns}}|1|{#exec|bm start {game} -d=10}}'
+    success: '{#|name|{player}} joined game {#|name|{game}}{#switch|{=|{game|players}=={game|spawns}}|1|{#exec|bm start {game} -d=10}}'
   # Messages relating to '/bm leave'
   leave:
     name: leave
@@ -331,4 +351,4 @@ command:
     not-joined: You're not part of a game
     # Player left successfully
     # {player}: the player that left
-    success: '{#gray|{#italic|{player} left game}}{#switch|{=|{game|players}==0}|1|{#exec|bm stop {game}}}'
+    success: '{#gray|{#italic|{#|name|{player}} left game}}{#switch|{=|{game|players}==0}|1|{#exec|bm stop {game}}}'
