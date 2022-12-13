@@ -16,7 +16,7 @@
 format:
   # How a basic message looks
   # {message}: the message being sent
-  message: '{#switch|{message}|||{#green|[Bomberman]} {message}}'
+  message: '{#green|[Bomberman]} {message}'
   # How to format an item by default
   # {item}: the item to format
   item: '{item|amount}x{item|type}'  

@@ -257,9 +257,8 @@ class Message private constructor(private val contents: TreeNode) : Formattable 
             val sendContents = if (contents.isRaw) {
                 contents
             } else {
-                Text.MESSAGE_FORMAT
-                        .with("message", this)
-                        .format().contents
+                // Apply the wrapper format, but not to empty values
+                Switch().format(listOf(this, empty, empty, Text.MESSAGE_FORMAT.with("message", this).format()), true).contents
             }
             val cursor = Cursor()
             sendContents.expand(cursor)
