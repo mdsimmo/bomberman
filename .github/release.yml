@@ -1,0 +1,16 @@
+changelog:
+  exclude:
+    labels:
+      - ignore-for-release
+    authors:
+      - octocat
+  categories:
+    - title: Breaking Changes 
+      labels:
+        - "Flag: Breaking Change"
+    - title: 🎉 New Features 🎉
+      labels:
+        - "Type: Enhancement"
+    - title: 🛠 Bug Fixes 🛠
+      labels:
+        - "Type: Bug"
