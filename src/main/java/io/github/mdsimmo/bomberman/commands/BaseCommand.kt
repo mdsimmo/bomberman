@@ -1,7 +1,5 @@
 package io.github.mdsimmo.bomberman.commands
 
-import com.sk89q.worldedit.WorldEdit
-import io.github.mdsimmo.bomberman.Bomberman
 import io.github.mdsimmo.bomberman.commands.game.*
 import io.github.mdsimmo.bomberman.messaging.CollectionWrapper
 import io.github.mdsimmo.bomberman.messaging.Message
@@ -11,7 +9,6 @@ import org.bukkit.command.CommandExecutor
 import org.bukkit.command.CommandSender
 import org.bukkit.command.TabCompleter
 import org.bukkit.util.StringUtil
-import java.util.ArrayList
 
 class BaseCommand : Cmd, TabCompleter, CommandExecutor {
 
@@ -85,7 +82,9 @@ class BaseCommand : Cmd, TabCompleter, CommandExecutor {
 
         // Send help if requested
         if (flags.containsKey(F_HELP)) {
-            child.context(Text.COMMAND_HELP).sendTo(sender)
+            child.context(Text.COMMAND_HELP)
+                .with("sender", sender)
+                .sendTo(sender)
             return true
         }
 

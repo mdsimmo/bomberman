@@ -52,6 +52,10 @@ class SenderWrapper(private val sender: CommandSender) : Formattable {
                 Bukkit.getServer().dispatchCommand(sender, cmd)
                 Message.empty
             }
+            "haspermission" -> {
+                require(args.size >= 2) { "haspermission requires a second argument" }
+                Message.of(if (sender.hasPermission(args[1].toString())) 1 else 0)
+            }
             else -> {
                 throw IllegalArgumentException("Unknown CommandSender option: ${args[0]}")
             }
@@ -105,12 +109,12 @@ class CollectionWrapper<T : Formattable>(private val list: Collection<T>) : Form
                 val filter = args.getOrNull(1)?.toString() ?: throw IllegalArgumentException("'filter' must have second argument")
                 val filtered =
                     list.withIndex().filter {
-                        SimpleContext(filter, elevated)
+                        val filterOutput = SimpleContext(filter, elevated)
                             .with("it", it.value)
                             .with("index", Message.of(it.index))
                             .format()
                             .toString()
-                            .isNotBlank()
+                        filterOutput.isNotBlank() && filterOutput != "0" && filterOutput != "0.0"
                     }.map { it.value }
                 return CollectionWrapper(filtered).format(args.drop(2), elevated)
             }

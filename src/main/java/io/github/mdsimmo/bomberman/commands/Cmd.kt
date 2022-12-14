@@ -71,7 +71,7 @@ abstract class Cmd(protected var parent: Cmd?) : Formattable {
     }
 
     override fun format(args: List<Message>, elevated: Boolean): Message {
-        return when (args.getOrElse(0) { "name" }.toString()) {
+        return when (args.getOrElse(0) { "name" }.toString().lowercase()) {
             "name" -> name()
             "path" -> Message.of(path())
             "usage" -> usage()
@@ -89,6 +89,7 @@ abstract class Cmd(protected var parent: Cmd?) : Formattable {
                             }
                         }
                     } }).format(args.drop(1), elevated)
+            "permission" -> Message.of(permission().value())
             else -> throw RuntimeException("Unknown command value '" + args[0] + "'")
         }
     }
