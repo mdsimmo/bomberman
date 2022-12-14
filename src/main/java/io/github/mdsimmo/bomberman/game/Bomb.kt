@@ -34,9 +34,11 @@ class Bomb private constructor(
         // Allow other bombs to blow this bomb up
         if (!noExplode && e.igniting.any { b: BlockPlan -> b.block == block }) {
             Bukkit.getScheduler().cancelTask(taskId)
-            taskId = Bukkit.getScheduler().scheduleSyncDelayedTask(Bomberman.instance) { explode() }
+            explode()
         }
     }
+
+
 
     @EventHandler(ignoreCancelled = true, priority = EventPriority.HIGH)
     fun onRunStopped(e: BmRunStoppedIntent) {
