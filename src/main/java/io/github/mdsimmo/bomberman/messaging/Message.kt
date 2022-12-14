@@ -263,7 +263,12 @@ class Message private constructor(private val contents: TreeNode) : Formattable 
             val cursor = Cursor()
             sendContents.expand(cursor)
             if (cursor.toString().isNotBlank()) {
-                sender.sendMessage(cursor.toString())
+                // filter out empty lines
+                val text = cursor.toString()
+                    .split('\n', '\r')
+                    .filter { it.isNotBlank() }
+                    .reduce{a, b -> a + "\n" + b}
+                sender.sendMessage(text)
             }
             // Handle possible title
             if (sender is Player) {
