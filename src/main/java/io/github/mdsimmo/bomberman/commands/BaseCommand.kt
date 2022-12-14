@@ -1,5 +1,7 @@
 package io.github.mdsimmo.bomberman.commands
 
+import com.sk89q.worldedit.WorldEdit
+import io.github.mdsimmo.bomberman.Bomberman
 import io.github.mdsimmo.bomberman.commands.game.*
 import io.github.mdsimmo.bomberman.messaging.CollectionWrapper
 import io.github.mdsimmo.bomberman.messaging.Message
@@ -12,6 +14,10 @@ import org.bukkit.util.StringUtil
 import java.util.ArrayList
 
 class BaseCommand : Cmd, TabCompleter, CommandExecutor {
+
+    companion object {
+        private const val F_HELP = "?"
+    }
 
     private val children: MutableList<Cmd> = ArrayList()
 
@@ -77,6 +83,12 @@ class BaseCommand : Cmd, TabCompleter, CommandExecutor {
             return true
         }
 
+        // Send help if requested
+        if (flags.containsKey(F_HELP)) {
+            child.context(Text.COMMAND_HELP).sendTo(sender)
+            return true
+        }
+
         // Execute the command
         val result = child.run(sender, args.drop(1), flags)
 
@@ -87,7 +99,6 @@ class BaseCommand : Cmd, TabCompleter, CommandExecutor {
                     args.drop(1).map { Message.of(it) }
                 ))
                 .sendTo(sender)
-            child.context(Text.COMMAND_HELP).sendTo(sender)
         }
 
         return result
@@ -107,7 +118,7 @@ class BaseCommand : Cmd, TabCompleter, CommandExecutor {
             if (splitIndex == -1) {
                 cmd.flags(sender)
                     .map { "-$it" }
-                    .plus("-?")
+                    .plus("-$F_HELP")
             } else {
                 val key = currentlyTyping.substring(1, splitIndex)
                 cmd.flagOptions(key)
