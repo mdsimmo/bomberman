@@ -82,7 +82,7 @@ command:
   deny-permission: '{#|error|You do not have permission to use {#|code|/{command|path}}}'
   # Shown when the player uses a command incorrectly
   # {attempt}: the list of arguments that the player typed
-  incorrect-usage: '{#|error|Incorrect usage: {#|code|{command|usage}}}'
+  incorrect-usage: '{#|error|Incorrect usage. For help, type: {#|code|/{command|path} -?}}'
   # Shown when a player types a command that does not exist
   # {attempt}: the cmd that the player typed
   unknown-command: '{#|error|Unknown command: {#|quote|{attempt}}}'
