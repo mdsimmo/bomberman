@@ -100,7 +100,7 @@ object Expander {
                 .lowercase()
 
         // TODO remove {#exec|...}
-        if (keyString == "#exec" && !context.elevatedPermissions) {
+        if (keyString == "#exec" && !context.elevated) {
             return Message.empty
         }
         // Try and look up a key, function or chat color to format with

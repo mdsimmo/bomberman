@@ -9,18 +9,18 @@ import org.bukkit.inventory.ItemStack
 class Context {
     private val objects: Map<String, Formattable>
     private val functions: Set<(String) -> String?>
-    val elevatedPermissions: Boolean
+    val elevated: Boolean
 
     constructor(elevated: Boolean) {
         objects = mapOf()
         functions = emptySet()
-        this.elevatedPermissions = elevated
+        this.elevated = elevated
     }
 
     private constructor(objects: Map<String, Formattable>, functions: Set<(String) -> String?>, elevated: Boolean) {
         this.objects = objects
         this.functions = functions
-        this.elevatedPermissions = elevated
+        this.elevated = elevated
     }
 
     operator fun get(key: String): Formattable? = objects[key]
@@ -30,19 +30,19 @@ class Context {
     }
 
     fun addFunctions(functions: (String) -> String?): Context {
-        return Context(objects, this.functions+functions, elevatedPermissions)
+        return Context(objects, this.functions+functions, elevated)
     }
 
     fun newScope(): Context {
-        return Context(elevatedPermissions)
+        return Context(emptyMap(), functions, elevated)
     }
 
     fun plus(key: String, thing: Formattable): Context {
-        return Context(objects.plus(Pair(key, thing)), functions, elevatedPermissions)
+        return Context(objects.plus(Pair(key, thing)), functions, elevated)
     }
 
     fun plus(context: Context): Context {
-        return Context(objects.plus(context.objects), functions + context.functions, elevatedPermissions or context.elevatedPermissions)
+        return Context(objects.plus(context.objects), functions + context.functions, elevated or context.elevated)
     }
 
     fun plus(key: String, value: String) = plus(key, StringWrapper(value))

@@ -47,7 +47,7 @@ class SenderWrapper(private val sender: CommandSender) : Formattable {
                 Message.empty
             }
             "exec" -> {
-                if (context.elevatedPermissions) {
+                if (context.elevated) {
                     require(args.size >= 2) { "Exec requires a second argument" }
                     val cmd = args[1].toString()
                     Bukkit.getServer().dispatchCommand(sender, cmd)

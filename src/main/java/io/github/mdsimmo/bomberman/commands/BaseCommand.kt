@@ -65,7 +65,7 @@ class BaseCommand : Cmd, TabCompleter, CommandExecutor {
         }
 
         // Find the referenced command
-        val child = children.firstOrNull { c -> c.name().toString().equals(args[0], ignoreCase = true) }
+        val child = children.firstOrNull { c -> c.name().format(emptyList(), c.cmdContext()).toString().equals(args[0], ignoreCase = true) }
         if (child == null) {
             Text.UNKNOWN_COMMAND.format(cmdContext()
                 .plus("attempt", args[0]))
@@ -105,7 +105,7 @@ class BaseCommand : Cmd, TabCompleter, CommandExecutor {
         val currentlyTyping = args.last() // Will always have one.
 
         // Find referenced child command
-        val cmd = children.firstOrNull { c -> c.name().toString().equals(arguments.firstOrNull(), ignoreCase = true) } ?: this
+        val cmd = children.firstOrNull { c -> c.name().format(emptyList(), c.cmdContext()).toString().equals(arguments.firstOrNull(), ignoreCase = true) } ?: this
         if (!cmd.permission().isAllowedBy(sender))
             return emptyList()
 
@@ -149,7 +149,7 @@ class BaseCommand : Cmd, TabCompleter, CommandExecutor {
         return if (args.size <= 1)
             children
                 .filter { it.permission().isAllowedBy(sender) }
-                .map { it.name().toString() }
+                .map { it.name().format(emptyList(), it.cmdContext()).toString() }
         else
             emptyList()
     }
