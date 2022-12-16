@@ -5,13 +5,14 @@ import io.github.mdsimmo.bomberman.commands.GameCommand
 import io.github.mdsimmo.bomberman.commands.Permission
 import io.github.mdsimmo.bomberman.commands.Permissions
 import io.github.mdsimmo.bomberman.game.Game
+import io.github.mdsimmo.bomberman.messaging.Formattable
 import io.github.mdsimmo.bomberman.messaging.Message
 import io.github.mdsimmo.bomberman.messaging.Text
 import org.bukkit.command.CommandSender
 
 class GameInfo(parent: Cmd) : GameCommand(parent) {
-    override fun name(): Message {
-        return Text.INFO_NAME.format()
+    override fun name(): Formattable {
+        return Text.INFO_NAME
     }
 
     override fun permission(): Permission {
@@ -25,23 +26,23 @@ class GameInfo(parent: Cmd) : GameCommand(parent) {
     override fun gameRun(sender: CommandSender, args: List<String>, flags: Map<String, String>, game: Game): Boolean {
         if (args.isNotEmpty())
             return false
-        context(Text.INFO_DETAILS).with("game", game).sendTo(sender)
+        Text.INFO_DETAILS.format(cmdContext().plus("game", game)).sendTo(sender)
         return true
     }
 
-    override fun extra(): Message {
-        return context(Text.INFO_EXTRA).format()
+    override fun extra(): Formattable {
+        return Text.INFO_EXTRA
     }
 
-    override fun example(): Message {
-        return context(Text.INFO_EXAMPLE).format()
+    override fun example(): Formattable {
+        return Text.INFO_EXAMPLE
     }
 
-    override fun description(): Message {
-        return context(Text.INFO_DESCRIPTION).format()
+    override fun description(): Formattable {
+        return Text.INFO_DESCRIPTION
     }
 
-    override fun usage(): Message {
-        return context(Text.INFO_USAGE).format()
+    override fun usage(): Formattable {
+        return Text.INFO_USAGE
     }
 }

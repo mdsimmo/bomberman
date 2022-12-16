@@ -5,6 +5,7 @@ import io.github.mdsimmo.bomberman.events.BmRunStartCountDownIntent
 import io.github.mdsimmo.bomberman.events.BmRunStartedIntent
 import io.github.mdsimmo.bomberman.events.BmRunStoppedIntent
 import io.github.mdsimmo.bomberman.events.BmTimerCountedEvent
+import io.github.mdsimmo.bomberman.messaging.Context
 import io.github.mdsimmo.bomberman.messaging.Text
 import org.bukkit.Bukkit
 import org.bukkit.event.EventHandler
@@ -57,10 +58,9 @@ class StartTimer private constructor(private val game: Game, private var time: I
         if (e.override) {
             killSelf()
         } else {
-            e.cancelBecause(Text.GAME_ALREADY_COUNTING
-                    .with("game", game)
-                    .with("time", time)
-                    .format())
+            e.cancelBecause(Text.GAME_ALREADY_COUNTING.format(Context(false)
+                    .plus("game", game)
+                    .plus("time", time)))
         }
     }
 
@@ -70,9 +70,8 @@ class StartTimer private constructor(private val game: Game, private var time: I
         if (e.game != game)
             return
         killSelf()
-        e.cancelFor(Text.STOP_TIMER_STOPPED
-                .with("time", time)
-                .with("game", game)
-                .format())
+        e.cancelFor(Text.STOP_TIMER_STOPPED.format(Context(false)
+                .plus("time", time)
+                .plus("game", game)))
     }
 }

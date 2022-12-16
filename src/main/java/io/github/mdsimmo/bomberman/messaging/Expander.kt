@@ -26,11 +26,11 @@ object Expander {
     /**
      * Expands all braces in text. The number of open braces must be balanced with close braces
      * @param text the text to expand
-     * @param things Reference-able things
+     * @param context Reference-able things
      * @return the expanded text
      */
     @JvmStatic
-    fun expand(text: String, things: Map<String, Formattable>, elevatedPermissions: Boolean): Message {
+    fun expand(text: String, context: Context): Message {
         var expanded: Message = Message.empty
         val building = StringBuilder()
         var ignoreNextSpecial = false
@@ -51,7 +51,7 @@ object Expander {
                         Message.of(subtext.replaceFirst("!", ""))
                     } else {
                         // Expand the brace
-                        expandBrace(subtext, things, elevatedPermissions)
+                        expandBrace(subtext, context)
                     }
                     expanded = expanded.append(expandedBrace)
                     i += subtext.length - 1 // -1 because starting brace was already counted
@@ -77,7 +77,7 @@ object Expander {
      * @param text the text to expands formatted as "{ key | arg1 | ... | argN }"
      * @return the expanded string
      */
-    private fun expandBrace(text: String, things: Map<String, Formattable>, elevatedPermissions: Boolean): Message {
+    private fun expandBrace(text: String, context: Context): Message {
         if (text[0] != '{' || text[text.length - 1] != '}')
             throw RuntimeException("expandBrace() must start and end with a brace")
 
@@ -89,7 +89,7 @@ object Expander {
         val args = mutableListOf<Message>()
         generateSequence { toNext(text, '|', i.get()) }
                 .forEach { subArg ->
-                    args.add(Message.lazyExpand(subArg.substring(1, subArg.length - 1), things, elevatedPermissions))
+                    args.add(Message.lazyExpand(subArg.substring(1, subArg.length - 1), context))
                     // -1 because the first '|' would get counted twice
                     i.addAndGet(subArg.length - 1)
                 }
@@ -100,14 +100,14 @@ object Expander {
                 .lowercase()
 
         // TODO remove {#exec|...}
-        if (keyString == "#exec" && !elevatedPermissions) {
+        if (keyString == "#exec" && !context.elevatedPermissions) {
             return Message.empty
         }
         // Try and look up a key, function or chat color to format with
-        val thing = things[keyString]
+        val thing = context[keyString]
                 ?: functions[keyString]
                 ?: Message.error(text)
-        return thing.format(args, elevatedPermissions)
+        return thing.format(args, context)
     }
 
     /**

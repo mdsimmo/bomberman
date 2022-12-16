@@ -43,7 +43,7 @@ class MessageTest {
     @Test
     fun formatReturnsItself() {
         val hello = of("I am fancy")
-        val formatted = hello.format(listOf(), false)
+        val formatted = hello.format(listOf(), Context(false))
         assertEquals(hello, formatted)
     }
 }

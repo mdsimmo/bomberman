@@ -6,27 +6,27 @@ import io.github.mdsimmo.bomberman.commands.Permission
 import io.github.mdsimmo.bomberman.commands.Permissions
 import io.github.mdsimmo.bomberman.events.BmRunStoppedIntent
 import io.github.mdsimmo.bomberman.game.Game
+import io.github.mdsimmo.bomberman.messaging.Formattable
 import io.github.mdsimmo.bomberman.messaging.Message
 import io.github.mdsimmo.bomberman.messaging.Text
 import org.bukkit.command.CommandSender
 
 class RunStop(parent: Cmd) : GameCommand(parent) {
-    override fun name(): Message {
-        return context(Text.STOP_NAME).format()
+    override fun name(): Formattable {
+        return Text.STOP_NAME
     }
 
     override fun gameRun(sender: CommandSender, args: List<String>, flags: Map<String, String>, game: Game): Boolean {
         if (args.isNotEmpty())
             return false
         val e = BmRunStoppedIntent.stopGame(game)
-        if (!e.isCancelled) Text.STOP_SUCCESS
-                .with("game", game)
+        if (!e.isCancelled) Text.STOP_SUCCESS.format(cmdContext()
+                    .plus("game", game))
                 .sendTo(sender) else {
             (e.cancelledReason()
-                    ?: Text.COMMAND_CANCELLED
-                                .with("command", this)
-                                .format())
-                    .sendTo(sender)
+                    ?: Text.COMMAND_CANCELLED.format(cmdContext()
+                                .plus("command", this)))
+                .sendTo(sender)
         }
         return true
     }
@@ -39,19 +39,19 @@ class RunStop(parent: Cmd) : GameCommand(parent) {
         return emptyList()
     }
 
-    override fun extra(): Message {
-        return context(Text.STOP_EXTRA).format()
+    override fun extra(): Formattable {
+        return Text.STOP_EXTRA
     }
 
-    override fun example(): Message {
-        return context(Text.STOP_EXAMPLE).format()
+    override fun example(): Formattable {
+        return Text.STOP_EXAMPLE
     }
 
-    override fun description(): Message {
-        return context(Text.STOP_DESCRIPTION).format()
+    override fun description(): Formattable {
+        return Text.STOP_DESCRIPTION
     }
 
-    override fun usage(): Message {
-        return context(Text.STOP_USAGE).format()
+    override fun usage(): Formattable {
+        return Text.STOP_USAGE
     }
 }

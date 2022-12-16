@@ -4,13 +4,14 @@ import io.github.mdsimmo.bomberman.commands.Cmd
 import io.github.mdsimmo.bomberman.commands.Permission
 import io.github.mdsimmo.bomberman.commands.Permissions
 import io.github.mdsimmo.bomberman.events.BmGameListIntent
+import io.github.mdsimmo.bomberman.messaging.Formattable
 import io.github.mdsimmo.bomberman.messaging.Message
 import io.github.mdsimmo.bomberman.messaging.Text
 import org.bukkit.command.CommandSender
 
 class GameList(parent: Cmd?) : Cmd(parent) {
-    override fun name(): Message {
-        return context(Text.GAMELIST_NAME).format()
+    override fun name(): Formattable {
+        return Text.GAMELIST_NAME
     }
 
     override fun options(sender: CommandSender, args: List<String>): List<String> {
@@ -21,8 +22,8 @@ class GameList(parent: Cmd?) : Cmd(parent) {
         if (args.isNotEmpty())
             return false
         val games = BmGameListIntent.listGames()
-        context(Text.GAMELIST_GAMES)
-                .with("games", games)
+        Text.GAMELIST_GAMES.format(cmdContext()
+                .plus("games", games))
                 .sendTo(sender)
         return true
     }
@@ -31,19 +32,19 @@ class GameList(parent: Cmd?) : Cmd(parent) {
         return Permissions.LIST
     }
 
-    override fun example(): Message {
-        return context(Text.GAMELIST_EXAMPLE).format()
+    override fun example(): Formattable {
+        return Text.GAMELIST_EXAMPLE
     }
 
-    override fun extra(): Message {
-        return context(Text.GAMELIST_EXTRA).format()
+    override fun extra(): Formattable {
+        return Text.GAMELIST_EXTRA
     }
 
-    override fun description(): Message {
-        return context(Text.GAMELIST_DESCRIPTION).format()
+    override fun description(): Formattable {
+        return Text.GAMELIST_DESCRIPTION
     }
 
-    override fun usage(): Message {
-        return context(Text.GAMELIST_USAGE).format()
+    override fun usage(): Formattable {
+        return Text.GAMELIST_USAGE
     }
 }

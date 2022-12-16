@@ -14,7 +14,7 @@ abstract class Cmd(protected var parent: Cmd?) : Formattable {
      *
      * @return the name
      */
-    abstract fun name(): Message
+    abstract fun name(): Formattable
 
     /**
      * Gets a list of possible values to return.
@@ -28,9 +28,9 @@ abstract class Cmd(protected var parent: Cmd?) : Formattable {
 
     open fun flagOptions(flag: String): Set<String> = emptySet()
 
-    open fun flagExtension(flag: String): Message  = Message.empty
+    open fun flagExtension(flag: String): Formattable  = Message.empty
 
-    open fun flagDescription(flag: String): Message = Message.empty
+    open fun flagDescription(flag: String): Formattable = Message.empty
 
     /**
      * Execute the command
@@ -41,10 +41,10 @@ abstract class Cmd(protected var parent: Cmd?) : Formattable {
      */
     abstract fun run(sender: CommandSender, args: List<String>, flags: Map<String, String>): Boolean
 
-    abstract fun extra(): Message
-    abstract fun example(): Message
-    abstract fun description(): Message
-    abstract fun usage(): Message
+    abstract fun extra(): Formattable
+    abstract fun example(): Formattable
+    abstract fun description(): Formattable
+    abstract fun usage(): Formattable
 
     /**
      * @return the permission needed to run this command
@@ -66,29 +66,29 @@ abstract class Cmd(protected var parent: Cmd?) : Formattable {
         return path
     }
 
-    fun context(text: Contexted): Contexted {
-        return text.with("command", this)
+    fun cmdContext(): Context {
+        return Context(false).plus("command", this)
     }
 
-    override fun format(args: List<Message>, elevated: Boolean): Message {
+    override fun format(args: List<Message>, context: Context): Message {
         return when (args.getOrElse(0) { "name" }.toString()) {
-            "name" -> name()
+            "name" -> name().format(emptyList(), context.plus(cmdContext()))
             "path" -> Message.of(path())
-            "usage" -> usage()
-            "extra" -> extra()
-            "example" -> example()
-            "description" -> description()
+            "usage" -> usage().format(emptyList(), context.plus(cmdContext()))
+            "extra" -> extra().format(emptyList(), context.plus(cmdContext()))
+            "example" -> example().format(emptyList(), context.plus(cmdContext()))
+            "description" -> description().format(emptyList(), context.plus(cmdContext()))
             "flags" -> CollectionWrapper(flags(Bukkit.getConsoleSender())
                     .map { flag -> object: Formattable {
-                        override fun format(args: List<Message>, elevated: Boolean): Message {
+                        override fun format(args: List<Message>, context: Context): Message {
                             return when ((args.firstOrNull() ?: "name").toString()) {
                                 "name" -> Message.of(flag)
-                                "ext" -> flagExtension(flag)
-                                "description" -> flagDescription(flag)
+                                "ext" -> flagExtension(flag).format(emptyList(), context.plus(cmdContext()))
+                                "description" -> flagDescription(flag).format(emptyList(), context.plus(cmdContext()))
                                 else -> throw RuntimeException("Unknown flag value '" + args[0] + "'")
                             }
                         }
-                    } }).format(args.drop(1), elevated)
+                    } }).format(args.drop(1), context)
             else -> throw RuntimeException("Unknown command value '" + args[0] + "'")
         }
     }

@@ -33,8 +33,8 @@ class Message private constructor(private val contents: TreeNode) : Formattable 
             return of(s).color(ChatColor.RED)
         }
 
-        fun lazyExpand(text: String, context: Map<String, Formattable>, elevated: Boolean): Message {
-            return Message(LazyNode(text, context, elevated))
+        fun lazyExpand(text: String, context: Context): Message {
+            return Message(LazyNode(text, context))
         }
     }
 
@@ -165,9 +165,7 @@ class Message private constructor(private val contents: TreeNode) : Formattable 
             get() = parts.any { it.isRaw }
 
         override fun expandTitle(): Title? {
-            return parts
-                    .mapNotNull { it.expandTitle() }
-                    .firstOrNull()
+            return parts.firstNotNullOfOrNull { it.expandTitle() }
         }
     }
 
@@ -223,9 +221,9 @@ class Message private constructor(private val contents: TreeNode) : Formattable 
 
     }
 
-    private class LazyNode (val text: String, val context: Map<String, Formattable>, elevated: Boolean) : TreeNode {
+    private class LazyNode (val text: String, val context: Context) : TreeNode {
         val content: TreeNode by lazy {
-            Expander.expand(text, context, elevated).contents
+            Expander.expand(text, context).contents
         }
 
         override fun expand(cursor: Cursor) {
@@ -248,17 +246,17 @@ class Message private constructor(private val contents: TreeNode) : Formattable 
         return Message(Joined(contents, text.contents))
     }
 
-    override fun format(args: List<Message>, elevated: Boolean): Message {
+    override fun format(args: List<Message>, context: Context): Message {
         return this
     }
 
     fun sendTo(sender: CommandSender) {
         try {
-            val sendContents = if (contents.isRaw) {
+            val sendContents: TreeNode = if (contents.isRaw) {
                 contents
             } else {
                 // Apply the wrapper format, but not to empty values
-                Switch().format(listOf(this, empty, empty, Text.MESSAGE_FORMAT.with("message", this).format()), true).contents
+                Switch().format(listOf(this, empty, empty, Text.MESSAGE_FORMAT.format(listOf(), Context(false).plus("message", this))), Context(false)).contents
             }
             val cursor = Cursor()
             sendContents.expand(cursor)

@@ -9,14 +9,15 @@ import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
 import org.junit.Test
 import org.mockito.ArgumentMatchers
+import org.mockito.Mockito
 import org.mockito.Mockito.*
 
 class FormattingTest {
+    private fun <T> any(): T = Mockito.any()
 
     class NumberName(private val number: Int) : Formattable {
-        override fun format(args: List<Message>, elevated: Boolean): Message {
-            val arg = args.getOrNull(0)?.toString() ?: "text"
-            return when (arg) {
+        override fun format(args: List<Message>, context: Context): Message {
+            return when (args.getOrNull(0)?.toString() ?: "text") {
                 "text" -> of(when (number) {
                     0 -> "Zero"
                     1 -> "One"
@@ -37,14 +38,20 @@ class FormattingTest {
         for (t in Text.values()) {
             // We should be able to evaluate every message without throwing an exception
             // Missing arguments should just be formatted red
-            assertNotNull(t.format())
+            assertNotNull(t.format(Context(false)))
         }
     }
 
     @Test
     fun testCustomFormat() {
-        val a = expand("A map: \n{#|format.map|key|value}\nWow!", mapOf(), false)
-        assertEquals("A map: \n key: value\nWow!", ChatColor.stripColor(a.toString()))
+        val context = Context(false).addFunctions { key ->
+            when (key) {
+                "custom.path" -> "{arg0}: {arg1}"
+                else -> null
+            }
+        }
+        val a = expand("A map: \n{#|custom.path|key|value}\nWow!", context)
+        assertEquals("A map: \nkey: value\nWow!", a.toString())
     }
 
     @Test
@@ -83,7 +90,7 @@ class FormattingTest {
         val sender = mock(Player::class.java)
         val message = expand(
                 "{#title|Chapter {chapter}|The story ends|1|2|3}",
-                mapOf(Pair("chapter", of(1))), false
+                Context(false).plus("chapter", of(1))
         )
 
         message.sendTo(sender)
@@ -93,109 +100,109 @@ class FormattingTest {
 
     @Test
     fun testEquationsExpand() {
-        val a = expand("Equation {=|2+3}", mapOf(), false)
+        val a = expand("Equation {=|2+3}", Context(false))
         assertEquals("Equation 5", a.toString())
     }
 
     @Test
     fun testEquationEquals() {
-        val a = expand("{=|5==6} {=|5==5}", mapOf(), false)
+        val a = expand("{=|5==6} {=|5==5}", Context(false))
         assertEquals("0 1", a.toString())
     }
 
     @Test
     fun testEquationEqualsNot() {
-        val a = expand("{=|5!=6} {=|5!=5}", mapOf(), false)
+        val a = expand("{=|5!=6} {=|5!=5}", Context(false))
         assertEquals("1 0", a.toString())
     }
 
     @Test
     fun testEquationGreater() {
-        val a = expand("{=|5>6} {=|6>5} {=|5>5}", mapOf(), false)
+        val a = expand("{=|5>6} {=|6>5} {=|5>5}", Context(false))
         assertEquals("0 1 0", a.toString())
     }
 
     @Test
     fun testEquationLesser() {
-        val a = expand("{=|5<6} {=|6<5} {=|5<5}", mapOf(), false)
+        val a = expand("{=|5<6} {=|6<5} {=|5<5}", Context(false))
         assertEquals("1 0 0", a.toString())
     }
 
     @Test
     fun testEquationGreaterEqual() {
-        val a = expand("{=|5>=6} {=|6>=5} {=|5>=5}", mapOf(), false)
+        val a = expand("{=|5>=6} {=|6>=5} {=|5>=5}", Context(false))
         assertEquals("0 1 1", a.toString())
     }
 
     @Test
     fun testEquationLesserEqual() {
-        val a = expand("{=|5<=6} {=|6<=5} {=|5<=5}", mapOf(), false)
+        val a = expand("{=|5<=6} {=|6<=5} {=|5<=5}", Context(false))
         assertEquals("1 0 1", a.toString())
     }
 
     @Test
     fun testEquationAnd() {
-        val a = expand("{=|0 & 0} {=|0 & 1} {=|1 & 0} {=|1 & 1} {=|-1 & 2}", mapOf(), false)
+        val a = expand("{=|0 & 0} {=|0 & 1} {=|1 & 0} {=|1 & 1} {=|-1 & 2}", Context(false))
         assertEquals("0 0 0 1 1", a.toString())
     }
 
     @Test
     fun testEquationOr() {
-        val a = expand("{=|0 $ 0} {=|0 $ 1} {=|1 $ 0} {=|1 $ 1} {=|-1 $ 2}", mapOf(), false)
+        val a = expand("{=|0 $ 0} {=|0 $ 1} {=|1 $ 0} {=|1 $ 1} {=|-1 $ 2}", Context(false))
         assertEquals("0 1 1 1 1", a.toString())
     }
 
     @Test
     fun testEquationNot() {
-        val a = expand("{=|!0} {=|!1} {=|!(-2)} {=|-(!2)}", mapOf(), false)
+        val a = expand("{=|!0} {=|!1} {=|!(-2)} {=|-(!2)}", Context(false))
         assertEquals("1 0 0 0", a.toString())
     }
 
     @Test
     fun testNotBeforeAnd() {
-        val a = expand("{=|1 $ !0}", mapOf(), false)
+        val a = expand("{=|1 $ !0}", Context(false))
         assertEquals("1", a.toString())
     }
 
     @Test
     fun testPlusBeforeAnd() {
-        val a = expand("{=|1 & -1 + 1}", mapOf(), false)
+        val a = expand("{=|1 & -1 + 1}", Context(false))
         assertEquals("0", a.toString())
     }
 
     @Test
     fun testEquationAndBeforeOr() {
-        val a = expand("{=|1 $ 1 & 0}", mapOf(), false)
+        val a = expand("{=|1 $ 1 & 0}", Context(false))
         assertEquals("1", a.toString())
     }
 
     @Test
     fun testAndOrBeforeEqual() {
-        val a = expand("{=|-1 == -1 & 1} {=|0 == 0 $ 1}", mapOf(), false)
+        val a = expand("{=|-1 == -1 & 1} {=|0 == 0 $ 1}", Context(false))
         assertEquals("0 0", a.toString())
     }
 
     @Test
     fun testCompareBeforeEqual() {
-        val a = expand("{=|0 == 1 > 1}", mapOf(), false)
+        val a = expand("{=|0 == 1 > 1}", Context(false))
         assertEquals("1", a.toString())
     }
 
     @Test
     fun testEquationRound() {
-        val a = expand("{=|round(0.6)} {=|round(0.1)} {=|round(0.5)} {=|round(-0.6)} {=|round(-0.1)} {=|round(-0.5)}", mapOf(), false)
+        val a = expand("{=|round(0.6)} {=|round(0.1)} {=|round(0.5)} {=|round(-0.6)} {=|round(-0.1)} {=|round(-0.5)}", Context(false))
         assertEquals("1 0 1 -1 0 0", a.toString())
     }
 
     @Test
     fun testSwitchExpands() {
-        val a = expand("{#switch|a|a|1|b|2|3} {#switch|b|a|1|b|2|3} {#switch|c|a|1|b|2|3}", mapOf(), false)
+        val a = expand("{#switch|a|a|1|b|2|3} {#switch|b|a|1|b|2|3} {#switch|c|a|1|b|2|3}", Context(false))
         assertEquals("1 2 3", a.toString())
     }
 
     @Test
     fun testSwitchNoMatchReturnsEmpty() {
-        val a = expand("{#switch|c|a|1|b|2}", mapOf(), false)
+        val a = expand("{#switch|c|a|1|b|2}", Context(false))
         assertEquals("", a.toString())
     }
 
@@ -203,39 +210,39 @@ class FormattingTest {
     fun testSwitchEvaluatesOnlyTheSelectedArgument() {
         val no = mock(Formattable::class.java)
         val yes = mock(Formattable::class.java)
-        `when`(no.format(anyList(), anyBoolean())).thenReturn(of("No"))
-        `when`(yes.format(anyList(), anyBoolean())).thenReturn(of("Yes"))
+        `when`(no.format(anyList(), any())).thenReturn(of("No"))
+        `when`(yes.format(anyList(), any())).thenReturn(of("Yes"))
 
-        val a = expand("{#switch|1|0|{no}|1|{yes}|2|{no}|{no}}", mapOf(
-                Pair("no", no),
-                Pair("yes", yes)
-        ), false)
+        val context =  Context(false)
+            .plus("no", no)
+            .plus("yes", yes)
+        val a = expand("{#switch|1|0|{no}|1|{yes}|2|{no}|{no}}", context)
 
         assertEquals("Yes", a.toString())
-        verify(yes).format(emptyList(), false)
+        verify(yes).format(listOf(), context)
         verifyNoMoreInteractions(yes)
         verifyNoInteractions(no)
     }
 
     @Test
-    fun testSwitchEvaluatesArgmentsInOrder() {
+    fun testSwitchEvaluatesArgumentsInOrder() {
         val one = mock(Formattable::class.java)
         val two = mock(Formattable::class.java)
         val three = mock(Formattable::class.java)
-        `when`(one.format(anyList(), anyBoolean())).thenReturn(of("1"))
-        `when`(two.format(anyList(), anyBoolean())).thenReturn(of("2"))
-        `when`(three.format(anyList(), anyBoolean())).thenReturn(of("3"))
+        `when`(one.format(anyList(), any())).thenReturn(of("1"))
+        `when`(two.format(anyList(), any())).thenReturn(of("2"))
+        `when`(three.format(anyList(), any())).thenReturn(of("3"))
 
-        val a = expand("{#switch|2|{one}|One|{two}|Two|{three}|Three|Four+}", mapOf(
-                Pair("one", one),
-                Pair("two", two),
-                Pair("three", three)
-        ), false)
+        val context = Context(false)
+            .plus("one", one)
+            .plus("two", two)
+            .plus("three", three)
+        val a = expand("{#switch|2|{one}|One|{two}|Two|{three}|Three|Four+}", context)
 
         assertEquals("Two", a.toString())
-        verify(one).format(emptyList(), false)
+        verify(one).format(emptyList(), context)
         verifyNoMoreInteractions(one)
-        verify(two).format(emptyList(), false)
+        verify(two).format(emptyList(), context)
         verifyNoMoreInteractions(two)
         verifyNoInteractions(three)
     }
@@ -245,7 +252,7 @@ class FormattingTest {
         val mylist = listOf(of("Hello"), of("Small"), of("World"))
         val a = expand(
                 "{mylist|foreach|[\\{index\\}: \\{it\\}]|-}",
-                mapOf(Pair("mylist", CollectionWrapper(mylist))), false)
+                Context(false).plus("mylist", CollectionWrapper(mylist)))
         assertEquals("[0: Hello]-[1: Small]-[2: World]", a.toString())
     }
 
@@ -254,14 +261,14 @@ class FormattingTest {
         val mylist = listOf(of("One"), of("Two"), of("Three"))
         val a = expand(
                 "{mylist|sort|\\{#sub\\|\\{it\\}\\|1\\}|foreach|(\\{index\\}: \\{it\\})|, }",
-                mapOf(Pair("mylist", CollectionWrapper(mylist))), false)
+                Context(false).plus("mylist", CollectionWrapper(mylist)))
         assertEquals("(0: Three), (1: One), (2: Two)", a.toString())
     }
 
     @Test
     fun testExclaimDoesNotEvaluate() {
         val text = "Hello {!bob}"
-        val result = expand(text, mapOf(), false)
+        val result = expand(text, Context(false))
         assertEquals("Hello {bob}", result.toString())
     }
 
@@ -270,7 +277,7 @@ class FormattingTest {
         val mylist = listOf(of("One"), of("Two"), of("Three"))
         val a = expand(
             "{mylist|sort|{!#sub|{it}|1}|foreach|({!index}: {!it})|, }",
-            mapOf(Pair("mylist", CollectionWrapper(mylist))), false)
+            Context(false).plus("mylist", CollectionWrapper(mylist)))
         assertEquals("(0: Three), (1: One), (2: Two)", a.toString())
     }
 
@@ -279,7 +286,7 @@ class FormattingTest {
         val mylist = listOf(of("One"), of("Two"), of("Three"), of("Four"))
         val a = expand(
             "{mylist|filter|{!#regex|{it}|[^e]|}|foreach|{!it}|, }",
-            mapOf(Pair("mylist", CollectionWrapper(mylist))), false)
+            Context(false).plus("mylist", CollectionWrapper(mylist)))
         assertEquals("One, Three", a.toString())
     }
 
@@ -288,7 +295,7 @@ class FormattingTest {
         val mylist = listOf(NumberName(1), NumberName(2), NumberName(3))
         val a = expand(
             "{mylist|get|Two}",
-            mapOf(Pair("mylist", CollectionWrapper(mylist))), false)
+            Context(false).plus("mylist", CollectionWrapper(mylist)))
         assertEquals("Two", a.toString())
     }
 
@@ -297,7 +304,7 @@ class FormattingTest {
         val mylist = listOf(NumberName(0), NumberName(1), NumberName(3))
         val a = expand(
             "{mylist|get|Two|Value: {!it}}",
-            mapOf(Pair("mylist", CollectionWrapper(mylist))), false)
+            Context(false).plus("mylist", CollectionWrapper(mylist)))
         assertEquals("", a.toString())
     }
 
@@ -306,7 +313,7 @@ class FormattingTest {
         val mylist = listOf(NumberName(0), NumberName(1), NumberName(2), NumberName(3))
         val a = expand(
             "{mylist|get|Two|Value: {!it|val}}",
-            mapOf(Pair("mylist", CollectionWrapper(mylist))), false)
+            Context(false).plus("mylist", CollectionWrapper(mylist)))
         assertEquals("Value: 2", a.toString())
     }
 
@@ -315,14 +322,14 @@ class FormattingTest {
         val mylist = listOf(NumberName(0), NumberName(1), NumberName(2), NumberName(3))
         val a = expand(
             "{mylist|get|1|{!it|val}|Got: {!it}}",
-            mapOf(Pair("mylist", CollectionWrapper(mylist))), false)
+            Context(false).plus("mylist", CollectionWrapper(mylist)))
         assertEquals("Got: One", a.toString())
     }
 
     @Test
     fun testListSize() {
         val mylist = listOf(of("Hello"), of("Small"), of("World"))
-        val a = expand("{mylist|length}", mapOf(Pair("mylist", CollectionWrapper(mylist))), false)
+        val a = expand("{mylist|length}", Context(false).plus("mylist", CollectionWrapper(mylist)))
         assertEquals("3", a.toString())
     }
 
@@ -330,98 +337,98 @@ class FormattingTest {
     fun testEmbeddedLists() {
         val myList = listOf(
             object: Formattable {
-                override fun format(args: List<Message>, elevated: Boolean): Message {
+                override fun format(args: List<Message>, context: Context): Message {
                     return if (args.getOrNull(0).toString() == "inner") {
                         CollectionWrapper(listOf(NumberName(0), NumberName(1), NumberName(2)))
-                            .format(args.drop(1), false)
+                            .format(args.drop(1), context)
                     } else {
                         of("Bad call")
                     }
                 }
             },
             object: Formattable {
-                override fun format(args: List<Message>, elevated: Boolean): Message {
+                override fun format(args: List<Message>, context: Context): Message {
                     return if (args.getOrNull(0).toString() == "inner") {
                         CollectionWrapper(listOf(NumberName(3), NumberName(4)))
-                            .format(args.drop(1), false)
+                            .format(args.drop(1), context)
                     } else {
                         of("Bad call")
                     }
                 }
             })
-        val result = expand("[{list|foreach|[{!it|inner|foreach|{!it|text}|, }]|, }]", mapOf(Pair("list", CollectionWrapper(myList))), false)
+        val result = expand("[{list|foreach|[{!it|inner|foreach|{!it|text}|, }]|, }]", Context(false).plus("list", CollectionWrapper(myList)))
         assertEquals("[[Zero, One, Two], [Three, Four]]", result.toString())
     }
 
     @Test
     fun testStringLength() {
-        val a = expand("{#len|Hello}", emptyMap(), false)
+        val a = expand("{#len|Hello}", Context(false))
         assertEquals("5", a.toString())
     }
 
     @Test
     fun testPadEmpty() {
-        val a = expand("{#padl|abc|5}", emptyMap(), false)
+        val a = expand("{#padl|abc|5}", Context(false))
         assertEquals("  abc", a.toString())
     }
 
     @Test
     fun testPadLeft() {
-        val a = expand("{#padl|abc|8|xyz}", emptyMap(), false)
+        val a = expand("{#padl|abc|8|xyz}", Context(false))
         assertEquals("xyzxyabc", a.toString())
     }
 
     @Test
     fun testPadRight() {
-        val a = expand("{#padr|abc|8|xyz}", emptyMap(), false)
+        val a = expand("{#padr|abc|8|xyz}", Context(false))
         assertEquals("abcxyzxy", a.toString())
     }
 
     @Test
     fun testSubStringPosNone() {
-        val a = expand("{#sub|icecream|3}", emptyMap(), false)
+        val a = expand("{#sub|icecream|3}", Context(false))
         assertEquals("cream", a.toString())
     }
 
     @Test
     fun testSubStringPosPos() {
-        val a = expand("{#sub|icecream|3|2}", emptyMap(), false)
+        val a = expand("{#sub|icecream|3|2}", Context(false))
         assertEquals("cr", a.toString())
     }
 
     @Test
     fun testSubStringPosNeg() {
-        val a = expand("{#sub|icecream|3|-2}", emptyMap(), false)
+        val a = expand("{#sub|icecream|3|-2}", Context(false))
         assertEquals("cre", a.toString())
     }
 
     @Test
     fun testSubStringNegNone() {
-        val a = expand("{#sub|icecream|-3}", emptyMap(), false)
+        val a = expand("{#sub|icecream|-3}", Context(false))
         assertEquals("eam", a.toString())
     }
 
     @Test
     fun testSubStringNegPos() {
-        val a = expand("{#sub|icecream|-3|2}", emptyMap(), false)
+        val a = expand("{#sub|icecream|-3|2}", Context(false))
         assertEquals("ea", a.toString())
     }
 
     @Test
     fun testSubStringNegNeg() {
-        val a = expand("{#sub|icecream|-4|-2}", emptyMap(), false)
+        val a = expand("{#sub|icecream|-4|-2}", Context(false))
         assertEquals("re", a.toString())
     }
 
     @Test
     fun testSubStringEndBeforeStart() {
-        val a = expand("{#sub|icecream|10|-10}", emptyMap(), false)
+        val a = expand("{#sub|icecream|10|-10}", Context(false))
         assertEquals("", a.toString())
     }
 
     @Test
     fun testRegex() {
-        val a = expand("{#regex|The little bird says|i(\\\\w+)|a\$1d}", emptyMap(), false)
+        val a = expand("{#regex|The little bird says|i(\\\\w+)|a\$1d}", Context(false))
         assertEquals("The lattled bardd says", a.toString())
     }
 }

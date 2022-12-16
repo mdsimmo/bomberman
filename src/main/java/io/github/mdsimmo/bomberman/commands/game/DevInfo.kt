@@ -4,8 +4,8 @@ import io.github.mdsimmo.bomberman.Bomberman
 import io.github.mdsimmo.bomberman.commands.Cmd
 import io.github.mdsimmo.bomberman.commands.Permission
 import io.github.mdsimmo.bomberman.commands.Permissions
+import io.github.mdsimmo.bomberman.messaging.Formattable
 import io.github.mdsimmo.bomberman.messaging.Message
-import io.github.mdsimmo.bomberman.messaging.SimpleContext
 import org.bukkit.Bukkit
 import org.bukkit.ChatColor
 import org.bukkit.command.CommandSender
@@ -13,7 +13,7 @@ import org.bukkit.event.HandlerList
 
 class DevInfo(parent: Cmd) : Cmd(parent) {
 
-    override fun name(): Message {
+    override fun name(): Formattable {
         return Message.of("dev")
     }
 
@@ -144,19 +144,19 @@ class DevInfo(parent: Cmd) : Cmd(parent) {
         return Permissions.BASE
     }
 
-    override fun example(): Message {
+    override fun example(): Formattable {
         return Message.empty
     }
 
-    override fun extra(): Message {
+    override fun extra(): Formattable {
         return Message.empty
     }
 
-    override fun description(): Message {
+    override fun description(): Formattable {
         return Message.of("Dev commands. Was meant to remove this before shipping")
     }
 
-    override fun usage(): Message {
+    override fun usage(): Formattable {
         return Message.empty
     }
 }

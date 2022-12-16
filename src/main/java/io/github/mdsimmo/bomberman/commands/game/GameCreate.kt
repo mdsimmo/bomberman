@@ -15,6 +15,7 @@ import io.github.mdsimmo.bomberman.game.Game
 import io.github.mdsimmo.bomberman.game.GameSave
 import io.github.mdsimmo.bomberman.game.GameSettings
 import io.github.mdsimmo.bomberman.game.GameSettingsBuilder
+import io.github.mdsimmo.bomberman.messaging.Formattable
 import io.github.mdsimmo.bomberman.messaging.Message
 import io.github.mdsimmo.bomberman.messaging.Text
 import io.github.mdsimmo.bomberman.utils.WorldEditUtils.selectionBounds
@@ -58,8 +59,8 @@ class GameCreate(parent: Cmd) : Cmd(parent) {
         }
     }
 
-    override fun name(): Message {
-        return context(Text.CREATE_NAME).format()
+    override fun name(): Formattable {
+        return Text.CREATE_NAME
     }
 
     override fun options(sender: CommandSender, args: List<String>): List<String> {
@@ -98,21 +99,21 @@ class GameCreate(parent: Cmd) : Cmd(parent) {
         }
     }
 
-    override fun flagDescription(flag: String): Message {
+    override fun flagDescription(flag: String): Formattable {
         return when(flag) {
-            F_SCHEMA -> context(Text.CREATE_FLAG_SCHEMA).format()
-            F_TEMPLATE -> context(Text.CREATE_FLAG_TEMPLATE).format()
-            F_GAME -> context(Text.CREATE_FLAG_GAME).format()
-            F_WAND -> context(Text.CREATE_FLAG_WAND).format()
+            F_SCHEMA -> Text.CREATE_FLAG_SCHEMA
+            F_TEMPLATE -> Text.CREATE_FLAG_TEMPLATE
+            F_GAME -> Text.CREATE_FLAG_GAME
+            F_WAND -> Text.CREATE_FLAG_WAND
             else -> Message.empty
         }
     }
 
-    override fun flagExtension(flag: String): Message {
+    override fun flagExtension(flag: String): Formattable {
         return when(flag) {
-            F_SCHEMA -> context(Text.CREATE_FLAG_SCHEMA_EXT).format()
-            F_TEMPLATE -> context(Text.CREATE_FLAG_TEMPLATE_EXT).format()
-            F_GAME -> context(Text.CREATE_FLAG_GAME_EXT).format()
+            F_SCHEMA -> Text.CREATE_FLAG_SCHEMA_EXT
+            F_TEMPLATE -> Text.CREATE_FLAG_TEMPLATE_EXT
+            F_GAME -> Text.CREATE_FLAG_GAME_EXT
             else -> Message.empty
         }
     }
@@ -122,21 +123,21 @@ class GameCreate(parent: Cmd) : Cmd(parent) {
             if (args.size != 1)
                 return false
             if (sender !is Player) {
-                context(Text.MUST_BE_PLAYER).sendTo(sender)
+                Text.MUST_BE_PLAYER.format(cmdContext()).sendTo(sender)
                 return true
             }
             val gameName = args[0]
             BmGameLookupIntent.find(gameName)?.let { game ->
-                context(Text.CREATE_GAME_EXISTS)
-                        .with("game", game)
-                        .sendTo(sender)
+                Text.CREATE_GAME_EXISTS.format(cmdContext()
+                        .plus("game", game))
+                    .sendTo(sender)
                 return true
             }
             // Also make sure the save file is safe to use (in case file names have been altered or special characters used)
             if (plugin.gameSaves().resolve(GameSave.sanitize("${gameName}.game.zip")).exists()) {
-                context(Text.CREATE_GAME_FILE_CONFLICT)
-                    .with("game", gameName)
-                    .with("file", GameSave.sanitize("${gameName}.game.zip"))
+                Text.CREATE_GAME_FILE_CONFLICT.format(cmdContext()
+                        .plus("game", gameName)
+                        .plus("file", GameSave.sanitize("${gameName}.game.zip")))
                     .sendTo(sender)
                 return true
             }
@@ -164,9 +165,9 @@ class GameCreate(parent: Cmd) : Cmd(parent) {
                     // Load schematic from path
                     val path = we.getWorkingDirectoryPath(we.configuration.saveDir).resolve(file)
                     if (!path.exists()) {
-                        context(Text.CREATE_GAME_FILE_NOT_FOUND)
-                            .with("file", path.toString())
-                            .with("filename", path.name)
+                        Text.CREATE_GAME_FILE_NOT_FOUND.format(cmdContext()
+                                .plus("file", path.toString())
+                                .plus("filename", path.name))
                             .sendTo(sender)
                         return true
                     }
@@ -189,9 +190,9 @@ class GameCreate(parent: Cmd) : Cmd(parent) {
                         file.plus(".game.zip")
                     val path = plugin.templates().resolve(fullFileName)
                     if (!path.exists()) {
-                        context(Text.CREATE_GAME_FILE_NOT_FOUND)
-                            .with("file", path.toString())
-                            .with("filename", path.name)
+                        Text.CREATE_GAME_FILE_NOT_FOUND.format(cmdContext()
+                                .plus("file", path.toString())
+                                .plus("filename", path.name))
                             .sendTo(sender)
                         return true
                     }
@@ -209,14 +210,14 @@ class GameCreate(parent: Cmd) : Cmd(parent) {
                 } ?: throw RuntimeException("This should never happen")
 
                 val game = Game.buildGameFromSchema(gameName, sender.location, schema, settings)
-                context(Text.CREATE_SUCCESS)
-                    .with("game", game)
+                Text.CREATE_SUCCESS.format(cmdContext()
+                        .plus("game", game))
                     .sendTo(sender)
                 return true
 
         } catch (e: Exception) {
-            context(Text.CREATE_ERROR)
-                .with("error", e.message ?: "")
+            Text.CREATE_ERROR.format(cmdContext()
+                    .plus("error", e.message ?: ""))
                 .sendTo(sender)
             plugin.logger.log(Level.WARNING, "Error creating game", e)
         }
@@ -227,14 +228,14 @@ class GameCreate(parent: Cmd) : Cmd(parent) {
         val owner: SessionOwner = BukkitAdapter.adapt(sender)
         val session = WorldEdit.getInstance().sessionManager.getIfPresent(owner)
         if (session == null || session.selectionWorld == null || !session.isSelectionDefined(session.selectionWorld)) {
-            context(Text.CREATE_NEED_SELECTION).sendTo(sender)
+            Text.CREATE_NEED_SELECTION.format(cmdContext()).sendTo(sender)
         } else {
             val region = session.getSelection(session.selectionWorld)
             val box = selectionBounds(region)
                 val game = Game.buildGameFromRegion(gameName, box, settings)
-                context(Text.CREATE_SUCCESS)
-                        .with("game", game)
-                        .sendTo(sender)
+                Text.CREATE_SUCCESS.format(cmdContext()
+                        .plus("game", game))
+                    .sendTo(sender)
 
         }
     }
@@ -243,19 +244,19 @@ class GameCreate(parent: Cmd) : Cmd(parent) {
         return Permissions.CREATE
     }
 
-    override fun example(): Message {
-        return context(Text.CREATE_EXAMPLE).format()
+    override fun example(): Formattable {
+        return Text.CREATE_EXAMPLE
     }
 
-    override fun extra(): Message {
-        return context(Text.CREATE_EXTRA).format()
+    override fun extra(): Formattable {
+        return Text.CREATE_EXTRA
     }
 
-    override fun description(): Message {
-        return context(Text.CREATE_DESCRIPTION).format()
+    override fun description(): Formattable {
+        return Text.CREATE_DESCRIPTION
     }
 
-    override fun usage(): Message {
-        return context(Text.CREATE_USAGE).format()
+    override fun usage(): Formattable {
+        return Text.CREATE_USAGE
     }
 }

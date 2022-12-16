@@ -8,14 +8,13 @@ import java.io.IOException
 import java.io.InputStreamReader
 import java.io.Reader
 import java.nio.file.Files
-import java.util.*
 import kotlin.io.path.exists
 
 /**
  * A list of Contexteds that are defined in messages.yml. If messages.yml has not been created, then it will default to
  * default_messages.yml in the resource folder.
  */
-enum class Text(path: String) : Contexted {
+enum class Text(path: String) : FormattableNoArgs {
     MESSAGE_FORMAT("format.message"),
     ITEM_FORMAT("format.item"),
     PLAYER_WON("game-play.player-won"),
@@ -166,42 +165,15 @@ enum class Text(path: String) : Contexted {
                 ?: throw RuntimeException("No default message for text: $path")
     }
 
-    override fun with(key: String, thing: Formattable): Contexted {
-        return object : Contexted {
-            var things: MutableMap<String, Formattable> = HashMap()
-
-            override fun with(key: String, thing: Formattable): Contexted {
-                things[key] = thing
-                return this
-            }
-
-            override fun format(): Message {
-                return Expander.expand(text, things, true)
-            }
-        }.with(key, thing)
-    }
-
-    override fun format(): Message {
-        return Expander.expand(text, mapOf(), true)
-    }
-
-    companion object {
-        fun getSection(path: String): Contexted {
-            val text = YAMLLanguage.server?.getString(path)
-                    ?: YAMLLanguage.builtin.getString(path)
-
-            return if (text == null) {
-                ErrorContext("{${path}}")
-            } else {
-                SimpleContext(text, true)
-            }
-        }
+    override fun format(context: Context): Message {
+        return Expander.expand(text, context.plus(YAMLLanguage.textContext))
     }
 
     // class to read the English language text from
     private object YAMLLanguage {
         val builtin: YamlConfiguration
         val server: YamlConfiguration?
+        val textContext: Context
 
         init {
             val input = Text::class.java.classLoader.getResourceAsStream("default_messages.yml")!!
@@ -221,6 +193,9 @@ enum class Text(path: String) : Contexted {
                 e.printStackTrace()
             } catch (e: InvalidConfigurationException) {
                 e.printStackTrace()
+            }
+            textContext = Context(true).addFunctions {
+                server.getString(it) ?: builtin.getString(it)
             }
         }
     }

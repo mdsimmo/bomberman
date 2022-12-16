@@ -1,11 +1,7 @@
 package io.github.mdsimmo.bomberman.commands
 
-import com.sk89q.worldedit.WorldEdit
-import io.github.mdsimmo.bomberman.Bomberman
 import io.github.mdsimmo.bomberman.commands.game.*
-import io.github.mdsimmo.bomberman.messaging.CollectionWrapper
-import io.github.mdsimmo.bomberman.messaging.Message
-import io.github.mdsimmo.bomberman.messaging.Text
+import io.github.mdsimmo.bomberman.messaging.*
 import org.bukkit.command.Command
 import org.bukkit.command.CommandExecutor
 import org.bukkit.command.CommandSender
@@ -52,7 +48,7 @@ class BaseCommand : Cmd, TabCompleter, CommandExecutor {
         }
     }
 
-    override fun name(): Message {
+    override fun name(): Formattable {
         return Message.of("bomberman")
     }
 
@@ -64,28 +60,28 @@ class BaseCommand : Cmd, TabCompleter, CommandExecutor {
 
     override fun run(sender: CommandSender, args: List<String>, flags: Map<String, String>): Boolean {
         if (args.isEmpty()) {
-            context(Text.COMMAND_GROUP_HELP).sendTo(sender)
+            Text.COMMAND_GROUP_HELP.format(cmdContext()).sendTo(sender)
             return true
         }
 
         // Find the referenced command
         val child = children.firstOrNull { c -> c.name().toString().equals(args[0], ignoreCase = true) }
         if (child == null) {
-            context(Text.UNKNOWN_COMMAND)
-                .with("attempt", args[0])
+            Text.UNKNOWN_COMMAND.format(cmdContext()
+                .plus("attempt", args[0]))
                 .sendTo(sender)
             return true
         }
 
         // Check for permissions
         if (!child.permission().isAllowedBy(sender)) {
-            child.context(Text.DENY_PERMISSION).sendTo(sender)
+            Text.DENY_PERMISSION.format(child.cmdContext()).sendTo(sender)
             return true
         }
 
         // Send help if requested
         if (flags.containsKey(F_HELP)) {
-            child.context(Text.COMMAND_HELP).sendTo(sender)
+            Text.COMMAND_HELP.format(child.cmdContext()).sendTo(sender)
             return true
         }
 
@@ -94,10 +90,10 @@ class BaseCommand : Cmd, TabCompleter, CommandExecutor {
 
         // Show help if usage was incorrect
         if (!result) {
-            child.context(Text.INCORRECT_USAGE)
-                .with("attempt", CollectionWrapper(
+            Text.INCORRECT_USAGE.format(child.cmdContext()
+                .plus("attempt", CollectionWrapper(
                     args.drop(1).map { Message.of(it) }
-                ))
+                )))
                 .sendTo(sender)
         }
 
@@ -162,27 +158,27 @@ class BaseCommand : Cmd, TabCompleter, CommandExecutor {
         return Permissions.BASE
     }
 
-    override fun description(): Message {
-        return context(Text.BOMBERMAN_DESCRIPTION).format()
+    override fun description(): Formattable {
+        return Text.BOMBERMAN_DESCRIPTION
     }
 
-    override fun extra(): Message {
-        return Text.COMMAND_GROUP_EXTRA.format()
+    override fun extra(): Formattable {
+        return Text.COMMAND_GROUP_EXTRA
     }
 
-    override fun example(): Message {
-        return context(Text.COMMAND_GROUP_EXAMPLE).format()
+    override fun example(): Formattable {
+        return Text.COMMAND_GROUP_EXAMPLE
     }
 
-    override fun usage(): Message {
-        return context(Text.COMMAND_GROUP_USAGE).format()
+    override fun usage(): Formattable {
+        return Text.COMMAND_GROUP_USAGE
     }
 
-    override fun format(args: List<Message>, elevated: Boolean): Message {
+    override fun format(args: List<Message>, context: Context): Message {
         return if (args.getOrNull(0).toString().equals("children", ignoreCase = true)) {
-            CollectionWrapper(children).format(args.drop(1), elevated)
+            CollectionWrapper(children).format(args.drop(1), context)
         } else {
-            super.format(args, elevated)
+            super.format(args, context)
         }
     }
 }
