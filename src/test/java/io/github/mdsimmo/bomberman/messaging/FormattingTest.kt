@@ -55,6 +55,25 @@ class FormattingTest {
     }
 
     @Test
+    fun testContextObjectsAreKeptInScope() {
+        val context = Context(false)
+            .plus("list", listOf(of("A"), of("B"), of("C")))
+            .plus("obj", object : Formattable {
+                override fun format(args: List<Message>, context: Context): Message {
+                    require(args.size == 1)
+                    return of(when(args[0].toString()) {
+                        "A" -> "1"
+                        "B" -> "2"
+                        "C" -> "3"
+                        else -> throw RuntimeException()
+                    })
+                }
+            })
+        val a = expand("{list|foreach|{!obj|{it}}|}", context)
+        assertEquals("123", a.toString())
+    }
+
+    @Test
     fun wrapperMessageAppendedOnSendTo() {
         val sender = mock(CommandSender::class.java)
         val message = of("Hello World").color(ChatColor.AQUA)
