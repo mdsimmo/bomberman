@@ -6,6 +6,7 @@ import io.github.mdsimmo.bomberman.commands.Permission
 import io.github.mdsimmo.bomberman.commands.Permissions
 import io.github.mdsimmo.bomberman.events.BmPlayerJoinGameIntent
 import io.github.mdsimmo.bomberman.game.Game
+import io.github.mdsimmo.bomberman.messaging.Formattable
 import io.github.mdsimmo.bomberman.messaging.Message
 import io.github.mdsimmo.bomberman.messaging.Text
 import org.bukkit.Bukkit
@@ -27,8 +28,8 @@ class GameJoin(parent: Cmd) : GameCommand(parent) {
         }
     }
 
-    override fun name(): Message {
-        return context(Text.JOIN_NAME).format()
+    override fun name(): Formattable {
+        return Text.JOIN_NAME
     }
 
     override fun gameOptions(args: List<String>): List<String> {
@@ -46,16 +47,16 @@ class GameJoin(parent: Cmd) : GameCommand(parent) {
         }
     }
 
-    override fun flagDescription(flag: String): Message {
+    override fun flagDescription(flag: String): Formattable {
         return when(flag) {
-            F_TARGET -> context(Text.JOIN_FLAG_TARGET).format()
+            F_TARGET -> Text.JOIN_FLAG_TARGET
             else -> Message.empty
         }
     }
 
-    override fun flagExtension(flag: String): Message {
+    override fun flagExtension(flag: String): Formattable {
         return when(flag) {
-            F_TARGET -> context(Text.JOIN_FLAG_TARGET_EXT).format()
+            F_TARGET -> Text.JOIN_FLAG_TARGET_EXT
             else -> Message.empty
         }
     }
@@ -70,8 +71,7 @@ class GameJoin(parent: Cmd) : GameCommand(parent) {
 
             // Deny permissions if not allowed to select others
             if (!Permissions.JOIN_REMOTE.isAllowedBy(sender)) {
-                context(Text.DENY_PERMISSION)
-                    .sendTo(sender)
+                Text.DENY_PERMISSION.format(cmdContext()).sendTo(sender)
                 return true
             }
 
@@ -79,8 +79,8 @@ class GameJoin(parent: Cmd) : GameCommand(parent) {
             select(selection, sender).fold(
                 onSuccess = { it },
                 onFailure = {
-                    Text.INVALID_TARGET_SELECTOR
-                        .with("selector", selection)
+                    Text.INVALID_TARGET_SELECTOR.format(cmdContext()
+                            .plus("selector", selection))
                         .sendTo(sender)
                     return true
                 }
@@ -88,7 +88,7 @@ class GameJoin(parent: Cmd) : GameCommand(parent) {
         } else {
             // no target selector, apply to sender
             if (sender !is Player) {
-                context(Text.MUST_BE_PLAYER).sendTo(sender)
+                Text.MUST_BE_PLAYER.format(cmdContext()).sendTo(sender)
                 return true
             }
             listOf(sender)
@@ -103,15 +103,15 @@ class GameJoin(parent: Cmd) : GameCommand(parent) {
                         sendTo(sender)
                     }
                     ?: run {
-                        context(Text.COMMAND_CANCELLED)
-                            .with("game", game)
-                            .with("player", target)
+                        Text.COMMAND_CANCELLED.format(cmdContext()
+                                .plus("game", game)
+                                .plus("player", target))
                             .sendTo(target)
                     }
             } else {
-                context(Text.JOIN_SUCCESS)
-                    .with("game", game)
-                    .with("player", target)
+                Text.JOIN_SUCCESS.format(cmdContext()
+                        .plus("game", game)
+                        .plus("player", target))
                     .sendTo(target)
             }
         }
@@ -122,19 +122,19 @@ class GameJoin(parent: Cmd) : GameCommand(parent) {
         return Permissions.JOIN
     }
 
-    override fun extra(): Message {
-        return context(Text.JOIN_EXTRA).format()
+    override fun extra(): Formattable {
+        return Text.JOIN_EXTRA
     }
 
-    override fun example(): Message {
-        return context(Text.JOIN_EXAMPLE).format()
+    override fun example(): Formattable {
+        return Text.JOIN_EXAMPLE
     }
 
-    override fun description(): Message {
-        return context(Text.JOIN_DESCRIPTION).format()
+    override fun description(): Formattable {
+        return Text.JOIN_DESCRIPTION
     }
 
-    override fun usage(): Message {
-        return context(Text.JOIN_USAGE).format()
+    override fun usage(): Formattable {
+        return Text.JOIN_USAGE
     }
 }

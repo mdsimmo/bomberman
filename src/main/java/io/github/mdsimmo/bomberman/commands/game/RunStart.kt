@@ -6,13 +6,14 @@ import io.github.mdsimmo.bomberman.commands.Permission
 import io.github.mdsimmo.bomberman.commands.Permissions
 import io.github.mdsimmo.bomberman.events.BmRunStartCountDownIntent
 import io.github.mdsimmo.bomberman.game.Game
+import io.github.mdsimmo.bomberman.messaging.Formattable
 import io.github.mdsimmo.bomberman.messaging.Message
 import io.github.mdsimmo.bomberman.messaging.Text
 import org.bukkit.command.CommandSender
 
 class RunStart(parent: Cmd) : GameCommand(parent) {
-    override fun name(): Message {
-        return context(Text.START_NAME).format()
+    override fun name(): Formattable {
+        return Text.START_NAME
     }
 
     override fun gameOptions(args: List<String>): List<String> {
@@ -23,17 +24,17 @@ class RunStart(parent: Cmd) : GameCommand(parent) {
         return setOf("d", "o")
     }
 
-    override fun flagExtension(flag: String): Message {
+    override fun flagExtension(flag: String): Formattable {
         return when (flag) {
-            "d" -> context(Text.START_FLAG_DELAY_EXT).format()
+            "d" -> Text.START_FLAG_DELAY_EXT
             else -> Message.empty
         }
     }
 
-    override fun flagDescription(flag: String): Message {
+    override fun flagDescription(flag: String): Formattable {
         return when (flag) {
-            "d" -> context(Text.START_FLAG_DELAY_DESC).format()
-            "o" -> context(Text.START_FLAG_OVERRIDE_DESC).format()
+            "d" -> Text.START_FLAG_DELAY_DESC
+            "o" -> Text.START_FLAG_OVERRIDE_DESC
             else -> Message.empty
         }
     }
@@ -48,7 +49,7 @@ class RunStart(parent: Cmd) : GameCommand(parent) {
             else -> {
                 val i = s.toIntOrNull()
                 if ((i == null) || (i < 0)) {
-                    Text.INVALID_NUMBER.with("number", s).sendTo(sender)
+                    Text.INVALID_NUMBER.format(cmdContext().plus("number", s)).sendTo(sender)
                     return true
                 } else {
                     i
@@ -59,13 +60,11 @@ class RunStart(parent: Cmd) : GameCommand(parent) {
         val e = BmRunStartCountDownIntent.startGame(game, delay, flags.containsKey("o"))
         if (e.isCancelled) {
             (e.cancelledReason
-                    ?: Text.COMMAND_CANCELLED
-                            .with("game", game)
-                            .format()
-                    )
-                    .sendTo(sender)
+                    ?: Text.COMMAND_CANCELLED.format(cmdContext()
+                            .plus("game", game)))
+                .sendTo(sender)
         } else {
-            Text.GAME_START_SUCCESS.with("game", game).sendTo(sender)
+            Text.GAME_START_SUCCESS.format(cmdContext().plus("game", game)).sendTo(sender)
         }
         return true
     }
@@ -74,19 +73,19 @@ class RunStart(parent: Cmd) : GameCommand(parent) {
         return Permissions.START
     }
 
-    override fun extra(): Message {
-        return context(Text.START_EXTRA).format()
+    override fun extra(): Formattable {
+        return Text.START_EXTRA
     }
 
-    override fun example(): Message {
-        return context(Text.START_EXAMPLE).format()
+    override fun example(): Formattable {
+        return Text.START_EXAMPLE
     }
 
-    override fun description(): Message {
-        return context(Text.START_DESCRIPTION).format()
+    override fun description(): Formattable {
+        return Text.START_DESCRIPTION
     }
 
-    override fun usage(): Message {
-        return context(Text.START_USAGE).format()
+    override fun usage(): Formattable {
+        return Text.START_USAGE
     }
 }

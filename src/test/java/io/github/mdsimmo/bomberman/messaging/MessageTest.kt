@@ -40,10 +40,4 @@ class MessageTest {
         assertEquals("Part aPart b", c.toString())
     }
 
-    @Test
-    fun formatReturnsItself() {
-        val hello = of("I am fancy")
-        val formatted = hello.format(listOf(), false)
-        assertEquals(hello, formatted)
-    }
 }

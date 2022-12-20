@@ -3,6 +3,7 @@ package io.github.mdsimmo.bomberman.messaging
 import org.bukkit.ChatColor
 import org.bukkit.command.CommandSender
 import org.bukkit.entity.Player
+import java.lang.IllegalArgumentException
 import java.util.*
 import javax.annotation.CheckReturnValue
 
@@ -11,6 +12,8 @@ import javax.annotation.CheckReturnValue
  */
 @CheckReturnValue
 class Message private constructor(private val contents: TreeNode) : Formattable {
+
+    // TODO the internals of this class are an utter mess
 
     companion object {
         fun of(text: String): Message {
@@ -33,8 +36,12 @@ class Message private constructor(private val contents: TreeNode) : Formattable 
             return of(s).color(ChatColor.RED)
         }
 
-        fun lazyExpand(text: String, context: Map<String, Formattable>, elevated: Boolean): Message {
-            return Message(LazyNode(text, context, elevated))
+        fun lazyExpand(text: String, context: Context): Message {
+            return Message(LazyNode(text, context))
+        }
+
+        fun reference(item: Formattable, context: Context): Message {
+            return Message(ReferenceNode(item, context))
         }
     }
 
@@ -122,6 +129,8 @@ class Message private constructor(private val contents: TreeNode) : Formattable 
         val isRaw: Boolean
 
         fun expandTitle(): Title?
+
+        fun applyModifier(arg: Message): Formattable?
     }
 
     private class StringNode(val text: String) : TreeNode {
@@ -133,6 +142,10 @@ class Message private constructor(private val contents: TreeNode) : Formattable 
             get() = false
 
         override fun expandTitle(): Title? {
+            return null
+        }
+
+        override fun applyModifier(arg: Message): Formattable? {
             return null
         }
 
@@ -165,10 +178,13 @@ class Message private constructor(private val contents: TreeNode) : Formattable 
             get() = parts.any { it.isRaw }
 
         override fun expandTitle(): Title? {
-            return parts
-                    .mapNotNull { it.expandTitle() }
-                    .firstOrNull()
+            return parts.firstNotNullOfOrNull { it.expandTitle() }
         }
+
+        override fun applyModifier(arg: Message): Formattable? {
+            return parts.firstNotNullOfOrNull { it.applyModifier(arg) }
+        }
+
     }
 
     private class Colored(val content: TreeNode, val color: ChatColor) : TreeNode {
@@ -185,6 +201,9 @@ class Message private constructor(private val contents: TreeNode) : Formattable 
             return null
         }
 
+        override fun applyModifier(arg: Message): Formattable? {
+            return null
+        }
     }
 
     // TODO Raw/Title formatting is really strange
@@ -194,6 +213,10 @@ class Message private constructor(private val contents: TreeNode) : Formattable 
             get() = true
 
         override fun expandTitle(): Title? {
+            return null
+        }
+
+        override fun applyModifier(arg: Message): Formattable? {
             return null
         }
     }
@@ -221,11 +244,14 @@ class Message private constructor(private val contents: TreeNode) : Formattable 
             return Title(titleString, subtitleString, fadeIn, stay, fadeOut)
         }
 
+        override fun applyModifier(arg: Message): Formattable? {
+            return null
+        }
     }
 
-    private class LazyNode (val text: String, val context: Map<String, Formattable>, elevated: Boolean) : TreeNode {
+    private class LazyNode (val text: String, val context: Context) : TreeNode {
         val content: TreeNode by lazy {
-            Expander.expand(text, context, elevated).contents
+            Expander.expand(text, context).contents
         }
 
         override fun expand(cursor: Cursor) {
@@ -238,6 +264,31 @@ class Message private constructor(private val contents: TreeNode) : Formattable 
         override fun expandTitle(): Title? {
             return content.expandTitle()
         }
+
+        override fun applyModifier(arg: Message): Formattable? {
+            return content.applyModifier(arg)
+        }
+    }
+
+    private class ReferenceNode (val item: Formattable, context: Context) : TreeNode {
+        val content: TreeNode by lazy {
+            item.format(context).contents
+        }
+
+        override fun expand(cursor: Cursor) {
+            content.expand(cursor)
+        }
+
+        override val isRaw: Boolean
+            get() = content.isRaw
+
+        override fun expandTitle(): Title? {
+            return content.expandTitle()
+        }
+
+        override fun applyModifier(arg: Message): Formattable {
+            return item.applyModifier(arg)
+        }
     }
 
     fun color(color: ChatColor): Message {
@@ -248,17 +299,29 @@ class Message private constructor(private val contents: TreeNode) : Formattable 
         return Message(Joined(contents, text.contents))
     }
 
-    override fun format(args: List<Message>, elevated: Boolean): Message {
+    override fun format(context: Context): Message {
         return this
+    }
+
+    override fun applyModifier(arg: Message): Formattable {
+        return contents.applyModifier(arg) ?: throw IllegalArgumentException("Cannot accept extra arguments")
     }
 
     fun sendTo(sender: CommandSender) {
         try {
-            val sendContents = if (contents.isRaw) {
+            val sendContents: TreeNode = if (contents.isRaw) {
                 contents
             } else {
                 // Apply the wrapper format, but not to empty values
-                Switch().format(listOf(this, empty, empty, Text.MESSAGE_FORMAT.with("message", this).format()), true).contents
+                Switch()
+                    .applyModifier(this)
+                    .applyModifier(empty)
+                    .applyModifier(empty)
+                    .applyModifier(Text.MESSAGE_FORMAT
+                        .format(Context(false).plus("message", this))
+                    )
+                    .format(Context(false))
+                    .contents
             }
             val cursor = Cursor()
             sendContents.expand(cursor)

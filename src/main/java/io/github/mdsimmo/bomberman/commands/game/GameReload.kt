@@ -9,14 +9,15 @@ import io.github.mdsimmo.bomberman.events.BmGameBuildIntent
 import io.github.mdsimmo.bomberman.events.BmGameDeletedIntent
 import io.github.mdsimmo.bomberman.game.Game
 import io.github.mdsimmo.bomberman.game.GameSave
+import io.github.mdsimmo.bomberman.messaging.Formattable
 import io.github.mdsimmo.bomberman.messaging.Message
 import io.github.mdsimmo.bomberman.messaging.Text
 import org.bukkit.command.CommandSender
 import java.io.IOException
 
 class GameReload(parent: Cmd) : GameCommand(parent) {
-    override fun name(): Message {
-        return context(Text.RELOAD_NAME).format()
+    override fun name(): Formattable {
+        return Text.RELOAD_NAME
     }
 
     override fun gameRun(sender: CommandSender, args: List<String>, flags: Map<String, String>, game: Game): Boolean {
@@ -26,12 +27,12 @@ class GameReload(parent: Cmd) : GameCommand(parent) {
         try {
             val newGame = GameSave.loadGame(Bomberman.instance.gameSaves().resolve(GameSave.sanitize("${game.name}.game.zip")))
             BmGameBuildIntent.build(newGame)
-            Text.RELOAD_SUCCESS
-                .with("game", newGame)
+            Text.RELOAD_SUCCESS.format(cmdContext()
+                .plus("game", newGame))
                 .sendTo(sender)
         } catch (e: IOException) {
-            Text.RELOAD_CANNOT_LOAD
-                .with("game", game.name)
+            Text.RELOAD_CANNOT_LOAD.format(cmdContext()
+                .plus("game", game.name))
                 .sendTo(sender)
         }
         return true
@@ -45,19 +46,19 @@ class GameReload(parent: Cmd) : GameCommand(parent) {
         return emptyList()
     }
 
-    override fun extra(): Message {
-        return context(Text.RELOAD_EXTRA).format()
+    override fun extra(): Formattable {
+        return Text.RELOAD_EXTRA
     }
 
-    override fun example(): Message {
-        return context(Text.RELOAD_EXAMPLE).format()
+    override fun example(): Formattable {
+        return Text.RELOAD_EXAMPLE
     }
 
-    override fun description(): Message {
-        return context(Text.RELOAD_DESCRIPTION).format()
+    override fun description(): Formattable {
+        return Text.RELOAD_DESCRIPTION
     }
 
-    override fun usage(): Message {
-        return context(Text.RELOAD_USAGE).format()
+    override fun usage(): Formattable {
+        return Text.RELOAD_USAGE
     }
 }

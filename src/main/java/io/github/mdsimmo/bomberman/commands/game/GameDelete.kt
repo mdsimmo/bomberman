@@ -6,13 +6,13 @@ import io.github.mdsimmo.bomberman.commands.Permission
 import io.github.mdsimmo.bomberman.commands.Permissions
 import io.github.mdsimmo.bomberman.events.BmGameDeletedIntent
 import io.github.mdsimmo.bomberman.game.Game
-import io.github.mdsimmo.bomberman.messaging.Message
+import io.github.mdsimmo.bomberman.messaging.Formattable
 import io.github.mdsimmo.bomberman.messaging.Text
 import org.bukkit.command.CommandSender
 
 class GameDelete(parent: Cmd) : GameCommand(parent) {
-    override fun name(): Message {
-        return context(Text.DELETE_NAME).format()
+    override fun name(): Formattable {
+        return Text.DELETE_NAME
     }
 
     override fun gameOptions(args: List<String>): List<String> {
@@ -23,7 +23,7 @@ class GameDelete(parent: Cmd) : GameCommand(parent) {
         if (args.isNotEmpty())
             return false
         BmGameDeletedIntent.delete(game, true)
-        context(Text.DELETE_SUCCESS).with("game", game).sendTo(sender)
+        Text.DELETE_SUCCESS.format(cmdContext().plus("game", game)).sendTo(sender)
         return true
     }
 
@@ -31,19 +31,19 @@ class GameDelete(parent: Cmd) : GameCommand(parent) {
         return Permissions.DELETE
     }
 
-    override fun example(): Message {
-        return context(Text.DELETE_EXAMPLE).format()
+    override fun example(): Formattable {
+        return Text.DELETE_EXAMPLE
     }
 
-    override fun extra(): Message {
-        return context(Text.DELETE_EXTRA).format()
+    override fun extra(): Formattable {
+        return Text.DELETE_EXTRA
     }
 
-    override fun description(): Message {
-        return context(Text.DELETE_DESCRIPTION).format()
+    override fun description(): Formattable {
+        return Text.DELETE_DESCRIPTION
     }
 
-    override fun usage(): Message {
-        return context(Text.DELETE_USAGE).format()
+    override fun usage(): Formattable {
+        return Text.DELETE_USAGE
     }
 }

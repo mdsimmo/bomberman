@@ -8,7 +8,7 @@ object Expander {
             Pair("=", Equation()),
             Pair("#switch", Switch()),
             Pair("#title", TitleExpander()),
-            Pair("#raw", RawExpander()),
+            Pair("#raw", Message.rawFlag),
             Pair("#", CustomPath()),
             Pair("#regex", RegexExpander()),
             Pair("#len", LengthExpander()),
@@ -26,11 +26,11 @@ object Expander {
     /**
      * Expands all braces in text. The number of open braces must be balanced with close braces
      * @param text the text to expand
-     * @param things Reference-able things
+     * @param context Reference-able things
      * @return the expanded text
      */
     @JvmStatic
-    fun expand(text: String, things: Map<String, Formattable>, elevatedPermissions: Boolean): Message {
+    fun expand(text: String, context: Context): Message {
         var expanded: Message = Message.empty
         val building = StringBuilder()
         var ignoreNextSpecial = false
@@ -40,8 +40,10 @@ object Expander {
             when {
                 c == '{' && !ignoreNextSpecial -> {
                     // Add the basic text we have
-                    expanded = expanded.append(Message.of(building.toString()))
-                    building.setLength(0)
+                    if (building.isNotEmpty()) {
+                        expanded = expanded.append(Message.of(building.toString()))
+                        building.setLength(0)
+                    }
 
                     // Get raw text inside brace
                     val subtext = toNext(text, '}', i)
@@ -51,7 +53,7 @@ object Expander {
                         Message.of(subtext.replaceFirst("!", ""))
                     } else {
                         // Expand the brace
-                        expandBrace(subtext, things, elevatedPermissions)
+                        expandBrace(subtext, context)
                     }
                     expanded = expanded.append(expandedBrace)
                     i += subtext.length - 1 // -1 because starting brace was already counted
@@ -67,7 +69,9 @@ object Expander {
             i++
         }
         // Add anything remaining
-        expanded = expanded.append(Message.of(building.toString()))
+        if (building.isNotEmpty()) {
+            expanded = expanded.append(Message.of(building.toString()))
+        }
         return expanded
     }
 
@@ -77,7 +81,7 @@ object Expander {
      * @param text the text to expands formatted as "{ key | arg1 | ... | argN }"
      * @return the expanded string
      */
-    private fun expandBrace(text: String, things: Map<String, Formattable>, elevatedPermissions: Boolean): Message {
+    private fun expandBrace(text: String, context: Context): Message {
         if (text[0] != '{' || text[text.length - 1] != '}')
             throw RuntimeException("expandBrace() must start and end with a brace")
 
@@ -89,7 +93,7 @@ object Expander {
         val args = mutableListOf<Message>()
         generateSequence { toNext(text, '|', i.get()) }
                 .forEach { subArg ->
-                    args.add(Message.lazyExpand(subArg.substring(1, subArg.length - 1), things, elevatedPermissions))
+                    args.add(Message.lazyExpand(subArg.substring(1, subArg.length - 1), context))
                     // -1 because the first '|' would get counted twice
                     i.addAndGet(subArg.length - 1)
                 }
@@ -100,14 +104,31 @@ object Expander {
                 .lowercase()
 
         // TODO remove {#exec|...}
-        if (keyString == "#exec" && !elevatedPermissions) {
+        if (keyString == "#exec" && !context.elevated) {
             return Message.empty
         }
-        // Try and look up a key, function or chat color to format with
-        val thing = things[keyString]
+
+        // Check if item is a reference request
+        val reference = keyString.startsWith("@")
+        if (reference) {
+            keyString = keyString.substring(1, keyString.length) // remove the "@"
+        }
+
+        // Try and look up an object or function to format with
+        val thing = context[keyString]
                 ?: functions[keyString]
-                ?: Message.error(text)
-        return thing.format(args, elevatedPermissions)
+                ?: return Message.error(text)
+
+        val modified = args.fold(thing) { partial, nextArg ->
+            val result = partial.applyModifier(nextArg)
+            result
+        }
+
+        return if (reference) {
+            Message.reference(modified, context)
+        } else {
+            return modified.format(context)
+        }
     }
 
     /**
