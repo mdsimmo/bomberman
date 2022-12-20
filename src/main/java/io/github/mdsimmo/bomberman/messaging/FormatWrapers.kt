@@ -30,16 +30,15 @@ class ItemWrapper(private val item: ItemStack) : Formattable {
 
 }
 
-class SenderWrapper(private val sender: CommandSender) : FormatWrapper({
-
-    DefaultArg("name") { arg ->
+class SenderWrapper(private val sender: CommandSender) : Formattable by (
+        DefaultArg("name") { arg ->
             when (arg.toString().lowercase()) {
                 "name" -> Message.of(sender.name)
                 "msg" -> {
                     RequiredArg { arg2 ->
-                            arg2.sendTo(sender)
-                            Message.empty
-                        }
+                        arg2.sendTo(sender)
+                        Message.empty
+                    }
                 }
 
                 "exec" -> {
@@ -57,16 +56,15 @@ class SenderWrapper(private val sender: CommandSender) : FormatWrapper({
                     throw IllegalArgumentException("Unknown CommandSender option: $arg")
                 }
             }
-        }
-})
+        })
 
-class ColorWrapper(private val color: ChatColor) : FormatWrapper ({
+
+class ColorWrapper(private val color: ChatColor) : Formattable by (
     RequiredArg { arg ->
         arg.color(color)
-    }
-})
+    })
 
-class CollectionWrapper<T : Formattable>(private val list: Collection<T>) : FormatWrapper({
+class CollectionWrapper<T : Formattable>(private val list: Collection<T>) : Formattable by (
 
     DefaultArg("length") { argProperty: Message ->
         when (argProperty.toString().lowercase()) {
@@ -124,10 +122,9 @@ class CollectionWrapper<T : Formattable>(private val list: Collection<T>) : Form
             }
             else -> throw IllegalArgumentException("Unknown list option: $argProperty")
         }
-    }
-})
+    })
 
-class TitleExpander : FormatWrapper ({
+class TitleExpander : Formattable by (
     RequiredArg { title ->
         DefaultArg(Message.empty) { subtitle ->
             DefaultArg(Message.of(0)) { argFadeIn ->
@@ -141,10 +138,9 @@ class TitleExpander : FormatWrapper ({
                 }
             }
         }
-    }
-})
+    })
 
-class Switch : FormatWrapper ({
+class Switch : Formattable by (
 
     RequiredArg { valueArg ->
         AdditionalArgs { args ->
@@ -165,20 +161,18 @@ class Switch : FormatWrapper ({
             // no default supplied
             Message.empty
         }
-    }
-})
+    })
 
-class Execute : FormatWrapper ({
+class Execute : Formattable by (
     RequiredArg { command ->
         ContextArg { context ->
             if (context.elevated)
                 Bukkit.getServer().dispatchCommand(Bukkit.getConsoleSender(), command.toString())
             Message.empty
         }
-    }
-})
+    })
 
-class Equation : FormatWrapper ({
+class Equation : Formattable by (
 
     RequiredArg { argEquation ->
         try {
@@ -201,8 +195,8 @@ class Equation : FormatWrapper ({
         } catch (e: Exception) {
             Message.error("{$argEquation}")
         }
-    }
-})
+    })
+
 const val epsilon =  0.00000001
 
 const val PRECEDENCE_NOT = Operator.PRECEDENCE_UNARY_MINUS
@@ -314,7 +308,7 @@ private val round : Function =
             }
         }
 
-class CustomPath : FormatWrapper ({
+class CustomPath : Formattable by (
 
     RequiredArg { functionArg ->
         AdditionalArgs { args ->
@@ -330,10 +324,9 @@ class CustomPath : FormatWrapper ({
                 Expander.expand(text, callContext)
             }
         }
-    }
-})
+    })
 
-class RegexExpander : FormatWrapper ({
+class RegexExpander : Formattable by (
 
     RequiredArg { argText ->
         RequiredArg { argPattern ->
@@ -344,16 +337,14 @@ class RegexExpander : FormatWrapper ({
                 Message.of(text.replace(Regex(pattern), replace))
             }
         }
-    }
-})
+    })
 
-class LengthExpander : FormatWrapper ({
+class LengthExpander : Formattable by (
     RequiredArg { arg ->
         Message.of(arg.toString().length)
-    }
-})
+    })
 
-class SubstringExpander : FormatWrapper ({
+class SubstringExpander : Formattable by (
 
     RequiredArg { argText ->
         RequiredArg { argStart ->
@@ -389,10 +380,9 @@ class SubstringExpander : FormatWrapper ({
                 Message.of(text.substring(start, end))
             }
         }
-    }
-})
+    })
 
-open class PadExpander(internal val startText: (String) -> String, internal val endText: (String) -> String) : FormatWrapper ({
+open class PadExpander(internal val startText: (String) -> String, internal val endText: (String) -> String) : Formattable by (
 
     RequiredArg { argText ->
         RequiredArg { argLength ->
@@ -414,18 +404,16 @@ open class PadExpander(internal val startText: (String) -> String, internal val 
                 Message.of(result.toString())
             }
         }
-    }
-})
+    })
 
 class PadLeftExpander : PadExpander({ "" }, { it })
 
 class PadRightExpander : PadExpander({ it }, { "" })
 
-class RandomExpander : FormatWrapper ({
+class RandomExpander : Formattable by (
 
     DefaultArg(Message.of(1)) { max ->
         DefaultArg(Message.of(0)) { min ->
             Message.of(Random.nextDouble(min.toString().toDouble(), max.toString().toDouble()).toString())
         }
-    }
-})
+    })

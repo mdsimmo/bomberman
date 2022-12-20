@@ -1,20 +1,5 @@
 package io.github.mdsimmo.bomberman.messaging
 
-open class FormatWrapper(val call: () -> Formattable) : Formattable {
-
-    private val built: Formattable by lazy {
-        call()
-    }
-
-    override fun applyModifier(arg: Message): Formattable {
-        return built.applyModifier(arg)
-    }
-
-    override fun format(context: Context): Message {
-        return built.format(context)
-    }
-}
-
 class DefaultArg(val text: Message, val function: (Message) -> Formattable) : Formattable {
 
     constructor(text: String, function: (Message) -> Formattable)
