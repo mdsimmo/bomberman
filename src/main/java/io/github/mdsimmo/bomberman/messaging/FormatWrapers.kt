@@ -30,21 +30,21 @@ class ItemWrapper(private val item: ItemStack) : Formattable {
 
 }
 
-class SenderWrapper(private val sender: CommandSender) : PartialWrapper({
+class SenderWrapper(private val sender: CommandSender) : FormatWrapper({
 
-    PartialDefault("name") { arg ->
+    DefaultArg("name") { arg ->
             when (arg.toString().lowercase()) {
                 "name" -> Message.of(sender.name)
                 "msg" -> {
-                    PartialRequired { arg2 ->
+                    RequiredArg { arg2 ->
                             arg2.sendTo(sender)
                             Message.empty
                         }
                 }
 
                 "exec" -> {
-                    PartialRequired { arg2 ->
-                        PartialContext { context ->
+                    RequiredArg { arg2 ->
+                        ContextArg { context ->
                             if (context.elevated) {
                                 val cmd = arg2.toString()
                                 Bukkit.getServer().dispatchCommand(sender, cmd)
@@ -60,21 +60,21 @@ class SenderWrapper(private val sender: CommandSender) : PartialWrapper({
         }
 })
 
-class ColorWrapper(private val color: ChatColor) : PartialWrapper ({
-    PartialRequired { arg ->
+class ColorWrapper(private val color: ChatColor) : FormatWrapper ({
+    RequiredArg { arg ->
         arg.color(color)
     }
 })
 
-class CollectionWrapper<T : Formattable>(private val list: Collection<T>) : PartialWrapper({
+class CollectionWrapper<T : Formattable>(private val list: Collection<T>) : FormatWrapper({
 
-    PartialDefault("length") { argProperty: Message ->
+    DefaultArg("length") { argProperty: Message ->
         when (argProperty.toString().lowercase()) {
             "length" -> Message.of(list.size)
             "foreach" -> {
-                PartialDefault("({index}: {it})") { argMapper ->
-                    PartialDefault(" ") { argSeparator ->
-                        PartialContext { context ->
+                DefaultArg("({index}: {it})") { argMapper ->
+                    DefaultArg(" ") { argSeparator ->
+                        ContextArg { context ->
                             val mapper = argMapper.toString()
                             list
                                 .mapIndexed { i, item ->
@@ -91,8 +91,8 @@ class CollectionWrapper<T : Formattable>(private val list: Collection<T>) : Part
                 }
             }
             "sort" -> {
-                PartialDefault("{it}") { argMapper ->
-                    PartialContext { context ->
+                DefaultArg("{it}") { argMapper ->
+                    ContextArg { context ->
                         val sorted = list.withIndex().sortedBy {
                             Expander.expand(
                                 argMapper.toString(), context
@@ -106,8 +106,8 @@ class CollectionWrapper<T : Formattable>(private val list: Collection<T>) : Part
                 }
             }
             "filter" -> {
-                PartialRequired { argFilter ->
-                    PartialContext { context ->
+                RequiredArg { argFilter ->
+                    ContextArg { context ->
                         val filtered =
                             list.withIndex().filter {
                                 Expander.expand(
@@ -127,12 +127,12 @@ class CollectionWrapper<T : Formattable>(private val list: Collection<T>) : Part
     }
 })
 
-class TitleExpander : PartialWrapper ({
-    PartialRequired { title ->
-        PartialDefault(Message.empty) { subtitle ->
-            PartialDefault(Message.of(0)) { argFadeIn ->
-                PartialDefault(Message.of(20)) { argDuration ->
-                    PartialDefault(Message.of(0)) { argFadeOut ->
+class TitleExpander : FormatWrapper ({
+    RequiredArg { title ->
+        DefaultArg(Message.empty) { subtitle ->
+            DefaultArg(Message.of(0)) { argFadeIn ->
+                DefaultArg(Message.of(20)) { argDuration ->
+                    DefaultArg(Message.of(0)) { argFadeOut ->
                         val fadeIn = argFadeIn.toString().toInt()
                         val duration = argDuration.toString().toInt()
                         val fadeOut = argFadeOut.toString().toInt()
@@ -144,43 +144,33 @@ class TitleExpander : PartialWrapper ({
     }
 })
 
-class Switch : Formattable {
-    private class ArgsBuilder(val value: String, val args: List<Message>) : Formattable {
-        override fun applyModifier(arg: Message): Formattable {
-            return ArgsBuilder(value, args + arg)
-        }
+class Switch : FormatWrapper ({
 
-        override fun format(context: Context): Message {
+    RequiredArg { valueArg ->
+        AdditionalArgs { args ->
+            val value = valueArg.toString()
             val size = args.size
             var i = 0
             while (i < size) {
                 val test = args[i]
                 if (i+1 < args.size) {
                     if (value == test.toString()) {
-                        return args[i + 1]
+                        return@AdditionalArgs args[i + 1]
                     }
                 } else {
-                    return test // default
+                    return@AdditionalArgs test // default
                 }
                 i += 2
             }
             // no default supplied
-            return Message.empty
+            Message.empty
         }
     }
+})
 
-    override fun applyModifier(arg: Message): Formattable {
-        return ArgsBuilder(arg.toString(), emptyList())
-    }
-
-    override fun format(context: Context): Message {
-        throw IllegalArgumentException("At least one argument is required")
-    }
-}
-
-class Execute : PartialWrapper ({
-    PartialRequired { command ->
-        PartialContext { context ->
+class Execute : FormatWrapper ({
+    RequiredArg { command ->
+        ContextArg { context ->
             if (context.elevated)
                 Bukkit.getServer().dispatchCommand(Bukkit.getConsoleSender(), command.toString())
             Message.empty
@@ -188,9 +178,9 @@ class Execute : PartialWrapper ({
     }
 })
 
-class Equation : PartialWrapper ({
+class Equation : FormatWrapper ({
 
-    PartialRequired { argEquation ->
+    RequiredArg { argEquation ->
         try {
             val answer = ExpressionBuilder(argEquation.toString())
                     .operator(greater)
@@ -324,38 +314,30 @@ private val round : Function =
             }
         }
 
-class CustomPath : Formattable {
+class CustomPath : FormatWrapper ({
 
-    private class ArgsBuilder(val function: String, val args: List<Message>) : Formattable {
-        override fun applyModifier(arg: Message): Formattable {
-            return ArgsBuilder(function, args + arg)
-        }
+    RequiredArg { functionArg ->
+        AdditionalArgs { args ->
+            ContextArg { context ->
+                val function = functionArg.toString()
+                val text = context.getFunction(function)
+                    ?: return@ContextArg Message.error("{#|$function}")
 
-        override fun format(context: Context): Message {
-            val text = context.getFunction(function) ?: return Message.error("{#|$function}")
+                val callContext = args.foldIndexed(context.newScope()) { i: Int, ctx, msg ->
+                    ctx.plus("arg$i", msg)
+                }
 
-            val callContext = args.foldIndexed(context.newScope()) { i: Int, ctx, msg ->
-                ctx.plus("arg$i", msg)
+                Expander.expand(text, callContext)
             }
-
-            return Expander.expand(text, callContext)
         }
     }
+})
 
-    override fun applyModifier(arg: Message): Formattable {
-        return ArgsBuilder(arg.toString(), emptyList())
-    }
+class RegexExpander : FormatWrapper ({
 
-    override fun format(context: Context): Message {
-        throw IllegalArgumentException("Second argument required")
-    }
-}
-
-class RegexExpander : PartialWrapper ({
-
-    PartialRequired { argText ->
-        PartialRequired { argPattern ->
-            PartialRequired { argReplace ->
+    RequiredArg { argText ->
+        RequiredArg { argPattern ->
+            RequiredArg { argReplace ->
                 val text = argText.toString()
                 val pattern = argPattern.toString()
                 val replace = argReplace.toString()
@@ -365,17 +347,17 @@ class RegexExpander : PartialWrapper ({
     }
 })
 
-class LengthExpander : PartialWrapper ({
-    PartialRequired { arg ->
+class LengthExpander : FormatWrapper ({
+    RequiredArg { arg ->
         Message.of(arg.toString().length)
     }
 })
 
-class SubstringExpander : PartialWrapper ({
+class SubstringExpander : FormatWrapper ({
 
-    PartialRequired { argText ->
-        PartialRequired { argStart ->
-            PartialDefault(Message.of(Int.MAX_VALUE)) { argLength ->
+    RequiredArg { argText ->
+        RequiredArg { argStart ->
+            DefaultArg(Message.of(Int.MAX_VALUE)) { argLength ->
                 val text = argText.toString()
                 var start = argStart.toString().toInt().let {
                     if (it < 0)
@@ -410,11 +392,11 @@ class SubstringExpander : PartialWrapper ({
     }
 })
 
-open class PadExpander(internal val startText: (String) -> String, internal val endText: (String) -> String) : PartialWrapper ({
+open class PadExpander(internal val startText: (String) -> String, internal val endText: (String) -> String) : FormatWrapper ({
 
-    PartialRequired { argText ->
-        PartialRequired { argLength ->
-            PartialDefault(" ") { argPadText ->
+    RequiredArg { argText ->
+        RequiredArg { argLength ->
+            DefaultArg(" ") { argPadText ->
                 val length = argLength.toString().toInt()
                 val padText = argPadText.toString().ifEmpty{ " " }
 
@@ -439,10 +421,10 @@ class PadLeftExpander : PadExpander({ "" }, { it })
 
 class PadRightExpander : PadExpander({ it }, { "" })
 
-class RandomExpander : PartialWrapper ({
+class RandomExpander : FormatWrapper ({
 
-    PartialDefault(Message.of(1)) { max ->
-        PartialDefault(Message.of(0)) { min ->
+    DefaultArg(Message.of(1)) { max ->
+        DefaultArg(Message.of(0)) { min ->
             Message.of(Random.nextDouble(min.toString().toDouble(), max.toString().toDouble()).toString())
         }
     }

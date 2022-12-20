@@ -492,7 +492,7 @@ class Game constructor(private val save: GameSave) : Formattable, Listener {
         return when (arg.toString().lowercase()) {
             "name" -> Message.of(name)
             "spawns" -> CollectionWrapper(spawns.map {
-                PartialRequired { spawnArg->
+                RequiredArg { spawnArg->
                     when (spawnArg.toString().lowercase()) {
                         "world", "w" -> Message.of(it.world?.name ?: "unknown")
                         "x" -> Message.of(it.x.toInt())

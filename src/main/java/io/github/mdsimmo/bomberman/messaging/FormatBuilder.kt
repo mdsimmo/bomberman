@@ -1,6 +1,6 @@
 package io.github.mdsimmo.bomberman.messaging
 
-open class PartialWrapper(val call: () -> Formattable) : Formattable {
+open class FormatWrapper(val call: () -> Formattable) : Formattable {
 
     private val built: Formattable by lazy {
         call()
@@ -15,7 +15,7 @@ open class PartialWrapper(val call: () -> Formattable) : Formattable {
     }
 }
 
-class PartialDefault(val text: Message, val function: (Message) -> Formattable) : Formattable {
+class DefaultArg(val text: Message, val function: (Message) -> Formattable) : Formattable {
 
     constructor(text: String, function: (Message) -> Formattable)
             : this(Message.of(text), function)
@@ -29,7 +29,7 @@ class PartialDefault(val text: Message, val function: (Message) -> Formattable) 
     }
 }
 
-class PartialRequired(val function: (Message) -> Formattable) : Formattable {
+class RequiredArg(val function: (Message) -> Formattable) : Formattable {
     override fun applyModifier(arg: Message): Formattable {
         return function(arg)
     }
@@ -39,10 +39,19 @@ class PartialRequired(val function: (Message) -> Formattable) : Formattable {
     }
 }
 
-class PartialContext(val function: (Context) -> Formattable) : Formattable {
+class ContextArg(val function: (Context) -> Formattable) : Formattable {
 
     override fun applyModifier(arg: Message): Formattable {
-        return ExtraArgsHolder(function, arg)
+        // Store all extra arguments until formatted with context
+        return ExtraArgsHolder({ context, args ->
+            // Apply the Context
+            val initial = function(context)
+
+            // Pass all stored arguments to the result
+            args.fold(initial) { obj, arg ->
+                obj.applyModifier(arg)
+            }
+        }, arg)
     }
 
     override fun format(context: Context): Message {
@@ -50,21 +59,29 @@ class PartialContext(val function: (Context) -> Formattable) : Formattable {
     }
 }
 
+class AdditionalArgs(private val function: (List<Message>) -> Formattable) : Formattable {
+    override fun applyModifier(arg: Message): Formattable {
+        // Pass all additional arguments to the caller
+        return ExtraArgsHolder({ _, args -> function(args) }, arg)
+    }
+
+    override fun format(context: Context): Message {
+        return function(emptyList()).format(context)
+    }
+}
+
 internal class ExtraArgsHolder(
-    private val initial: (Context) -> Formattable,
+    private val callback: (Context, List<Message>) -> Formattable,
     vararg args: Message
 ) : Formattable {
 
     private val extraArgs = args.toList()
 
     override fun applyModifier(arg: Message): Formattable {
-        return ExtraArgsHolder(initial, *(extraArgs + arg).toTypedArray())
+        return ExtraArgsHolder(callback, *(extraArgs + arg).toTypedArray())
     }
 
     override fun format(context: Context): Message {
-        val initialFormattable = initial(context)
-        return extraArgs.fold(initialFormattable) { obj, arg ->
-            obj.applyModifier(arg)
-        }.format(context)
+        return callback(context, extraArgs).format(context)
     }
 }

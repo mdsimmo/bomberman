@@ -191,7 +191,7 @@ class ExpanderTest {
     @Test
     fun testObjectsArePassedToFunctions() {
         val context = Context()
-            .plus("obj", PartialRequired { arg ->
+            .plus("obj", RequiredArg { arg ->
                 when (arg.toString()) {
                     "value" -> Message.of("Good")
                     else -> arg
