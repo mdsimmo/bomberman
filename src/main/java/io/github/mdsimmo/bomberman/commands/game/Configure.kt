@@ -6,8 +6,7 @@ import io.github.mdsimmo.bomberman.commands.Permission
 import io.github.mdsimmo.bomberman.commands.Permissions
 import io.github.mdsimmo.bomberman.game.Game
 import io.github.mdsimmo.bomberman.game.GameSettingsBuilder
-import io.github.mdsimmo.bomberman.messaging.Contexted
-import io.github.mdsimmo.bomberman.messaging.Message
+import io.github.mdsimmo.bomberman.messaging.Formattable
 import io.github.mdsimmo.bomberman.messaging.Text
 import org.bukkit.GameMode
 import org.bukkit.Material
@@ -19,8 +18,8 @@ import kotlin.math.max
 import kotlin.math.min
 
 class Configure(parent: Cmd) : GameCommand(parent) {
-    override fun name(): Message {
-        return context(Text.CONFIGURE_NAME).format()
+    override fun name(): Formattable {
+        return Text.CONFIGURE_NAME
     }
 
     override fun gameOptions(args: List<String>): List<String> {
@@ -31,31 +30,31 @@ class Configure(parent: Cmd) : GameCommand(parent) {
         return Permissions.CONFIGURE
     }
 
-    override fun extra(): Message {
-        return context(Text.CONFIGURE_EXTRA).format()
+    override fun extra(): Formattable {
+        return Text.CONFIGURE_EXTRA
     }
 
-    override fun example(): Message {
-        return context(Text.CONFIGURE_EXAMPLE).format()
+    override fun example(): Formattable {
+        return Text.CONFIGURE_EXAMPLE
     }
 
-    override fun description(): Message {
-        return context(Text.CONFIGURE_DESCRIPTION).format()
+    override fun description(): Formattable {
+        return Text.CONFIGURE_DESCRIPTION
     }
 
-    override fun usage(): Message {
-        return context(Text.CONFIGURE_USAGE).format()
+    override fun usage(): Formattable {
+        return Text.CONFIGURE_USAGE
     }
 
     override fun gameRun(sender: CommandSender, args: List<String>, flags: Map<String, String>, game: Game): Boolean {
         if (args.isNotEmpty())
             return false
         if (sender !is Player) {
-            context(Text.MUST_BE_PLAYER).sendTo(sender)
+            Text.MUST_BE_PLAYER.format(cmdContext()).sendTo(sender)
             return true
         }
         if (sender.gameMode != GameMode.CREATIVE) {
-            context(Text.CONFIGURE_PROMPT_CREATIVE).sendTo(sender)
+            Text.CONFIGURE_PROMPT_CREATIVE.format(cmdContext()).sendTo(sender)
             return true
         }
 
@@ -64,20 +63,20 @@ class Configure(parent: Cmd) : GameCommand(parent) {
     }
 
     private fun showMainMenu(player: Player, game: Game) {
-        GuiBuilder.show(player, Text.CONFIGURE_TITLE_MAIN.format().toString(), arrayOf(
+        GuiBuilder.show(player, Text.CONFIGURE_TITLE_MAIN.format(cmdContext()).toString(), arrayOf(
                 "         ",
                 " s b l i ",
                 "         "),
                 onInit = { index ->
                     when (index.section) {
                         's' -> GuiBuilder.ItemSlot(Material.REDSTONE).unMovable()
-                                .displayName(Text.CONFIGURE_TITLE_GENERAL.format().toString())
+                                .displayName(Text.CONFIGURE_TITLE_GENERAL.format(cmdContext()).toString())
                         'b' -> GuiBuilder.ItemSlot(Material.DIRT).unMovable()
-                                .displayName(Text.CONFIGURE_TITLE_BLOCKS.format().toString())
+                                .displayName(Text.CONFIGURE_TITLE_BLOCKS.format(cmdContext()).toString())
                         'l' -> GuiBuilder.ItemSlot(Material.GOLDEN_APPLE).unMovable()
-                                .displayName(Text.CONFIGURE_TITLE_LOOT.format().toString())
+                                .displayName(Text.CONFIGURE_TITLE_LOOT.format(cmdContext()).toString())
                         'i' -> GuiBuilder.ItemSlot(Material.CHEST).unMovable()
-                                .displayName(Text.CONFIGURE_TITLE_INVENTORY.format().toString())
+                                .displayName(Text.CONFIGURE_TITLE_INVENTORY.format(cmdContext()).toString())
                         else -> GuiBuilder.blank
                     }
                 },
@@ -94,7 +93,7 @@ class Configure(parent: Cmd) : GameCommand(parent) {
 
     private fun showGeneralConfig(player: Player, game: Game) {
         val settings = GameSettingsBuilder(game.settings)
-        GuiBuilder.show(player, Text.CONFIGURE_TITLE_GENERAL.format().toString(), arrayOf(
+        GuiBuilder.show(player, Text.CONFIGURE_TITLE_GENERAL.format(cmdContext()).toString(), arrayOf(
                 "  ^^^^   ",
                 "< lfbitg ",
                 "  vvvv   "),
@@ -165,7 +164,7 @@ class Configure(parent: Cmd) : GameCommand(parent) {
 
     private fun showBlockSettings(player: Player, game: Game, builder: GameSettingsBuilder, selected: Int, description: String, types: Set<Material>, result: (Set<Material>) -> Unit) {
         val typesList = types.filter { it.isItem }.filter { it.isBlock }.toList()
-        GuiBuilder.show(player, Text.CONFIGURE_TITLE_BLOCKS.format().toString(), arrayOf(
+        GuiBuilder.show(player, Text.CONFIGURE_TITLE_BLOCKS.format(cmdContext()).toString(), arrayOf(
                 "<d s p n ",
                 " c cEc c ",
                 "iiiiiiiii",
@@ -348,16 +347,16 @@ class Configure(parent: Cmd) : GameCommand(parent) {
                                 else -> Material.WHITE_CONCRETE
                             }
                             GuiBuilder.ItemSlot(icon)
-                                    .unMovable().displayName(stringify(Text.CONFIGURE_LOOT_SLOT.with("slot", index.secIndex)))
+                                    .unMovable().displayName(Text.CONFIGURE_LOOT_SLOT.format(cmdContext().plus("slot", index.secIndex)).toString())
                         }
                         'K' -> GuiBuilder.ItemSlot(Material.EMERALD)
-                                .unMovable().displayName(stringify(Text.CONFIGURE_LOOT_BLOCK.with("slot", slot)))
+                                .unMovable().displayName(Text.CONFIGURE_LOOT_BLOCK.format(cmdContext().plus("slot", slot)).toString())
                         'k' -> GuiBuilder.ItemSlot(loot.getOrNull(slot)?.first?.getOrNull(index.secIndex)?.let { ItemStack(it) })
                         'V' -> GuiBuilder.ItemSlot(Material.EMERALD)
-                                .unMovable().displayName(stringify(Text.CONFIGURE_LOOT_ITEM.with("slot", slot)))
+                                .unMovable().displayName(Text.CONFIGURE_LOOT_ITEM.format(cmdContext().plus("slot", slot)).toString())
                         'v' -> GuiBuilder.ItemSlot(loot.getOrNull(slot)?.second?.getOrNull(index.secIndex)?.first)
                         'W' -> GuiBuilder.ItemSlot(Material.EMERALD)
-                                .unMovable().displayName(stringify(Text.CONFIGURE_LOOT_WEIGHT.with("slot", slot)))
+                                .unMovable().displayName(Text.CONFIGURE_LOOT_WEIGHT.format(cmdContext().plus("slot", slot)).toString())
                         'w' -> GuiBuilder.ItemSlot(Material.GOLD_NUGGET, loot.getOrNull(slot)?.second?.getOrNull(index.secIndex)?.second ?: 0)
                         else -> GuiBuilder.blank
                     }
@@ -418,7 +417,10 @@ class Configure(parent: Cmd) : GameCommand(parent) {
         return itemStack
     }
 
-    private fun stringify(text: Contexted): String {
-        return text.format().toString()
+    private fun stringify(text: Text, vararg extraContext: Pair<String, Formattable>): String {
+        val context = extraContext.fold(cmdContext()) { ctx, extra ->
+            ctx.plus(extra.first, extra.second)
+        }
+        return text.format(context).toString()
     }
 }

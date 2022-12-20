@@ -22,7 +22,6 @@ import org.bukkit.Bukkit
 import org.bukkit.Location
 import org.bukkit.Material
 import org.bukkit.configuration.file.YamlConfiguration
-import org.bukkit.entity.Item
 import org.bukkit.entity.Player
 import org.bukkit.event.EventHandler
 import org.bukkit.event.EventPriority
@@ -258,20 +257,18 @@ class Game constructor(private val save: GameSave) : Formattable, Listener {
             return
 
         if (running) {
-            e.cancelFor(Text.GAME_ALREADY_STARTED
-                    .with("game", this)
-                    .with("player", e.player)
-                    .format())
+            e.cancelFor(Text.GAME_ALREADY_STARTED.format(Context(false)
+                    .plus("game", this)
+                    .plus("player", e.player)))
             return
         }
 
         // Check if there is spare room
         val gameSpawn = findSpareSpawn()
         if (gameSpawn == null) {
-            e.cancelFor(Text.JOIN_GAME_FULL
-                    .with("game", this)
-                    .with("player", e.player)
-                    .format())
+            e.cancelFor(Text.JOIN_GAME_FULL.format(Context(false)
+                    .plus("game", this)
+                    .plus("player", e.player)))
             return
         }
 
@@ -301,13 +298,12 @@ class Game constructor(private val save: GameSave) : Formattable, Listener {
             .forEach { change ->
                 val cancelExpression = change.entries.firstOrNull { it.key.equals("cancel", ignoreCase = true) }?.value
                     ?: return@forEach
-                val result = Expander.expand(cancelExpression, mapOf(
-                    Pair("base", Message.of(e.damage)),
-                    Pair("final", Message.of(e.finalDamage)),
-                    Pair("cause", Message.of(e.cause.toString())),
-                    Pair("player", SenderWrapper(e.entity)),
-                    Pair("game", this),
-                ), true).toString()
+                val result = Expander.expand(cancelExpression, Context(false)
+                    .plus("base", Message.of(e.damage))
+                    .plus("final", Message.of(e.finalDamage))
+                    .plus("cause", Message.of(e.cause.toString()))
+                    .plus("player", SenderWrapper(e.entity))
+                    .plus("game", this)).toString()
                 val asDouble = result.toDoubleOrNull() ?: return@forEach
                 if (asDouble > 0.000001 || asDouble < -0.000001) {
                     e.isCancelled = true
@@ -326,15 +322,15 @@ class Game constructor(private val save: GameSave) : Formattable, Listener {
                         rules.filterKeys { modifier.toString().matches(Regex(it, RegexOption.IGNORE_CASE)) }
                             // apply rule
                             .forEach {
-                                val result = Expander.expand(it.value, mapOf(
-                                    Pair("base", Message.of(e.damage)),
-                                    Pair("damage", Message.of(e.getDamage(modifier))),
-                                    Pair("final", Message.of(e.finalDamage)),
-                                    Pair("cause", Message.of(e.cause.toString())),
-                                    Pair("player", SenderWrapper(e.entity)),
-                                    Pair("game", this),
-                                    Pair("modifier", Message.of(modifier.toString())),
-                                ), true)
+                                val result = Expander.expand(it.value, Context(false)
+                                    .plus("base", Message.of(e.damage))
+                                    .plus("damage", Message.of(e.getDamage(modifier)))
+                                    .plus("final", Message.of(e.finalDamage))
+                                    .plus("cause", Message.of(e.cause.toString()))
+                                    .plus("player", SenderWrapper(e.entity))
+                                    .plus("game", this)
+                                    .plus("modifier", Message.of(modifier.toString()))
+                                )
                                 result.toString().toDoubleOrNull()?.also { damage ->
                                     e.setDamage(modifier, damage)
                                 }
@@ -349,12 +345,12 @@ class Game constructor(private val save: GameSave) : Formattable, Listener {
             return
 
         if (running) {
-            e.cancelBecause(Text.GAME_ALREADY_STARTED.with("game", this).format())
+            e.cancelBecause(Text.GAME_ALREADY_STARTED.format(Context(false).plus("game", this)))
             return
         }
 
         if (players.size == 0) {
-            e.cancelBecause(Text.GAME_NO_PLAYERS.with("game", this).format())
+            e.cancelBecause(Text.GAME_NO_PLAYERS.format(Context(false).plus("game", this)))
             return
         }
 
@@ -410,7 +406,7 @@ class Game constructor(private val save: GameSave) : Formattable, Listener {
         if (e.game != this)
             return
         if (!running) {
-            e.cancelFor(Text.STOP_NOT_STARTED.with("game", this).format())
+            e.cancelFor(Text.STOP_NOT_STARTED.format(Context(false).plus("game", this)))
         }
     }
 
@@ -492,29 +488,35 @@ class Game constructor(private val save: GameSave) : Formattable, Listener {
         BmGameTerminatedIntent.terminateGame(this)
     }
 
-    override fun format(args: List<Message>, elevated: Boolean): Message {
-        if (args.isEmpty())
-            return Message.of(name)
-        return when (args[0].toString()) {
+    override fun applyModifier(arg: Message): Formattable {
+        return when (arg.toString().lowercase()) {
             "name" -> Message.of(name)
-            "spawns" -> CollectionWrapper(spawns.map { object : Formattable {
-                override fun format(args: List<Message>, elevated: Boolean): Message {
-                    require(args.size == 1) { "Spawn format must have one arg" }
-                    return when(args[0].toString().lowercase()) {
+            "spawns" -> CollectionWrapper(spawns.map {
+                RequiredArg { spawnArg->
+                    when (spawnArg.toString().lowercase()) {
                         "world", "w" -> Message.of(it.world?.name ?: "unknown")
                         "x" -> Message.of(it.x.toInt())
                         "y" -> Message.of(it.y.toInt())
                         "z" -> Message.of(it.z.toInt())
-                        else -> throw IllegalArgumentException("Unknown spawn format ${args[0]}")
+                        else -> throw IllegalArgumentException("Unknown spawn format $spawnArg")
                     }
                 }
-            } }).format(args.drop(1), elevated)
+            })
             "players" -> CollectionWrapper(players.map { SenderWrapper(it) })
-                    .format(args.drop(1), elevated)
             "power" -> Message.of(settings.initialItems.sumOf {
-                if (it?.type == settings.bombItem) { it.amount } else { 0 }})
+                if (it?.type == settings.bombItem) {
+                    it.amount
+                } else {
+                    0
+                }
+            })
             "bombs" -> Message.of(settings.initialItems.sumOf {
-                if (it?.type == settings.powerItem) { it.amount } else { 0 }})
+                if (it?.type == settings.powerItem) {
+                    it.amount
+                } else {
+                    0
+                }
+            })
             "lives" -> Message.of(settings.lives.toString())
             "w", "world" -> Message.of(origin.world?.name ?: "unknown")
             "x" -> Message.of(origin.x.toInt())
@@ -523,10 +525,19 @@ class Game constructor(private val save: GameSave) : Formattable, Listener {
             "xsize" -> Message.of(box.size.x)
             "ysize" -> Message.of(box.size.y)
             "zsize" -> Message.of(box.size.z)
-            "running" -> Message.of(if (running) { "true" } else { "false" })
-            "schema" -> format(args.drop(1), elevated) // for backwards compatibility
+            "running" -> Message.of(
+                if (running) {
+                    "true"
+                } else {
+                    "false"
+                }
+            )
+            "schema" -> this // for backwards compatibility
             else -> Message.empty
         }
     }
 
+    override fun format(context: Context): Message {
+        return applyModifier("name").format(context)
+    }
 }

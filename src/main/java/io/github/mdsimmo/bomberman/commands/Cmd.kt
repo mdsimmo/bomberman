@@ -3,6 +3,7 @@ package io.github.mdsimmo.bomberman.commands
 import io.github.mdsimmo.bomberman.messaging.*
 import org.bukkit.Bukkit
 import org.bukkit.command.CommandSender
+import kotlin.IllegalArgumentException
 
 // TODO Cmd shouldn't require knowing its parent
 abstract class Cmd(protected var parent: Cmd?) : Formattable {
@@ -14,7 +15,7 @@ abstract class Cmd(protected var parent: Cmd?) : Formattable {
      *
      * @return the name
      */
-    abstract fun name(): Message
+    abstract fun name(): Formattable
 
     /**
      * Gets a list of possible values to return.
@@ -28,9 +29,9 @@ abstract class Cmd(protected var parent: Cmd?) : Formattable {
 
     open fun flagOptions(flag: String): Set<String> = emptySet()
 
-    open fun flagExtension(flag: String): Message  = Message.empty
+    open fun flagExtension(flag: String): Formattable  = Message.empty
 
-    open fun flagDescription(flag: String): Message = Message.empty
+    open fun flagDescription(flag: String): Formattable = Message.empty
 
     /**
      * Execute the command
@@ -41,10 +42,10 @@ abstract class Cmd(protected var parent: Cmd?) : Formattable {
      */
     abstract fun run(sender: CommandSender, args: List<String>, flags: Map<String, String>): Boolean
 
-    abstract fun extra(): Message
-    abstract fun example(): Message
-    abstract fun description(): Message
-    abstract fun usage(): Message
+    abstract fun extra(): Formattable
+    abstract fun example(): Formattable
+    abstract fun description(): Formattable
+    abstract fun usage(): Formattable
 
     /**
      * @return the permission needed to run this command
@@ -62,16 +63,20 @@ abstract class Cmd(protected var parent: Cmd?) : Formattable {
         parent?.also {
             path += it.path(separator) + separator
         }
-        path += name().toString()
+        path += name().format(Context())
         return path
     }
 
-    fun context(text: Contexted): Contexted {
-        return text.with("command", this)
+    fun cmdContext(): Context {
+        return Context(false).plus("command", this)
     }
 
-    override fun format(args: List<Message>, elevated: Boolean): Message {
-        return when (args.getOrElse(0) { "name" }.toString().lowercase()) {
+    override fun format(context: Context): Message {
+        return applyModifier(Message.of("name")).format(context)
+    }
+
+    override fun applyModifier(arg: Message): Formattable {
+        return when (arg.toString().lowercase()) {
             "name" -> name()
             "path" -> Message.of(path())
             "usage" -> usage()
@@ -80,17 +85,21 @@ abstract class Cmd(protected var parent: Cmd?) : Formattable {
             "description" -> description()
             "flags" -> CollectionWrapper(flags(Bukkit.getConsoleSender())
                     .map { flag -> object: Formattable {
-                        override fun format(args: List<Message>, elevated: Boolean): Message {
-                            return when ((args.firstOrNull() ?: "name").toString()) {
+                        override fun applyModifier(arg: Message): Formattable {
+                            return when (arg.toString().lowercase()) {
                                 "name" -> Message.of(flag)
                                 "ext" -> flagExtension(flag)
                                 "description" -> flagDescription(flag)
-                                else -> throw RuntimeException("Unknown flag value '" + args[0] + "'")
+                                "permission" -> Message.of(permission().value())
+                                else -> throw IllegalArgumentException("Unknown flag value '$arg'`")
                             }
                         }
-                    } }).format(args.drop(1), elevated)
-            "permission" -> Message.of(permission().value())
-            else -> throw RuntimeException("Unknown command value '" + args[0] + "'")
+
+                        override fun format(context: Context): Message {
+                            return applyModifier(Message.of("name")).format(context)
+                        }
+                    } })
+            else -> throw IllegalArgumentException("Unknown command value '$arg'")
         }
     }
 

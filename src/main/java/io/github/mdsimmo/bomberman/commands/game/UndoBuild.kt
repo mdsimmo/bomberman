@@ -14,7 +14,7 @@ import io.github.mdsimmo.bomberman.commands.Permission
 import io.github.mdsimmo.bomberman.commands.Permissions
 import io.github.mdsimmo.bomberman.events.BmGameDeletedIntent
 import io.github.mdsimmo.bomberman.events.BmGameLookupIntent
-import io.github.mdsimmo.bomberman.messaging.Message
+import io.github.mdsimmo.bomberman.messaging.Formattable
 import io.github.mdsimmo.bomberman.messaging.Text
 import io.github.mdsimmo.bomberman.utils.Box
 import io.github.mdsimmo.bomberman.utils.BukkitUtils
@@ -62,8 +62,8 @@ class UndoBuild(parent: Cmd) : Cmd(parent) {
 
 
 
-    override fun name(): Message {
-        return context(Text.UNDO_NAME).format()
+    override fun name(): Formattable {
+        return Text.UNDO_NAME
     }
 
     override fun options(sender: CommandSender, args: List<String>): List<String> {
@@ -81,8 +81,8 @@ class UndoBuild(parent: Cmd) : Cmd(parent) {
         // Find the clipboard
         val (origin, clipboard, _) = gameMemory[gameName] ?: Triple(null, null, 0)
         if (clipboard == null || origin  == null) {
-            context(Text.UNDO_UNKNOWN_GAME)
-                    .with("game", gameName)
+            Text.UNDO_UNKNOWN_GAME.format(cmdContext()
+                    .plus("game", gameName))
                     .sendTo(sender)
             return true
         }
@@ -90,8 +90,8 @@ class UndoBuild(parent: Cmd) : Cmd(parent) {
         // Delete the game if it exists still
         BmGameLookupIntent.find(gameName)?.let { game ->
             BmGameDeletedIntent.delete(game, true)
-            context(Text.UNDO_DELETED)
-                    .with("game", game)
+            Text.UNDO_DELETED.format(cmdContext()
+                    .plus("game", game))
                     .sendTo(sender)
         }
 
@@ -113,8 +113,8 @@ class UndoBuild(parent: Cmd) : Cmd(parent) {
         gameMemory.remove(gameName)
 
         // Signal success
-        context(Text.UNDO_SUCCESS)
-            .with("game", gameName)
+        Text.UNDO_SUCCESS.format(cmdContext()
+            .plus("game", gameName))
             .sendTo(sender)
         return true
     }
@@ -123,19 +123,19 @@ class UndoBuild(parent: Cmd) : Cmd(parent) {
         return Permissions.UNDO
     }
 
-    override fun example(): Message {
-        return context(Text.UNDO_EXAMPLE).format()
+    override fun example(): Formattable {
+        return Text.UNDO_EXAMPLE
     }
 
-    override fun extra(): Message {
-        return context(Text.UNDO_EXTRA).format()
+    override fun extra(): Formattable {
+        return Text.UNDO_EXTRA
     }
 
-    override fun description(): Message {
-        return context(Text.UNDO_DESCRIPTION).format()
+    override fun description(): Formattable {
+        return Text.UNDO_DESCRIPTION
     }
 
-    override fun usage(): Message {
-        return context(Text.UNDO_USAGE).format()
+    override fun usage(): Formattable {
+        return Text.UNDO_USAGE
     }
 }

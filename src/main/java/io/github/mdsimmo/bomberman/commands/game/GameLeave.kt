@@ -4,6 +4,7 @@ import io.github.mdsimmo.bomberman.commands.Cmd
 import io.github.mdsimmo.bomberman.commands.Permission
 import io.github.mdsimmo.bomberman.commands.Permissions
 import io.github.mdsimmo.bomberman.events.BmPlayerLeaveGameIntent
+import io.github.mdsimmo.bomberman.messaging.Formattable
 import io.github.mdsimmo.bomberman.messaging.Message
 import io.github.mdsimmo.bomberman.messaging.Text
 import org.bukkit.Bukkit
@@ -16,8 +17,8 @@ class GameLeave(parent: Cmd) : Cmd(parent) {
         private const val F_TARGET = "t"
     }
 
-    override fun name(): Message {
-        return context(Text.LEAVE_NAME).format()
+    override fun name(): Formattable {
+        return Text.LEAVE_NAME
     }
 
     override fun options(sender: CommandSender, args: List<String>): List<String> {
@@ -35,16 +36,16 @@ class GameLeave(parent: Cmd) : Cmd(parent) {
         }
     }
 
-    override fun flagDescription(flag: String): Message {
+    override fun flagDescription(flag: String): Formattable {
         return when(flag) {
-            F_TARGET -> context(Text.LEAVE_FLAG_TARGET).format()
+            F_TARGET -> Text.LEAVE_FLAG_TARGET
             else -> Message.empty
         }
     }
 
-    override fun flagExtension(flag: String): Message {
+    override fun flagExtension(flag: String): Formattable {
         return when(flag) {
-            F_TARGET -> context(Text.LEAVE_FLAG_TARGET_EXT).format()
+            F_TARGET -> Text.LEAVE_FLAG_TARGET_EXT
             else -> Message.empty
         }
     }
@@ -59,8 +60,7 @@ class GameLeave(parent: Cmd) : Cmd(parent) {
 
             // Deny permissions if not allowed to select others
             if (!Permissions.LEAVE_REMOTE.isAllowedBy(sender)) {
-                context(Text.DENY_PERMISSION)
-                    .sendTo(sender)
+                Text.DENY_PERMISSION.format(cmdContext()).sendTo(sender)
                 return true
             }
 
@@ -68,8 +68,8 @@ class GameLeave(parent: Cmd) : Cmd(parent) {
             GameJoin.select(selection, sender).fold(
                 onSuccess = { it },
                 onFailure = {
-                    Text.INVALID_TARGET_SELECTOR
-                        .with("selector", selection)
+                    Text.INVALID_TARGET_SELECTOR.format(cmdContext()
+                            .plus("selector", selection))
                         .sendTo(sender)
                     return true
                 }
@@ -77,7 +77,7 @@ class GameLeave(parent: Cmd) : Cmd(parent) {
         } else {
             // no target selector, apply to sender
             if (sender !is Player) {
-                context(Text.MUST_BE_PLAYER).sendTo(sender)
+                Text.MUST_BE_PLAYER.format(cmdContext()).sendTo(sender)
                 return true
             }
             listOf(sender)
@@ -86,13 +86,13 @@ class GameLeave(parent: Cmd) : Cmd(parent) {
         targets.forEach { target ->
             val e = BmPlayerLeaveGameIntent.leave(target)
             if (e.isHandled()) {
-                Text.LEAVE_SUCCESS
-                        .with("player", target)
-                        .with("game", e.game ?: Message.error("none"))
+                Text.LEAVE_SUCCESS.format(cmdContext()
+                            .plus("player", target)
+                            .plus("game", e.game ?: Message.error("none")))
                         .sendTo(target)
             } else {
-                Text.LEAVE_NOT_JOINED
-                        .with("player", target)
+                Text.LEAVE_NOT_JOINED.format(cmdContext()
+                            .plus("player", target))
                         .sendTo(target)
             }
         }
@@ -103,19 +103,19 @@ class GameLeave(parent: Cmd) : Cmd(parent) {
         return Permissions.LEAVE
     }
 
-    override fun extra(): Message {
-        return context(Text.LEAVE_EXTRA).format()
+    override fun extra(): Formattable {
+        return Text.LEAVE_EXTRA
     }
 
-    override fun description(): Message {
-        return context(Text.LEAVE_DESCRIPTION).format()
+    override fun description(): Formattable {
+        return Text.LEAVE_DESCRIPTION
     }
 
-    override fun usage(): Message {
-        return context(Text.LEAVE_USAGE).format()
+    override fun usage(): Formattable {
+        return Text.LEAVE_USAGE
     }
 
-    override fun example(): Message {
-        return context(Text.JOIN_EXAMPLE).format()
+    override fun example(): Formattable {
+        return Text.JOIN_EXAMPLE
     }
 }

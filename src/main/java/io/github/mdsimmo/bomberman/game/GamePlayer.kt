@@ -4,6 +4,7 @@ import com.sk89q.jnbt.StringTag
 import com.sk89q.worldedit.bukkit.BukkitAdapter
 import io.github.mdsimmo.bomberman.Bomberman
 import io.github.mdsimmo.bomberman.events.*
+import io.github.mdsimmo.bomberman.messaging.Context
 import io.github.mdsimmo.bomberman.messaging.Text
 import org.bukkit.Bukkit
 import org.bukkit.GameMode
@@ -197,10 +198,9 @@ class GamePlayer private constructor(private val player: Player, private val gam
     @EventHandler(ignoreCancelled = true, priority = EventPriority.LOW)
     fun onPlayerJoinGame(e: BmPlayerJoinGameIntent) { // Cannot join two games at once
         if (e.player === player) {
-            e.cancelFor(Text.JOIN_ALREADY_JOINED
-                    .with("game", e.game)
-                    .with("player", player)
-                    .format())
+            e.cancelFor(Text.JOIN_ALREADY_JOINED.format(Context(false)
+                    .plus("game", e.game)
+                    .plus("player", player)))
         }
     }
 
@@ -209,9 +209,9 @@ class GamePlayer private constructor(private val player: Player, private val gam
         if (e.game != game)
             return
         if (e.count > 0) {
-            Text.GAME_COUNT
-                    .with("time", e.count)
-                    .with("game", game)
+            Text.GAME_COUNT.format(Context(false)
+                    .plus("time", e.count)
+                    .plus("game", game))
                     .sendTo(player)
         }
     }
@@ -220,8 +220,8 @@ class GamePlayer private constructor(private val player: Player, private val gam
     fun onRunStarted(e: BmRunStartedIntent) {
         if (e.game != game)
             return
-        Text.GAME_STARTED
-                .with("game", game)
+        Text.GAME_STARTED.format(Context(false)
+                .plus("game", game))
                 .sendTo(player)
         e.setHandled()
     }
@@ -368,8 +368,8 @@ class GamePlayer private constructor(private val player: Player, private val gam
     @EventHandler(ignoreCancelled = true, priority = EventPriority.HIGH)
     fun onPlayerWon(e: BmPlayerWonEvent) {
         if (e.player !== player) return
-        Text.PLAYER_WON
-                .with("player", player)
+        Text.PLAYER_WON.format(Context(false)
+                .plus("player", player))
                 .sendTo(player)
         // Let player walk around like a boss until the game stops
         immunity = true
