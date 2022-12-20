@@ -7,28 +7,21 @@ import org.bukkit.Bukkit
 import org.bukkit.ChatColor
 import org.bukkit.command.CommandSender
 import org.bukkit.inventory.ItemStack
-import java.lang.RuntimeException
 import java.math.BigDecimal
+import kotlin.math.absoluteValue
+import kotlin.math.min
 import kotlin.math.roundToLong
 import kotlin.random.Random
 
 
-class StringWrapper(val text: String) : Formattable {
-
-    override fun format(args: List<Message>, context: Context): Message {
-        return Message.of(text)
-    }
-
-}
-
 class ItemWrapper(private val item: ItemStack) : Formattable {
 
-    override fun format(args: List<Message>, context: Context): Message {
-        return if (args.isEmpty()) {
-            Text.ITEM_FORMAT.format(
-                emptyList(), context.newScope().plus("item", this)
-            )
-        } else when (args[0].toString()) {
+    override fun format(context: Context): Message {
+        return Text.ITEM_FORMAT.format(context.newScope().plus("item", this))
+    }
+
+    override fun applyModifier(arg: Message): Formattable {
+        return when (arg.toString().lowercase()) {
             "amount" -> Message.of(item.amount)
             "type" -> Message.of(item.type.key.toString())
             else -> Message.empty
@@ -37,163 +30,169 @@ class ItemWrapper(private val item: ItemStack) : Formattable {
 
 }
 
-class SenderWrapper(private val sender: CommandSender) : Formattable {
-    override fun format(args: List<Message>, context: Context): Message {
-        return when (args.getOrNull(0)?.toString()?.lowercase() ?: "name") {
-            "name" -> Message.of(sender.name)
-            "msg" -> {
-                require(args.size >= 2) { "Sending a message requires a second argument" }
-                args[1].sendTo(sender)
-                Message.empty
-            }
-            "exec" -> {
-                if (context.elevated) {
-                    require(args.size >= 2) { "Exec requires a second argument" }
-                    val cmd = args[1].toString()
-                    Bukkit.getServer().dispatchCommand(sender, cmd)
+class SenderWrapper(private val sender: CommandSender) : PartialWrapper({
+
+    PartialDefault("name") { arg ->
+            when (arg.toString().lowercase()) {
+                "name" -> Message.of(sender.name)
+                "msg" -> {
+                    PartialRequired { arg2 ->
+                            arg2.sendTo(sender)
+                            Message.empty
+                        }
                 }
-                Message.empty
-            }
-            else -> {
-                throw IllegalArgumentException("Unknown CommandSender option: ${args[0]}")
+
+                "exec" -> {
+                    PartialRequired { arg2 ->
+                        PartialContext { context ->
+                            if (context.elevated) {
+                                val cmd = arg2.toString()
+                                Bukkit.getServer().dispatchCommand(sender, cmd)
+                            }
+                            Message.empty
+                        }
+                    }
+                }
+                else -> {
+                    throw IllegalArgumentException("Unknown CommandSender option: $arg")
+                }
             }
         }
-    }
-}
+})
 
-class ColorWrapper(private val color: ChatColor) : Formattable {
-    override fun format(args: List<Message>, context: Context): Message {
-        require (args.size == 1) { "Colors format is {<color>|text}" }
-        return args[0].color(color)
+class ColorWrapper(private val color: ChatColor) : PartialWrapper ({
+    PartialRequired { arg ->
+        arg.color(color)
     }
-}
+})
 
-class CollectionWrapper<T : Formattable>(private val list: Collection<T>) : Formattable {
-    override fun format(args: List<Message>, context: Context): Message {
-        return when (args.getOrNull(0)?.toString() ?: "length") {
+class CollectionWrapper<T : Formattable>(private val list: Collection<T>) : PartialWrapper({
+
+    PartialDefault("length") { argProperty: Message ->
+        when (argProperty.toString().lowercase()) {
+            "length" -> Message.of(list.size)
             "foreach" -> {
-                // Join all elements by applying arg[1] to each item separated by arg[2]
-                val mapper = args.getOrNull(1)?.toString() ?: "({index}: {it})"
-                val separator = args.getOrNull(2) ?: Message.of(" ")
-                list
-                        .mapIndexed {i, item ->
-                            Expander.expand(mapper, context
-                                    .plus("it", item)
-                                    .plus("index", i))
+                PartialDefault("({index}: {it})") { argMapper ->
+                    PartialDefault(" ") { argSeparator ->
+                        PartialContext { context ->
+                            val mapper = argMapper.toString()
+                            list
+                                .mapIndexed { i, item ->
+                                    Expander.expand(
+                                        mapper, context
+                                            .plus("it", item)
+                                            .plus("index", i)
+                                    )
+                                }
+                                .ifEmpty { listOf(Message.empty) }
+                                .reduce { a, b -> a.append(argSeparator).append(b) }
                         }
-                        .ifEmpty { listOf(Message.empty) }
-                        .reduce { a, b -> a.append(separator).append(b) }
+                    }
+                }
             }
             "sort" -> {
-                val mapper = args.getOrNull(1)?.toString()
-                val sorted = if (mapper == null) {
-                    list.sortedBy {
-                        it.toString()
+                PartialDefault("{it}") { argMapper ->
+                    PartialContext { context ->
+                        val sorted = list.withIndex().sortedBy {
+                            Expander.expand(
+                                argMapper.toString(), context
+                                    .plus("it", it.value)
+                                    .plus("index", Message.of(it.index))
+                            ).toString()
+                        }
+                            .map { it.value }
+                        CollectionWrapper(sorted)
                     }
-                } else {
-                    list.withIndex().sortedBy {
-                        Expander.expand(mapper,  context
-                                .plus("it", it.value)
-                                .plus("index", Message.of(it.index)))
-                            .toString()
-                    }.map { it.value }
                 }
-                return CollectionWrapper(sorted).format(args.drop(2), context)
             }
-            "length" -> Message.of(list.size)
             "filter" -> {
-                val filter = args.getOrNull(1)?.toString() ?: throw IllegalArgumentException("'filter' must have second argument")
-                val filtered =
-                    list.withIndex().filter {
-                        Expander.expand(filter, context
-                                .plus("it", it.value)
-                                .plus("index", Message.of(it.index)))
-                            .toString()
-                            .isNotBlank()
-                    }.map { it.value }
-                return CollectionWrapper(filtered).format(args.drop(2), context)
-            }
-            "get" -> {
-                val (value, criteria, results) = when (args.size) {
-                    0, 1 ->  throw RuntimeException("Should be impossible")
-                    2 -> Triple(args[1].toString(), "{it}","{it}")
-                    3 -> Triple(args[1].toString(), "{it}", args[2].toString())
-                    4 -> Triple(args[1].toString(), args[2].toString(), args[3].toString())
-                    else -> throw IllegalArgumentException("'=' must have 1-3 arguments afterwards")
-                }
-                val match = list.withIndex().firstOrNull {
-                    val crit = Expander.expand(criteria, context
-                            .plus("it", it.value)
-                            .plus("index", Message.of(it.index)))
-                        .toString()
-                    crit == value
-                }?.value
-                return if (match == null) {
-                    Message.empty
-                } else {
-                    Expander.expand(results, context
-                            .plus("it", match))
+                PartialRequired { argFilter ->
+                    PartialContext { context ->
+                        val filtered =
+                            list.withIndex().filter {
+                                Expander.expand(
+                                    argFilter.toString(), context
+                                        .plus("it", it.value)
+                                        .plus("index", Message.of(it.index))
+                                )
+                                    .toString()
+                                    .isNotBlank()
+                            }.map { it.value }
+                        CollectionWrapper(filtered)
+                    }
                 }
             }
-
-            else -> throw IllegalArgumentException("Unknown list option: " + args[0])
+            else -> throw IllegalArgumentException("Unknown list option: $argProperty")
         }
     }
-}
+})
 
-class RawExpander : Formattable {
-    override fun format(args: List<Message>, context: Context): Message {
-        require(args.isEmpty()) { "Raw format is {#raw}" }
-        return Message.rawFlag
+class TitleExpander : PartialWrapper ({
+    PartialRequired { title ->
+        PartialDefault(Message.empty) { subtitle ->
+            PartialDefault(Message.of(0)) { argFadeIn ->
+                PartialDefault(Message.of(20)) { argDuration ->
+                    PartialDefault(Message.of(0)) { argFadeOut ->
+                        val fadeIn = argFadeIn.toString().toInt()
+                        val duration = argDuration.toString().toInt()
+                        val fadeOut = argFadeOut.toString().toInt()
+                        Message.title(title, subtitle, fadeIn, duration, fadeOut)
+                    }
+                }
+            }
+        }
     }
-}
-
-class TitleExpander : Formattable {
-    override fun format(args: List<Message>, context: Context): Message {
-        require(args.isNotEmpty()) { "Title format is {#title|title|subtitle=''|fadeIn=0|stay=20|fadeOut=0}" }
-        val text = args[0]
-        val subtitle = if (args.size >= 2) args[1] else Message.empty
-        val fadein = if (args.size >= 3) args[2].toString().toInt() else 0
-        val duration = if (args.size >= 4) args[3].toString().toInt() else 20
-        val fadeout = if (args.size >= 5) args[4].toString().toInt() else 0
-        return Message.title(text, subtitle, fadein, duration, fadeout)
-    }
-}
+})
 
 class Switch : Formattable {
-    override fun format(args: List<Message>, context: Context): Message {
-        val size = args.size
-        val value = args[0].toString()
-        var i = 1
-        while (i < size) {
-            val test = args[i]
-            if (i+1 < args.size) {
-                if (value == test.toString()) {
-                    return args[i + 1]
-                }
-            } else {
-                return test // default
-            }
-            i += 2
+    private class ArgsBuilder(val value: String, val args: List<Message>) : Formattable {
+        override fun applyModifier(arg: Message): Formattable {
+            return ArgsBuilder(value, args + arg)
         }
-        // no default supplied
-        return Message.empty
+
+        override fun format(context: Context): Message {
+            val size = args.size
+            var i = 0
+            while (i < size) {
+                val test = args[i]
+                if (i+1 < args.size) {
+                    if (value == test.toString()) {
+                        return args[i + 1]
+                    }
+                } else {
+                    return test // default
+                }
+                i += 2
+            }
+            // no default supplied
+            return Message.empty
+        }
+    }
+
+    override fun applyModifier(arg: Message): Formattable {
+        return ArgsBuilder(arg.toString(), emptyList())
+    }
+
+    override fun format(context: Context): Message {
+        throw IllegalArgumentException("At least one argument is required")
     }
 }
 
-class Execute : Formattable {
-    override fun format(args: List<Message>, context: Context): Message {
-        require(args.size == 1) { "Execute format is {#exec|command}" }
-        Bukkit.getServer().dispatchCommand(Bukkit.getConsoleSender(), args[0].toString())
-        return Message.empty
+class Execute : PartialWrapper ({
+    PartialRequired { command ->
+        PartialContext { context ->
+            if (context.elevated)
+                Bukkit.getServer().dispatchCommand(Bukkit.getConsoleSender(), command.toString())
+            Message.empty
+        }
     }
-}
+})
 
-class Equation : Formattable {
-    override fun format(args: List<Message>, context: Context): Message {
-        require (args.size == 1) { "Equation format is {#=|equation}" }
-        return try {
-            val answer = ExpressionBuilder(args[0].toString())
+class Equation : PartialWrapper ({
+
+    PartialRequired { argEquation ->
+        try {
+            val answer = ExpressionBuilder(argEquation.toString())
                     .operator(greater)
                     .operator(lesser)
                     .operator(greaterEqual)
@@ -210,10 +209,10 @@ class Equation : Formattable {
                     .stripTrailingZeros()
                     .toPlainString())
         } catch (e: Exception) {
-            Message.error("{${args[0]}}")
+            Message.error("{$argEquation}")
         }
     }
-}
+})
 const val epsilon =  0.00000001
 
 const val PRECEDENCE_NOT = Operator.PRECEDENCE_UNARY_MINUS
@@ -326,121 +325,125 @@ private val round : Function =
         }
 
 class CustomPath : Formattable {
-    override fun format(args: List<Message>, context: Context): Message {
-        require(args.isNotEmpty()) { "Custom format is {#|path|args...}" }
-        val text = context.getFunction(args[0].toString()) ?: return Message.error(args[0].toString())
 
-        val callContext = args.drop(1).foldIndexed(context.newScope()) { i: Int, ctx, msg ->
-            ctx.plus("arg$i", msg.toString())
+    private class ArgsBuilder(val function: String, val args: List<Message>) : Formattable {
+        override fun applyModifier(arg: Message): Formattable {
+            return ArgsBuilder(function, args + arg)
         }
 
-        return Expander.expand(text, callContext)
-    }
-}
+        override fun format(context: Context): Message {
+            val text = context.getFunction(function) ?: return Message.error("{#|$function}")
 
-class RegexExpander : Formattable {
-    override fun format(args: List<Message>, context: Context): Message {
-        require(args.size == 3) { "Regex format is {#regex|text|pattern|replace}" }
-        val text = args[0].toString()
-        val pattern = args[1].toString()
-        val replace = args[2].toString()
-        return Message.of(text.replace(Regex(pattern), replace))
-    }
-}
-
-class LengthExpander : Formattable {
-    override fun format(args: List<Message>, context: Context): Message {
-        require(args.size == 1) { "Length format is {#len|text}" }
-        return Message.of(args[0].toString().length)
-    }
-}
-
-class SubstringExpander : Formattable {
-    override fun format(args: List<Message>, context: Context): Message {
-        require(args.size == 2 || args.size == 3) { "Substring format is {#sub|text|start|length}"}
-        val text = args[0].toString()
-        var start = args[1].toString().toInt().let {
-            if (it < 0)
-                text.length - -it
-            else
-                it
-        }
-        var end = args.getOrElse(2) { text.length }.toString().toInt().let {
-            if (it < 0)
-                text.length - -it
-            else
-                start + it
-        }
-
-        // clip if outside of bounds
-        if (start < 0)
-            start = 0
-        if (start > text.length)
-            start = text.length
-        if (end < 0)
-            end = 0
-        if (end > text.length)
-            end = text.length
-        if (end < start) {
-            end = start
-        }
-
-        return Message.of(text.substring(start, end))
-    }
-}
-
-interface PadExpander : Formattable {
-    override fun format(args: List<Message>, context: Context): Message {
-        require(args.size >= 2) { "Pad format is {#pad|text|length|padtext=' '}"}
-        val length = args[1].toString().toInt()
-        val padText = args.getOrNull(2)?.toString()?.ifEmpty{ " " } ?: " "
-
-        val result = StringBuilder(startText(args[0].toString()))
-        val endText = endText(args[0].toString())
-        var padTextIndexIterator = padText.iterator()
-        while (result.length < length - endText.length) {
-            if (!padTextIndexIterator.hasNext()) {
-                padTextIndexIterator = padText.iterator()
+            val callContext = args.foldIndexed(context.newScope()) { i: Int, ctx, msg ->
+                ctx.plus("arg$i", msg)
             }
-            result.append(padTextIndexIterator.next())
-        }
-        result.append(endText)
 
-        return Message.of(result.toString())
+            return Expander.expand(text, callContext)
+        }
     }
 
-    fun startText(text: String): String
+    override fun applyModifier(arg: Message): Formattable {
+        return ArgsBuilder(arg.toString(), emptyList())
+    }
 
-    fun endText(text: String): String
+    override fun format(context: Context): Message {
+        throw IllegalArgumentException("Second argument required")
+    }
 }
 
-class PadLeftExpander : PadExpander{
-    override fun startText(text: String) = ""
-    override fun endText(text: String) = text
-}
+class RegexExpander : PartialWrapper ({
 
-class PadRightExpander : PadExpander {
-    override fun startText(text: String) = text
-    override fun endText(text: String) = ""
-}
-
-class RandomExpander : Formattable {
-    override fun format(args: List<Message>, context: Context): Message {
-        return when (args.size) {
-            0 -> Message.of(Random.nextDouble().toString())
-            1 -> {
-                return args[0].toString().toDoubleOrNull()?.let {  max ->
-                    Message.of(Random.nextDouble(max).toString())
-                } ?: Message.error("Number expected. Got '${args[0]}'")
+    PartialRequired { argText ->
+        PartialRequired { argPattern ->
+            PartialRequired { argReplace ->
+                val text = argText.toString()
+                val pattern = argPattern.toString()
+                val replace = argReplace.toString()
+                Message.of(text.replace(Regex(pattern), replace))
             }
-            2 -> {
-                return args[0].toString().toDoubleOrNull()?.let {  min ->
-                    args[1].toString().toDoubleOrNull()?.let { max ->
-                        Message.of(Random.nextDouble(min, max).toString())
+        }
+    }
+})
+
+class LengthExpander : PartialWrapper ({
+    PartialRequired { arg ->
+        Message.of(arg.toString().length)
+    }
+})
+
+class SubstringExpander : PartialWrapper ({
+
+    PartialRequired { argText ->
+        PartialRequired { argStart ->
+            PartialDefault(Message.of(Int.MAX_VALUE)) { argLength ->
+                val text = argText.toString()
+                var start = argStart.toString().toInt().let {
+                    if (it < 0)
+                        text.length - it.absoluteValue
+                    else
+                        it
+                }
+                val endString = argLength.toString()
+                var end = endString.toInt().let {
+                    if (it < 0)
+                        text.length - it.absoluteValue
+                    else
+                        start + min(it, text.length) // min to prevent overflow on Int.MAX_VALUE
+                }
+
+                // clip if outside of bounds
+                if (start < 0)
+                    start = 0
+                if (start > text.length)
+                    start = text.length
+                if (end < 0)
+                    end = 0
+                if (end > text.length)
+                    end = text.length
+                if (end < start) {
+                    end = start
+                }
+
+                Message.of(text.substring(start, end))
+            }
+        }
+    }
+})
+
+open class PadExpander(internal val startText: (String) -> String, internal val endText: (String) -> String) : PartialWrapper ({
+
+    PartialRequired { argText ->
+        PartialRequired { argLength ->
+            PartialDefault(" ") { argPadText ->
+                val length = argLength.toString().toInt()
+                val padText = argPadText.toString().ifEmpty{ " " }
+
+                val result = StringBuilder(startText(argText.toString()))
+                val endString = endText(argText.toString())
+                var padTextIndexIterator = padText.iterator()
+                while (result.length < length - endString.length) {
+                    if (!padTextIndexIterator.hasNext()) {
+                        padTextIndexIterator = padText.iterator()
                     }
-                } ?: Message.error("Number expected. Got '${args[0]}', '${args[1]}'")
+                    result.append(padTextIndexIterator.next())
+                }
+                result.append(endString)
+
+                Message.of(result.toString())
             }
-            else -> throw IllegalArgumentException("Rand can have 0-2 arguments")
         }
     }
-}
+})
+
+class PadLeftExpander : PadExpander({ "" }, { it })
+
+class PadRightExpander : PadExpander({ it }, { "" })
+
+class RandomExpander : PartialWrapper ({
+
+    PartialDefault(Message.of(1)) { max ->
+        PartialDefault(Message.of(0)) { min ->
+            Message.of(Random.nextDouble(min.toString().toDouble(), max.toString().toDouble()).toString())
+        }
+    }
+})

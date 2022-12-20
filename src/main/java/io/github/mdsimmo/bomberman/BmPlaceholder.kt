@@ -2,10 +2,7 @@ package io.github.mdsimmo.bomberman
 
 import io.github.mdsimmo.bomberman.events.BmGameListIntent
 import io.github.mdsimmo.bomberman.events.BmGameLookupIntent
-import io.github.mdsimmo.bomberman.messaging.Context
-import io.github.mdsimmo.bomberman.messaging.Expander
-import io.github.mdsimmo.bomberman.messaging.Message
-import io.github.mdsimmo.bomberman.messaging.SenderWrapper
+import io.github.mdsimmo.bomberman.messaging.*
 import me.clip.placeholderapi.expansion.PlaceholderExpansion
 import org.bukkit.entity.Player
 
@@ -24,8 +21,10 @@ class BmPlaceholder : PlaceholderExpansion() {
         when (content.getOrNull(0)) {
             "info" -> {
                 val gameName = content.getOrNull(1) ?: return "info <name> <stat>"
-                val game = BmGameLookupIntent.find(gameName)
-                return game?.format(content.drop(2).map { Message.of(it) }, Context(false))?.toString() ?: ""
+                val game = BmGameLookupIntent.find(gameName) ?: return ""
+                return content.drop(2).fold(game as Formattable) {
+                        format, arg -> format.applyModifier(Message.of(arg))
+                }.format(Context()).toString()
             }
             "msg" -> {
                 return try {

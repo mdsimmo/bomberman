@@ -14,7 +14,7 @@ import kotlin.io.path.exists
  * A list of Contexteds that are defined in messages.yml. If messages.yml has not been created, then it will default to
  * default_messages.yml in the resource folder.
  */
-enum class Text(path: String) : FormattableNoArgs {
+enum class Text(path: String) : Formattable {
     MESSAGE_FORMAT("format.message"),
     ITEM_FORMAT("format.item"),
     PLAYER_WON("game-play.player-won"),
@@ -163,6 +163,10 @@ enum class Text(path: String) : FormattableNoArgs {
         text = YAMLLanguage.server?.getString(path)
                 ?: YAMLLanguage.builtin.getString(path)
                 ?: throw RuntimeException("No default message for text: $path")
+    }
+
+    override fun applyModifier(arg: Message): Formattable {
+        return this
     }
 
     override fun format(context: Context): Message {

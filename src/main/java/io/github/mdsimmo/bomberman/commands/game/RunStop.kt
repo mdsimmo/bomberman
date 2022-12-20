@@ -7,7 +7,6 @@ import io.github.mdsimmo.bomberman.commands.Permissions
 import io.github.mdsimmo.bomberman.events.BmRunStoppedIntent
 import io.github.mdsimmo.bomberman.game.Game
 import io.github.mdsimmo.bomberman.messaging.Formattable
-import io.github.mdsimmo.bomberman.messaging.Message
 import io.github.mdsimmo.bomberman.messaging.Text
 import org.bukkit.command.CommandSender
 

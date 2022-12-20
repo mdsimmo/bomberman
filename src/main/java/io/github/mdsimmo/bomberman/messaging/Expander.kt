@@ -8,7 +8,7 @@ object Expander {
             Pair("=", Equation()),
             Pair("#switch", Switch()),
             Pair("#title", TitleExpander()),
-            Pair("#raw", RawExpander()),
+            Pair("#raw", Message.rawFlag),
             Pair("#", CustomPath()),
             Pair("#regex", RegexExpander()),
             Pair("#len", LengthExpander()),
@@ -40,8 +40,10 @@ object Expander {
             when {
                 c == '{' && !ignoreNextSpecial -> {
                     // Add the basic text we have
-                    expanded = expanded.append(Message.of(building.toString()))
-                    building.setLength(0)
+                    if (building.isNotEmpty()) {
+                        expanded = expanded.append(Message.of(building.toString()))
+                        building.setLength(0)
+                    }
 
                     // Get raw text inside brace
                     val subtext = toNext(text, '}', i)
@@ -67,7 +69,9 @@ object Expander {
             i++
         }
         // Add anything remaining
-        expanded = expanded.append(Message.of(building.toString()))
+        if (building.isNotEmpty()) {
+            expanded = expanded.append(Message.of(building.toString()))
+        }
         return expanded
     }
 
@@ -103,11 +107,28 @@ object Expander {
         if (keyString == "#exec" && !context.elevated) {
             return Message.empty
         }
-        // Try and look up a key, function or chat color to format with
+
+        // Check if item is a reference request
+        val reference = keyString.startsWith("@")
+        if (reference) {
+            keyString = keyString.substring(1, keyString.length) // remove the "@"
+        }
+
+        // Try and look up an object or function to format with
         val thing = context[keyString]
                 ?: functions[keyString]
-                ?: Message.error(text)
-        return thing.format(args, context)
+                ?: return Message.error(text)
+
+        val modified = args.fold(thing) { partial, nextArg ->
+            val result = partial.applyModifier(nextArg)
+            result
+        }
+
+        return if (reference) {
+            Message.reference(modified, context)
+        } else {
+            return modified.format(context)
+        }
     }
 
     /**

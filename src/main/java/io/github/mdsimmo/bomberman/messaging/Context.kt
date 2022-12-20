@@ -11,7 +11,7 @@ class Context {
     private val functions: Set<(String) -> String?>
     val elevated: Boolean
 
-    constructor(elevated: Boolean) {
+    constructor(elevated: Boolean = false) {
         objects = mapOf()
         functions = emptySet()
         this.elevated = elevated
@@ -45,9 +45,9 @@ class Context {
         return Context(objects.plus(context.objects), functions + context.functions, elevated or context.elevated)
     }
 
-    fun plus(key: String, value: String) = plus(key, StringWrapper(value))
+    fun plus(key: String, value: String) = plus(key, Message.of(value))
 
-    fun plus(key: String, value: Int) = plus(key, StringWrapper(value.toString()))
+    fun plus(key: String, value: Int) = plus(key, Message.of(value))
 
     fun plus(key: String, value: Collection<Formattable>) = plus(key, CollectionWrapper(value))
 

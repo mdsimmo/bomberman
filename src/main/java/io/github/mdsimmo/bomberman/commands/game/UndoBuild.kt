@@ -15,7 +15,6 @@ import io.github.mdsimmo.bomberman.commands.Permissions
 import io.github.mdsimmo.bomberman.events.BmGameDeletedIntent
 import io.github.mdsimmo.bomberman.events.BmGameLookupIntent
 import io.github.mdsimmo.bomberman.messaging.Formattable
-import io.github.mdsimmo.bomberman.messaging.Message
 import io.github.mdsimmo.bomberman.messaging.Text
 import io.github.mdsimmo.bomberman.utils.Box
 import io.github.mdsimmo.bomberman.utils.BukkitUtils

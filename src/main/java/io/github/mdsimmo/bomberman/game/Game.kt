@@ -488,29 +488,35 @@ class Game constructor(private val save: GameSave) : Formattable, Listener {
         BmGameTerminatedIntent.terminateGame(this)
     }
 
-    override fun format(args: List<Message>, context: Context): Message {
-        if (args.isEmpty())
-            return Message.of(name)
-        return when (args[0].toString()) {
+    override fun applyModifier(arg: Message): Formattable {
+        return when (arg.toString().lowercase()) {
             "name" -> Message.of(name)
-            "spawns" -> CollectionWrapper(spawns.map { object : Formattable {
-                override fun format(args: List<Message>, context: Context): Message {
-                    require(args.size == 1) { "Spawn format must have one arg" }
-                    return when(args[0].toString().lowercase()) {
+            "spawns" -> CollectionWrapper(spawns.map {
+                PartialRequired { spawnArg->
+                    when (spawnArg.toString().lowercase()) {
                         "world", "w" -> Message.of(it.world?.name ?: "unknown")
                         "x" -> Message.of(it.x.toInt())
                         "y" -> Message.of(it.y.toInt())
                         "z" -> Message.of(it.z.toInt())
-                        else -> throw IllegalArgumentException("Unknown spawn format ${args[0]}")
+                        else -> throw IllegalArgumentException("Unknown spawn format $spawnArg")
                     }
                 }
-            } }).format(args.drop(1), context)
+            })
             "players" -> CollectionWrapper(players.map { SenderWrapper(it) })
-                    .format(args.drop(1), context)
             "power" -> Message.of(settings.initialItems.sumOf {
-                if (it?.type == settings.bombItem) { it.amount } else { 0 }})
+                if (it?.type == settings.bombItem) {
+                    it.amount
+                } else {
+                    0
+                }
+            })
             "bombs" -> Message.of(settings.initialItems.sumOf {
-                if (it?.type == settings.powerItem) { it.amount } else { 0 }})
+                if (it?.type == settings.powerItem) {
+                    it.amount
+                } else {
+                    0
+                }
+            })
             "lives" -> Message.of(settings.lives.toString())
             "w", "world" -> Message.of(origin.world?.name ?: "unknown")
             "x" -> Message.of(origin.x.toInt())
@@ -519,10 +525,19 @@ class Game constructor(private val save: GameSave) : Formattable, Listener {
             "xsize" -> Message.of(box.size.x)
             "ysize" -> Message.of(box.size.y)
             "zsize" -> Message.of(box.size.z)
-            "running" -> Message.of(if (running) { "true" } else { "false" })
-            "schema" -> format(args.drop(1), context) // for backwards compatibility
+            "running" -> Message.of(
+                if (running) {
+                    "true"
+                } else {
+                    "false"
+                }
+            )
+            "schema" -> this // for backwards compatibility
             else -> Message.empty
         }
     }
 
+    override fun format(context: Context): Message {
+        return applyModifier("name").format(context)
+    }
 }

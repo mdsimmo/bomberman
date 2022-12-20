@@ -65,7 +65,7 @@ class BaseCommand : Cmd, TabCompleter, CommandExecutor {
         }
 
         // Find the referenced command
-        val child = children.firstOrNull { c -> c.name().format(emptyList(), c.cmdContext()).toString().equals(args[0], ignoreCase = true) }
+        val child = children.firstOrNull { c -> c.name().format(c.cmdContext()).toString().equals(args[0], ignoreCase = true) }
         if (child == null) {
             Text.UNKNOWN_COMMAND.format(cmdContext()
                 .plus("attempt", args[0]))
@@ -105,7 +105,7 @@ class BaseCommand : Cmd, TabCompleter, CommandExecutor {
         val currentlyTyping = args.last() // Will always have one.
 
         // Find referenced child command
-        val cmd = children.firstOrNull { c -> c.name().format(emptyList(), c.cmdContext()).toString().equals(arguments.firstOrNull(), ignoreCase = true) } ?: this
+        val cmd = children.firstOrNull { c -> c.name().format(c.cmdContext()).toString().equals(arguments.firstOrNull(), ignoreCase = true) } ?: this
         if (!cmd.permission().isAllowedBy(sender))
             return emptyList()
 
@@ -149,7 +149,7 @@ class BaseCommand : Cmd, TabCompleter, CommandExecutor {
         return if (args.size <= 1)
             children
                 .filter { it.permission().isAllowedBy(sender) }
-                .map { it.name().format(emptyList(), it.cmdContext()).toString() }
+                .map { it.name().format(it.cmdContext()).toString() }
         else
             emptyList()
     }
@@ -174,11 +174,11 @@ class BaseCommand : Cmd, TabCompleter, CommandExecutor {
         return Text.COMMAND_GROUP_USAGE
     }
 
-    override fun format(args: List<Message>, context: Context): Message {
-        return if (args.getOrNull(0).toString().equals("children", ignoreCase = true)) {
-            CollectionWrapper(children).format(args.drop(1), context)
+    override fun applyModifier(arg: Message): Formattable {
+        return if (arg.toString().equals("children", ignoreCase = true)) {
+            CollectionWrapper(children)
         } else {
-            super.format(args, context)
+            super.applyModifier(arg)
         }
     }
 }
