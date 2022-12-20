@@ -83,6 +83,7 @@ abstract class Cmd(protected var parent: Cmd?) : Formattable {
             "extra" -> extra()
             "example" -> example()
             "description" -> description()
+            "permission" -> Message.of(permission().value())
             "flags" -> CollectionWrapper(flags(Bukkit.getConsoleSender())
                     .map { flag -> object: Formattable {
                         override fun applyModifier(arg: Message): Formattable {
@@ -90,7 +91,6 @@ abstract class Cmd(protected var parent: Cmd?) : Formattable {
                                 "name" -> Message.of(flag)
                                 "ext" -> flagExtension(flag)
                                 "description" -> flagDescription(flag)
-                                "permission" -> Message.of(permission().value())
                                 else -> throw IllegalArgumentException("Unknown flag value '$arg'`")
                             }
                         }
