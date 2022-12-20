@@ -83,6 +83,7 @@ abstract class Cmd(protected var parent: Cmd?) : Formattable {
             "extra" -> extra()
             "example" -> example()
             "description" -> description()
+            "permission" -> Message.of(permission().value())
             "flags" -> CollectionWrapper(flags(Bukkit.getConsoleSender())
                     .map { flag -> object: Formattable {
                         override fun applyModifier(arg: Message): Formattable {

@@ -7,7 +7,6 @@ import org.bukkit.command.CommandExecutor
 import org.bukkit.command.CommandSender
 import org.bukkit.command.TabCompleter
 import org.bukkit.util.StringUtil
-import java.util.ArrayList
 
 class BaseCommand : Cmd, TabCompleter, CommandExecutor {
 
@@ -60,7 +59,7 @@ class BaseCommand : Cmd, TabCompleter, CommandExecutor {
 
     override fun run(sender: CommandSender, args: List<String>, flags: Map<String, String>): Boolean {
         if (args.isEmpty()) {
-            Text.COMMAND_GROUP_HELP.format(cmdContext()).sendTo(sender)
+            Text.COMMAND_GROUP_HELP.format(cmdContext().plus("sender", sender)).sendTo(sender)
             return true
         }
 
@@ -81,7 +80,9 @@ class BaseCommand : Cmd, TabCompleter, CommandExecutor {
 
         // Send help if requested
         if (flags.containsKey(F_HELP)) {
-            Text.COMMAND_HELP.format(child.cmdContext()).sendTo(sender)
+            Text.COMMAND_HELP.format(child.cmdContext()
+                .plus("sender", sender))
+                .sendTo(sender)
             return true
         }
 

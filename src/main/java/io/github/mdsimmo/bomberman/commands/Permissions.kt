@@ -4,6 +4,8 @@ import org.bukkit.command.CommandSender
 
 interface Permission {
     fun isAllowedBy(sender: CommandSender): Boolean
+
+    fun value(): String
 }
 
 enum class Permissions(val permission: String) : Permission {
@@ -25,4 +27,6 @@ enum class Permissions(val permission: String) : Permission {
     override fun isAllowedBy(sender: CommandSender): Boolean {
         return sender.hasPermission(permission)
     }
+
+    override fun value(): String = permission
 }

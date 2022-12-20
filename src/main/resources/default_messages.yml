@@ -99,11 +99,13 @@ command:
   # The base command details
   bomberman:
     description: Main command for Bomberman
-  # Details for commands which group other commands
+  # Details for commands for the base Bomberman command
   group:
+    # Help instructions
+    # {sender}: the player  (or console) requesting help
     help: |-
       {#|heading|Help: {command|name}}
-      {command|children|sort|{!it|name}|foreach|{!#|map|{it|name}|{#switch|{=|{#len|{it|description}}>40}|1|{#sub|{it|description}|0|40}...|{it|description}}}|
+      {command|children|sort|{!it|name}|filter|{!sender|haspermission|{it|permission}}|foreach|{!#|map|{it|name}|{#switch|{=|{#len|{it|description}}>40}|1|{#sub|{it|description}|0|40}...|{it|description}}}|
       }
     usage: '/{command|path} <subcommand>'
     example: ''

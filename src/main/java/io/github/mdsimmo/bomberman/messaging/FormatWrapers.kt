@@ -52,6 +52,11 @@ class SenderWrapper(private val sender: CommandSender) : Formattable by (
                         }
                     }
                 }
+                "haspermission" -> {
+                    RequiredArg { arg2 ->
+                        Message.of(if (sender.hasPermission(arg2.toString())) 1 else 0)
+                    }
+                }
                 else -> {
                     throw IllegalArgumentException("Unknown CommandSender option: $arg")
                 }
@@ -108,13 +113,12 @@ class CollectionWrapper<T : Formattable>(private val list: Collection<T>) : Form
                     ContextArg { context ->
                         val filtered =
                             list.withIndex().filter {
-                                Expander.expand(
+                                val filterOutput = Expander.expand(
                                     argFilter.toString(), context
                                         .plus("it", it.value)
                                         .plus("index", Message.of(it.index))
-                                )
-                                    .toString()
-                                    .isNotBlank()
+                                ).toString()
+                                filterOutput.isNotBlank() && filterOutput != "0" && filterOutput != "0.0"
                             }.map { it.value }
                         CollectionWrapper(filtered)
                     }
