@@ -74,7 +74,33 @@ class CollectionWrapper<T : Formattable>(private val list: Collection<T>) : Form
     DefaultArg("length") { argProperty: Message ->
         when (argProperty.toString().lowercase()) {
             "length" -> Message.of(list.size)
+            "map" -> {
+                RequiredArg { argMapper ->
+                    ContextArg { context ->
+                        val mapper = argMapper.toString()
+                        val newList = list.mapIndexed { i, item ->
+                                Expander.expand(
+                                    mapper, context
+                                        .plus("it", item)
+                                        .plus("index", i)
+                                )
+                            }
+                        CollectionWrapper(newList)
+                    }
+                }
+            }
+            "join" -> {
+                DefaultArg("") { separator ->
+                    ContextArg { context ->
+                        list
+                            .map { it.format(context) }
+                            .ifEmpty { listOf(Message.empty) }
+                            .reduce { a, b -> a.append(separator).append(b) }
+                    }
+                }
+            }
             "foreach" -> {
+                // For backwards compatibility only. Prefer map + join
                 DefaultArg("({index}: {it})") { argMapper ->
                     DefaultArg(" ") { argSeparator ->
                         ContextArg { context ->
