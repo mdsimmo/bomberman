@@ -27,6 +27,7 @@ class FormatWrapperTest {
                         else -> "?"
                     })
                 "val" -> of(number)
+                "next" -> NumberName(number+1)
                 else -> throw IllegalArgumentException("Unknown arg: $arg")
             }
         }
@@ -312,6 +313,34 @@ class FormatWrapperTest {
             })
         val result = expand("[{list|foreach|[{!it|inner|foreach|{!it|text}|, }]|, }]", Context().plus("list", CollectionWrapper(myList)))
         assertEquals("[[Zero, One, Two], [Three, Four]]", result.toString())
+    }
+
+    @Test
+    fun testCollectionJoinWithoutSeparator() {
+        val myList = listOf(of("Hello"), of("Small"), of("World"))
+        val result = expand("{mylist|join}", Context().plus("mylist", CollectionWrapper(myList)))
+        assertEquals("HelloSmallWorld", result.toString())
+    }
+
+    @Test
+    fun testCollectionJoinWithSeparator() {
+        val myList = listOf(of("Hello"), of("Small"), of("World"))
+        val result = expand("{mylist|join|-}", Context().plus("mylist", CollectionWrapper(myList)))
+        assertEquals("Hello-Small-World", result.toString())
+    }
+
+    @Test
+    fun testCollectionMap() {
+        val myList = listOf(of("Hello"), of("Small"), of("World"))
+        val result = expand("[{mylist|map|{!index}={!it}|join|, }]", Context().plus("mylist", CollectionWrapper(myList)))
+        assertEquals("[0=Hello, 1=Small, 2=World]", result.toString())
+    }
+
+    @Test
+    fun testCollectionMapPassesDirectObjectReferences() {
+        val myList = listOf(NumberName(0), NumberName(1), NumberName(2))
+        val result = expand("{mylist|map|{!@it|next}|map|{!it|text}|join}", Context().plus("mylist", CollectionWrapper(myList)))
+        assertEquals("OneTwoThree", result.toString())
     }
 
     @Test
