@@ -18,9 +18,12 @@ import io.github.mdsimmo.bomberman.messaging.*
 import io.github.mdsimmo.bomberman.utils.Box
 import io.github.mdsimmo.bomberman.utils.BukkitUtils
 import io.github.mdsimmo.bomberman.utils.WorldEditUtils
+import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer
 import org.bukkit.Bukkit
 import org.bukkit.Location
 import org.bukkit.Material
+import org.bukkit.block.Sign
+import org.bukkit.block.sign.Side
 import org.bukkit.configuration.file.YamlConfiguration
 import org.bukkit.entity.Player
 import org.bukkit.event.EventHandler
@@ -46,19 +49,16 @@ class Game constructor(private val save: GameSave) : Formattable, Listener {
         }
 
         fun buildGameFromRegion(name: String, box: Box, settings: GameSettings): Game {
-
-            // Copy the blocks to a clipboard
             val region = WorldEditUtils.convert(box)
             val clipboard = BlockArrayClipboard(region)
             WorldEdit.getInstance().newEditSession(BukkitAdapter.adapt(box.world))
-                    .use { editSession ->
-                        val forwardExtentCopy = ForwardExtentCopy(
-                                editSession, region, clipboard, region.minimumPoint
-                        )
-                        Operations.complete(forwardExtentCopy)
-                    }
+                .use { editSession ->
+                    val forwardExtentCopy = ForwardExtentCopy(
+                        editSession, region, clipboard, region.minimumPoint
+                    )
+                    Operations.complete(forwardExtentCopy)
+                }
 
-            // Save all data
             val save = GameSave.createNewSave(
                 name,
                 BukkitUtils.boxLoc1(box),
@@ -66,10 +66,8 @@ class Game constructor(private val save: GameSave) : Formattable, Listener {
                 clipboard
             )
 
-            // Delete history from previous games with the same name
             UndoBuild.removeHistory(name)
 
-            // Create a new game
             val game = Game(save)
             game.makeCages()
             return game
@@ -92,7 +90,7 @@ class Game constructor(private val save: GameSave) : Formattable, Listener {
         }
 
     private val origin: Location get() = save.origin
-    val clipboard: Clipboard @Throws(IOException::class) get() = save.getSchematic() // TODO make private
+    val clipboard: Clipboard @Throws(IOException::class) get() = save.getSchematic()
     private val box: Box by lazy {
         WorldEditUtils.pastedBounds(origin, clipboard)
     }
@@ -106,15 +104,17 @@ class Game constructor(private val save: GameSave) : Formattable, Listener {
         }
     }
 
-    // Spawns are saved in temporary file to avoid needing to read the schematic on server load
     private val spawns: Set<Location> by lazy {
-        (tempData.getList("spawn-points"))
+        val cached = (tempData.getList("spawn-points"))
             ?.filterIsInstance(Location::class.java)?.toSet()
-            ?: searchSpawns().also { writeTempData("spawns", it.toList()) }
+        if (!cached.isNullOrEmpty()) {
+            cached
+        } else {
+            searchSpawns().also { writeTempData("spawn-points", it.toList()) }
+        }
     }
 
     init {
-        // If game was not shut down cleanly (i.e. server died), rebuild the arena
         if (tempData.getBoolean("rebuild-needed", false)) {
             Bukkit.getScheduler().scheduleSyncDelayedTask(plugin) {
                 BmGameBuildIntent.build(this)
@@ -129,55 +129,50 @@ class Game constructor(private val save: GameSave) : Formattable, Listener {
         tempDataFile(this).writer().use { it.write(tempData.saveToString()) }
     }
 
-    /*
-    // announce scores
-    private fun winnersDisplay() {
-        for (rep in observers) {
-            Chat.sendMessage(getMessage(Text.SCORE_ANNOUNCE, rep.getPlayer()))
-
-            for (i in 0 until winners.size()) {
-                val repWinner = winners.get(i)
-                val place = i + 1
-                Chat.messageRaw(getMessage(Text.WINNERS_LIST, rep.getPlayer())
-                        .put("player", repWinner).put("place", place))
-            }
-        }
-    }
-*/
-    //	}
-    //		return list
-    //					rep ).put( "stats", getStats( rep ) ) )
-    //			list.add( getMessage( Text.SCORE_DISPLAY, sender ).put( "player",
-    //		for ( GamePlayer rep : players )
-    //		List<Message> list = new ArrayList<Message>( players.size() )
-    //	public List<Message> scoreDisplay( CommandSender sender ) {
-
-//
-//    fun switchSchema(newSchema: File) {
-//        BmRunStoppedIntent.stopGame(this)
-//        spawnCache = null
-//        schema = Arena(newSchema, BukkitUtils.boxLoc1(schema.box))
-//        schema.build(false)
-//    }
-
     private fun searchSpawns(): Set<Location> {
         plugin.logger.info("Searching for spawns...")
-        val spawns = mutableSetOf<Location>()
-        for (loc in clipboard.region) {
-            val block = clipboard.getFullBlock(loc)
-            block.nbtData?.let {
-                if (
-                    it.getString("Text1").contains("[spawn]", ignoreCase = true) or
-                    it.getString("Text2").contains("[spawn]", ignoreCase = true) or
-                    it.getString("Text3").contains("[spawn]", ignoreCase = true) or
-                    it.getString("Text4").contains("[spawn]", ignoreCase = true)
-                ) {
-                    spawns += BukkitAdapter.adapt(box.world, loc.subtract(clipboard.origin)).add(origin).block.location
+        val foundSpawns = mutableSetOf<Location>()
+        val serializer = PlainTextComponentSerializer.plainText()
+
+        val startLoc = BukkitUtils.boxLoc1(box)
+        val minX = startLoc.blockX
+        val minY = startLoc.blockY
+        val minZ = startLoc.blockZ
+        val maxX = minX + box.size.x
+        val maxY = minY + box.size.y
+        val maxZ = minZ + box.size.z
+
+        for (x in minX until maxX) {
+            for (y in minY until maxY) {
+                for (z in minZ until maxZ) {
+                    val block = box.world.getBlockAt(x, y, z)
+                    val state = block.state
+                    if (state is Sign) {
+                        val frontLines = state.getSide(Side.FRONT).lines().map { serializer.serialize(it) }
+                        val backLines = state.getSide(Side.BACK).lines().map { serializer.serialize(it) }
+                        if ((frontLines + backLines).any { it.contains("[spawn]", ignoreCase = true) }) {
+                            foundSpawns += block.location
+                        }
+                    }
                 }
             }
         }
-        plugin.logger.info("  ${spawns.size} spawns found")
-        return spawns
+
+        if (foundSpawns.isEmpty()) {
+            for (loc in clipboard.region) {
+                val block = clipboard.getFullBlock(loc)
+                @Suppress("DEPRECATION")
+                block.nbtData?.let { nbt ->
+                    val rawNbt = nbt.value.toString()
+                    if (rawNbt.contains("[spawn]", ignoreCase = true)) {
+                        foundSpawns += BukkitAdapter.adapt(box.world, loc.subtract(clipboard.origin)).add(origin).block.location
+                    }
+                }
+            }
+        }
+
+        plugin.logger.info("  ${foundSpawns.size} spawns found")
+        return foundSpawns
     }
 
     private fun findSpareSpawn(): Location? {
@@ -191,22 +186,11 @@ class Game constructor(private val save: GameSave) : Formattable, Listener {
     }
 
     private fun removeCages() {
-        WorldEdit.getInstance().newEditSession(BukkitAdapter.adapt(save.origin.world))
-                .use { editSession ->
-                    val offset = BlockVector3.at(save.origin.x, save.origin.y, save.origin.z)
-                            .subtract(save.getSchematic().origin)
-                    spawnBlocks()
-                            .filter { (isSpawn, _) ->
-                                !isSpawn
-                            }
-                            .forEach { (_, block) ->
-                                val loc = block.location
-                                val blockVec = BlockVector3.at(loc.x, loc.y, loc.z)
-                                val clipLocation = blockVec.subtract(offset)
-                                val blockState = save.getSchematic().getFullBlock(clipLocation)
-                                editSession.setBlock(blockVec, blockState)
-                            }
-                }
+        spawnBlocks().forEach { (isSpawn, block) ->
+            if (!isSpawn && block.type == settings.cageBlock) {
+                block.type = Material.AIR
+            }
+        }
     }
 
     private fun makeCages() {
@@ -225,7 +209,7 @@ class Game constructor(private val save: GameSave) : Formattable, Listener {
                 for (j in -1..2) {
                     for (k in -1..1) {
                         val blockLoc = location.clone().add(i.toDouble(), j.toDouble(), k.toDouble())
-                        if(!box.contains(blockLoc)) {
+                        if (!box.contains(blockLoc)) {
                             continue
                         }
                         val b = blockLoc.block
@@ -239,7 +223,6 @@ class Game constructor(private val save: GameSave) : Formattable, Listener {
             }
         }
     }
-
     @EventHandler(ignoreCancelled = true, priority = EventPriority.LOW)
     fun onGameListing(e: BmGameListIntent) {
         e.games.add(this)
@@ -258,17 +241,16 @@ class Game constructor(private val save: GameSave) : Formattable, Listener {
 
         if (running) {
             e.cancelFor(Text.GAME_ALREADY_STARTED.format(Context(false)
-                    .plus("game", this)
-                    .plus("player", e.player)))
+                .plus("game", this)
+                .plus("player", e.player)))
             return
         }
 
-        // Check if there is spare room
         val gameSpawn = findSpareSpawn()
         if (gameSpawn == null) {
             e.cancelFor(Text.JOIN_GAME_FULL.format(Context(false)
-                    .plus("game", this)
-                    .plus("player", e.player)))
+                .plus("game", this)
+                .plus("player", e.player)))
             return
         }
 
@@ -282,18 +264,15 @@ class Game constructor(private val save: GameSave) : Formattable, Listener {
         if (!players.contains(e.entity))
             return
 
-        // Find any changes to apply to this event based on cause
         val damageChanges = this.settings.damageSources
             .filterKeys { e.cause.toString().matches(Regex(it, RegexOption.IGNORE_CASE)) }
             .map { it.value }
 
-        // If none specified, assume cancel event, except CUSTOM (which is what our plugin uses)
         if (damageChanges.isEmpty() && e.cause != EntityDamageEvent.DamageCause.CUSTOM) {
             e.isCancelled = true
             return
         }
 
-        // Special check to test if event should be cancelled
         damageChanges
             .forEach { change ->
                 val cancelExpression = change.entries.firstOrNull { it.key.equals("cancel", ignoreCase = true) }?.value
@@ -311,16 +290,13 @@ class Game constructor(private val save: GameSave) : Formattable, Listener {
                 }
             }
 
+        @Suppress("DEPRECATION")
         damageChanges
-            // Each change has a set of rules which apply to individual modifiers
             .forEach { rules ->
-                // All other rules affect the modifiers
                 EntityDamageEvent.DamageModifier.values()
-                    .filter { e.isApplicable(it) } // not-applicable modifiers cause crashes
+                    .filter { e.isApplicable(it) }
                     .forEach { modifier ->
-                        // find rules that apply to this modifier (regex match)
                         rules.filterKeys { modifier.toString().matches(Regex(it, RegexOption.IGNORE_CASE)) }
-                            // apply rule
                             .forEach {
                                 val result = Expander.expand(it.value, Context(false)
                                     .plus("base", Message.of(e.damage))
@@ -383,20 +359,17 @@ class Game constructor(private val save: GameSave) : Formattable, Listener {
         if (players.contains(e.player)) {
             players.remove(e.player)
 
-            // If not running (but might be counting down) or no players left, stop the game immediately
             if (players.size < 1 || !this.running) {
                 Bukkit.getScheduler().scheduleSyncDelayedTask(plugin) {
                     BmRunStoppedIntent.stopGame(this)
                 }
             } else if (players.size == 1) {
-                // Tell remaining player they won
                 players.forEach {
                     Bukkit.getPluginManager().callEvent(BmPlayerWonEvent(this, it))
                 }
-                // Let player celebrate for 5 seconds, then stop the game
                 Bukkit.getScheduler().scheduleSyncDelayedTask(plugin, {
                     BmRunStoppedIntent.stopGame(this)
-                }, 5*20L) // 5 seconds to see messages
+                }, 5 * 20L)
             }
         }
     }
@@ -416,12 +389,10 @@ class Game constructor(private val save: GameSave) : Formattable, Listener {
             return
         if (running) {
             running = false
-            // Reset the arena
             BmGameBuildIntent.build(this)
         }
         e.setHandled()
     }
-
     @EventHandler(ignoreCancelled = true, priority = EventPriority.HIGH)
     fun onGameRebuild(e: BmGameBuildIntent) {
         if (e.game != this)
@@ -429,18 +400,12 @@ class Game constructor(private val save: GameSave) : Formattable, Listener {
 
         plugin.logger.info("Building schematic ...")
 
-        // cleanup any dropped items
         box.world.getNearbyEntities(BukkitUtils.convert(box))
             .filter { it !is Player }
-            .forEach{
-                //println("DELETE ENTITY: " + it.type + " " + it.location)
-                //println("  box: " + box)
-                it.remove() }
+            .forEach { it.remove() }
 
-        // Paste the schematic
         WorldEdit.getInstance().newEditSession(BukkitAdapter.adapt(box.world))
             .use { editSession ->
-
                 val operation = ClipboardHolder(clipboard)
                     .createPaste(editSession)
                     .to(BlockVector3.at(origin.blockX, origin.blockY, origin.blockZ))
@@ -449,8 +414,6 @@ class Game constructor(private val save: GameSave) : Formattable, Listener {
                         save.getSettings().sourceMask.mapNotNull { BlockTypes.get(it.key.toString()) })))
                     .build()
                 Operations.complete(operation)
-
-                editSession.close()
             }
         makeCages()
 
@@ -492,7 +455,7 @@ class Game constructor(private val save: GameSave) : Formattable, Listener {
         return when (arg.toString().lowercase()) {
             "name" -> Message.of(name)
             "spawns" -> CollectionWrapper(spawns.map {
-                RequiredArg { spawnArg->
+                RequiredArg { spawnArg ->
                     when (spawnArg.toString().lowercase()) {
                         "world", "w" -> Message.of(it.world?.name ?: "unknown")
                         "x" -> Message.of(it.x.toInt())
@@ -532,7 +495,7 @@ class Game constructor(private val save: GameSave) : Formattable, Listener {
                     "false"
                 }
             )
-            "schema" -> this // for backwards compatibility
+            "schema" -> this
             else -> Message.empty
         }
     }

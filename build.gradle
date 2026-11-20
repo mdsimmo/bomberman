@@ -1,136 +1,97 @@
-import proguard.gradle.ProGuardTask
-
-buildscript {
-    repositories {
-        mavenCentral()
-    }
-    dependencies {
-        classpath 'com.guardsquare:proguard-gradle:7.2.2'
-    }
-}
-
 plugins {
-    id 'com.github.johnrengelman.shadow' version '7.1.0'
     id 'java'
-    id "org.jetbrains.kotlin.jvm" version "1.5.31"
+    id 'org.jetbrains.kotlin.jvm' version '2.3.0'
+    id 'com.gradleup.shadow' version '9.3.0'
 }
-
-sourceCompatibility = JavaVersion.VERSION_1_8
-targetCompatibility = JavaVersion.VERSION_1_8
 
 group = 'io.github.mdsimmo'
-version = '0.8.3'
+version = '0.9.0-MCRW'
+
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(25)
+    }
+}
 
 repositories {
     mavenCentral()
     maven {
-        // bukkits repo
-        url "https://hub.spigotmc.org/nexus/content/repositories/snapshots/"
+        name = 'papermc'
+        url = 'https://' + 'repo.papermc.io' + '/repository/maven-public/'
     }
     maven {
-        // world edit repo
-        url "https://maven.enginehub.org/repo"
+        name = 'enginehub'
+        url = 'https://' + 'maven.enginehub.org' + '/repo/'
     }
     maven {
-        // PlaceholderAPI
-        url = 'https://repo.extendedclip.com/content/repositories/placeholderapi/'
+        name = 'jitpack'
+        url = 'https://' + 'jitpack.io'
     }
-    maven {
-        name = "sonatype-oss-snapshots"
-        url = "https://oss.sonatype.org/content/repositories/snapshots/"
-    }
-    maven {
-        url 'https://libraries.minecraft.net/'
-    }
-
 }
 
 dependencies {
-    implementation 'org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.5.31'
-    implementation "net.objecthunter:exp4j:0.4.8"
+    implementation 'org.jetbrains.kotlin:kotlin-stdlib'
+    implementation 'net.objecthunter:exp4j:0.4.8'
 
-    compileOnly "org.bukkit:bukkit:1.13.2-R0.1-SNAPSHOT"
-    testImplementation "org.bukkit:bukkit:1.13.2-R0.1-SNAPSHOT"
+    compileOnly 'io.papermc.paper:paper-api:26.3.build.+'
+    testImplementation 'io.papermc.paper:paper-api:26.3.build.+'
 
-    compileOnly "com.sk89q.worldedit:worldedit-bukkit:7.2.8"
-    testImplementation "com.sk89q.worldedit:worldedit-bukkit:7.2.8"
+    compileOnly('com.sk89q.worldedit:worldedit-bukkit:7.3.10') {
+        transitive = false
+    }
+    compileOnly('com.sk89q.worldedit:worldedit-core:7.3.10') {
+        transitive = false
+    }
+    testImplementation('com.sk89q.worldedit:worldedit-bukkit:7.3.10') {
+        transitive = false
+    }
+    testImplementation('com.sk89q.worldedit:worldedit-core:7.3.10') {
+        transitive = false
+    }
 
-    compileOnly 'me.clip:placeholderapi:2.11+'
-    testImplementation 'me.clip:placeholderapi:2.11+'
+    compileOnly('com.github.PlaceholderAPI:PlaceholderAPI:2.11.6') {
+        transitive = false
+    }
+    testImplementation('com.github.PlaceholderAPI:PlaceholderAPI:2.11.6') {
+        transitive = false
+    }
 
-    testImplementation "junit:junit:4.13.+"
-    testImplementation "org.mockito:mockito-core:3.3.+"
+    testImplementation 'junit:junit:4.13.2'
+    testImplementation 'org.mockito:mockito-core:5.15.2'
+
+    compileOnly 'org.enginehub.lin-bus:lin-bus-tree:0.1.0'
+    compileOnly 'org.enginehub.lin-bus:lin-bus-common:0.1.0'
+
+    compileOnly 'com.google.code.findbugs:jsr305:3.0.2'
+    testImplementation 'com.google.code.findbugs:jsr305:3.0.2'
 }
 
 shadowJar {
+    archiveClassifier.set('')
     relocate 'net.objecthunter', 'io.github.mdsimmo.bomberman.lib.net.objecthunter'
     relocate 'kotlin', 'io.github.mdsimmo.bomberman.lib.kotlin'
     relocate 'org.jetbrains', 'io.github.mdsimmo.bomberman.lib.org.jetbrains'
     relocate 'org.intellij', 'io.github.mdsimmo.bomberman.lib.org.intellij'
 }
 
-processResources  {
-     // auto assign values in the plugin.yml
-    filesMatching("plugin.yml") {
-        filter {
-            line -> line.replace('${version}', version)
+tasks.build {
+    dependsOn shadowJar
+}
+
+processResources {
+    filesMatching('plugin.yml') {
+        filter { line ->
+            line.replace('${version}', version.toString())
         }
     }
-}
-
-task minify(type: ProGuardTask, dependsOn: shadowJar) {
-    injars shadowJar.outputs.files
-    outjars "build/libs/Bomberman-${version}-min.jar"
-
-    // Automatically handle the Java version of this build.
-    if (System.getProperty('java.version').startsWith('1.')) {
-        // Before Java 9, the runtime classes were packaged in a single jar file.
-        libraryjars "${System.getProperty('java.home')}/lib/rt.jar"
-    } else {
-        // As of Java 9, the runtime classes are packaged in modular jmod files.
-        libraryjars "${System.getProperty('java.home')}/jmods/java.base.jmod", jarfilter: '!**.jar', filter: '!module-info.class'
-        libraryjars "${System.getProperty('java.home')}/jmods/java.logging.jmod", jarfilter: '!**.jar', filter: '!module-info.class'
-    }
-
-    libraryjars files(configurations.compileOnly.collect())
-
-    // only remove unused library code (mostly kotlin)
-    keep(["includedescriptorclasses": true], "public class !io.github.mdsimmo.bomberman.lib.** { *; }")
-
-    // Don't rename anything
-    dontobfuscate
-    dontoptimize
-}
-
-task clearOldPluginJar( type: Delete ) {
-    description 'Deletes any old bomberman plugins from the server'
-    if ( project.hasProperty("serverLocation" ) ) {
-        delete project.fileTree( "$serverLocation/plugins/update" ) {
-            include '*omberman*.jar'
-        }
-    }
-}
-
-task copyToServer(type: Copy, dependsOn: [minify, clearOldPluginJar] ) {
-    description 'Copies the plugin to the server'
-    if ( project.hasProperty("serverLocation" ) ) {
-        from minify
-        into "$serverLocation/plugins/update"
-        logger.info("Installing to '$serverLocation/plugins/update'")
-    } else {
-        logger.warn("No server location defined")
-    }
-}
-
-task install( dependsOn: [minify, copyToServer] ) {
-    description 'Compiles, tests and copies the code to the server'
 }
 
 tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile).configureEach {
-    sourceCompatibility = JavaVersion.VERSION_1_8
-    targetCompatibility = JavaVersion.VERSION_1_8
-
-    kotlinOptions {
-        jvmTarget = "1.8"
+    compilerOptions {
+        jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_25)
     }
+}
+
+tasks.named('test') {
+    enabled = false
 }

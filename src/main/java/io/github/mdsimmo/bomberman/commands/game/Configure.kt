@@ -181,7 +181,7 @@ class Configure(parent: Cmd) : GameCommand(parent) {
                                 .unMovable().displayName(stringify(Text.CONFIGURE_INDESTRUCTIBLE))
                         'p' -> GuiBuilder.ItemSlot(Material.OXEYE_DAISY)
                                 .unMovable().displayName(stringify(Text.CONFIGURE_PASS_DESTROY))
-                        'n' -> GuiBuilder.ItemSlot(Material.SIGN)
+                        'n' -> GuiBuilder.ItemSlot(Material.OAK_SIGN)
                                 .unMovable().displayName(stringify(Text.CONFIGURE_PASS_KEEP))
                         'c' -> {
                             if (index.secIndex == selected) {
